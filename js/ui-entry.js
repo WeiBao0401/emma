@@ -141,7 +141,7 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
   const slots = {};
   let entry = null;
   const state = { guess: false, notice: '', pulled: false, zhBack: null, regenArm: 0, regenBusy: false, syl: true,
-    sweep: false, confirm: false, noteOpen: false, open: new Set() };
+    sweep: false, confirm: false, noteOpen: false, closed: new Set() };
   let armTimer = 0, noteTimer = 0, revealTimer = 0;
   let flushNote = null;   // saves a note still waiting for its debounce
   let noteEl = null;
@@ -162,9 +162,10 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
     link ? lookupBtn(x[key]) : h('b', { className: 'w', lang: 'en', text: x[key] }),
     h('span', { className: 'd', text: x[valKey] || '' })))) : null);
 
-  // one folded index row: the label, a count, + / −; the panel is built with the row and kept while it is open
+  // one index row: the label, a count, + / −. Wei 10-24: everything is open as soon as it arrives; a row stays shut
+  // only after she taps it shut (state.closed), so parts arriving later do not fold it again
   function ixRow(name, label, count, makePanel, { skel = false } = {}) {
-    const open = !skel && state.open.has(name);
+    const open = !skel && !state.closed.has(name);
     const btn = h('button', { type: 'button', className: 'row', 'aria-expanded': String(open), disabled: skel },
       h('span', { className: 't', text: label }),
       skel ? h('span', { className: 'c-sk', 'aria-hidden': 'true' }) : h('span', { className: 'c num', text: String(count) }),
@@ -173,7 +174,7 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
     btn.addEventListener('click', () => {
       const on = btn.getAttribute('aria-expanded') !== 'true';
       btn.setAttribute('aria-expanded', String(on));
-      if (on) state.open.add(name); else state.open.delete(name);
+      if (on) state.closed.delete(name); else state.closed.add(name);
     });
     return h('div', { className: 'ix', dataset: { ix: name } }, btn, panel);
   }
@@ -426,8 +427,8 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
       if (j !== ans) ev.currentTarget.classList.add('wrong');
       explain.hidden = false;
     } } })));
-    // the first question opens by default, so opening the row shows something to answer
-    return h('details', { className: 'q', open: i === 0 },
+    // every question is open (Wei 10-24); the answer still shows only after a pick
+    return h('details', { className: 'q', open: true },
       h('summary', {}, h('span', { className: 'qn num', text: String(i + 1) }), h('span', { className: 'qq', text: q.question || '' })),
       box, explain);
   }
