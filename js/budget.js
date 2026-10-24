@@ -29,7 +29,7 @@
 //
 // kv 'budget' 的形状：{ days: { 'YYYY-MM-DD': { kind: 元 } }, exhausted?: 'YYYY-MM-DD' }，days 留 62 天。
 // 依赖：kv 是 app.js 传来的 { get(key), set(key, value) }（异步）；config.js 的单价和 TTS 设置。
-import { TTS_URL, TTS_MODEL, MODEL_CHOICES, POE_MODEL_CHOICES } from './config.js';
+import { TTS_URL, TTS_MODEL, TTS_SPEECH_URL, TTS_SPEECH_MODEL, MODEL_CHOICES, POE_MODEL_CHOICES } from './config.js';
 
 export const KINDS = ['lookup', 'tts', 'hint', 'story', 'reflect', 'photo', 'other'];
 export const BUDGET_ERROR = 'budget';
@@ -49,6 +49,7 @@ export const PRICES = {
   ...fromChoices(POE_MODEL_CHOICES),
   ...fromChoices(MODEL_CHOICES),
   [TTS_MODEL]: 0.8,   // per 10,000 characters
+  [TTS_SPEECH_MODEL]: [1.5, 12],   // per 1M tokens, input / output (research/08; about 0.13 元 per 10,000 characters)
 };
 export const FALLBACK_PRICE = [12, 36];
 
@@ -58,6 +59,10 @@ export const budgetKindOf = aiKind => AI_KIND[aiKind] || (KINDS.includes(aiKind)
 
 export function costOf(usage, kind, model = '') {
   if (!usage || typeof usage !== 'object') return 0;
+  if (model === TTS_SPEECH_MODEL && (usage.input_tokens != null || usage.output_tokens != null)) {
+    const p = PRICES[TTS_SPEECH_MODEL];
+    return (Math.max(0, Number(usage.input_tokens) || 0) * p[0] + Math.max(0, Number(usage.output_tokens) || 0) * p[1]) / 1e6;
+  }
   if (kind === 'tts' || usage.characters != null) {
     const per = typeof PRICES[TTS_MODEL] === 'number' ? PRICES[TTS_MODEL] : 0.8;
     return Math.max(0, Number(usage.characters) || 0) / 10000 * per;
@@ -160,7 +165,9 @@ export function createBudget({ kv, now = () => new Date(), getCap = () => 1.5, g
 export function wrapFetch(fetchImpl, budget, { ttsUrl = TTS_URL } = {}) {
   const f = fetchImpl || ((...a) => fetch(...a));
   return async (url, opts = {}) => {
-    const isTTS = String(url) === ttsUrl && (opts.method || 'GET').toUpperCase() === 'POST';
+    const isTTS = (String(url) === ttsUrl || String(url) === TTS_SPEECH_URL) && (opts.method || 'GET').toUpperCase() === 'POST';
+    let ttsModel = TTS_MODEL;
+    try { ttsModel = JSON.parse(opts.body).model || TTS_MODEL; } catch (e) { /* not JSON: the older model */ }
     if (!isTTS || !budget) return f(url, opts);
     if (!budget.canSpend('tts')) {
       return new Response(JSON.stringify({ code: 'AppDailyCap', message: 'daily cap reached in app' }), { status: 429, headers: { 'Content-Type': 'application/json' } });
@@ -168,7 +175,7 @@ export function wrapFetch(fetchImpl, budget, { ttsUrl = TTS_URL } = {}) {
     const res = await f(url, opts);
     try {
       const data = await res.clone().json();
-      if (res.ok && data && data.usage) budget.record(data.usage, 'tts', TTS_MODEL);
+      if (res.ok && data && data.usage) budget.record(data.usage, 'tts', ttsModel);
       else if (res.status === 429 && isBudgetExhausted(429, data) && budget.markExhausted) budget.markExhausted();
     } catch (e) { /* not JSON: nothing to record */ }
     return res;

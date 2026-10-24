@@ -1,5 +1,5 @@
 // Keep VERSION identical to VERSION in sw.js; bump both on every release (tests/run.mjs checks).
-export const VERSION = '0.1.4';
+export const VERSION = '0.1.5';
 
 export const API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
 
@@ -88,7 +88,18 @@ export const TTS_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/mult
 export const TTS_MODEL = 'qwen3-tts-flash';
 export const TTS_RESULT_HOSTS = ['dashscope-result-bj.oss-cn-beijing.aliyuncs.com', 'dashscope-result-sh.oss-cn-shanghai.aliyuncs.com',
   'dashscope-result-hz.oss-cn-hangzhou.aliyuncs.com'];
-export const TTS_VOICES = [['Jennifer', '美式女声'], ['Aiden', '美式男声'], ['Cherry', '女声，中英文都自然']];
+// The newer Bailian voices (v0.1.5, research/08-tts-options.md, tts-samples/): qwen-audio-3.1-tts-flash on the
+// SpeechSynthesizer endpoint, same host and key, CORS open for weibao0401.github.io, audio on the same OSS buckets.
+// With Wei's key every sample was transcribed back right and a headword got a clear pause. These voices read
+// English only, so Chinese text (dictation prompts) goes to TTS_ZH_VOICE on TTS_MODEL. '+teacher' = the same voice
+// with TTS_TEACHER as its instruction.
+export const TTS_SPEECH_URL = 'https://dashscope.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer';
+export const TTS_SPEECH_MODEL = 'qwen-audio-3.1-tts-flash';
+export const TTS_SPEECH_VOICES = ['Ava_v3.1', 'Emily_v3.1', 'Brian_v3.1'];
+export const TTS_ZH_VOICE = 'Cherry';
+export const TTS_TEACHER = '用清楚、稍慢、温和的老师语气朗读，适合初中生跟读';
+export const TTS_VOICES = [['Jennifer', '美式女声'], ['Aiden', '美式男声'], ['Cherry', '女声，中英文都自然'],
+  ['Ava_v3.1', '新 · 美式女声'], ['Ava_v3.1+teacher', '新 · 美式女声，老师语气'], ['Emily_v3.1', '新 · 英式女声'], ['Brian_v3.1', '新 · 美式男声']];
 export const TTS_CHUNK = 500;          // characters per request (the API takes up to 600; a Chinese character counts 2)
 export const TTS_TEXT_CAP = 3000;      // longest text read aloud in one tap (a reading passage)
 export const TTS_TIMEOUT_MS = 15000;

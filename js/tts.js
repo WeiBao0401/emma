@@ -14,7 +14,8 @@
 //   and on any Qwen failure falls back to the system voice with a short toast (the same reason at most once a
 //   minute). A failure that a retry will not fix (bad key, model not enabled, billing, unknown result host) pauses
 //   Qwen for 10 minutes: taps go straight to the system voice, inside the tap, with no request.
-import { TTS_URL, TTS_MODEL, TTS_RESULT_HOSTS, TTS_CHUNK, TTS_TEXT_CAP, TTS_TIMEOUT_MS, TTS_CACHE } from './config.js';
+import { TTS_URL, TTS_MODEL, TTS_RESULT_HOSTS, TTS_CHUNK, TTS_TEXT_CAP, TTS_TIMEOUT_MS, TTS_CACHE,
+  TTS_SPEECH_URL, TTS_SPEECH_MODEL, TTS_SPEECH_VOICES, TTS_ZH_VOICE, TTS_TEACHER } from './config.js';
 import { setPlaybackSession } from './speech.js';
 
 export class TTSError extends Error {
@@ -29,6 +30,29 @@ export function voiceMode(s) {
 
 const CJK = /[㐀-鿿豈-﫿]/;
 export const ttsLanguage = text => (CJK.test(String(text)) ? 'Auto' : 'English');
+// Which model, endpoint and voice read this text (Emma v0.1.5; this file now differs from Wei's dictionary here).
+// The newer English-only voices (config TTS_SPEECH_VOICES) go to qwen-audio-3.1-tts-flash; Chinese text in those
+// voices falls back to TTS_ZH_VOICE on qwen3-tts-flash; every older voice stays exactly as before.
+export function ttsRoute(text, voice) {
+  const v = String(voice || 'Jennifer');
+  const teacher = v.endsWith('+teacher');
+  const base = teacher ? v.slice(0, -'+teacher'.length) : v;
+  if (TTS_SPEECH_VOICES.includes(base)) {
+    if (CJK.test(String(text))) return { kind: 'mm', url: TTS_URL, model: TTS_MODEL, voice: TTS_ZH_VOICE, instruction: '' };
+    return { kind: 'speech', url: TTS_SPEECH_URL, model: TTS_SPEECH_MODEL, voice: base, instruction: teacher ? TTS_TEACHER : '' };
+  }
+  return { kind: 'mm', url: TTS_URL, model: TTS_MODEL, voice: base, instruction: '' };
+}
+export function ttsBody(text, voice) {
+  const r = ttsRoute(text, voice);
+  if (r.kind === 'speech') {
+    const input = { text, voice: r.voice, format: 'wav', sample_rate: 24000, language_hints: ['en'] };
+    if (r.instruction) input.instruction = r.instruction;
+    return { url: r.url, body: { model: r.model, input } };
+  }
+  return { url: r.url, body: { model: r.model, input: { text, voice: r.voice, language_type: ttsLanguage(text) } } };
+}
+
 // Billing length: a Chinese character counts 2, everything else 1.
 export const ttsLength = text => { let n = 0; for (const ch of String(text)) n += CJK.test(ch) ? 2 : 1; return n; };
 
@@ -151,8 +175,11 @@ export function createTTS({ getSettings, store = null, fetchImpl, sleep = sleepM
   const counts = { synth: 0, memHits: 0, storeHits: 0 };
   let puts = 0;
 
-  const modelOf = s => (s.mock ? 'mock' : TTS_MODEL);   // mock beeps never mix with real clips
-  const keyOf = (text, voice, s = getSettings()) => `${modelOf(s)}|${voice || s.qwenVoice || 'Jennifer'}|${text}`;
+  // mock beeps never mix with real clips; for the older voices the key is the same as before, so cached clips stay
+  const keyOf = (text, voice, s = getSettings()) => {
+    const r = ttsRoute(text, voice || s.qwenVoice || 'Jennifer');
+    return `${s.mock ? 'mock' : r.model}|${r.voice}${r.instruction ? '+teacher' : ''}|${text}`;
+  };
   function remember(key, blob) {
     mem.delete(key);
     mem.set(key, blob);
@@ -187,11 +214,12 @@ export function createTTS({ getSettings, store = null, fetchImpl, sleep = sleepM
     if (!url) {
       links.delete(key);
       counts.synth++;
+      const req = ttsBody(text, voice);
       const data = await withTimeout(async signal => {
-        const res = await doFetch(TTS_URL, {
+        const res = await doFetch(req.url, {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + s.apiKey, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: TTS_MODEL, input: { text, voice, language_type: ttsLanguage(text) } }),
+          body: JSON.stringify(req.body),
           signal,
         });
         const body = await res.json().catch(() => null);
