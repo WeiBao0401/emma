@@ -1,0 +1,629 @@
+{
+  "version": 1,
+  "source": "英语小对话的按钮问题（DESIGN 2.5、3.5；teacher-memory 7.2）。和句库是同一套，Claude 预写，家长过目。老师用英文问，按钮也是英文，每句下面带中文字幕；只给按钮，不开输入框；按哪个都算答了，不打分。",
+  "rules": {
+    "week1": "第一周每天收尾最多一个（day 1-5），能跳过，不叫问卷",
+    "weekly": "第 2 周起每周最多一个，由周反思从这里挑 id（ask_emma 只返回 qid）",
+    "answer": "回答记 events { type: 'ask', qid, who: 'emma', answer: 选项 id, about }；跳过记 answer: 'skip'"
+  },
+  "buttons": {
+    "none": {
+      "id": "none",
+      "en": "Not these",
+      "zh": "都不是",
+      "about": null
+    },
+    "skip": {
+      "id": "skip",
+      "en": "Not now",
+      "zh": "先跳过",
+      "about": null
+    }
+  },
+  "questions": [
+    {
+      "id": "q-story-kind",
+      "day": 1,
+      "about": "interest.story",
+      "to": "profile.interests",
+      "en": "What story do you want to read?",
+      "zh": "你更想读哪种故事？",
+      "options": [
+        {
+          "id": "secret",
+          "en": "A story with a secret",
+          "zh": "神秘案件",
+          "about": "story:mystery"
+        },
+        {
+          "id": "school",
+          "en": "School life",
+          "zh": "校园日常",
+          "about": "story:school"
+        },
+        {
+          "id": "animal",
+          "en": "Animal adventures",
+          "zh": "动物冒险",
+          "about": "story:animal"
+        },
+        {
+          "id": "magic",
+          "en": "Magic and fun",
+          "zh": "魔法奇遇",
+          "about": "story:magic"
+        }
+      ],
+      "none": true,
+      "pool": "week1",
+      "words": [
+        "what",
+        "story",
+        "do",
+        "you",
+        "want",
+        "to",
+        "read"
+      ]
+    },
+    {
+      "id": "q-listen-first",
+      "day": 2,
+      "about": "pref.listen_first",
+      "to": "profile.prefs",
+      "en": "Do you want to listen first?",
+      "zh": "做题前想先听一遍吗？",
+      "options": [
+        {
+          "id": "yes",
+          "en": "Yes, listen first",
+          "zh": "想，先听一遍",
+          "about": "listen_first:yes"
+        },
+        {
+          "id": "no",
+          "en": "No, just start",
+          "zh": "不用，直接做",
+          "about": "listen_first:no"
+        },
+        {
+          "id": "some",
+          "en": "Sometimes",
+          "zh": "看情况",
+          "about": "listen_first:sometimes"
+        }
+      ],
+      "none": false,
+      "pool": "week1",
+      "words": [
+        "do",
+        "you",
+        "want",
+        "to",
+        "listen",
+        "first"
+      ]
+    },
+    {
+      "id": "q-hardest",
+      "day": 3,
+      "about": "hard.part",
+      "to": "questions_open",
+      "en": "What is hardest for you in English?",
+      "zh": "英语里你觉得最难的是什么？",
+      "options": [
+        {
+          "id": "words",
+          "en": "Remembering words",
+          "zh": "记单词",
+          "about": "hard:words"
+        },
+        {
+          "id": "spelling",
+          "en": "Spelling",
+          "zh": "拼写",
+          "about": "hard:spelling"
+        },
+        {
+          "id": "grammar",
+          "en": "Grammar",
+          "zh": "语法",
+          "about": "hard:grammar"
+        },
+        {
+          "id": "listening",
+          "en": "Listening",
+          "zh": "听",
+          "about": "hard:listening"
+        }
+      ],
+      "none": {
+        "en": "All OK",
+        "zh": "都还行",
+        "about": "hard:none"
+      },
+      "pool": "week1",
+      "words": [
+        "what",
+        "be",
+        "hard",
+        "for",
+        "you",
+        "in",
+        "english"
+      ]
+    },
+    {
+      "id": "q-like-one",
+      "day": 4,
+      "about": "interest.like",
+      "to": "profile.interests",
+      "en": "Tell me one thing you like.",
+      "zh": "说一样你喜欢的东西。",
+      "options": [
+        {
+          "id": "cats",
+          "en": "I like cats",
+          "zh": "我喜欢猫",
+          "about": "like:cats"
+        },
+        {
+          "id": "music",
+          "en": "I like music",
+          "zh": "我喜欢音乐",
+          "about": "like:music"
+        },
+        {
+          "id": "sports",
+          "en": "I like sports",
+          "zh": "我喜欢运动",
+          "about": "like:sports"
+        },
+        {
+          "id": "drawing",
+          "en": "I like drawing",
+          "zh": "我喜欢画画",
+          "about": "like:drawing"
+        }
+      ],
+      "none": true,
+      "pool": "week1",
+      "words": [
+        "tell",
+        "me",
+        "one",
+        "thing",
+        "you",
+        "like"
+      ]
+    },
+    {
+      "id": "q-lesson-length",
+      "day": 5,
+      "about": "pace.length",
+      "to": "profile.rhythm",
+      "en": "How was today's lesson?",
+      "zh": "今天的课怎么样？",
+      "options": [
+        {
+          "id": "short",
+          "en": "Too short",
+          "zh": "太短",
+          "about": "length:too_short"
+        },
+        {
+          "id": "right",
+          "en": "Just right",
+          "zh": "正好",
+          "about": "length:just_right"
+        },
+        {
+          "id": "long",
+          "en": "Too long",
+          "zh": "太长",
+          "about": "length:too_long"
+        }
+      ],
+      "none": false,
+      "pool": "week1",
+      "words": [
+        "how",
+        "be",
+        "today",
+        "lesson"
+      ]
+    },
+    {
+      "id": "q-fav-part",
+      "about": "pref.part",
+      "to": "profile.prefs",
+      "en": "Which part do you like best?",
+      "zh": "你最喜欢哪一部分？",
+      "options": [
+        {
+          "id": "cards",
+          "en": "The word cards",
+          "zh": "单词卡",
+          "about": "part:warmup"
+        },
+        {
+          "id": "listen",
+          "en": "Listening",
+          "zh": "听",
+          "about": "part:listen"
+        },
+        {
+          "id": "write",
+          "en": "Writing words",
+          "zh": "写单词",
+          "about": "part:write"
+        },
+        {
+          "id": "story",
+          "en": "The story",
+          "zh": "故事",
+          "about": "part:read"
+        }
+      ],
+      "none": true,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "which",
+        "part",
+        "do",
+        "you",
+        "like",
+        "good"
+      ]
+    },
+    {
+      "id": "q-feel-english",
+      "about": "feel.english",
+      "to": "profile.rhythm",
+      "en": "How is English for you now?",
+      "zh": "现在你觉得英语怎么样？",
+      "options": [
+        {
+          "id": "better",
+          "en": "Better than before",
+          "zh": "比以前好了",
+          "about": "feel:better"
+        },
+        {
+          "id": "same",
+          "en": "The same",
+          "zh": "和以前一样",
+          "about": "feel:same"
+        },
+        {
+          "id": "hard",
+          "en": "A bit hard",
+          "zh": "有点难",
+          "about": "feel:hard"
+        }
+      ],
+      "none": false,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "how",
+        "be",
+        "english",
+        "for",
+        "you",
+        "now"
+      ]
+    },
+    {
+      "id": "q-study-time",
+      "about": "habit.time",
+      "to": "profile.rhythm",
+      "en": "When do you like to study?",
+      "zh": "你喜欢什么时候学？",
+      "options": [
+        {
+          "id": "before-dinner",
+          "en": "Before dinner",
+          "zh": "晚饭前",
+          "about": "time:before_dinner"
+        },
+        {
+          "id": "after-dinner",
+          "en": "After dinner",
+          "zh": "晚饭后",
+          "about": "time:after_dinner"
+        },
+        {
+          "id": "before-bed",
+          "en": "Before bed",
+          "zh": "睡觉前",
+          "about": "time:before_bed"
+        },
+        {
+          "id": "morning",
+          "en": "In the morning",
+          "zh": "早上",
+          "about": "time:morning"
+        }
+      ],
+      "none": true,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "when",
+        "do",
+        "you",
+        "like",
+        "to",
+        "study"
+      ]
+    },
+    {
+      "id": "q-busy-week",
+      "about": "habit.load",
+      "to": "profile.rhythm",
+      "en": "Was this week very busy?",
+      "zh": "这周很忙吗？",
+      "options": [
+        {
+          "id": "busy",
+          "en": "Yes, very busy",
+          "zh": "很忙",
+          "about": "load:busy"
+        },
+        {
+          "id": "ok",
+          "en": "It was OK",
+          "zh": "还好",
+          "about": "load:ok"
+        },
+        {
+          "id": "free",
+          "en": "Not busy",
+          "zh": "不忙",
+          "about": "load:light"
+        }
+      ],
+      "none": false,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "be",
+        "this",
+        "week",
+        "very",
+        "busy"
+      ]
+    },
+    {
+      "id": "q-need-zh",
+      "about": "pref.zh",
+      "to": "profile.prefs",
+      "en": "Do you need the Chinese?",
+      "zh": "你需要看中文吗？",
+      "options": [
+        {
+          "id": "yes",
+          "en": "Yes, please",
+          "zh": "需要",
+          "about": "zh:need"
+        },
+        {
+          "id": "some",
+          "en": "Sometimes",
+          "zh": "有时候需要",
+          "about": "zh:sometimes"
+        },
+        {
+          "id": "no",
+          "en": "No, I can read it",
+          "zh": "不用，我看得懂",
+          "about": "zh:no_need"
+        }
+      ],
+      "none": false,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "do",
+        "you",
+        "need",
+        "the",
+        "chinese"
+      ]
+    },
+    {
+      "id": "q-more-english",
+      "about": "pref.english",
+      "to": "profile.prefs",
+      "en": "Do you want more English from me?",
+      "zh": "想让我多说点英语吗？",
+      "options": [
+        {
+          "id": "more",
+          "en": "Yes, more",
+          "zh": "想，多说点",
+          "about": "english:more"
+        },
+        {
+          "id": "same",
+          "en": "This is good",
+          "zh": "现在这样就好",
+          "about": "english:same"
+        },
+        {
+          "id": "less",
+          "en": "Not so much",
+          "zh": "少一点",
+          "about": "english:less"
+        }
+      ],
+      "none": false,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "do",
+        "you",
+        "want",
+        "more",
+        "english",
+        "from",
+        "me"
+      ]
+    },
+    {
+      "id": "q-most-fun",
+      "about": "pref.mode",
+      "to": "profile.prefs",
+      "en": "Which is the most fun?",
+      "zh": "哪个最好玩？",
+      "options": [
+        {
+          "id": "listen",
+          "en": "Listen and choose",
+          "zh": "听音选词",
+          "about": "mode:listen"
+        },
+        {
+          "id": "read",
+          "en": "Read and choose",
+          "zh": "看词选意思",
+          "about": "mode:mc4"
+        },
+        {
+          "id": "spell",
+          "en": "Spell the words",
+          "zh": "拼单词",
+          "about": "mode:spell"
+        },
+        {
+          "id": "paper",
+          "en": "Write on paper",
+          "zh": "在纸上写",
+          "about": "mode:paper"
+        }
+      ],
+      "none": true,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "which",
+        "be",
+        "the",
+        "most",
+        "fun"
+      ]
+    },
+    {
+      "id": "q-voice-speed",
+      "about": "pref.voice",
+      "to": "profile.prefs",
+      "en": "Do I read too fast?",
+      "zh": "我读得快不快？",
+      "options": [
+        {
+          "id": "ok",
+          "en": "Just right",
+          "zh": "正好",
+          "about": "voice:ok"
+        },
+        {
+          "id": "fast",
+          "en": "A bit fast",
+          "zh": "有点快",
+          "about": "voice:fast"
+        },
+        {
+          "id": "slow",
+          "en": "A bit slow",
+          "zh": "有点慢",
+          "about": "voice:slow"
+        }
+      ],
+      "none": false,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "do",
+        "i",
+        "read",
+        "too",
+        "fast"
+      ]
+    },
+    {
+      "id": "q-weekend-length",
+      "about": "pace.weekend",
+      "to": "profile.rhythm",
+      "en": "Weekend lesson: long or short?",
+      "zh": "周末的课想长一点，还是短一点？",
+      "options": [
+        {
+          "id": "long",
+          "en": "Long, I have time",
+          "zh": "长一点，我有时间",
+          "about": "weekend:long"
+        },
+        {
+          "id": "short",
+          "en": "Short, please",
+          "zh": "短一点",
+          "about": "weekend:short"
+        },
+        {
+          "id": "two",
+          "en": "Two short ones",
+          "zh": "分两次做",
+          "about": "weekend:split"
+        }
+      ],
+      "none": false,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "weekend",
+        "lesson",
+        "long",
+        "or",
+        "short"
+      ]
+    },
+    {
+      "id": "q-what-helps",
+      "about": "pref.help",
+      "to": "profile.prefs",
+      "en": "What helps you most?",
+      "zh": "什么最能帮到你？",
+      "options": [
+        {
+          "id": "again",
+          "en": "Hearing it again",
+          "zh": "再听一遍",
+          "about": "help:replay"
+        },
+        {
+          "id": "zh",
+          "en": "Seeing the Chinese",
+          "zh": "看中文",
+          "about": "help:zh"
+        },
+        {
+          "id": "hint",
+          "en": "A little help",
+          "zh": "一点提示",
+          "about": "help:hint"
+        }
+      ],
+      "none": true,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "what",
+        "help",
+        "you",
+        "most"
+      ]
+    }
+  ]
+}

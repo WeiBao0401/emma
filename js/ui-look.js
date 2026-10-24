@@ -212,7 +212,6 @@ export function createLookTab(app) {
           h('div', {}, h('p', { className: 'quote', lang: 'en' }, marked(context, d ? d.word : q)))),
         h('div', { className: 'ctx-note' }, skBars([96, 52]))));
     }
-    b.append(h('section', { className: 'sec' }, h('h2', { className: 'sec-h', text: '巧记' }), h('div', { className: 'mnemo' }, skBars([94, 88, 40]))));
     stubBar(shell, d ? d.word : q, { label: '加进单词本', icon: 'pen', disabled: true });
     push(shell.el);
   }
@@ -224,7 +223,8 @@ export function createLookTab(app) {
     const code = err && err.code;
     const offline = code === 'network' || code === 'timeout';
     // Emma's wording (kid-errors.js): no key, model or provider names; the technical text stays in the parent area
-    const msg = d && offline ? '现在连不上老师，先看离线词典的意思。' : app.kidError(err, { where: 'look' }) + (d ? ' 下面先看离线词典的意思。' : '');
+    // with the dictionary's meaning underneath, kid-errors adds “先看看词典里的意思吧”
+    const msg = app.kidError(err, { where: 'look', dict: !!d }) || '再试一次。';
     const toMe = null;
     shell.body.append(
       d ? dictHead(app, d, { wrap: true }) : h('section', { className: 'ehead' }, headwordNode({ headword: q })),

@@ -1,6 +1,17 @@
 {
-  "version": 0,
-  "source": "英语小对话双语句库（DESIGN 2.5）。一句不超过 8 个词，只用她认识的词。占位：只有两句，由英语小对话 agent 写全，Wei 过目。",
+  "version": 1,
+  "source": "英语小对话双语句库（DESIGN 2.5）。Claude 预写，家长过目。一句不超过 8 个词，只用她认识的词（小学词和课本 Starter 到 Unit 3 的常见词）；words 是用到的词（原形），tests/lines.test.mjs 粗检。程序只按场景挑编号，不现写句子。按钮问题在 questions.json。",
+  "scenes": {
+    "open": "打开 App，首页的招呼",
+    "ask": "收尾时引出按钮问题",
+    "praise": "夸她，{word} 是今天做对的一个词",
+    "close": "收尾说再见",
+    "back": "漏了一天回来（回归日）",
+    "late": "21:00 以后，只推轻松版",
+    "easy": "轻松版",
+    "dictation": "明天有听写，听写前后（when.phase：before / after）"
+  },
+  "when": "可选条件：hour [起, 止) 按 ctx.hour（默认当前小时）；其他键要 ctx 里同名的值相等，true 表示有值且不为 0",
   "lines": [
     {
       "id": "open-001",
@@ -18,6 +29,489 @@
       ]
     },
     {
+      "id": "open-002",
+      "scene": "open",
+      "en": "Hello {name}! Nice to see you.",
+      "zh": "你好 {name}！见到你真好。",
+      "words": [
+        "hello",
+        "nice",
+        "to",
+        "see",
+        "you"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "open-003",
+      "scene": "open",
+      "en": "Hi {name}! Let's begin.",
+      "zh": "嗨 {name}！我们开始吧。",
+      "words": [
+        "hi",
+        "let",
+        "us",
+        "begin"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "open-004",
+      "scene": "open",
+      "en": "Hello again, {name}! Ready?",
+      "zh": "又见面啦，{name}！准备好了吗？",
+      "words": [
+        "hello",
+        "again",
+        "ready"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "open-005",
+      "scene": "open",
+      "en": "Hi {name}! Let's learn some words.",
+      "zh": "嗨 {name}！我们来学几个词。",
+      "words": [
+        "hi",
+        "let",
+        "us",
+        "learn",
+        "some",
+        "word"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "open-006",
+      "scene": "open",
+      "en": "Hi {name}! Today is a new day.",
+      "zh": "嗨 {name}！今天又是新的一天。",
+      "words": [
+        "hi",
+        "today",
+        "be",
+        "a",
+        "new",
+        "day"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "open-007",
+      "scene": "open",
+      "en": "Hello {name}! I'm happy you're here.",
+      "zh": "你好 {name}！你来了，我很开心。",
+      "words": [
+        "hello",
+        "i",
+        "be",
+        "happy",
+        "you",
+        "here"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "open-008",
+      "scene": "open",
+      "en": "Good evening, {name}! Ready to start?",
+      "zh": "晚上好，{name}！准备好开始了吗？",
+      "words": [
+        "good",
+        "evening",
+        "ready",
+        "to",
+        "start"
+      ],
+      "slots": [
+        "name"
+      ],
+      "when": {
+        "hour": [
+          17,
+          24
+        ]
+      }
+    },
+    {
+      "id": "open-009",
+      "scene": "open",
+      "en": "Good morning, {name}! Let's begin.",
+      "zh": "早上好，{name}！我们开始吧。",
+      "words": [
+        "good",
+        "morning",
+        "let",
+        "us",
+        "begin"
+      ],
+      "slots": [
+        "name"
+      ],
+      "when": {
+        "hour": [
+          5,
+          12
+        ]
+      }
+    },
+    {
+      "id": "open-010",
+      "scene": "open",
+      "en": "Good afternoon, {name}! Ready?",
+      "zh": "下午好，{name}！准备好了吗？",
+      "words": [
+        "good",
+        "afternoon",
+        "ready"
+      ],
+      "slots": [
+        "name"
+      ],
+      "when": {
+        "hour": [
+          12,
+          17
+        ]
+      }
+    },
+    {
+      "id": "open-011",
+      "scene": "open",
+      "en": "Hi {name}! Let's warm up first.",
+      "zh": "嗨 {name}！我们先热热身。",
+      "words": [
+        "hi",
+        "let",
+        "us",
+        "warm",
+        "up",
+        "first"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "open-012",
+      "scene": "open",
+      "en": "Hi {name}! You can do this.",
+      "zh": "嗨 {name}！你能行。",
+      "words": [
+        "hi",
+        "you",
+        "can",
+        "do",
+        "this"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "ask-001",
+      "scene": "ask",
+      "en": "One question for you.",
+      "zh": "问你一个问题。",
+      "words": [
+        "one",
+        "question",
+        "for",
+        "you"
+      ]
+    },
+    {
+      "id": "ask-002",
+      "scene": "ask",
+      "en": "Can I ask you something?",
+      "zh": "我可以问你一件事吗？",
+      "words": [
+        "can",
+        "i",
+        "ask",
+        "you",
+        "something"
+      ]
+    },
+    {
+      "id": "ask-003",
+      "scene": "ask",
+      "en": "I want to know you better.",
+      "zh": "我想更了解你。",
+      "words": [
+        "i",
+        "want",
+        "to",
+        "know",
+        "you",
+        "good"
+      ]
+    },
+    {
+      "id": "ask-004",
+      "scene": "ask",
+      "en": "There is no wrong answer.",
+      "zh": "没有错的答案。",
+      "words": [
+        "there",
+        "be",
+        "no",
+        "wrong",
+        "answer"
+      ]
+    },
+    {
+      "id": "ask-005",
+      "scene": "ask",
+      "en": "Choose one. Any answer is OK.",
+      "zh": "选一个吧，怎么选都可以。",
+      "words": [
+        "choose",
+        "one",
+        "any",
+        "answer",
+        "be",
+        "ok"
+      ]
+    },
+    {
+      "id": "ask-006",
+      "scene": "ask",
+      "en": "A small question before you go.",
+      "zh": "走之前，问你一个小问题。",
+      "words": [
+        "a",
+        "small",
+        "question",
+        "before",
+        "you",
+        "go"
+      ]
+    },
+    {
+      "id": "ask-007",
+      "scene": "ask",
+      "en": "Here is a question for you.",
+      "zh": "有个问题想问你。",
+      "words": [
+        "here",
+        "be",
+        "a",
+        "question",
+        "for",
+        "you"
+      ]
+    },
+    {
+      "id": "ask-008",
+      "scene": "ask",
+      "en": "This is not a test.",
+      "zh": "这不是考试。",
+      "words": [
+        "this",
+        "be",
+        "not",
+        "a",
+        "test"
+      ]
+    },
+    {
+      "id": "praise-001",
+      "scene": "praise",
+      "en": "You got {word} right today!",
+      "zh": "今天 {word} 你做对了！",
+      "words": [
+        "you",
+        "get",
+        "right",
+        "today"
+      ],
+      "slots": [
+        "word"
+      ]
+    },
+    {
+      "id": "praise-002",
+      "scene": "praise",
+      "en": "Great job with {word}!",
+      "zh": "{word} 做得真好！",
+      "words": [
+        "great",
+        "job",
+        "with"
+      ],
+      "slots": [
+        "word"
+      ]
+    },
+    {
+      "id": "praise-003",
+      "scene": "praise",
+      "en": "{word}? You know it now!",
+      "zh": "{word}？你现在认识它了！",
+      "words": [
+        "you",
+        "know",
+        "it",
+        "now"
+      ],
+      "slots": [
+        "word"
+      ]
+    },
+    {
+      "id": "praise-004",
+      "scene": "praise",
+      "en": "You remembered {word}. Well done!",
+      "zh": "你记住了 {word}，真棒！",
+      "words": [
+        "you",
+        "remember",
+        "well",
+        "do"
+      ],
+      "slots": [
+        "word"
+      ]
+    },
+    {
+      "id": "praise-005",
+      "scene": "praise",
+      "en": "{word} was new. Now you know it!",
+      "zh": "{word} 本来是新词，现在你认识了！",
+      "words": [
+        "be",
+        "new",
+        "now",
+        "you",
+        "know",
+        "it"
+      ],
+      "slots": [
+        "word"
+      ]
+    },
+    {
+      "id": "praise-006",
+      "scene": "praise",
+      "en": "Good memory! You got {word}.",
+      "zh": "记性真好！{word} 你答对了。",
+      "words": [
+        "good",
+        "memory",
+        "you",
+        "get"
+      ],
+      "slots": [
+        "word"
+      ]
+    },
+    {
+      "id": "praise-007",
+      "scene": "praise",
+      "en": "Yes! {word} is right.",
+      "zh": "对！{word} 答对了。",
+      "words": [
+        "yes",
+        "be",
+        "right"
+      ],
+      "slots": [
+        "word"
+      ]
+    },
+    {
+      "id": "praise-008",
+      "scene": "praise",
+      "en": "Nice work! {word} is yours now.",
+      "zh": "真不错！{word} 现在是你的了。",
+      "words": [
+        "nice",
+        "work",
+        "be",
+        "your",
+        "now"
+      ],
+      "slots": [
+        "word"
+      ]
+    },
+    {
+      "id": "praise-009",
+      "scene": "praise",
+      "en": "You spelled {word} right!",
+      "zh": "{word} 你拼对了！",
+      "words": [
+        "you",
+        "spell",
+        "right"
+      ],
+      "slots": [
+        "word"
+      ],
+      "when": {
+        "spelled": true
+      }
+    },
+    {
+      "id": "praise-010",
+      "scene": "praise",
+      "en": "{word} was hard. You did it!",
+      "zh": "{word} 不简单，你做到了！",
+      "words": [
+        "be",
+        "hard",
+        "you",
+        "do",
+        "it"
+      ],
+      "slots": [
+        "word"
+      ],
+      "when": {
+        "hard": true
+      }
+    },
+    {
+      "id": "praise-011",
+      "scene": "praise",
+      "en": "Well done today, {name}!",
+      "zh": "今天做得很好，{name}！",
+      "words": [
+        "well",
+        "do",
+        "today"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "praise-012",
+      "scene": "praise",
+      "en": "You worked hard today!",
+      "zh": "你今天很用功！",
+      "words": [
+        "you",
+        "work",
+        "hard",
+        "today"
+      ]
+    },
+    {
       "id": "close-001",
       "scene": "close",
       "en": "See you tomorrow!",
@@ -27,6 +521,655 @@
         "you",
         "tomorrow"
       ]
+    },
+    {
+      "id": "close-002",
+      "scene": "close",
+      "en": "Good work today. Bye!",
+      "zh": "今天学得很好。再见！",
+      "words": [
+        "good",
+        "work",
+        "today",
+        "bye"
+      ]
+    },
+    {
+      "id": "close-003",
+      "scene": "close",
+      "en": "That's all for today.",
+      "zh": "今天就到这里。",
+      "words": [
+        "that",
+        "be",
+        "all",
+        "for",
+        "today"
+      ]
+    },
+    {
+      "id": "close-004",
+      "scene": "close",
+      "en": "Thank you, {name}. See you!",
+      "zh": "谢谢你，{name}。回头见！",
+      "words": [
+        "thank",
+        "you",
+        "see"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "close-005",
+      "scene": "close",
+      "en": "Have a good night, {name}!",
+      "zh": "晚上好好休息，{name}！",
+      "words": [
+        "have",
+        "a",
+        "good",
+        "night"
+      ],
+      "slots": [
+        "name"
+      ],
+      "when": {
+        "hour": [
+          18,
+          24
+        ]
+      }
+    },
+    {
+      "id": "close-006",
+      "scene": "close",
+      "en": "Have a nice day, {name}!",
+      "zh": "祝你今天开心，{name}！",
+      "words": [
+        "have",
+        "a",
+        "nice",
+        "day"
+      ],
+      "slots": [
+        "name"
+      ],
+      "when": {
+        "hour": [
+          5,
+          15
+        ]
+      }
+    },
+    {
+      "id": "close-007",
+      "scene": "close",
+      "en": "You did it! See you tomorrow.",
+      "zh": "你完成了！明天见。",
+      "words": [
+        "you",
+        "do",
+        "it",
+        "see",
+        "tomorrow"
+      ]
+    },
+    {
+      "id": "close-008",
+      "scene": "close",
+      "en": "Time to rest. Bye bye!",
+      "zh": "该休息啦。拜拜！",
+      "words": [
+        "time",
+        "to",
+        "rest",
+        "bye"
+      ]
+    },
+    {
+      "id": "close-009",
+      "scene": "close",
+      "en": "Great job today. Bye, {name}!",
+      "zh": "今天真棒。再见，{name}！",
+      "words": [
+        "great",
+        "job",
+        "today",
+        "bye"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "close-010",
+      "scene": "close",
+      "en": "Thanks for coming today!",
+      "zh": "谢谢你今天来学习！",
+      "words": [
+        "thank",
+        "for",
+        "come",
+        "today"
+      ]
+    },
+    {
+      "id": "close-011",
+      "scene": "close",
+      "en": "See you next time!",
+      "zh": "下次见！",
+      "words": [
+        "see",
+        "you",
+        "next",
+        "time"
+      ]
+    },
+    {
+      "id": "back-001",
+      "scene": "back",
+      "en": "Welcome back, {name}!",
+      "zh": "欢迎回来，{name}！",
+      "words": [
+        "welcome",
+        "back"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "back-002",
+      "scene": "back",
+      "en": "I missed you! Let's start easy.",
+      "zh": "想你啦！我们从简单的开始。",
+      "words": [
+        "i",
+        "miss",
+        "you",
+        "let",
+        "us",
+        "start",
+        "easy"
+      ]
+    },
+    {
+      "id": "back-003",
+      "scene": "back",
+      "en": "Good to see you again!",
+      "zh": "又见到你了，真好！",
+      "words": [
+        "good",
+        "to",
+        "see",
+        "you",
+        "again"
+      ]
+    },
+    {
+      "id": "back-004",
+      "scene": "back",
+      "en": "You're back! Let's do a short one.",
+      "zh": "你回来啦！我们来一节短的。",
+      "words": [
+        "you",
+        "be",
+        "back",
+        "let",
+        "us",
+        "do",
+        "a",
+        "short",
+        "one"
+      ]
+    },
+    {
+      "id": "back-005",
+      "scene": "back",
+      "en": "Hi again, {name}! Ready?",
+      "zh": "又见面啦，{name}！准备好了吗？",
+      "words": [
+        "hi",
+        "again",
+        "ready"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "back-006",
+      "scene": "back",
+      "en": "No problem. Let's go on today.",
+      "zh": "没关系，今天接着来。",
+      "words": [
+        "no",
+        "problem",
+        "let",
+        "us",
+        "go",
+        "on",
+        "today"
+      ]
+    },
+    {
+      "id": "back-007",
+      "scene": "back",
+      "en": "Welcome back! Today can be easy.",
+      "zh": "欢迎回来！今天可以轻松一点。",
+      "words": [
+        "welcome",
+        "back",
+        "today",
+        "can",
+        "be",
+        "easy"
+      ]
+    },
+    {
+      "id": "back-008",
+      "scene": "back",
+      "en": "Every day is a new start.",
+      "zh": "每天都是新的开始。",
+      "words": [
+        "every",
+        "day",
+        "be",
+        "a",
+        "new",
+        "start"
+      ]
+    },
+    {
+      "id": "late-001",
+      "scene": "late",
+      "en": "It's late. Let's do a short one.",
+      "zh": "有点晚了，我们做一节短的。",
+      "words": [
+        "it",
+        "be",
+        "late",
+        "let",
+        "us",
+        "do",
+        "a",
+        "short",
+        "one"
+      ]
+    },
+    {
+      "id": "late-002",
+      "scene": "late",
+      "en": "Just a little today, OK?",
+      "zh": "今天少做一点，好吗？",
+      "words": [
+        "just",
+        "a",
+        "little",
+        "today",
+        "ok"
+      ]
+    },
+    {
+      "id": "late-003",
+      "scene": "late",
+      "en": "It's late. Go to bed early!",
+      "zh": "很晚了，早点睡！",
+      "words": [
+        "it",
+        "be",
+        "late",
+        "go",
+        "to",
+        "bed",
+        "early"
+      ]
+    },
+    {
+      "id": "late-004",
+      "scene": "late",
+      "en": "Short and easy tonight.",
+      "zh": "今晚短一点，轻松一点。",
+      "words": [
+        "short",
+        "and",
+        "easy",
+        "tonight"
+      ]
+    },
+    {
+      "id": "late-005",
+      "scene": "late",
+      "en": "A short lesson, then bed!",
+      "zh": "短短一节，然后去睡觉！",
+      "words": [
+        "a",
+        "short",
+        "lesson",
+        "then",
+        "bed"
+      ]
+    },
+    {
+      "id": "late-006",
+      "scene": "late",
+      "en": "Five minutes, then sleep.",
+      "zh": "五分钟，然后睡觉。",
+      "words": [
+        "five",
+        "minute",
+        "then",
+        "sleep"
+      ]
+    },
+    {
+      "id": "easy-001",
+      "scene": "easy",
+      "en": "Busy day? Let's do the easy one.",
+      "zh": "今天忙吗？我们做轻松版。",
+      "words": [
+        "busy",
+        "day",
+        "let",
+        "us",
+        "do",
+        "the",
+        "easy",
+        "one"
+      ]
+    },
+    {
+      "id": "easy-002",
+      "scene": "easy",
+      "en": "A short lesson today. That's OK!",
+      "zh": "今天上一节短课，没关系！",
+      "words": [
+        "a",
+        "short",
+        "lesson",
+        "today",
+        "that",
+        "be",
+        "ok"
+      ]
+    },
+    {
+      "id": "easy-003",
+      "scene": "easy",
+      "en": "Lots of homework? Just {minutes} minutes.",
+      "zh": "作业多吗？只要 {minutes} 分钟。",
+      "words": [
+        "lot",
+        "of",
+        "homework",
+        "just",
+        "minute"
+      ],
+      "slots": [
+        "minutes"
+      ]
+    },
+    {
+      "id": "easy-004",
+      "scene": "easy",
+      "en": "Short is good, too!",
+      "zh": "短一点也很好！",
+      "words": [
+        "short",
+        "be",
+        "good",
+        "too"
+      ]
+    },
+    {
+      "id": "easy-005",
+      "scene": "easy",
+      "en": "A little every day is great.",
+      "zh": "每天学一点就很棒。",
+      "words": [
+        "a",
+        "little",
+        "every",
+        "day",
+        "be",
+        "great"
+      ]
+    },
+    {
+      "id": "easy-006",
+      "scene": "easy",
+      "en": "Just a few words today.",
+      "zh": "今天只学几个词。",
+      "words": [
+        "just",
+        "a",
+        "few",
+        "word",
+        "today"
+      ]
+    },
+    {
+      "id": "easy-007",
+      "scene": "easy",
+      "en": "Easy and short. You can do it!",
+      "zh": "轻松又短，你能做到！",
+      "words": [
+        "easy",
+        "and",
+        "short",
+        "you",
+        "can",
+        "do",
+        "it"
+      ]
+    },
+    {
+      "id": "easy-008",
+      "scene": "easy",
+      "en": "Small steps, every day!",
+      "zh": "每天一小步！",
+      "words": [
+        "small",
+        "step",
+        "every",
+        "day"
+      ]
+    },
+    {
+      "id": "dict-001",
+      "scene": "dictation",
+      "en": "Get your pen and paper.",
+      "zh": "拿出纸和笔。",
+      "words": [
+        "get",
+        "your",
+        "pen",
+        "and",
+        "paper"
+      ],
+      "when": {
+        "phase": "before"
+      }
+    },
+    {
+      "id": "dict-002",
+      "scene": "dictation",
+      "en": "Listen and write. Ready?",
+      "zh": "听一个，写一个。准备好了吗？",
+      "words": [
+        "listen",
+        "and",
+        "write",
+        "ready"
+      ],
+      "when": {
+        "phase": "before"
+      }
+    },
+    {
+      "id": "dict-003",
+      "scene": "dictation",
+      "en": "Write it on paper, please.",
+      "zh": "请写在纸上。",
+      "words": [
+        "write",
+        "it",
+        "on",
+        "paper",
+        "please"
+      ],
+      "when": {
+        "phase": "before"
+      }
+    },
+    {
+      "id": "dict-004",
+      "scene": "dictation",
+      "en": "Let's get ready for tomorrow!",
+      "zh": "我们为明天做好准备！",
+      "words": [
+        "let",
+        "us",
+        "get",
+        "ready",
+        "for",
+        "tomorrow"
+      ],
+      "when": {
+        "phase": "before"
+      }
+    },
+    {
+      "id": "dict-005",
+      "scene": "dictation",
+      "en": "Not sure? Listen one more time.",
+      "zh": "没听清？再听一遍。",
+      "words": [
+        "not",
+        "sure",
+        "listen",
+        "one",
+        "more",
+        "time"
+      ]
+    },
+    {
+      "id": "dict-006",
+      "scene": "dictation",
+      "en": "Take your time.",
+      "zh": "慢慢来。",
+      "words": [
+        "take",
+        "your",
+        "time"
+      ]
+    },
+    {
+      "id": "dict-007",
+      "scene": "dictation",
+      "en": "Now check your answers.",
+      "zh": "现在对一下答案。",
+      "words": [
+        "now",
+        "check",
+        "your",
+        "answer"
+      ],
+      "when": {
+        "phase": "after"
+      }
+    },
+    {
+      "id": "dict-008",
+      "scene": "dictation",
+      "en": "Good! Now let's look at them.",
+      "zh": "好！现在我们来看看。",
+      "words": [
+        "good",
+        "now",
+        "let",
+        "us",
+        "look",
+        "at",
+        "them"
+      ],
+      "when": {
+        "phase": "after"
+      }
+    },
+    {
+      "id": "dict-009",
+      "scene": "dictation",
+      "en": "Some words are new. That's OK.",
+      "zh": "有几个词还不熟，没关系。",
+      "words": [
+        "some",
+        "word",
+        "be",
+        "new",
+        "that",
+        "ok"
+      ],
+      "when": {
+        "phase": "after",
+        "wrong": true
+      }
+    },
+    {
+      "id": "dict-010",
+      "scene": "dictation",
+      "en": "Let's write these again.",
+      "zh": "这几个我们再写一遍。",
+      "words": [
+        "let",
+        "us",
+        "write",
+        "these",
+        "again"
+      ],
+      "when": {
+        "phase": "after",
+        "wrong": true
+      }
+    },
+    {
+      "id": "dict-011",
+      "scene": "dictation",
+      "en": "Look at them again before bed.",
+      "zh": "睡前再看一眼。",
+      "words": [
+        "look",
+        "at",
+        "them",
+        "again",
+        "before",
+        "bed"
+      ],
+      "when": {
+        "phase": "after",
+        "wrong": true
+      }
+    },
+    {
+      "id": "dict-012",
+      "scene": "dictation",
+      "en": "You got them all! Ready for tomorrow.",
+      "zh": "全对了！明天没问题。",
+      "words": [
+        "you",
+        "get",
+        "them",
+        "all",
+        "ready",
+        "for",
+        "tomorrow"
+      ],
+      "when": {
+        "phase": "after",
+        "perfect": true
+      }
     }
   ],
   "questions": []

@@ -154,7 +154,7 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
     const st = app.words.enrichStatus(e.slug);
     const loading = st.running;
     const lex = hasLexicon(e), prac = hasPractice(e);
-    return { loading, lex, prac, lexSkel: !lex && loading, pracSkel: !prac && loading, errors: st.errors, guess: state.guess };
+    return { loading, lex, prac, lexSkel: !lex && loading, pracSkel: !prac && loading, errors: st.errors, causes: st.causes || [], guess: state.guess };
   }
 
   const lookupBtn = (word, cls = 'w link') => h('button', { type: 'button', className: cls, lang: 'en', text: word, on: { click: () => app.lookup(String(word || '')) } });
@@ -268,7 +268,7 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
     },
     ns(e, f) {
       return [sig(!!e.not_standard, f.guess), () => (!e.not_standard || f.guess ? null : h('p', { className: 'status-line ns' }, icon('info'),
-        h('span', { text: `模型认为“${e.headword}”不是标准英文词（可能是拼写变体或罕见写法），所以没有生成搭配、阅读和小测。` })))];
+        h('span', { text: '这个词不太常见（可能是另一种拼法），所以没有搭配、阅读和小测。' })))];
     },
     senses(e, f) {
       const writing = !!e.needs_core && f.loading;
@@ -291,8 +291,11 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
       const missing = !f.lex || !f.prac || !!e.needs_core;
       const show = !f.loading && f.errors && missing && !f.guess;
       const msgs = show ? Object.values(f.errors) : [];
+      // Emma's wording (kid-errors.js); the technical text (f.errors) stays for the parent area
+      const cause = (f.causes || [])[0];
+      const kid = show ? (cause && app.kidError ? app.kidError(cause, { where: 'look' }) : '') || '再试一次。' : '';
       return [sig(show, msgs), () => (!show ? null : h('p', { className: 'status-line err', role: 'status' }, icon('clock'),
-        h('span', { text: '讲解没写全：' + [...new Set(msgs)].join('；') }),
+        h('span', { text: '讲解没写全。' + kid }),
         h('button', { type: 'button', className: 'text-btn accent', text: '重试', on: { click: () => { app.words.enrich(e.slug).catch(() => {}); } } })))];
     },
     ctx(e, f) {

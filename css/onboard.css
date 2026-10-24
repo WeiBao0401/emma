@@ -1,6 +1,45 @@
 /* 第一次打开（ui-onboard.js）. Owner: 家长区 UI agent. Class names start with onboard-. */
-.onboard{min-height:100vh;min-height:100dvh;padding:calc(var(--top) + 40px) var(--gutter) 40px;display:flex;flex-direction:column;gap:24px}
+.onboard{min-height:100vh;min-height:100dvh;padding:calc(var(--top) + 40px) var(--gutter) 48px;display:flex;flex-direction:column;gap:24px}
 .onboard-list{display:grid;gap:18px}
 .onboard-list li{display:grid;grid-template-columns:28px minmax(0,1fr);align-items:baseline}
 .onboard-list .num{color:var(--muted)}
 .onboard-list p{font:16px/1.7 var(--sans)}
+.onboard .btn-row{margin-top:8px}
+.onboard-back{align-self:flex-start;margin:-20px 0 -8px -10px;color:var(--accent);gap:2px}
+.onboard-lede{font-size:26px}
+.onboard-h{margin-top:16px;color:var(--ink)}
+
+/* teacher name */
+.onboard-name{font:400 28px/1.3 var(--serif);min-height:56px}
+.onboard-suggest{display:flex;flex-wrap:wrap;gap:4px 28px;margin-top:-12px}
+
+/* theme swatches: three or four quiet colors, the same values as index.html :root[data-accent] */
+.onboard-swatches{display:flex;flex-wrap:wrap;gap:20px 28px}
+.onboard-swatch{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:64px;background:none;border:0;color:var(--muted);font:14px var(--sans)}
+.onboard-chip{width:48px;height:48px;border-radius:50%;background:#2F4A7A;box-shadow:0 0 0 3px var(--paper),0 0 0 4px transparent;transition:box-shadow .2s var(--ease)}
+.onboard-swatch[data-theme="green"] .onboard-chip{background:#1E7A55}
+.onboard-swatch[data-theme="rose"] .onboard-chip{background:#B5446B}
+.onboard-swatch[data-theme="violet"] .onboard-chip{background:#6A4FB0}
+.onboard-swatch.on{color:var(--ink);font-weight:600}
+.onboard-swatch.on .onboard-chip{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--ink)}
+
+/* weekly goal and the if-then sentence */
+.onboard-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--rule-strong);border-radius:var(--radius-btn);overflow:hidden;max-width:420px}
+.onboard-seg-btn{min-height:52px;background:transparent;border:0;border-left:1px solid var(--rule-strong);color:var(--ink);font:500 17px var(--sans)}
+.onboard-seg-btn:first-child{border-left:0}
+.onboard-seg-btn.on{background:var(--ink);color:var(--paper)}
+.onboard-pledge{font-size:28px}
+.onboard-pledge.second{margin-top:-4px;color:var(--muted)}
+.onboard-blank{display:inline-block;min-width:3em;padding:0 .15em;border-bottom:1.5px solid var(--rule-strong);color:var(--muted);text-align:center}
+.onboard-blank.filled{color:var(--accent);border-bottom-color:var(--accent)}
+.onboard-chips{display:flex;flex-wrap:wrap;gap:10px}
+.onboard-chip-btn{min-height:44px;padding:0 18px;border:1px solid var(--rule-strong);border-radius:999px;background:transparent;color:var(--ink);font:16px var(--sans)}
+.onboard-chip-btn.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+
+@media (prefers-color-scheme: dark){
+  .onboard-chip{background:#5FC79A}
+  .onboard-swatch[data-theme="blue"] .onboard-chip{background:#7FAEF0}
+  .onboard-swatch[data-theme="rose"] .onboard-chip{background:#F09AB8}
+  .onboard-swatch[data-theme="violet"] .onboard-chip{background:#B7A2F2}
+}
+@media (max-width:420px){.onboard-pledge{font-size:24px}.onboard-name{font-size:24px}}

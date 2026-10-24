@@ -1,11 +1,29 @@
-// OpenAI-compatible calls to Bailian (DashScope) or Poe through the relay: retries, truncation, tolerant JSON,
-// mock mode, the model speed test. v0 runs on Bailian only (config POE_ENABLED).
-// Emma (CONTRACTS.md "ai"): createAI({ getSettings, budget }) checks budget.canSpend(kind) before a call
-// (AIError 'budget-day' over the in-app daily cap), records budget.record(usage, kind, model) after one, and never
-// retries Bailian's "budget used up" 429 (AIError 'budget'). Messages here are for the parent area; what Emma sees
-// comes from kid-errors.js by err.code.
-// To come (teacher-memory 11): a task table and route(task, s) choosing provider + model per task, with a fallback.
-import { API_URL, RETRY_DELAYS, TIMEOUT_MS, MODEL_CHOICES, SPEED_WORD, SPEED_TIMEOUT_MS,
+// OpenAI-compatible calls to Bailian (DashScope) or Poe through the relay: per-task routing, retries, truncation,
+// tolerant JSON, mock mode, the model speed test. v0 runs on Bailian only (config POE_ENABLED false).
+// 负责：AI 层 agent（prompts.js、ai.js、budget.js、kid-errors.js）。CONTRACTS.md 9.9。
+//
+// 导出
+//   createAI({ getSettings, budget, fetchImpl?, sleep?, random?, timeouts?, now?, poeEnabled? }) -> {
+//     askJSON(kind, user, { signal }) -> Promise<object>   kind：core | lexicon | practice | zh | story | hint
+//     speedTest({ choices, word, timeoutMs, onResult })     家长区“测一下速度”
+//     recent(n = 50) -> [{ at, kind, provider, model, ms, usage, yuan, ok, code }]   最近的请求（只在内存，给家长区看）
+//   }
+//   route(kind, settings, { poeEnabled }) -> { kind, slot, provider, model, p }   这次调用走哪家、哪个模型
+//   routingOf(settings, { poeEnabled }) -> { core, lexicon, practice, zh, tts }   每个任务实际生效的 { provider, model }
+//   ROUTE_TASKS                            ['core', 'lexicon', 'practice', 'zh', 'tts']（settings.routing 的键）
+//   AIError, providerOf, normalizePoeUrl, poeHost, parseJSON, requestBody, speedError, mockReply
+//
+// 路由（DESIGN 10.8、teacher-memory 11）：settings.routing = { core: { provider, model }, lexicon, practice, zh, tts }，
+// provider 是 'bailian' 或 'poe'（中转站，OpenAI 兼容）。没写的任务、没写的 model 按老设置走（provider + models 三个槽），
+// 所以不填 routing 就是词典原来的样子。story 跟 practice、hint 跟 core 走（routing 里写了 story / hint 就用自己的）。
+// 'poe' 只在 POE_ENABLED（或 createAI 的 poeEnabled）为真时生效，否则一律读成百炼，原来给 Poe 写的模型名也不带过去：
+// v0 她实时用的功能全走百炼，Poe 以后由家长区打开。tts 永远百炼（tts.js 自己发请求，这里只给家长区显示用）。
+//
+// 预算（budget.js）：调用前 budget.blockReason(kind) 不为空就不发请求，抛 AIError 'budget-day'（App 的每天上限、
+// 类别上限）或 'budget'（今天收到过百炼的“预算用完”）；百炼“预算用完”的 429 不重试，抛 'budget' 并
+// budget.markExhausted()；每次请求的 usage 交给 budget.record(usage, kind, model)。
+// err.message 是给家长区看的，孩子看的一律走 kid-errors.js（按 err.code）。
+import { API_URL, RETRY_DELAYS, TIMEOUT_MS, MODEL_CHOICES, SPEED_WORD, SPEED_TIMEOUT_MS, DEFAULT_MODELS, TTS_MODEL, POE_ENABLED,
   POE_DIRECT_URL, POE_DEFAULT_MODELS, POE_MODEL_CHOICES, POE_BUDGET, POE_MAX_BUDGET } from './config.js';
 import { SYSTEM, userMsg } from './prompts.js';
 import { isBudgetExhausted, budgetKindOf } from './budget.js';
@@ -16,7 +34,9 @@ export class AIError extends Error {
 class Truncated extends Error {}
 class Retryable extends Error {}
 const BUDGET_MSG = '百炼返回 429：这个 Key 的月预算用完了（“预算管理”达到即停）。到百炼控制台调预算，或者等下个月。';
+const BUDGET_SEEN_MSG = '今天已经收到过百炼的“预算用完”（429），App 今天不再发请求。到百炼控制台调好预算后，在家长区点“再试”。';
 const DAY_CAP_MSG = '今天的花费到了 App 里设的每天上限，明天恢复。可以在家长区调高上限。';
+const KIND_CAP_MSG = '这一类调用今天的花费到了 App 里设的上限，明天恢复。可以在家长区调高上限。';
 
 const sleepMs = ms => new Promise(r => setTimeout(r, ms));
 const NETWORK_MSG = '连不上百炼：网络不通，或者请求被拦截了（开着 VPN 可以关掉再试）。';
@@ -51,6 +71,37 @@ export function providerOf(s) {
     choices: MODEL_CHOICES, networkMsg: NETWORK_MSG, relay: false };
 }
 
+// ---------------------------------------------------------------- routing (per task)
+
+export const ROUTE_TASKS = ['core', 'lexicon', 'practice', 'zh', 'tts'];
+// ask kinds without a row of their own borrow one
+const SLOT_OF = { core: 'core', lexicon: 'lexicon', practice: 'practice', zh: 'zh', story: 'practice', hint: 'core', tts: 'tts' };
+// the old three model slots (the dictionary's 我的 → 模型)
+const modelFor = (kind, models) => (kind === 'core' || kind === 'hint' ? models.core : kind === 'zh' ? models.zh : models.extras);
+
+// Which provider and model answer this kind of call. Bailian unless the row (or the old global switch) says Poe and
+// Poe is enabled; a Poe row read as Bailian drops its Poe model name too.
+export function route(kind, s = {}, { poeEnabled = POE_ENABLED } = {}) {
+  s = s || {};
+  const slot = SLOT_OF[kind] || 'practice';
+  const table = s.routing && typeof s.routing === 'object' ? s.routing : {};
+  const row = [table[kind], table[slot]].find(r => r && typeof r === 'object' && (r.provider || r.model)) || null;
+  const wanted = row && row.provider ? row.provider : s.provider;
+  const id = wanted === 'poe' && poeEnabled ? 'poe' : 'bailian';
+  const rowModel = row && (!row.provider || row.provider === id) ? String(row.model || '').trim() : '';
+  if (kind === 'tts') return { kind, slot, provider: 'bailian', model: (row && row.provider !== 'poe' && rowModel) || TTS_MODEL, p: providerOf({ ...s, provider: 'bailian' }) };
+  const p = providerOf({ ...s, provider: id });
+  const model = rowModel || String(modelFor(kind, p.models) || '').trim() || modelFor(kind, id === 'poe' ? POE_DEFAULT_MODELS : DEFAULT_MODELS);
+  return { kind, slot, provider: id, model, p };
+}
+
+// The table the parent area shows: what each task really uses now.
+export function routingOf(s = {}, opts = {}) {
+  const out = {};
+  for (const t of ROUTE_TASKS) { const r = route(t, s, opts); out[t] = { provider: r.provider, model: r.model }; }
+  return out;
+}
+
 // Same tolerance as server.py parse_json: strip fences, else take the first "{" .. last "}".
 export function parseJSON(text) {
   let t = String(text ?? '').trim();
@@ -61,8 +112,6 @@ export function parseJSON(text) {
     throw e;
   }
 }
-
-const modelFor = (kind, models) => (kind === 'core' ? models.core : kind === 'zh' ? models.zh : models.extras);
 
 // Every Bailian call sends this body. Thinking off (all current models think by default), json mode on, and no
 // max_tokens (the Bailian json-mode doc says not to set it with structured output). Poe (maxTokens given) takes json
@@ -118,11 +167,42 @@ function httpError(status, data, model, p = providerOf(null)) {
 
 const clockMs = () => (globalThis.performance ? performance.now() : Date.now());
 
-// budget (optional): budget.js createBudget(); without it nothing is checked or recorded (the dictionary's tests).
-export function createAI({ getSettings, fetchImpl, sleep = sleepMs, random = Math.random, timeouts = TIMEOUT_MS, now = clockMs, budget = null } = {}) {
-  const doFetch = fetchImpl || ((...a) => fetch(...a));
+const RECENT_CAP = 50;
+const pad2 = n => String(n).padStart(2, '0');
+const stamp = (d = new Date()) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
 
-  async function callOnce({ p, model, system, user, signal, timeoutMs, maxTokens, kind = 'other' }) {
+// budget (optional): budget.js createBudget(); without it nothing is checked or recorded (the dictionary's tests).
+// poeEnabled: Poe rows in settings only count when true (default config POE_ENABLED, false in v0).
+export function createAI({ getSettings, fetchImpl, sleep = sleepMs, random = Math.random, timeouts = TIMEOUT_MS, now = clockMs, budget = null,
+  poeEnabled = POE_ENABLED } = {}) {
+  const doFetch = fetchImpl || ((...a) => fetch(...a));
+  const log = [];   // recent requests, newest last, memory only (no prompt or answer text)
+  const note = rec => { log.push({ at: stamp(), ...rec }); if (log.length > RECENT_CAP) log.splice(0, log.length - RECENT_CAP); };
+
+  // Why the budget says no for this kind: '' | 'day' | 'kind' | 'month'. A budget with only canSpend (old shape) works too.
+  function blocked(kind) {
+    if (!budget) return '';
+    const k = budgetKindOf(kind);
+    try {
+      if (typeof budget.blockReason === 'function') return budget.blockReason(k) || '';
+      return budget.canSpend(k) ? '' : 'day';
+    } catch (e) { return ''; }
+  }
+
+  async function callOnce(args) {
+    const t0 = now();
+    const r = { kind: args.kind || 'other', provider: args.p.id, model: args.model };
+    try {
+      const out = await callOnceRaw(args, r);
+      note({ ...r, ms: Math.round(now() - t0), ok: true, code: '' });
+      return out;
+    } catch (e) {
+      note({ ...r, ms: Math.round(now() - t0), ok: false, code: e instanceof AIError ? e.code : e instanceof Truncated ? 'truncated' : String(e.message || '') });
+      throw e;
+    }
+  }
+
+  async function callOnceRaw({ p, model, system, user, signal, timeoutMs, maxTokens, kind = 'other' }, r = {}) {
     const ctrl = new AbortController();
     let timedOut = false;
     const timer = setTimeout(() => { timedOut = true; ctrl.abort(); }, timeoutMs);
@@ -150,18 +230,23 @@ export function createAI({ getSettings, fetchImpl, sleep = sleepMs, random = Mat
     }
     if (!res.ok) {
       // the key's monthly budget is used up: retrying only adds requests (research 05 F1)
-      if (res.status === 429 && isBudgetExhausted(429, data)) throw new AIError(BUDGET_MSG, 'budget');
+      if (res.status === 429 && isBudgetExhausted(429, data)) {
+        if (budget && budget.markExhausted) { try { budget.markExhausted(); } catch (e) { /* bookkeeping only */ } }
+        throw new AIError(BUDGET_MSG, 'budget');
+      }
       if (res.status === 429) throw new Retryable('429');
       if (res.status >= 500) throw new Retryable('5xx:' + res.status);
       throw httpError(res.status, data, model, p);
     }
     const choice = data && data.choices && data.choices[0];
     const content = String((choice && choice.message && choice.message.content) || '').trim();
-    if (choice && choice.finish_reason === 'length') throw new Truncated('输出被截断');
-    if (budget && data && data.usage) {
-      try { budget.record(data.usage, budgetKindOf(kind), model); } catch (e) { /* a bookkeeping slip never fails a call */ }
+    // every reply that carries usage is paid for, cut off or not
+    if (data && data.usage) {
+      r.usage = data.usage;
+      if (budget) { try { r.yuan = budget.record(data.usage, budgetKindOf(kind), model) || 0; } catch (e) { /* a bookkeeping slip never fails a call */ } }
     }
-    const used = (data.usage && data.usage.completion_tokens) || 0;
+    if (choice && choice.finish_reason === 'length') throw new Truncated('输出被截断');
+    const used = (data && data.usage && data.usage.completion_tokens) || 0;
     if (maxTokens && used >= maxTokens) throw new Truncated('输出被截断');
     if (!content) throw new Retryable('empty');
     return content;
@@ -190,20 +275,23 @@ export function createAI({ getSettings, fetchImpl, sleep = sleepMs, random = Mat
     throw new AIError(args.p.networkMsg, 'network');
   }
 
-  // kind: core | lexicon | practice | zh | story
+  // kind: core | lexicon | practice | zh | story | hint
   async function askJSON(kind, user, { signal } = {}) {
-    const s = getSettings();
+    const s = getSettings() || {};
     const mock = !!s.mock;
-    const p = providerOf(s);
+    const rt = route(kind, s, { poeEnabled });
+    const p = rt.p;
     if (!mock) keyCheck(p, 'lookup');
-    if (!mock && budget && !budget.canSpend(budgetKindOf(kind))) throw new AIError(DAY_CAP_MSG, 'budget-day');
+    const why = mock ? '' : blocked(kind);
+    if (why === 'month') throw new AIError(BUDGET_SEEN_MSG, 'budget');
+    if (why) throw new AIError(why === 'kind' ? KIND_CAP_MSG : DAY_CAP_MSG, 'budget-day');
     // test hook (?mock=offline): every call fails the way a dropped connection does
     if (mock && s.mockFail === 'network') {
       await sleep(300);
       if (signal && signal.aborted) throw new AIError('已取消', 'abort');
       throw new AIError(p.networkMsg, 'network');
     }
-    const model = modelFor(kind, p.models);
+    const model = rt.model;
     let maxTokens = p.id === 'poe' ? POE_BUDGET[kind] || POE_BUDGET.lexicon : 0;
     // up to 3 requests: a reply that does not parse is asked for again; a cut-off reply only once more (same request,
     // there is no budget to raise), since a model that runs past its own output limit twice will do it again
@@ -215,7 +303,7 @@ export function createAI({ getSettings, fetchImpl, sleep = sleepMs, random = Mat
         text = mock
           ? await mockReply(kind, user, { sleep, random, signal })
           : await callWithRetry({ p, model, system: SYSTEM[kind], user, signal, timeoutMs: timeouts[kind] || 60000, maxTokens, kind,
-            retryTimeout: kind !== 'core' && kind !== 'zh' });
+            retryTimeout: kind !== 'core' && kind !== 'zh' && kind !== 'hint' });
       } catch (e) {
         if (e instanceof Truncated) {
           if (++cuts >= 2) throw new AIError(`模型“${model}”的回答太长，两次都被截断了：再试一次，或者到“单词 → 家长”里换个模型。`, 'truncated');
@@ -251,9 +339,9 @@ export function createAI({ getSettings, fetchImpl, sleep = sleepMs, random = Mat
   // The real core prompt for SPEED_WORD, once per model, one after another, with the saved key. No retries (each
   // result is one request's time) and nothing is stored: results only go to the caller, never to words.js or the log.
   async function speedTest({ choices = null, word = SPEED_WORD, timeoutMs = SPEED_TIMEOUT_MS, onResult } = {}) {
-    const s = getSettings();
+    const s = getSettings() || {};
     const mock = !!s.mock;
-    const p = providerOf(s);
+    const p = route('core', s, { poeEnabled }).p;
     if (!mock) keyCheck(p, 'speed');
     const results = [];
     for (const c of choices || p.choices) {
@@ -306,7 +394,7 @@ export function createAI({ getSettings, fetchImpl, sleep = sleepMs, random = Mat
     return { ok: true, json: !!(obj && obj.headword) };
   }
 
-  return { askJSON, speedTest };
+  return { askJSON, speedTest, recent: (n = RECENT_CAP) => log.slice(-n).map(x => ({ ...x })) };
 }
 
 const MOCK_SPEED_MS = { 'qwen3.8-flash': 600, 'qwen3.7-flash': 450, 'qwen3.7-plus': 1000, 'qwen3.8-max': 1500, 'deepseek-v4-pro': 350, 'qwen-plus': 800 };
@@ -326,27 +414,34 @@ export function speedError(status, data, p = providerOf(null)) {
   return `${p.name}返回 ${status}：${message || code || '没有详情'}`;
 }
 
-// ---------------------------------------------------------------- mock (port of server.py mock_reply)
+// ---------------------------------------------------------------- mock (port of server.py mock_reply, kid version)
+// Same shapes as the real prompts (prompts.js), school-life content, nothing from work. The program's hints in the
+// user message (level label, textbook meaning) are echoed back, so ?mock=1 shows how they land on the word page.
 
-const MOCK_TYPO = { teh: ['the'], recieve: ['receive'], definately: ['definitely'] };
+const MOCK_TYPO = { teh: ['the'], recieve: ['receive'], definately: ['definitely'], freind: ['friend'] };
+const hintOf = (user, label) => { const m = String(user).match(new RegExp('^' + label + '[^:]*: (.*)$', 'm')); return m ? m[1].trim() : ''; };
 
 export async function mockReply(kind, user, { sleep = sleepMs, random = Math.random, signal } = {}) {
   // 0.5-1.5 s; core comes back first so the three tiers fill in visibly, like the real thing
-  const [lo, span] = kind === 'core' ? [500, 400] : kind === 'zh' ? [700, 600] : [900, 600];
+  const [lo, span] = kind === 'core' || kind === 'hint' ? [500, 400] : kind === 'zh' ? [700, 600] : [900, 600];
   await sleep(lo + Math.floor(random() * span));
   if (signal && signal.aborted) throw new AIError('已取消', 'abort');
   if (kind === 'story' || user.includes('Target words:')) {
-    const ws = user.split(':').slice(1).join(':').split(',');
-    return JSON.stringify({ title: 'A Busy Monday', text: ws.map(w => `We had to **${w.trim()}** today.`).join(' '),
-      cn: '（模拟翻译）', questions: [{ q: 'What happened?', a: 'A lot.' }, { q: 'Who?', a: 'We.' }] });
+    const ws = user.split('\n')[0].split(':').slice(1).join(':').split(',').map(w => w.trim()).filter(Boolean);
+    return JSON.stringify({ title: 'A Rainy Monday', text: ws.map(w => `Today we use **${w}** in class.`).join(' '),
+      cn: '（模拟翻译）', questions: [{ q: 'What day is it?', a: 'Monday.' }, { q: 'Where are they?', a: 'At school.' }] });
+  }
+  if (kind === 'hint') {
+    const w = hintOf(user, 'Word') || 'word';
+    return JSON.stringify({ mnemonic: `（模拟）把 ${w} 拆开读两遍，想一个画面就记住了。` });
   }
   if (kind === 'zh') {
     const q = user.split('\n')[0].replace('Chinese input: ', '');
-    return JSON.stringify({ status: 'ok', query: q, translation: '', explain: '英文里常用 meticulous 或 thorough，前者更强调细节。',
+    return JSON.stringify({ status: 'ok', query: q, translation: '', explain: '（模拟）最常用的是 careful，课本里就有。',
       options: [
-        { en: 'meticulous', pos: 'adj.', cn: '一丝不苟的', nuance: '最贴切，偏正式，强调细节', example: 'She is meticulous about data.', example_cn: '她对数据一丝不苟。', level: 'C1' },
-        { en: 'thorough', pos: 'adj.', cn: '彻底的', nuance: '强调全面不遗漏，更常用', example: 'We did a thorough check.', example_cn: '我们做了彻底检查。', level: 'B2' },
-        { en: 'painstaking', pos: 'adj.', cn: '煞费苦心的', nuance: '强调花了很大功夫', example: 'It took painstaking work.', example_cn: '这花了很大功夫。', level: 'C1' },
+        { en: 'careful', pos: 'adj.', cn: '仔细的，小心的', nuance: '最常用，说人做事仔细', example: 'Be careful on the road.', example_cn: '路上小心。', level: '' },
+        { en: 'carefully', pos: 'adv.', cn: '仔细地', nuance: '说“怎么做”，放在动词后面', example: 'Read it carefully.', example_cn: '仔细读一读。', level: '' },
+        { en: 'look after', pos: 'phr.', cn: '照顾，看管', nuance: '说照顾人或东西', example: 'I look after my cat.', example_cn: '我照顾我的猫。', level: '' },
       ], best: 0 });
   }
   const q = user.split('\n')[0].replace('Input: ', '').trim();
@@ -356,35 +451,34 @@ export async function mockReply(kind, user, { sleep = sleepMs, random = Math.ran
     return JSON.stringify({ invalid: true });
   }
   if (kind === 'core') {
+    const book = hintOf(user, 'Textbook meaning');
+    const senses = [{ pos: 'n.', cn: book || '（模拟）课本里的意思', en: 'a thing you use at school', example: `I have a ${lq} in my bag.`, example_cn: '我的书包里有一个。' }];
+    if (!book) senses.push({ pos: 'v.', cn: '（模拟）第二个常用意思', en: '', example: `We ${lq} after class.`, example_cn: '我们下课以后做这件事。' });
     return JSON.stringify({
-      status: 'ok', headword: lq, suggestions: [], kind: 'word', level: 'C1',
-      phonetic: '/məˈtɪkjələs/', syllables: (lq.match(/.{1,3}/g) || [lq]).join('·'),
-      brief_cn: '模拟释义·' + q.slice(0, 4),
-      senses: [
-        { pos: 'adj.', cn: '一丝不苟的；极其细致的', en: 'showing great attention to detail', example: `She kept ${q} notes of every customer call.`, example_cn: '她把每次客户通话都记得非常仔细。' },
-        { pos: 'adj.', cn: '过分讲究的', en: 'overly careful', example: `He is ${q} about formatting.`, example_cn: '他对格式过分讲究。' },
-      ],
-      context_note: user.includes('Context') ? '这里形容评审做得非常细，连小错都不放过。' : '',
-      mnemonic: '拆成 me + tick：我（me）对着清单一项项打勾（tick），一个都不漏。',
+      status: 'ok', headword: lq, suggestions: [], kind: 'word', level: hintOf(user, 'Level label'),
+      phonetic: '/ˈmɒk/', syllables: (lq.match(/.{1,3}/g) || [lq]).join('·'),
+      brief_cn: book || '模拟释义·' + q.slice(0, 4),
+      senses,
+      context_note: user.includes('Context') ? '（模拟）这句话里就是课本上的意思。' : '',
     });
   }
   if (kind === 'lexicon') {
     return JSON.stringify({
-      collocations: [{ phrase: `${q} attention to detail`, cn: '对细节一丝不苟' }, { phrase: `${q} planning`, cn: '周密的计划' }, { phrase: `${q} records`, cn: '详尽的记录' }],
-      synonyms: [{ word: 'thorough', diff: '强调全面、不遗漏，中性' }, { word: 'painstaking', diff: '强调费力、花大量功夫' }, { word: 'scrupulous', diff: '带道德意味：一丝不苟且诚实' }],
-      antonyms: [{ word: 'careless', cn: '粗心的' }, { word: 'sloppy', cn: '马虎的' }],
-      word_family: [{ word: q + 'ly', pos: 'adv.', cn: '一丝不苟地' }, { word: q + 'ness', pos: 'n.', cn: '细致' }],
-      roots: { breakdown: 'metus(恐惧) + -ulous(充满…的)', explain: '原意是“怕出错的”，后来引申为极其小心细致。', same_root: [{ word: 'meticulously', cn: '细致地' }] },
-      confusables: [{ word: 'meretricious', diff: '华而不实的，拼写相近，意思完全不同' }],
-      usage_tip: '多用于正面评价工作质量；形容人时有时暗示过分挑剔。',
+      collocations: [{ phrase: `a new ${lq}`, cn: '一个新的' }, { phrase: `my ${lq}`, cn: '我的' }, { phrase: `${lq} and pen`, cn: '和笔' }],
+      synonyms: [{ word: 'thing', diff: '（模拟）更笼统，什么东西都能说' }],
+      antonyms: [],
+      word_family: [{ word: lq + 's', pos: 'n.', cn: '复数' }],
+      roots: { breakdown: '', explain: '', same_root: [] },
+      confusables: [{ word: lq.slice(0, -1) || lq, diff: '（模拟）少一个字母，意思不一样' }],
+      usage_tip: '（模拟）说一个的时候前面加 a 或 an。',
     });
   }
   return JSON.stringify({
-    reading: { title: 'The Release Checklist', text: `Before every release, Mia does a ${q} review of the notes. Her ${q} habit has saved the team twice this quarter.`, cn: '每次发版前，Mia 都会仔细审一遍说明。她的这个习惯这个季度已经救了团队两次。' },
+    reading: { title: 'A Day at School', text: `Lily has a new ${lq}. She takes the ${lq} to school every day. Her friend Tom likes it too.`, cn: '莉莉有一个新的。她每天都带去学校。她的朋友汤姆也喜欢。' },
     quiz: [
-      { type: 'choice', question: `In “a ${q} review”, ${q} means:`, options: ['very careful', 'very fast', 'very short', 'very late'], answer: 0, explain: '形容评审做得细' },
-      { type: 'choice', question: 'Fill: She is ___ about data quality.', options: ['sloppy', q, 'random', 'loud'], answer: 1, explain: 'be meticulous about sth.' },
-      { type: 'choice', question: 'Closest synonym?', options: ['careless', 'quick', 'thorough', 'rough'], answer: 2, explain: 'thorough 最接近' },
+      { type: 'choice', question: `“I have a ${lq}.” 这句话里 ${lq} 是什么意思？`, options: ['（模拟）课本里的意思', '苹果', '老师', '星期一'], answer: 0, explain: '看句子里的东西' },
+      { type: 'choice', question: `选词填空：She takes the ___ to school.`, options: ['red', lq, 'happy', 'run'], answer: 1, explain: '这里要一个东西' },
+      { type: 'choice', question: '哪个说法是对的？', options: [`a ${lq}s`, `two ${lq}`, `a ${lq}`, `an two ${lq}`], answer: 2, explain: '一个东西用 a' },
     ],
   });
 }

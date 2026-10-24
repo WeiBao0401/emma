@@ -1,5 +1,51 @@
 {
-  "version": 0,
-  "source": "前置关系表（DESIGN 5.4、6.x）：学 key 之前要先会 value 里的这些。占位文件，由课标数据 agent 填。",
-  "prereq": {}
+  "version": 1,
+  "source": "前置关系表（DESIGN 5.4）：学 key 之前要先稳 value 里的这些。只用来决定“下周进新单元，这周先练哪张地基卡”。原创内容，不含课文。units 是七上各单元的语法点，按现在的目录：U5 植物单元的语法还没有定论，U6 动物单元是现在进行时（以 Emma 的书为准，调研 01 A2）。tags 连到 tags.json 的误解标签。",
+  "prereq": {
+    "g:personal_pronoun": ["g:be", "g:subject_pronoun"],
+    "g:possessive_pronoun": ["g:be", "g:subject_pronoun"],
+    "g:there_be": ["g:be_agree", "g:plural", "g:countable"],
+    "g:how_many_much": ["g:be_agree", "g:plural", "g:countable"],
+    "g:possessive_s": ["g:plural", "g:possessive_pronoun"],
+    "g:freq_adverb": ["g:third_s", "g:do_does_q"],
+    "g:present_simple": ["g:third_s", "g:do_does_q"],
+    "g:present_continuous": ["g:be", "g:ing_spelling"]
+  },
+  "names": {
+    "g:be": "be 动词",
+    "g:subject_pronoun": "I / you / he / she 的主格",
+    "g:personal_pronoun": "人称代词",
+    "g:possessive_pronoun": "物主代词",
+    "g:be_agree": "be 动词单复数",
+    "g:plural": "名词复数",
+    "g:countable": "可数和不可数",
+    "g:there_be": "there be",
+    "g:how_many_much": "How many / How much",
+    "g:possessive_s": "名词所有格 's",
+    "g:third_s": "第三人称单数 -s",
+    "g:do_does_q": "do / does 问句",
+    "g:freq_adverb": "频度副词",
+    "g:present_simple": "一般现在时",
+    "g:present_continuous": "现在进行时",
+    "g:ing_spelling": "动词加 -ing 的拼写"
+  },
+  "units": {
+    "U1": ["g:personal_pronoun", "g:possessive_pronoun"],
+    "U2": ["g:there_be", "g:how_many_much"],
+    "U3": ["g:possessive_s"],
+    "U4": ["g:freq_adverb", "g:present_simple"],
+    "U6": ["g:present_continuous"]
+  },
+  "tags": {
+    "g:be": ["be_missing", "be_plus_verb"],
+    "g:subject_pronoun": ["he_she", "subj_obj"],
+    "g:personal_pronoun": ["he_she", "subj_obj"],
+    "g:possessive_pronoun": ["poss_adj_vs_pron", "obj_vs_poss"],
+    "g:plural": ["plural_missing"],
+    "g:countable": ["uncountable_plural"],
+    "g:there_be": ["there_have", "there_be_agree"],
+    "g:possessive_s": ["poss_s_missing", "poss_of_overuse"],
+    "g:third_s": ["third_s_missing"],
+    "g:do_does_q": ["do_does"]
+  }
 }

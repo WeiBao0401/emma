@@ -1,13 +1,41 @@
 /* 今天（ui-home.js）. Owner: 今天标签 UI agent. Class names start with home-. Tokens (--ink, --accent, --rule...) come from
-   index.html :root; do not redefine them here. Placeholder styles until the home sketch (DESIGN 2.0) is built. */
-.home{min-height:100vh;min-height:100dvh;padding:var(--top) var(--gutter) calc(var(--tabbar) + 32px);display:flex;flex-direction:column}
-.home-body{flex:1;display:flex;flex-direction:column;gap:32px;padding-top:28px}
-.home-en{font:500 26px/1.35 var(--serif)}
-.home-zh{margin-top:4px;font-size:15px;color:var(--muted)}
-.home-plan .small{margin-top:8px}
-.home-cells{margin-top:18px;border-top:1px solid var(--rule)}
-.home-cell{display:flex;justify-content:space-between;align-items:baseline;min-height:44px;padding:10px 0;border-bottom:1px solid var(--rule)}
-.home-cell.soon,.home-cell.skip{color:var(--muted)}
-.home-cell.done span:first-child{text-decoration:line-through;text-decoration-color:var(--rule-strong)}
-.home-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:28px}
-.home-links{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:auto;padding-left:10px}
+   index.html :root; do not redefine them here. DESIGN 2.0 sketch: greeting, minutes, one button, a quiet row of links. */
+.home{min-height:100vh;min-height:100dvh;padding:var(--top) var(--gutter) calc(var(--tabbar) + 24px);display:flex;flex-direction:column}
+.home-phase{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%}
+.home-body{flex:1;display:flex;flex-direction:column;gap:40px;padding-top:32px}
+
+/* the dictation reminder: one line between rules, above the greeting */
+.home-notice{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;min-height:52px;padding:6px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font-size:16px;line-height:1.45;color:var(--ink)}
+.home-notice .icon{width:19px;height:19px;color:var(--accent)}
+.home-notice>span{flex:1;min-width:12em}
+.home-notice .text-btn{margin:0 -10px 0 0;font-size:16px;font-weight:600}
+.home-notice.quiet{color:var(--muted)}
+.home-notice.quiet .icon{color:var(--muted)}
+.home-body>.home-notice:first-child{margin-top:-16px}
+
+/* the teacher's English line, Chinese under it until it fades (DESIGN 2.5) */
+.home-en{font:500 30px/1.35 var(--serif);letter-spacing:-.01em;text-wrap:pretty}
+.home-en .say{width:36px;height:36px;margin-left:6px;vertical-align:-4px}
+.home-en .say .icon{width:20px;height:20px}
+.home-zh{margin-top:6px;font-size:16px;line-height:1.5;color:var(--muted)}
+.text-btn.home-zh-btn{margin-top:4px;font-size:14px}
+
+.home-summary{margin-top:12px;font-size:17px;line-height:1.55;color:var(--ink);text-wrap:pretty}
+.home-why{margin-top:6px;font-size:15px;line-height:1.55;color:var(--muted);text-wrap:pretty}
+.home-actions{display:flex;flex-direction:column;align-items:flex-start;gap:14px;margin-top:32px}
+.btn.home-start{min-height:60px;padding:0 26px 0 30px;gap:14px;font-size:18px}
+.btn.home-start .icon{width:21px;height:21px}
+.home-actions .text-btn{margin-left:-10px;font-size:16px;min-height:48px}
+
+/* bottom row: 明天有听写？  查词  这周 3 / 5 天 */
+.home-links{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 24px;margin-top:auto;padding:14px 10px 0;border-top:1px solid var(--rule)}
+.home-links .text-btn{font-size:16px;min-height:48px}
+.home-links .text-btn.home-week{color:var(--muted);font-variant-numeric:tabular-nums}
+
+@media (min-width:700px){
+  .home-body{padding-top:56px;gap:48px}
+  .home-en{font-size:34px}
+  .home-plan .lede{font-size:36px}
+  .home-links{justify-content:flex-start;gap:4px 48px}
+  .home-links .text-btn.home-week{margin-left:auto}
+}

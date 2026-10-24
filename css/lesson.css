@@ -1,4 +1,56 @@
-/* 上课（ui-lesson.js）. Owner: 今天标签 UI agent. Class names start with lesson-. */
+/* 上课（ui-lesson.js）. Owner: 今天标签 UI agent. Class names start with lesson-. The four-choice card itself is
+   css/choice.css (mc4-); the fallback flashcard uses the dictionary's .card / .grades in index.html. */
 .lesson{min-height:100vh;min-height:100dvh;padding:var(--top) var(--gutter) 32px;display:flex;flex-direction:column}
 .lesson .runhead.session>.text-btn{margin-left:-10px}
-.lesson-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;padding-bottom:64px}
+.lesson-kind{min-width:44px;text-align:right;font-size:14px;color:var(--muted)}
+
+/* the four cells, always the same; a quiet underline on the one she is in */
+.lesson-cells{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid var(--rule)}
+.lesson-cell{display:flex;flex-direction:column;gap:2px;padding:10px 8px 9px 0;min-width:0}
+.lesson-cell b{font:600 14px/1.3 var(--serif);color:var(--muted);white-space:nowrap}
+.lesson-cell .st{display:flex;align-items:center;gap:3px;font-size:12px;line-height:1.3;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lesson-cell .st .icon{width:13px;height:13px}
+.lesson-cell.now{box-shadow:inset 0 -2px 0 var(--ink)}
+.lesson-cell.now b{color:var(--ink)}
+.lesson-cell.now .st{color:var(--muted)}
+.lesson-cell.done .st{color:var(--good)}
+
+.lesson-tools{display:flex;justify-content:flex-end;gap:22px;padding-top:4px}
+.lesson-tools .text-btn{font-size:14px;margin:0 -10px}
+.lesson-tools .text-btn:disabled{opacity:1;color:var(--faint)}
+
+/* 今天够了 (DESIGN 2.3): a plain block, no alarm */
+.lesson-note{margin-top:16px;padding:16px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.lesson-note p{font:500 20px/1.4 var(--serif)}
+.lesson-note .btn-row{margin-top:14px}
+
+/* the wrap */
+.lesson-wrap{flex:1;display:flex;flex-direction:column;gap:32px;padding:40px 0 48px}
+.lesson-en{font:500 28px/1.35 var(--serif);letter-spacing:-.01em;text-wrap:pretty}
+.lesson-en .say{width:34px;height:34px;margin-left:6px;vertical-align:-4px}
+.lesson-en .say .icon{width:19px;height:19px}
+.lesson-zh{margin-top:6px;font-size:16px;line-height:1.5;color:var(--muted)}
+.text-btn.lesson-zh-btn{margin-top:4px;font-size:14px}
+.lesson-tally .lede{font-size:30px}
+.lesson-words{margin-top:8px;font:500 20px/1.4 var(--serif);color:var(--ink)}
+.lesson-tally .small{margin-top:6px}
+
+/* the first-week button question (teacher-memory 7.2): English buttons, Chinese small under each */
+.lesson-ask{padding-top:24px;border-top:1px solid var(--rule)}
+.lesson-q .lesson-en{font-size:24px}
+.lesson-opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:18px}
+.lesson-opt{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:2px;min-height:68px;padding:10px 16px;
+  border:1px solid var(--rule-strong);border-radius:var(--radius-btn);text-align:left;color:var(--ink);transition:background-color .2s var(--ease)}
+.lesson-opt b{font:500 18px/1.3 var(--serif)}
+.lesson-opt span{font-size:13px;line-height:1.4;color:var(--muted)}
+.lesson-opt:active{background:var(--tag-bg)}
+.text-btn.lesson-skip{margin-top:10px;margin-left:-10px;font-size:14px}
+.lesson-asked{font-size:16px;color:var(--muted)}
+.lesson-bye .lesson-en{font-size:24px;color:var(--ink)}
+
+@media (min-width:700px){
+  .lesson-cell b{font-size:15px}
+  .lesson-cell .st{font-size:13px}
+  .lesson-en{font-size:32px}
+  .lesson-tally .lede{font-size:36px}
+}

@@ -1,9 +1,11 @@
 // Offline shell for the check page: cache-first, so the page opens even when the host is unreachable.
-const CACHE = 'emma-check-1';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-512.png'];
+// Scope /emma/check/ (its own registration). The app's worker skips /emma/check/ and never deletes "emma-check-" caches;
+// this worker only ever deletes older "emma-check-" caches. Keep CACHE equal to 'emma-check-' + CHECK_VERSION in logic.js.
+const CACHE = 'emma-check-2';
+const SHELL = ['./', './index.html', './page.js', './logic.js', './manifest.webmanifest', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -14,10 +16,11 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  const url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== self.location.origin || !url.href.startsWith(self.registration.scope)) return;
   e.respondWith(
-    caches.match(req, { ignoreSearch: true }).then(hit => hit || fetch(req).then(res => {
-      if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
+    caches.match(req, { ignoreSearch: true, cacheName: CACHE }).then(hit => hit || fetch(req).then(res => {
+      if (res.ok && res.type === 'basic') { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
       return res;
     }))
   );

@@ -67,10 +67,12 @@
 }
 
 /* theme color picked on the first open (ui-onboard.js, kv 'profile'.theme); navy is the default above (v0.1.1, from the approved home prototype) */
+:root[data-accent="green"]{--accent:#1E7A55;--tag-bg:#DCEBE1}
 :root[data-accent="blue"]{--accent:#2B63B5;--tag-bg:#DCE6F3}
 :root[data-accent="rose"]{--accent:#B5446B;--tag-bg:#F3DFE6}
 :root[data-accent="violet"]{--accent:#6A4FB0;--tag-bg:#E6E0F3}
 @media (prefers-color-scheme: dark){
+  :root[data-accent="green"]{--accent:#5FC79A;--tag-bg:#1D3129}
   :root[data-accent="blue"]{--accent:#7FAEF0;--tag-bg:#1C2A3D}
   :root[data-accent="rose"]{--accent:#F09AB8;--tag-bg:#3A2430}
   :root[data-accent="violet"]{--accent:#B7A2F2;--tag-bg:#2C2540}
@@ -240,7 +242,7 @@ body.in-session .tabbar{transform:translateY(100%);visibility:hidden}
 /* ---------- entry page (design v2 4.2) ---------- */
 .ehead{padding-top:28px}
 .hw-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-height:44px;margin-top:4px}
-.hw-meta .tag{position:relative;top:-1px}
+.hw-meta .tag{position:relative;top:-1px;text-transform:none}
 .hw-meta .speak{margin-left:auto;margin-right:-11px;width:44px;height:44px;display:grid;place-items:center;color:var(--muted);border-radius:var(--radius-btn)}
 .phonetic{font:400 17px/1 var(--sans);letter-spacing:.01em;color:var(--muted)}
 .pos{font:italic 400 17px/1 var(--serif);color:var(--muted)}

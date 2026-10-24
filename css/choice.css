@@ -1,10 +1,31 @@
 /* 四选一（modes/choice.js）. Owner: 题型 agent. Class names start with mc4-. */
-.mc4{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:24px 0 48px}
-.mc4-prompt{font:650 44px/1.1 var(--serif);letter-spacing:-.02em}
-.mc4-prompt:lang(zh-CN){font:600 32px/1.3 var(--sans)}
-.mc4-options{display:grid;gap:0;border-top:1px solid var(--rule)}
-.mc4-opt{min-height:56px;padding:12px 0;text-align:left;font:17px/1.45 var(--sans);border-bottom:1px solid var(--rule);color:var(--ink)}
-.mc4-opt:lang(en){font:500 20px/1.3 var(--serif)}
-.mc4-opt:active{background:var(--tag-bg)}
-.mc4-opt.right{color:var(--good);font-weight:600}
-.mc4-opt.wrong{color:var(--danger);text-decoration:line-through}
+.mc4{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:24px 0 48px}
+.mc4-q{display:flex;flex-direction:column;gap:6px}
+.mc4-prompt{font:650 44px/1.12 var(--serif);letter-spacing:-.02em;color:var(--ink);overflow-wrap:anywhere}
+.mc4-prompt:lang(zh-CN){font:600 32px/1.35 var(--sans);letter-spacing:0}
+.mc4-prompt .say{width:36px;height:36px;vertical-align:-4px;margin-left:8px}
+.mc4-ask{color:var(--muted)}
+.mc4-meaning{margin-top:-6px}
+
+/* four big buttons: one column on a phone, two by two on an iPad */
+.mc4-options{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:600px){.mc4-options{grid-template-columns:1fr 1fr;gap:14px}}
+.mc4-opt{min-height:72px;padding:14px 18px;text-align:left;font:500 20px/1.35 var(--sans);color:var(--ink);
+  border:1px solid var(--rule-strong);border-radius:12px;background:var(--paper);
+  transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease)}
+.mc4-opt:lang(en){font:500 24px/1.25 var(--serif)}
+.mc4-opt:active:not(:disabled){background:var(--tag-bg)}
+.mc4-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mc4-opt:disabled{cursor:default;opacity:.55}
+.mc4-opt.right,.mc4-opt.reveal{opacity:1;border-color:var(--good);color:var(--good);font-weight:650;box-shadow:inset 0 0 0 1px var(--good)}
+.mc4-opt.right{background:var(--tag-bg)}
+.mc4-opt.wrong{opacity:1;border-color:var(--danger);color:var(--danger);text-decoration:line-through;text-decoration-thickness:1px}
+
+.mc4-hint{border-left:2px solid var(--accent);padding:2px 0 2px 14px}
+.mc4-hint-text{font:18px/1.5 var(--sans);color:var(--ink)}
+.mc4-hint-text:lang(en){font:400 20px/1.45 var(--serif)}
+.mc4-feedback{min-height:1.5em;font:17px/1.55 var(--sans);color:var(--ink)}
+.mc4.is-right .mc4-feedback{color:var(--good);font-weight:600}
+.mc4-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:var(--btn-h)}
+.mc4-actions .btn{margin-left:auto;min-width:140px}
+@media (prefers-reduced-motion:reduce){.mc4-opt{transition:none}}

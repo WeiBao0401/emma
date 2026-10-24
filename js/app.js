@@ -21,7 +21,9 @@ import { loadCurriculum, createCurriculum } from './curriculum.js';
 import { createLines, FILE as LINES_FILE } from './lines.js';
 import { planToday, wordsForPlan, dayOf } from './plan.js';
 import { kidMessage, needsParent } from './kid-errors.js';
+import { levelLabel, lookupHints } from './prompts.js';
 import { createHomeTab } from './ui-home.js';
+import { lessonDays } from './ui-home.js';
 import { createLessonView } from './ui-lesson.js';
 import { createDictationView } from './ui-dictation.js';
 import { createParentView } from './ui-parent.js';
@@ -60,7 +62,7 @@ const kv = {
 };
 
 const liveSettings = () => ({ ...settings, mock: !!settings.mock || mockForced, mockFail: mockOffline ? 'network' : '' });
-const budget = createBudget({ kv, getCap: () => settings.dailyCapYuan });
+const budget = createBudget({ kv, getCap: () => settings.dailyCapYuan, getKindCaps: () => settings.kindCapsYuan || {} });
 const ai = createAI({ getSettings: liveSettings, budget });
 // Offline base dictionary: same-origin files, cached by the service worker.
 // A network failure is an English TypeError on iOS ("Load failed"), so it gets a Chinese message here.
@@ -74,7 +76,11 @@ const dict = createDict({
   },
 });
 const fetchJSON = async path => { const r = await fetch(path); if (!r.ok) throw new Error(`${path} ${r.status}`); return r.json(); };
-const words = createWords({ store: idbStore, ai, dict });
+// The program decides the level label and passes the textbook meaning and the words she has met (prompts.js);
+// the curriculum is read when a lookup runs, so a reload after a textbook import is picked up.
+const words = createWords({ store: idbStore, ai, dict,
+  hintsFor: q => lookupHints(q, { curriculum, progress: kv.peek('progress', null) }),
+  levelFor: w => levelLabel(w, curriculum) });
 const speech = createSpeech({ getVoiceName: () => settings.voice });
 // Qwen voice through one shared <audio> element (sounds on silent), clips cached in IndexedDB; the system voice is the
 // fallback. Paid synthesis goes through the budget (budget.wrapFetch).
@@ -84,6 +90,10 @@ const voice = createVoice({ speech, tts, player: createPlayer(), getSettings: li
 const events = createEvents({ store: idbStore });
 let curriculum = createCurriculum({});
 let lines = createLines({});
+// units come from kv 'textbook' and from the unit fields of imported words; word forms from the offline dictionary
+const curriculumNow = () => loadCurriculum({ fetchJSON, kv, dict, entries: () => words.all() });
+const DEFAULT_PARENT = '家长';
+const parentName = () => String(((kv.peek('profile', {}) || {}).parentCall) || '').trim() || DEFAULT_PARENT;
 
 let look, lib, home, lesson, dictation, parent, onboard;
 let sheetView = null;
@@ -96,38 +106,47 @@ const app = {
   get curriculum() { return curriculum; },
   get lines() { return lines; },
   // after the textbook import writes kv 'textbook' (CONTRACTS.md "课本导入")
-  async reloadCurriculum() { curriculum = await loadCurriculum({ fetchJSON, kv }); for (const v of [home, lib]) if (v && v.onChange) v.onChange(); return curriculum; },
+  async reloadCurriculum() { curriculum = await curriculumNow(); for (const v of [home, lib]) if (v && v.onChange) v.onChange(); return curriculum; },
   say: (text, button, opts) => voice.say(text, button, opts),
   // settings
   settings: () => settings,
   async saveSettings(patch) {
     settings = { ...settings, ...patch, models: { ...settings.models, ...(patch.models || {}) },
       poeModels: { ...settings.poeModels, ...(patch.poeModels || {}) } };
+    // per-task routing (ai.js route) merges task by task, so changing one row keeps the others
+    if (patch.routing || settings.routing) settings.routing = { ...(settings.routing || {}), ...(patch.routing || {}) };
     if ('newPerDay' in patch) updateBadge();
     await kv.set('settings', settings);
   },
   mockForced: () => mockForced,
   // today's lesson (plan.js): state assembled here from words, curriculum and kv
+  // words carry r / last / order / source (wordsForPlan with { now }): surest first, today's reviews skipped, textbook order.
+  // lessonDays: first lesson (none yet), comeback day (last one before yesterday), this week's count.
+  // dictationTonight: a dictation record for today exists (dictation.js writes it after the first check, already done).
   planState(extra = {}) {
-    const day = dayOf(new Date());
+    const now = new Date();
+    const day = dayOf(now);
     const dayRec = kv.peek('day:' + day, {}) || {};
-    const dict0 = kv.peek('dictation:' + day, null);
+    let unitRanks;
+    try { unitRanks = Object.fromEntries((curriculum.units() || []).map(u => [u.id, u.order])); } catch (e) { unitRanks = undefined; }
     return {
-      words: wordsForPlan(words.favorites(), curriculum),
+      words: wordsForPlan(words.favorites(), curriculum, { now }),
       newPerDay: settings.newPerDay,
       newDoneToday: words.newDoneToday(),
       doneToday: dayRec.cells || {},
       light: false,
-      dictationTonight: !!(dict0 && !dict0.done),
+      dictationTonight: !!kv.peek('dictation:' + day, null),
       progress: kv.peek('progress', {}) || {},
       weekGoal: (kv.peek('profile', {}) || {}).weeklyGoal || 0,
-      weekDays: 0,
+      lessonDays: lessonDays(kv),
+      unitRanks: unitRanks && Object.keys(unitRanks).length ? unitRanks : undefined,
       ...extra,
     };
   },
   todayPlan: (extra = {}) => planToday(app.planState(extra), new Date()),
-  // errors Emma sees (kid-errors.js)
-  kidError: (err, opts) => kidMessage(err, opts),
+  // errors Emma sees (kid-errors.js); "家长" becomes what the parent asked to be called (kv profile.parentCall)
+  parentName: () => parentName(),
+  kidError: (err, opts) => kidMessage(err, opts).replace(/家长/g, parentName()),
   needsParent: err => needsParent(err),
   // navigation
   go: (name, p = {}) => showRoute(name, { params: p }),
@@ -150,7 +169,7 @@ const app = {
       if (!r.ok) toast(r.message, 3000);
       else if (r.found === false) toast('这次没认出这个词，讲解没变。', 3000);
       else toast('讲解已更新，其余部分正在生成');
-    } catch (err) { toast(kidMessage(err, { where: 'look' }), 3500); }
+    } catch (err) { toast(app.kidError(err, { where: 'look' }), 3500); }
   },
   registerView: v => views.add(v),
   unregisterView: v => views.delete(v),
@@ -228,7 +247,9 @@ function chrome() {
 
 // ---------------------------------------------------------------- live updates
 let changeTimer = 0;
-words.onChange(({ slug }) => {
+words.onChange(({ type, slug }) => {
+  // an import adds unit words: the curriculum's unit index is rebuilt from the entries
+  if (type === 'import' && curriculum && curriculum.refresh) { try { curriculum.refresh(); } catch (e) { console.warn('curriculum refresh:', (e && e.message) || e); } }
   for (const v of views) {
     if (!slug || v.slug === slug) v.update(v.slug ? words.get(v.slug) : undefined);
   }
@@ -284,9 +305,16 @@ function renderStatusInto(el) {
     s.btn ? h('button', { type: 'button', className: 'text-btn accent', text: s.btn, on: { click: actions[s.action] } }) : null)] : []));
 }
 
-// The count on the 今天 tab: cards due today (no app-icon badge: no notifications for a child's iPad)
+// The count on the 今天 tab: the warm-up cards today's plan still has (no app-icon badge: no notifications for a
+// child's iPad). Same numbers as the home page, so a finished lesson shows no count.
+function badgeCount() {
+  try {
+    const warm = app.todayPlan().cells.find(c => c.id === 'warmup');
+    return warm && warm.status === 'ready' ? (warm.items || []).length : 0;
+  } catch (e) { return words.dueCount(settings.newPerDay); }
+}
 function updateBadge() {
-  const n = words.dueCount(settings.newPerDay);
+  const n = badgeCount();
   const b = tabButtons.home && tabButtons.home.querySelector('.count');
   if (b) { b.hidden = !n; b.textContent = n > 99 ? '99+' : String(n); }
   if (tabButtons.home) tabButtons.home.setAttribute('aria-label', n ? `今天，还有 ${n} 个词要复习` : '今天');
@@ -347,10 +375,11 @@ async function boot() {
     lastExport = (await idbStore.getMeta('lastExport')) || null;
     await words.load();
     await budget.load();
-    curriculum = await loadCurriculum({ fetchJSON, kv });
+    curriculum = await curriculumNow();
     let linesData = {};
     try { linesData = await fetchJSON(LINES_FILE); } catch (e) { console.warn('lines:', (e && e.message) || e); }
-    lines = createLines({ data: linesData, kv });
+    // load() reads curriculum/questions.json too (the first-week button questions)
+    lines = createLines({ data: linesData, kv, fetchJSON });
     await lines.load();
   } catch (e) {
     console.error(e);

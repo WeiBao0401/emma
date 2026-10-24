@@ -1,7 +1,9 @@
 // 单词 tab (the dictionary's 词库): running head with the count and the 家长 entry (家长区, ui-parent.js), a search
 // line, sort as a phrase of words, filters as a line of small words, rows grouped by month / letter / lookups (sticky
 // group heads), an A–Z thumb index. Rendered in batches of 150. A row pushes the word page (‹ 单词).
-// Owner: 接线 for now. To come (DESIGN 5.1): a unit filter (curriculum.units(), entry.unit) and the textbook order.
+// Owner: 接线. Unit filter (DESIGN 5.1): once the textbook is imported, a second line of small words picks a unit
+// (curriculum.units(), entry.unit or curriculum.unitOf) or 课外 (no unit). Inside a unit the words follow the textbook:
+// 必会词, then 认读词, then 小学词, each in the book's order (entry.order).
 import { h, icon } from './ui-dom.js';
 import { createEntryView } from './ui-entry.js';
 import { summary, hasExtras } from './words.js';
@@ -12,6 +14,10 @@ import { LIB_CHUNK } from './config.js';
 const FILTERS = [['all', '全部'], ['due', '今天要复习'], ['new', '新词'], ['learning', '学习中'], ['mastered', '已掌握'], ['relook', '收藏后又查过']];
 const SORTS = [['new', '新→旧'], ['old', '旧→新'], ['az', 'A–Z'], ['most', '查得最多']];
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
+const TIER_GROUP = { required: '必会词', recognize: '认读词', primary: '小学词', extra: '课外词' };
+const TIER_RANK = { required: 0, recognize: 1, primary: 2, extra: 3 };
+// 'Unit 2 More than fun' -> 'Unit 2' for the small line
+const shortUnit = u => { const t = String((u && u.title) || (u && u.id) || ''); const m = t.match(/^(Unit \d+|Starter)\b/i); return m ? m[1] : t; };
 const DAY = 864e5;
 
 const lsGet = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
@@ -22,6 +28,7 @@ export function createLibTab(app) {
   root.replaceChildren();
 
   let filter = 'all';
+  let unit = '';          // '' every unit, a unit id, or 'extra' (words outside the textbook)
   let sort = lsGet('emma.sort', 'new');   // same origin as Wei's dictionary: localStorage keys start with emma.
   if (!SORTS.some(s => s[0] === sort)) sort = 'new';
   let query = '';
@@ -46,11 +53,12 @@ export function createLibTab(app) {
   const searchRow = h('label', { className: 'search' }, icon('search'), searchEl, searchClear);
   const sortEl = h('div', { className: 'sort', role: 'group', 'aria-label': '排序' });
   const filterEl = h('div', { className: 'filters', role: 'tablist', 'aria-label': '筛选' });
+  const unitEl = h('div', { className: 'filters units', role: 'tablist', 'aria-label': '单元', hidden: true });
   const summaryEl = h('p', { className: 'summary', hidden: true });
   const listEl = h('div', { className: 'lib-list' });
   const thumbs = h('nav', { className: 'thumbs', 'aria-label': '字母索引', hidden: true });
   const loupe = h('div', { className: 'loupe', 'aria-hidden': 'true', hidden: true });
-  const controls = h('div', { className: 'lib-controls' }, searchRow, sortEl, filterEl, summaryEl);
+  const controls = h('div', { className: 'lib-controls' }, searchRow, sortEl, filterEl, unitEl, summaryEl);
   const listView = h('div', { className: 'lib-list-view' }, top, statusSlot, h('div', { className: 'lib-body' }, controls, listEl));
   const detailView = h('div', { className: 'lib-detail-view', hidden: true });
   root.append(listView, detailView, thumbs, loupe);
@@ -71,6 +79,20 @@ export function createLibTab(app) {
     for (const b of sortEl.querySelectorAll('button')) { const on = b.dataset.s === sort; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
   }
   syncChips();
+
+  // the unit line, rebuilt on every render: the units change when a textbook pack is imported
+  const curOf = () => { try { return app.curriculum; } catch (e) { return null; } };
+  function renderUnits() {
+    let units = [];
+    try { const c = curOf(); units = c && c.hasTextbook && c.hasTextbook() ? c.units() : []; } catch (e) { units = []; }
+    unitEl.hidden = !units.length;
+    if (!units.length) { unit = ''; unitEl.replaceChildren(); return; }
+    if (unit && unit !== 'extra' && !units.some(u => u.id === unit)) unit = '';
+    const chip = (k, label) => h('button', { type: 'button', className: 'f' + (k === unit ? ' on' : ''), role: 'tab', 'aria-selected': String(k === unit),
+      dataset: { u: k }, text: label, on: { click: () => { unit = k; render(); window.scrollTo(0, 0); } } });
+    unitEl.replaceChildren(chip('', '全部单元'), ...units.map(u => chip(u.id, shortUnit(u))), chip('extra', '课外'));
+  }
+  const inUnitOrder = () => !!unit && unit !== 'extra' && !query && (sort === 'new' || sort === 'old');
 
   // searching: the sort and filters step aside, 取消 takes the running head
   const searching = () => document.activeElement === searchEl || !!searchEl.value;
@@ -99,6 +121,7 @@ export function createLibTab(app) {
   // ---------------------------------------------------------------- data
   const favTime = w => w.favorited_at || w.created || '';
   function groupKey(w) {
+    if (inUnitOrder()) return TIER_GROUP[w.tier] || '课外词';
     if (sort === 'az') { const c = (w.headword || '')[0] || ''; return /[a-z]/i.test(c) ? c.toUpperCase() : '#'; }
     if (sort === 'most') return w.lookups >= 5 ? '查过 5 次以上' : w.lookups >= 2 ? `查过 ${w.lookups} 次` : w.lookups === 1 ? '查过 1 次' : '没在这里查过';
     const t = favTime(w);
@@ -111,22 +134,31 @@ export function createLibTab(app) {
     // 今天要复习 = what today's review will actually show (same rule and new-card quota as the 复习 tab)
     const rq = app.words.reviewQueue(app.settings().newPerDay);
     const dueSet = new Set([...rq.due, ...rq.fresh].map(e => e.slug));
+    const cur = curOf();
+    const ask = (fn, w, d) => { try { return cur && cur[fn] ? cur[fn](w) || d : d; } catch (e) { return d; } };
     const all = app.words.favorites().map(e => {
       const s = summary(e);
       s.isDue = dueSet.has(e.slug);
       s.isNew = !!(e.fsrs && e.fsrs.state === State.New);
+      s.unit = e.unit || ask('unitOf', e.headword, '');
+      s.tier = e.tier || ask('tierOf', e.headword, 'extra');
+      s.order = Number.isFinite(e.order) ? e.order : 1e9;
       return s;
     });
     const counts = { all: all.length, new: 0, learning: 0, mastered: 0, due: 0, relook: 0, dueOld: rq.due.length, dueNew: rq.fresh.length };
     for (const w of all) { counts[w.mastery]++; if (w.isDue) counts.due++; if (w.relookups > 0) counts.relook++; }
     const q = query;
+    const inUnit = w => !unit || (unit === 'extra' ? !w.unit : w.unit === unit);
     const list = all.filter(w =>
       (q || filter === 'all' || w.mastery === filter || (filter === 'due' && w.isDue) || (filter === 'relook' && w.relookups > 0)) &&
+      (q || inUnit(w)) &&
       (!q || String(w.headword).toLowerCase().includes(q) || String(w.brief_cn || '').toLowerCase().includes(q)));
     if (q) {
       // a search ranks words that start with what was typed first
       const starts = w => (String(w.headword).toLowerCase().startsWith(q) ? 0 : 1);
       list.sort((a, b) => starts(a) - starts(b) || String(a.headword).localeCompare(String(b.headword), 'en', { sensitivity: 'base' }));
+    } else if (inUnitOrder()) {
+      list.sort((a, b) => (TIER_RANK[a.tier] ?? 3) - (TIER_RANK[b.tier] ?? 3) || (sort === 'old' ? b.order - a.order : a.order - b.order));
     } else if (sort === 'az') list.sort((a, b) => String(a.headword).localeCompare(String(b.headword), 'en', { sensitivity: 'base' }));
     else if (sort === 'most') list.sort((a, b) => b.lookups - a.lookups || b.relookups - a.relookups || String(b.last_lookup || '').localeCompare(String(a.last_lookup || '')));
     else list.sort((a, b) => sort === 'new' ? favTime(b).localeCompare(favTime(a)) : favTime(a).localeCompare(favTime(b)));
@@ -187,6 +219,7 @@ export function createLibTab(app) {
   const arrow = () => icon('chev');
   function render({ keep = false } = {}) {
     dirty = false;
+    renderUnits();
     const keepShown = keep ? shown : 0;
     const { all, list, counts } = compute();
     rows = list;
@@ -199,12 +232,14 @@ export function createLibTab(app) {
     listView.classList.toggle('empty-lib', !all.length);
     syncSearch();
     // the line under the filters: how many words this filter holds (and, for today's review, the split)
-    if (filter !== 'all' && !query && all.length) {
-      const label = FILTERS.find(f => f[0] === filter)[1];
-      summaryEl.replaceChildren(
+    if ((filter !== 'all' || unit) && !query && all.length) {
+      const label = [unit ? (unit === 'extra' ? '课外' : (unitEl.querySelector('.f.on') || {}).textContent || unit) : '',
+        filter !== 'all' ? FILTERS.find(f => f[0] === filter)[1] : ''].filter(Boolean).join(' · ');
+      // replaceChildren would print a null as the text "null": only real nodes go in
+      summaryEl.replaceChildren(...[
         h('span', {}, h('b', { className: 'num', text: String(rows.length) }), ' 个词',
           filter === 'due' ? ` · 到期 ${counts.dueOld} · 新词 ${counts.dueNew}` : ` · ${label}`),
-        filter === 'due' && rows.length ? h('button', { type: 'button', className: 'text-btn accent', on: { click: () => app.go('home') } }, '去今天的课', arrow()) : null);
+        filter === 'due' && rows.length ? h('button', { type: 'button', className: 'text-btn accent', on: { click: () => app.go('home') } }, '去今天的课', arrow()) : null].filter(Boolean));
       summaryEl.hidden = false;
     } else summaryEl.hidden = true;
     if (!all.length) {

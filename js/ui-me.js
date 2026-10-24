@@ -2,10 +2,16 @@
 // 家长区里（4 位数字码之后）；这个文件不再自己占一个页面。
 // 负责：家长区 UI agent（ui-parent.js、ui-onboard.js、ui-me.js、css/parent.css、css/onboard.css）。
 // 状态：从词典照搬后删掉了 Wei 专用的东西（有道和 Mac 导入、搬到新图标、图标角标）；Poe 中转站的几行在
-// config POE_ENABLED 为 false 时不显示。家长区的新内容（日限额、进度和期中日期、花费、开机问卷）由负责的 agent 加。
+// config POE_ENABLED 为 false 时不显示，只留一行灰着的“以后开”。家长区自己的几组（进度、期中、花费、问卷、称呼、
+// 装机清单）在 ui-parent.js，通过 layout 和 hooks 放进这一页。
 //
-// createMeTab(ctx, { root, back }) -> { show(opts), onChange(), holding() }
+// createMeTab(ctx, { root, back, layout, hooks }) -> { show(opts), onChange(), holding(), render(), open(key) }
 //   root：要画进去的元素（默认 #tab-parent 里 ui-parent 给的容器）；back：{ label, onClick }，左上角的返回
+//   layout(kit) -> 元素数组：整页按什么顺序画（不给就是下面 render 里的默认顺序）。kit 里有 group、row、toggle、
+//     render、open、openRows，和这里的几组：ai（服务商、Key、测一下连接）、poe、study、data、advanced（模型、测速、
+//     模拟模式）、about
+//   hooks：exportExtra() -> { kv, events }，并进备份；previewExtra(data) -> 文字数组，导入前多说几句；
+//     afterImport(data) -> 文字数组，words.importData 之后写 kv（课本、进度……），返回导入完成后多说的几句
 //   opts.open：打开就展开的那一行（'key'、'import'、'backup'…）
 // A grouped document list: rows with a value and a chevron open a panel in place; switches and buttons sit on their row.
 import { h, icon, toast, ago, fmtBytes, localYmd } from './ui-dom.js';
@@ -15,9 +21,9 @@ import { normalizePoeUrl, poeHost, providerOf } from './ai.js';
 import { pageShell } from './ui-entry.js';
 
 const SAMPLE = 'meticulous. She is meticulous about details.';
-const MODEL_ROWS = [['core', '核心释义模型', '拼写判断、释义、巧记，要快'], ['extras', '扩展讲解模型', '搭配、同义词、阅读、小测'], ['zh', '中译英模型', '中文找英文说法']];
+const MODEL_ROWS = [['core', '核心释义模型', '拼写判断、释义，要快'], ['extras', '扩展讲解模型', '搭配、同义词、阅读、小测'], ['zh', '中译英模型', '中文找英文说法']];
 
-export function createMeTab(app, { root = document.getElementById('tab-parent'), back = { label: '单词', onClick: () => app.closeMe() } } = {}) {
+export function createMeTab(app, { root = document.getElementById('tab-parent'), back = { label: '单词', onClick: () => app.closeMe() }, layout = null, hooks = {} } = {}) {
   root.replaceChildren();
   const shell = pageShell(app, { back });
   shell.barEl.hidden = true;
@@ -30,6 +36,8 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
   let importVia = 'import';
   let speed = null;        // speed test: {running, results: [...]} | {error}
   let speedBox = null;     // where the speed test draws (rebuilt by every render)
+  let conn = null;         // connection test (the lookup model only): {running, model} | {model, result} | {model, error}
+  let connBox = null;
   const openRows = new Set();
 
   // the one file input; importVia says which panel asked
@@ -43,7 +51,8 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
     h('ul', { className: 'rows' }, ...rows.filter(Boolean)), foot ? h('p', { className: 'small foot', text: foot }) : null);
 
   // key + panel: a row that opens in place; value: text on the right; right: a control on the row
-  function row({ key = '', label, sub = '', value = null, right = null, panel = null, after = null }) {
+  // cls: extra classes on the row (ui-parent uses parent-off for a greyed-out row)
+  function row({ key = '', label, sub = '', value = null, right = null, panel = null, after = null, cls = '' }) {
     const go = !!panel;
     const open = go && openRows.has(key);
     const k = h('span', { className: 'k' }, h('b', { text: label }), sub ? h('span', { text: sub }) : null);
@@ -52,7 +61,7 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
       ? h('button', { type: 'button', className: 'srow-head', 'aria-expanded': String(open), on: { click: () => { if (openRows.has(key)) openRows.delete(key); else openRows.add(key); render(); } } },
         k, v, icon('chev', 'chev'))
       : h('div', { className: 'srow-head' }, k, v, right, icon('chev', 'chev none'));
-    return h('li', { className: 'srow' + (go ? ' go' : '') + (open ? ' open' : ''), dataset: { row: key || null } },
+    return h('li', { className: 'srow' + (go ? ' go' : '') + (open ? ' open' : '') + (cls ? ' ' + cls : ''), dataset: { row: key || null } },
       head, open ? h('div', { className: 'srow-panel' }, panel()) : null, after);
   }
 
@@ -65,7 +74,7 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
   // ---------------------------------------------------------------- 百炼 and Poe keys
   const KEYS = {
     bailian: { field: 'apiKey', row: 'key', placeholder: 'sk-…', aria: '百炼 API Key', from: '百炼控制台',
-      note: '只存在这台 iPad 里，不进备份文件。用给 Emma 单独建的 Key：只开要用的模型，月预算 30 元，开“达到即停”。' },
+      note: '只在这里填，只存在这台 iPad 里，不进备份文件。用给 Emma 单独建的 Key，只开要用的几个模型。保存时会去掉复制带进来的看不见的字符；之后只显示最后 4 位。' },
     poe: { field: 'poeKey', row: 'poekey', placeholder: '粘贴 Poe 的 API Key', aria: 'Poe API Key', from: 'poe.com/api_key',
       note: '在 poe.com/api_key 复制。只存在这台 iPad 里，不进备份文件；中转站不存 Key，只是原样转给 Poe。' },
   };
@@ -164,17 +173,67 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
     return h('li', { className: 'srow' }, speedBox);
   }
 
-  function bailianGroup() {
+  // 服务商, the greyed Poe row (v0), the key and the connection test: what a parent needs
+  function aiRows() {
+    const s = app.settings();
+    const poe = s.provider === 'poe';
+    return [
+      row({ label: '服务商', sub: poe ? '查词走 Poe，发音还用百炼' : '查词、讲解、朗读都走百炼', value: poe ? 'Poe' : '百炼' }),
+      POE_ENABLED ? null : row({ label: 'Poe 中转站', sub: '中转站搭好了再开', value: '以后开', cls: 'parent-off' }),
+      row({ key: 'key', label: 'Key', sub: poe ? '查词现在走 Poe，这个 Key 还用来发音' : '', value: s.apiKey ? '····' + s.apiKey.slice(-4) : '还没填', panel: keyPanelFor('bailian') }),
+      connRow(),
+    ];
+  }
+  // the three model slots, the full speed test and mock mode: rarely touched
+  function advancedRows() {
     const s = app.settings();
     const forced = app.mockForced();
     const poe = s.provider === 'poe';
-    return group('百炼', [
-      row({ key: 'key', label: 'Key', sub: poe ? '查词现在走 Poe，这个 Key 还用来发音' : '', value: s.apiKey ? '····' + s.apiKey.slice(-4) : '还没填', panel: keyPanelFor('bailian') }),
+    return [
       ...(poe ? [] : MODEL_ROWS.map(([k, label, sub]) => row({ key: 'm-' + k, label, sub, value: s.models[k], panel: modelPanel(k, label) }))),
       poe ? null : speedRow(),
       row({ label: '模拟模式', sub: forced ? '地址里带了 ?mock=1，这次打开一直是模拟模式' : '不调模型，返回假数据（会存进本机单词本），只在测试时打开',
         right: toggle(s.mock || forced, v => app.saveSettings({ mock: v }).then(() => { toast(v ? '已打开模拟模式' : '已关闭模拟模式'); app.refreshBanners(); }), { disabled: forced, label: '模拟模式' }) }),
-    ]);
+    ];
+  }
+  const bailianGroup = () => group('百炼', [...aiRows(), ...advancedRows()]);
+  const aiGroup = () => group('AI 服务', aiRows());
+  const advancedGroup = () => group('高级', advancedRows(), '模型一般不用改。测速会把每个模型都查一次。');
+
+  // Connection test: the speed test's approach with one model, the lookup one (core); nothing is stored.
+  function connRow() {
+    connBox = h('div', { className: 'speed-box' });
+    paintConn();
+    return h('li', { className: 'srow' }, connBox);
+  }
+  async function runConn() {
+    if (conn && conn.running) return;
+    const model = providerOf(app.settings()).models.core;
+    conn = { running: true, model };
+    paintConn();
+    try {
+      const [r] = await app.ai.speedTest({ choices: [{ id: model }] });
+      conn = { model, result: r };
+    } catch (e) {
+      conn = { model, error: (e && e.message) || String(e) };
+    }
+    paintConn();
+  }
+  function paintConn() {
+    if (!connBox) return;
+    const st = conn || {};
+    const model = providerOf(app.settings()).models.core;
+    const r = st.result;
+    let line = null;
+    if (st.error) line = h('p', { className: 'speed-err', role: 'alert', text: st.error });
+    else if (r && r.ok && r.json) line = h('p', { className: 'small parent-good', role: 'status', text: `连上了：${(r.ms / 1000).toFixed(1)} 秒，查词正常（${st.model}）` });
+    else if (r) line = h('p', { className: 'speed-err', role: 'alert', text: `${r.ok ? '连上了，但查词不正常' : '没连上'}：${r.error || '没有详情'}` });
+    connBox.replaceChildren(...[
+      h('div', { className: 'srow-head' },
+        h('span', { className: 'k' }, h('b', { text: '测一下连接' }), h('span', { text: `用查词的模型 ${model} 查一个词，不到 1 分钱` })),
+        h('button', { type: 'button', className: 'text-btn accent speed-btn', text: st.running ? '正在测…' : '测一下', disabled: !!st.running,
+          'aria-busy': st.running ? 'true' : null, on: { click: runConn } })),
+      line].filter(Boolean));
   }
 
   // Poe through the relay (SPEC 5.2): one switch says who answers lookups; the voice stays on Bailian.
@@ -352,12 +411,14 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
       const r = s.done;
       return h('div', { className: 'result', role: 'status' },
         h('p', { text: `导入完成：新增 ${r.added} 个，合并 ${r.merged} 个，${r.unchanged} 个没变化${r.zhAdded ? `，中译英 ${r.zhAdded} 条` : ''}。` }),
-        h('p', { className: 'small', text: `单词本 ${r.before.library} → ${r.after.library} 个，全部 ${r.before.total} → ${r.after.total} 个。` }));
+        h('p', { className: 'small', text: `单词本 ${r.before.library} → ${r.after.library} 个，全部 ${r.before.total} → ${r.after.total} 个。` }),
+        ...(s.extra || []).map(t => h('p', { className: 'small', text: t })));
     }
     const d = s.data, p = s.preview;
     return h('div', { className: 'result' },
       h('p', { className: 'small', text: `“${s.name}”：导出于 ${localYmd(d.exported_at) || '未知日期'}，${p.total} 个词（单词本里 ${p.incomingFav} 个），中译英 ${(d.zh || []).length} 条。` }),
       h('p', { className: 'small', text: `导入后：新增 ${p.added} 个，合并 ${p.merged} 个，${p.unchanged} 个没变化${p.skipped ? `，${p.skipped} 条格式不对跳过` : ''}。现在单词本 ${p.before.library} 个。导入不会删除任何东西。` }),
+      ...(s.extra || []).map(t => h('p', { className: 'small', text: t })),
       h('div', { className: 'btn-row' },
         h('button', { type: 'button', className: 'btn', text: '导入', on: { click: doImport } }),
         h('button', { type: 'button', className: 'text-btn', text: '取消', on: { click: () => { importState = null; render(); } } })));
@@ -366,10 +427,11 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
   const backupPanel = () => {
     const le = app.lastExport();
     return [h('p', { className: 'small', text: le ? `上次备份：${ago(le.at)}（${le.count} 个收藏）` : '上次备份：还没有' }),
-      h('p', { className: 'small', text: '单词和记录打包成一个文件（不含 Key），存到“文件”里。' }), exportBox('backup')];
+      h('p', { className: 'small', text: hooks.exportExtra ? '单词、课本、进度、问卷和学习记录打包成一个文件（不含 Key 和家长数字码），存到“文件”里。'
+        : '单词和记录打包成一个文件（不含 Key），存到“文件”里。' }), exportBox('backup')];
   };
   const importPanel = () => [
-    h('p', { className: 'small', text: '这个 App 导出的备份（.json / .json.gz），合并，不删除任何东西' }),
+    h('p', { className: 'small', text: '单元包（课本词）或这个 App 导出的备份（.json / .json.gz）。先看一眼要导入什么，再点“导入”。合并，不删除任何东西' }),
     h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: '选择文件', on: { click: () => pickFile('import') } })),
     importCard('import')];
 
@@ -401,6 +463,8 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
       toast('正在打包…', 4000);
       const at = new Date();
       const data = await app.words.exportData();
+      // the parent area adds kv (everything but settings and the code) and the events (CONTRACTS.md 5.1)
+      if (hooks.exportExtra) Object.assign(data, (await hooks.exportExtra()) || {});
       const gz = await gzipJSON(data);
       const name = `emma-backup-${localYmd(at)}.json.gz`;
       prepared = { file: new File([gz], name, { type: 'application/gzip' }), data, size: gz.byteLength, at: at.toISOString(),
@@ -452,7 +516,8 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
     try {
       const data = await parseExportBytes(await file.arrayBuffer());
       const preview = await app.words.previewImport(data);
-      importState = { name: file.name, data, preview, via };
+      const extra = hooks.previewExtra ? (await hooks.previewExtra(data)) || [] : [];
+      importState = { name: file.name, data, preview, extra, via };
     } catch (e) {
       importState = { error: '导入失败：' + (e.message || e), via };
     }
@@ -467,7 +532,9 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
     app.busy(+1);
     try {
       const r = await app.words.importData(s.data);
-      importState = { done: r, via };
+      // kv (textbook, progress, ...) after the words, then the curriculum reloads (CONTRACTS.md 5.2)
+      const extra = hooks.afterImport ? (await hooks.afterImport(s.data)) || [] : [];
+      importState = { done: r, extra, via };
       toast('导入完成');
       app.refreshBanners();
       app.updateBadge();
@@ -497,10 +564,24 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
     try { audioCount = await app.store.countAudio(); } catch (e) { /* ignore */ }
   }
 
+  // open one row (and scroll to it); ui-parent's checklist uses this
+  function open(key) {
+    openRows.add(key);
+    render();
+    requestAnimationFrame(() => { const r = root.querySelector(`[data-row="${key}"]`); if (r) r.scrollIntoView({ block: 'center' }); });
+  }
+  const kit = { group, row, toggle, render: () => render(), open, openRows,
+    ai: aiGroup, poe: () => (POE_ENABLED ? poeGroup() : null), study: studyGroup, data: dataGroup, advanced: advancedGroup, about: aboutGroup };
+
   function render() {
-    shell.body.replaceChildren(
-      h('h1', { className: 'page-title', text: '设置与数据' }),
-      ...[bailianGroup(), POE_ENABLED ? poeGroup() : null, studyGroup(), dataGroup(), aboutGroup()].filter(Boolean));
+    connBox = null;
+    speedBox = null;
+    if (layout) shell.body.replaceChildren(...layout(kit).filter(Boolean));
+    else {
+      shell.body.replaceChildren(
+        h('h1', { className: 'page-title', text: '设置与数据' }),
+        ...[bailianGroup(), POE_ENABLED ? poeGroup() : null, studyGroup(), dataGroup(), aboutGroup()].filter(Boolean));
+    }
     shell.refreshRule();
   }
 
@@ -508,8 +589,8 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
   let changeTimer = 0;
   render();
   return {
-    show({ open } = {}) {
-      if (open) { openRows.add(open); render(); requestAnimationFrame(() => { const r = root.querySelector(`[data-row="${open}"]`); if (r) r.scrollIntoView({ block: 'center' }); }); }
+    show({ open: key } = {}) {
+      if (key) open(key); else render();
       refreshStorage().then(() => { if (!typing()) render(); });
     },
     onChange() {
@@ -517,6 +598,8 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
       changeTimer = setTimeout(() => { if (app.currentRoute() === 'parent' && !(importState && importState.busy) && !typing()) render(); }, 200);
     },
     // something on this page would be lost by an automatic reload
-    holding: () => !!prepared || preparing || !!(importState && (importState.data || importState.busy)) || !!(speed && speed.running),
+    holding: () => !!prepared || preparing || !!(importState && (importState.data || importState.busy)) || !!(speed && speed.running) || !!(conn && conn.running),
+    render: () => render(),
+    open,
   };
 }

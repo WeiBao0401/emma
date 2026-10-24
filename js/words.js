@@ -163,12 +163,18 @@ function interest(e) {
 }
 
 // dict (optional): the offline dictionary (dict.js); its lemma table maps "went" to an existing "go" entry.
-export function createWords({ store, ai, dict = null, now = () => new Date(), hash = zhKey }) {
+// hintsFor (optional): q -> the program's hints for the prompt (prompts.js lookupHints: level, textbook meaning, known words).
+// levelFor (optional): headword -> the level label shown on the word page (prompts.js levelLabel). It replaces the
+//   model's "level" whenever a core lands, so the label always comes from the word lists, never from the model.
+// Fields other modules may set through patch(slug, fields): the write line (dictation) and the exam scope.
+export const PATCH_FIELDS = ['write', 'write_at', 'write_from', 'scope'];
+export function createWords({ store, ai, dict = null, now = () => new Date(), hash = zhKey, hintsFor = null, levelFor = null }) {
   const entries = new Map();     // slug -> entry (in-memory mirror of the entries store)
   const aliases = new Map();     // query form (lowercase) -> slug
   const pending = new Map();     // slug -> extras job started next to the core call
   const inflight = new Map();    // slug -> enrich promise (one per slug)
   const enrichErrors = new Map();
+  const enrichCauses = new Map();  // slug -> [error objects] (code for the kid's wording; enrichErrors keeps the text)
   const unfavorited = new Map(); // slug -> {favorited_at, t} for recent unfavorites
   const listeners = new Set();
   let zhCount = 0;
@@ -178,6 +184,8 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
   const remember = e => { for (const k of aliasKeys(e)) aliases.set(k, e.slug); };
   const save = e => store.putEntry(e);
   const log = rec => { Promise.resolve().then(() => store.addLog(rec)).catch(() => {}); };
+  const hints = q => { if (typeof hintsFor !== 'function') return {}; try { return hintsFor(q) || {}; } catch (e) { return {}; } };
+  const levelOf = (w, fallback) => { if (typeof levelFor !== 'function') return fallback; try { return levelFor(w) || fallback; } catch (e) { return fallback; } };
 
   // Alias table first (spellings seen before), then the slug, then the dictionary form of an inflected form.
   function findEntry(q) {
@@ -198,7 +206,7 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
 
   function startExtras(q, context, fromCn) {
     const ctrl = new AbortController();
-    const u = userMsg(q, context, fromCn);
+    const u = userMsg(q, context, fromCn, hints(q));
     const wrap = p => p.then(data => ({ data }), error => ({ error }));
     return {
       lexicon: wrap(ai.askJSON('lexicon', u, { signal: ctrl.signal })),
@@ -216,6 +224,8 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
     // allowlist: an unexpected key from the model must never overwrite favorited, note, fsrs, slug...
     const fields = { headword: core.headword };
     for (const k of CORE_KEYS) if (k in core) fields[k] = core[k];
+    fields.level = levelOf(core.headword, fields.level);
+    if (fields.level === undefined) delete fields.level;
     let rec = entries.get(slug);
     if (rec) {
       Object.assign(rec, fields);
@@ -258,7 +268,7 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
     const extras = startExtras(q, context, from_cn);   // runs in parallel with the core call
     let core;
     try {
-      core = await ai.askJSON('core', userMsg(q, context, from_cn), { signal });
+      core = await ai.askJSON('core', userMsg(q, context, from_cn, hints(q)), { signal });
     } catch (e) { extras.abort(); throw e; }
     const status = core.status || 'ok';
     if (status !== 'ok') {
@@ -287,7 +297,7 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
       const hit = await store.getZh(key);
       if (hit) { log({ at, query: q, result: 'zh-cached' }); return { ok: true, mode: 'zh', cached: true, result: hit }; }
     }
-    const data = await ai.askJSON('zh', zhUserMsg(q, context), { signal });
+    const data = await ai.askJSON('zh', zhUserMsg(q, context, { known: hints(q).known }), { signal });
     const options = Array.isArray(data.options) ? data.options.filter(o => o && typeof o.en === 'string' && o.en.trim()) : [];
     if (data.status === 'invalid' || !options.length) {
       log({ at, query: q, result: 'zh-invalid' });
@@ -322,12 +332,14 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
     if (hasExtras(rec) && !(job0 && job0.force)) {
       if (job0) job0.abort();
       enrichErrors.delete(slug);
+      enrichCauses.delete(slug);
       return { entry: rec, errors: {} };
     }
     const job = job0 || startExtras(rec.headword, '');
     const coreJob = rec.needs_core
-      ? ai.askJSON('core', userMsg(rec.headword, '')).then(data => ({ data }), error => ({ error })) : null;
+      ? ai.askJSON('core', userMsg(rec.headword, '', '', hints(rec.headword))).then(data => ({ data }), error => ({ error })) : null;
     const errors = {};
+    const causes = [];
     let invalid = 0, gotParts = false;
     const apply = async parts => {
       const cur = entries.get(slug);
@@ -340,10 +352,12 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
     const tasks = [];
     if (coreJob) {
       tasks.push(coreJob.then(async r => {
-        if (r.error) { errors.core = errMsg(r.error); return; }
+        if (r.error) { errors.core = errMsg(r.error); causes.push(r.error); return; }
         const parts = {};
         if ((r.data.status || 'ok') === 'ok') {
           for (const k of CORE_KEYS) if (k in r.data) parts[k] = r.data[k];
+          const lv = levelOf(rec.headword, parts.level);
+          if (lv !== undefined) parts.level = lv;
         }
         parts.needs_core = false;
         await apply(parts);
@@ -351,7 +365,7 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
     }
     for (const [name, keys] of [['lexicon', LEXICON_KEYS], ['practice', PRACTICE_KEYS]]) {
       tasks.push(job[name].then(async r => {
-        if (r.error) { errors[name] = errMsg(r.error); return; }
+        if (r.error) { errors[name] = errMsg(r.error); causes.push(r.error); return; }
         if (!r.data || r.data.invalid) { invalid++; return; }
         const parts = {};
         for (const k of keys) parts[k] = r.data[k] ?? null;
@@ -364,7 +378,8 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
     if (invalid === 2 && !Object.keys(errors).length) await apply({ not_standard: true });
     // false rather than delete, so a newer `updated` carries the removal through an import merge
     else if (gotParts && cur && cur.not_standard) { cur.not_standard = false; await save(cur); emit('entry', slug); }
-    if (Object.keys(errors).length) enrichErrors.set(slug, errors); else enrichErrors.delete(slug);
+    if (Object.keys(errors).length) { enrichErrors.set(slug, errors); enrichCauses.set(slug, causes); }
+    else { enrichErrors.delete(slug); enrichCauses.delete(slug); }
     return { entry: entries.get(slug), errors };
   }
 
@@ -386,6 +401,26 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
     try { await save(rec); } catch (e) { restore(rec, prev); throw e; }
     if (on) unfavorited.delete(slug);
     emit('favorite', slug);
+    return rec;
+  }
+
+  // A few fields other modules own (PATCH_FIELDS): dictation opens the write line, the plan may mark the exam scope.
+  async function patch(slug, fields = {}) {
+    const rec = entries.get(slug);
+    if (!rec) throw new Error('找不到这个词。');
+    const prev = {};
+    let changed = false;
+    for (const k of PATCH_FIELDS) {
+      if (!(k in fields) || rec[k] === fields[k]) continue;
+      prev[k] = rec[k];
+      rec[k] = fields[k];
+      changed = true;
+    }
+    if (!changed) return rec;
+    prev.updated = rec.updated;
+    rec.updated = localIso(now());
+    try { await save(rec); } catch (e) { restore(rec, prev); throw e; }
+    emit('patch', slug);
     return rec;
   }
 
@@ -518,13 +553,14 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
   }
 
   return {
-    load, lookup, enrich, favorite, setNote, review, reviewQueue, dueCount, tomorrowCount, stats,
+    load, lookup, enrich, favorite, setNote, patch, review, reviewQueue, dueCount, tomorrowCount, stats,
     exportData, importData, previewImport, reviewedToday, recent, favorites,
     get: slug => entries.get(slug),
     all: () => [...entries.values()],
     size: () => entries.size,
     resolve: q => findEntry(q),
-    enrichStatus: slug => ({ running: inflight.has(slug), errors: enrichErrors.get(slug) || null }),
+    // errors: { part: technical text } for the parent area; causes: the error objects, for ctx.kidError
+    enrichStatus: slug => ({ running: inflight.has(slug), errors: enrichErrors.get(slug) || null, causes: enrichCauses.get(slug) || [] }),
     enriching: () => inflight.size > 0,
     inToday: (slug, newPerDay, t = now()) => { const q = reviewQueue(newPerDay, t); return [...q.due, ...q.fresh].some(e => e.slug === slug); },
     newDoneToday,

@@ -1,0 +1,292 @@
+{
+  "version": 1,
+  "source": "家长开机问卷（DESIGN 3.5、teacher-memory 7.1）。家长在她第一次打开前填，约 10 分钟。这个文件只有题目，是公开的；回答只存在 iPad 的 kv 'parent.intake'，不进仓库、不发给模型原文。",
+  "title": "开机问卷",
+  "minutes": 10,
+  "notice": "这里不填健康、诊断和家里的事。",
+  "intro": [
+    "约 10 分钟，帮老师从第一天起就了解她。",
+    "只写事实，不写评价。拿不准的选“不知道”，或者空着。",
+    "你写的先当“待确认”，老师会用她做题的记录来核对。"
+  ],
+  "types": {
+    "single": "单选",
+    "multi": "多选",
+    "text": "短文本"
+  },
+  "rules": {
+    "optional": "每一项都可以空着",
+    "status": "家长的说法进笔记时一律先记成“待确认”（pending），等 App 自己的数据确认或推翻",
+    "answer_shape": "kv 'parent.intake' = { version: 1, at, updated, answers: { 题 id: 值 } }；单选是选项 id，多选是选项 id 数组，短文本是字符串（count 大于 1 时是字符串数组）",
+    "exclusive": "多选里 exclusive 列出的选项和别的选项互斥（选了“不知道”就清掉其他）",
+    "show_if": "show_if 里的题选中对应的值时才显示这一题"
+  },
+  "sections": [
+    {
+      "id": "likes",
+      "title": "她喜欢的",
+      "items": [
+        {
+          "id": "likes",
+          "type": "text",
+          "label": "她喜欢的 3 样具体的东西",
+          "count": 3,
+          "max": 20,
+          "placeholder": ["例如：橘猫", "例如：侦探动画", "例如：做手工"],
+          "help": "越具体越好。老师会用在例句和故事里。",
+          "to": "profile.interests"
+        },
+        {
+          "id": "dislikes",
+          "type": "text",
+          "label": "她不太喜欢的",
+          "count": 2,
+          "max": 20,
+          "placeholder": ["例如：恐怖的故事", ""],
+          "help": "可以不填。",
+          "to": "profile.interests"
+        }
+      ]
+    },
+    {
+      "id": "english",
+      "title": "英语现在怎么样",
+      "items": [
+        {
+          "id": "scores",
+          "type": "text",
+          "label": "最近的英语分数",
+          "count": 3,
+          "max": 30,
+          "placeholder": ["例如：Unit 1 单元测 72 / 100", "例如：听写 8 / 12", ""],
+          "help": "带上满分。不记得就空着。",
+          "to": "profile.baseline"
+        },
+        {
+          "id": "mistakes",
+          "type": "text",
+          "label": "最近的错题或听写错词",
+          "max": 200,
+          "placeholder": "例如：strict, carry, seldom；there be 的句子",
+          "help": "词用逗号隔开。这些词会先放进待学的词里。",
+          "to": "pool"
+        },
+        {
+          "id": "teacher",
+          "type": "text",
+          "label": "老师说过的问题",
+          "max": 100,
+          "placeholder": "原话一两句，例如“默写错得多”",
+          "help": "照老师的原话写，不用加自己的判断。",
+          "to": "open_questions"
+        },
+        {
+          "id": "phonics",
+          "type": "single",
+          "label": "她会不会音标",
+          "options": [
+            { "id": "yes", "zh": "会" },
+            { "id": "some", "zh": "会一点" },
+            { "id": "not_yet", "zh": "还没学会" },
+            { "id": "unknown", "zh": "不知道" }
+          ],
+          "to": "profile.baseline"
+        }
+      ]
+    },
+    {
+      "id": "habits",
+      "title": "她做题时通常怎样",
+      "items": [
+        {
+          "id": "on_mistake",
+          "type": "multi",
+          "label": "做错题的时候，她通常会",
+          "max_pick": 2,
+          "options": [
+            { "id": "retry", "zh": "再试一次" },
+            { "id": "skip", "zh": "想跳过" },
+            { "id": "upset", "zh": "着急" },
+            { "id": "ask", "zh": "来问人" },
+            { "id": "unknown", "zh": "不知道" }
+          ],
+          "exclusive": ["unknown"],
+          "to": "open_questions"
+        },
+        {
+          "id": "on_praise",
+          "type": "single",
+          "label": "被夸的时候，她",
+          "options": [
+            { "id": "specific", "zh": "喜欢具体说做对了什么" },
+            { "id": "short", "zh": "一句就行" },
+            { "id": "dislike", "zh": "不太喜欢被夸" },
+            { "id": "unknown", "zh": "不知道" }
+          ],
+          "to": "knob.praise"
+        },
+        {
+          "id": "free_time",
+          "type": "single",
+          "label": "上学的日子，她几点有空做英语",
+          "options": [
+            { "id": "before_19", "zh": "19:00 以前" },
+            { "id": "19_20", "zh": "19:00 到 20:00" },
+            { "id": "20_21", "zh": "20:00 到 21:00" },
+            { "id": "after_21", "zh": "21:00 以后" },
+            { "id": "varies", "zh": "不固定" }
+          ],
+          "to": "knob.lesson_mix"
+        },
+        {
+          "id": "busy_days",
+          "type": "multi",
+          "label": "哪几天作业多",
+          "options": [
+            { "id": "mon", "zh": "周一" },
+            { "id": "tue", "zh": "周二" },
+            { "id": "wed", "zh": "周三" },
+            { "id": "thu", "zh": "周四" },
+            { "id": "fri", "zh": "周五" },
+            { "id": "sat", "zh": "周六" },
+            { "id": "sun", "zh": "周日" },
+            { "id": "varies", "zh": "不固定" },
+            { "id": "unknown", "zh": "不知道" }
+          ],
+          "exclusive": ["varies", "unknown"],
+          "to": "knob.lesson_mix"
+        }
+      ]
+    },
+    {
+      "id": "school",
+      "title": "学校",
+      "items": [
+        {
+          "id": "book",
+          "type": "single",
+          "label": "英语课本",
+          "options": [
+            { "id": "wy7a", "zh": "外研版七年级上册（2024 新版）" },
+            { "id": "other", "zh": "其他" }
+          ],
+          "default": "wy7a",
+          "to": "profile.school"
+        },
+        {
+          "id": "unit_now",
+          "type": "single",
+          "label": "现在学到哪个单元",
+          "options": [
+            { "id": "S", "zh": "Starter" },
+            { "id": "U1", "zh": "Unit 1" },
+            { "id": "U2", "zh": "Unit 2" },
+            { "id": "U3", "zh": "Unit 3" },
+            { "id": "U4", "zh": "Unit 4" },
+            { "id": "U5", "zh": "Unit 5" },
+            { "id": "U6", "zh": "Unit 6" },
+            { "id": "unknown", "zh": "不知道" }
+          ],
+          "to": "progress.unit"
+        },
+        {
+          "id": "exam_date",
+          "type": "text",
+          "format": "date",
+          "label": "期中考试日期",
+          "max": 10,
+          "placeholder": "例如：2026-11-12",
+          "help": "还没定就空着，定了再到家长区改。",
+          "to": "progress.examDate"
+        },
+        {
+          "id": "exam_range",
+          "type": "multi",
+          "label": "期中考试范围",
+          "options": [
+            { "id": "S", "zh": "Starter" },
+            { "id": "U1", "zh": "Unit 1" },
+            { "id": "U2", "zh": "Unit 2" },
+            { "id": "U3", "zh": "Unit 3" },
+            { "id": "U4", "zh": "Unit 4" },
+            { "id": "U5", "zh": "Unit 5" },
+            { "id": "U6", "zh": "Unit 6" },
+            { "id": "unknown", "zh": "不知道" }
+          ],
+          "exclusive": ["unknown"],
+          "help": "以老师的复习提纲为准。选中的第一个和最后一个单元记成范围的起止。",
+          "to": "progress.examFrom, progress.examTo"
+        },
+        {
+          "id": "dictation_freq",
+          "type": "single",
+          "label": "英语听写多久一次",
+          "options": [
+            { "id": "daily", "zh": "几乎每天" },
+            { "id": "few", "zh": "一周两三次" },
+            { "id": "weekly", "zh": "一周一次" },
+            { "id": "rare", "zh": "很少" },
+            { "id": "unknown", "zh": "不知道" }
+          ],
+          "to": "profile.school"
+        },
+        {
+          "id": "dictation_way",
+          "type": "multi",
+          "label": "听写怎么考",
+          "options": [
+            { "id": "zh2en", "zh": "读中文写英文" },
+            { "id": "en2en", "zh": "读英文写英文" },
+            { "id": "phrase", "zh": "短语" },
+            { "id": "en2zh", "zh": "英译汉" },
+            { "id": "unknown", "zh": "不知道" }
+          ],
+          "exclusive": ["unknown"],
+          "help": "选项和“明天有听写”里的考法一样，第一个会成为默认考法。",
+          "to": "dictation.method"
+        },
+        {
+          "id": "platform",
+          "type": "single",
+          "label": "学校用的英语听说平台",
+          "options": [
+            { "id": "none", "zh": "没有" },
+            { "id": "huitingshuo", "zh": "慧听说" },
+            { "id": "yiqi", "zh": "一起中学" },
+            { "id": "etingshuo", "zh": "E听说" },
+            { "id": "ekwing", "zh": "翼课网" },
+            { "id": "tianxue", "zh": "天学网" },
+            { "id": "other", "zh": "其他" },
+            { "id": "unknown", "zh": "不知道" }
+          ],
+          "help": "学校已经布置听说作业的话，App 就不重复同类练习。",
+          "to": "profile.school"
+        },
+        {
+          "id": "platform_other",
+          "type": "text",
+          "label": "其他平台的名字",
+          "max": 20,
+          "show_if": { "platform": "other" },
+          "to": "profile.school"
+        }
+      ]
+    },
+    {
+      "id": "parent",
+      "title": "关于你",
+      "items": [
+        {
+          "id": "parent_call",
+          "type": "text",
+          "label": "页面上怎么称呼你",
+          "max": 10,
+          "default": "家长",
+          "placeholder": "例如：妈妈、爸爸",
+          "help": "她的页面上提到你时用这个称呼，默认“家长”。",
+          "to": "profile.parentCall"
+        }
+      ]
+    }
+  ]
+}

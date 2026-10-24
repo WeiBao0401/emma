@@ -1,107 +1,298 @@
-// 明天有听写，纸笔版的界面（DESIGN 5.3 的两张草图）：选单元、勾掉老师没划的词、选考法；老师一个一个读，她写在纸上；
-// 写完出答案，她自己打勾；错的马上再写一轮。逻辑在 dictation.js。
+// 明天有听写，纸笔版的界面（DESIGN 5.3 的两张草图）：选单元、勾掉老师没划的词（默认当前单元的必会词）、选考法；
+// 老师一个一个读（千问），她写在纸上，“第 x / n 个”“再听一遍”“下一个”；写完出答案，她自己逐个打勾；
+// 错的马上再写一轮；结束时说“10 分钟后再写一次错的”，首页到时提醒；第二天早上首页有“出门前看一眼”。
+// 逻辑都在 dictation.js（buildDictation、createDictation、saveDictation、tonightDictation、morningList）。
 // 负责：今天标签 UI agent（ui-home.js、ui-lesson.js、ui-dictation.js、css/dictation.css）。
-// 状态：骨架，能跑通一轮：词来自当前单元（kv 'progress'.unit 的 curriculum.unitWords），没导入课本时拿单词本里
-// 最近的 10 个词顶上；界面是占位。勾词、选单元、“再听一遍”的慢速、睡前提醒由负责的 agent 补。
 //
 // 导出
 //   createDictationView(ctx) -> { show(params), inSession(), holding() }
-//     渲染进 #tab-dictation。params：{ unit?, retry?: true（只写昨晚错的） }。全屏，左上角“结束”回到今天。
+//     渲染进 #tab-dictation。全屏，左上角“结束”回到今天。params：
+//       { unit? }              直接选好这个单元
+//       { retry: true }        首页“再写一次错的”：今天写错过的词再写一次（dictation.js tonightDictation）
+//       { glance: true }       首页“出门前看一眼”：只看昨晚错的词，看完记 morningDone
+//   wordsForUnit(curriculum, unit, method) -> [{ slug, w, cn, required, on }]   这个单元可以听写的词（buildDictation 的 candidates）
 //
-// 用到的 ctx：curriculum.unitWords / units、kv.peek('progress') / get / set、words.favorites、say、events.log、go('home')。
-// 每个打勾记一条 events { type: 'dictation', slug, correct, mode: 'paper', choice: method, step: 'dictation' }；
-// 整次记进 kv 'dictation:<YYYY-MM-DD>'（形状见 dictation.js 的 DictationRecord）。
+// 用到的 ctx：curriculum.units / unitWords / isRequired、kv.peek('progress') / get / set、words（saveDictation 打开
+// “写得出”线要 words.patch）、say、events.log / sessionId、go('home')、busy。
+// 每个打勾记一条 events（d.event(slug)：type 'dictation'、slug、correct、mode 'paper'、choice 考法、round、pass）加 sid；
+// 每轮对完 saveDictation 写 kv 'dictation:<YYYY-MM-DD>'。
 import { h, icon } from './ui-dom.js';
-import { METHODS, promptFor, createDictation } from './dictation.js';
-import { slugify } from './words.js';
+import * as D from './dictation.js';
 import { meaningOf } from './modes/choice.js';
 import { dayOf } from './plan.js';
+
+export function wordsForUnit(curriculum, unit, method = 'zh2en') {
+  if (!curriculum || !unit) return [];
+  const plan = D.buildDictation({ unit, words: curriculum.unitWords(unit) || [], method, isRequired: w => !!(curriculum.isRequired && curriculum.isRequired(w)) });
+  return plan.candidates.map(c => ({ slug: c.slug, w: c.w, cn: c.cn || '', required: !!c.required, on: !!c.on }));
+}
 
 export function createDictationView(ctx) {
   const root = document.getElementById('tab-dictation');
   root.replaceChildren();
   const stage = h('div', { className: 'dict' });
   root.append(stage);
-  let d = null;          // createDictation(...)
+
+  let d = null;           // a Dictation from dictation.js
   let method = 'zh2en';
-  let words = [];
   let unit = '';
+  let list = [];          // candidate words on the setup screen
+  let picked = new Set(); // slugs she will write
+  let fromBook = false;
+  let sid = '';
+  let t0 = 0;
+  let pass = 'main';      // 'main' | 'tonight' (the reminder from 今天)
+  let busy = false;
+  let lastRec = null;
 
-  const header = title => h('header', { className: 'runhead session' },
-    h('button', { type: 'button', className: 'text-btn', text: '结束', on: { click: () => { d = null; ctx.go('home'); } } }),
+  const header = (title, onEnd = end) => h('header', { className: 'runhead session' },
+    h('button', { type: 'button', className: 'text-btn', text: '结束', on: { click: onEnd } }),
     h('span', { className: 'runhead-title', text: title }), h('span'));
+  const log = ev => { try { ctx.events.log({ sid, ...ev }); } catch (e) { /* never blocks */ } };
+  const units = () => { try { return ctx.curriculum.units() || []; } catch (e) { return []; } };
+  const unitTitle = id => (units().find(u => u.id === id) || {}).title || id;
+  const setBusy = on => { if (on !== busy) { busy = on; ctx.busy(on ? +1 : -1); } };
+  const minutes = () => Math.round((Date.now() - t0) / 60000);
 
-  function pickWords(params) {
-    unit = params.unit || (ctx.kv.peek('progress', {}) || {}).unit || '';
-    const fromBook = unit ? ctx.curriculum.unitWords(unit).filter(x => !x.phrase) : [];
-    if (fromBook.length) return fromBook.map(x => ({ slug: slugify(x.w), w: x.w, cn: x.cn || '' }));
-    return ctx.words.favorites().slice(-10).map(e => ({ slug: e.slug, w: e.headword, cn: meaningOf(e) }));
+  // ---------------------------------------------------------------- setup (sketch 1)
+
+  function loadList() {
+    const us = units();
+    fromBook = us.length > 0;
+    if (fromBook) {
+      if (!unit || !us.some(u => u.id === unit)) {
+        const p = (ctx.kv.peek('progress', {}) || {}).unit;
+        unit = us.some(u => u.id === p) ? p : us[us.length - 1].id;
+      }
+      list = wordsForUnit(ctx.curriculum, unit, method);
+      picked = new Set(list.filter(x => x.on).map(x => x.slug));
+    } else {
+      unit = '';
+      list = ctx.words.favorites().slice(-10).map(e => ({ slug: e.slug, w: e.headword, cn: meaningOf(e) }));
+      picked = new Set(list.map(x => x.slug));
+    }
   }
 
   function setup(params = {}) {
     d = null;
-    words = pickWords(params);
-    stage.replaceChildren(header('明天有听写'),
+    pass = 'main';
+    setBusy(false);
+    if (params.unit) unit = params.unit;
+    loadList();
+    drawSetup();
+  }
+
+  const chip = (text, on, onClick) => h('button', { type: 'button', className: 'dict-chip', 'aria-pressed': on ? 'true' : 'false', text, on: { click: onClick } });
+  const countText = () => `${fromBook ? unitTitle(unit) + ' · ' : ''}${list.filter(x => picked.has(x.slug)).length} 个词`;
+
+  function drawSetup() {
+    const us = units();
+    const count = h('p', { className: 'lede dict-count-line', text: countText() });
+    const go = h('button', { type: 'button', className: 'btn dict-start', disabled: !picked.size, on: { click: begin } }, '开始', icon('arrow'));
+    const toggle = (x, b) => {
+      if (picked.has(x.slug)) picked.delete(x.slug); else picked.add(x.slug);
+      b.setAttribute('aria-pressed', picked.has(x.slug) ? 'true' : 'false');
+      count.textContent = countText();
+      go.disabled = !picked.size;
+    };
+    stage.replaceChildren(header('明天有听写', () => ctx.go('home')),
       h('section', { className: 'dict-setup' },
-        h('p', { className: 'lede', text: `${unit ? unit + ' · ' : ''}${words.length} 个词` }),
-        h('p', { className: 'small', text: '老师怎么考？' }),
-        h('div', { className: 'btn-row' }, METHODS.map(([id, label]) => h('button', { type: 'button', className: 'text-btn' + (id === method ? ' on' : ''), text: label,
-          on: { click: () => { method = id; setup(params); } } }))),
-        h('p', { className: 'small', text: '拿出纸和笔，听一个写一个。' }),
-        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: '开始', disabled: !words.length, on: { click: () => { d = createDictation({ words, method, unit }); draw(); } } }))));
+        count,
+        fromBook && us.length > 1 ? h('div', { className: 'dict-sec' },
+          h('p', { className: 'dict-label', text: '哪个单元？' }),
+          h('div', { className: 'dict-chips' }, us.map(u => chip(u.title || u.id, u.id === unit, () => { unit = u.id; loadList(); drawSetup(); })))) : null,
+        h('div', { className: 'dict-sec' },
+          h('p', { className: 'dict-label', text: '老师怎么考？' }),
+          h('div', { className: 'dict-chips' }, D.METHODS.map(([id, label]) => chip(label, id === method, () => {
+            const reload = fromBook && (id === 'phrase') !== (method === 'phrase');
+            method = id;
+            if (reload) loadList();
+            drawSetup();
+          })))),
+        h('div', { className: 'dict-sec' },
+          h('p', { className: 'dict-label', text: fromBook ? '老师没划的词，点一下去掉' : '还没导入课本，先用单词本里最近的词' }),
+          list.length ? h('ul', { className: 'dict-pick' }, list.map(x => {
+            const b = h('button', { type: 'button', className: 'dict-word', 'aria-pressed': picked.has(x.slug) ? 'true' : 'false' },
+              h('span', { className: 'box', 'aria-hidden': 'true' }, icon('check')),
+              h('span', { className: 'w', lang: 'en', text: x.w }),
+              h('span', { className: 'cn', text: x.cn }));
+            b.addEventListener('click', () => toggle(x, b));
+            return h('li', {}, b);
+          })) : h('p', { className: 'small', text: method === 'phrase' ? '这个单元没有短语。换一种考法试试。' : '这里还没有词。' })),
+        h('p', { className: 'dict-paper', text: '拿出纸和笔，听一个写一个。' }),
+        h('div', { className: 'btn-row' }, go)));
   }
 
-  function draw() {
-    if (!d) return;
-    if (d.phase === 'writing') {
-      const w = d.current();
-      const p = promptFor(w, method);
-      const say = btn => ctx.say(p.say, btn);
-      stage.replaceChildren(header('听写'),
-        h('section', { className: 'dict-run' },
-          h('p', { className: 'small', text: `第 ${d.index + 1} / ${d.words.length} 个` }),
-          p.show ? h('p', { className: 'lede', lang: p.lang, text: p.show }) : null,
-          h('div', { className: 'btn-row' },
-            h('button', { type: 'button', className: 'text-btn accent', on: { click: ev => say(ev.currentTarget) } }, icon('speak'), '再听一遍'),
-            h('button', { type: 'button', className: 'btn', text: d.index + 1 < d.words.length ? '下一个' : '写完了', on: { click: () => { d.next(); draw(); } } }))));
-      setTimeout(() => say(null), 0);
-      return;
-    }
-    if (d.phase === 'checking') {
-      const m = d.marks();
-      stage.replaceChildren(header('对一下'),
-        h('section', { className: 'dict-check' },
-          h('p', { className: 'small', text: '对一下，写对的打勾' }),
-          h('ul', { className: 'dict-list' }, d.words.map(w => h('li', { className: 'dict-item' + (w.slug in m ? (m[w.slug] ? ' ok' : ' bad') : '') },
-            h('span', { className: 'serif', lang: 'en', text: promptFor(w, method).answer }),
-            h('span', { className: 'small', text: w.cn }),
-            h('button', { type: 'button', className: 'text-btn', text: '对', on: { click: () => mark(w, true) } }),
-            h('button', { type: 'button', className: 'text-btn', text: '错', on: { click: () => mark(w, false) } }))))));
-      return;
-    }
-    const bad = d.wrong();
-    save();
-    stage.replaceChildren(header('听写'),
-      h('section', { className: 'dict-done' },
-        h('p', { className: 'lede', text: bad.length ? `错了 ${bad.length} 个：现在再写一遍这 ${bad.length} 个` : '全对了。' }),
-        h('div', { className: 'btn-row' },
-          bad.length ? h('button', { type: 'button', className: 'btn', text: '再写一遍', on: { click: () => { d = d.retryRound(); draw(); } } })
-            : h('button', { type: 'button', className: 'btn', text: '回到今天', on: { click: () => { d = null; ctx.go('home'); } } }))));
+  function begin() {
+    const words = list.filter(x => picked.has(x.slug)).map(({ slug, w, cn }) => ({ slug, w, cn }));
+    if (!words.length) return;
+    run(D.createDictation({ words, method, unit, kind: 'main' }));
   }
 
-  function mark(w, ok) {
-    d.mark(w.slug, ok);
-    ctx.events.log({ type: 'dictation', step: 'dictation', slug: w.slug, correct: ok, mode: 'paper', choice: method, unit: unit || undefined });
+  function run(dict) {
+    sid = ctx.events.sessionId();
+    t0 = Date.now();
+    d = dict;
+    log({ type: 'session_start', step: 'dictation', kind: 'dictation', hour: new Date().getHours(), unit: d.unit || undefined, pass });
+    setBusy(true);
     draw();
   }
 
+  // ---------------------------------------------------------------- listening (sketch 1, lower half)
+
+  function draw() {
+    if (!d) return;
+    if (d.phase === 'writing') drawWriting(); else drawCheck();
+  }
+
+  function drawWriting() {
+    const w = d.current();
+    if (!w) { d.finishWriting(); drawCheck(); return; }
+    const p = d.prompt ? d.prompt() : D.promptFor(w, d.method);
+    const say = btn => ctx.say(p.say, btn);
+    const pr = d.progress ? d.progress() : { n: d.index + 1, total: d.words.length };
+    const last = pr.n >= pr.total;
+    const again = h('button', { type: 'button', className: 'text-btn accent dict-again', on: { click: ev => say(ev.currentTarget) } }, icon('speak'), '再听一遍');
+    stage.replaceChildren(header(d.kind === 'main' ? '听写' : '再写一遍'),
+      h('section', { className: 'dict-run' },
+        h('p', { className: 'dict-count' }, '第 ', h('span', { className: 'num', text: String(pr.n) }), ' / ', h('span', { className: 'num', text: String(pr.total) }), ' 个'),
+        p.show ? h('p', { className: 'dict-prompt', lang: p.lang, text: p.show }) : h('p', { className: 'dict-prompt listen', text: '听老师读' }),
+        again,
+        h('div', { className: 'dict-run-foot' },
+          h('button', { type: 'button', className: 'btn dict-next', on: { click: () => { d.next(); draw(); } } }, last ? '写完了' : '下一个', last ? null : icon('arrow')),
+          d.index > 0 ? h('button', { type: 'button', className: 'text-btn', text: '上一个', on: { click: () => { d.back(); draw(); } } }) : null)));
+    // read right away, inside the tap that got here, so iPad lets it play (if it is blocked she taps 再听一遍)
+    say(again);
+  }
+
+  // ---------------------------------------------------------------- checking (sketch 2)
+
+  function drawCheck() {
+    const rows = d.answers ? d.answers() : d.words.map(w => ({ ...w, answer: D.promptFor(w, d.method).answer, mark: w.slug in d.marks() ? d.marks()[w.slug] : null }));
+    const zhAnswer = d.method === 'en2zh';
+    const markBtn = (w, ok) => h('button', { type: 'button', className: 'dict-mark ' + (ok ? 'ok' : 'bad'), 'aria-pressed': w.mark === ok ? 'true' : 'false',
+      'aria-label': `${w.w} ${ok ? '写对了' : '写错了'}`, text: ok ? '对' : '错', on: { click: () => mark(w, ok) } });
+    const left = rows.filter(w => w.mark === null).length;
+    stage.replaceChildren(header('对一下'),
+      h('section', { className: 'dict-check' },
+        h('p', { className: 'dict-label', text: '对一下，写对的打勾' }),
+        h('ul', { className: 'dict-list' }, rows.map(w => {
+          const other = zhAnswer ? w.w : w.cn;
+          return h('li', { className: 'dict-item' + (w.mark === true ? ' ok' : w.mark === false ? ' bad' : '') },
+            h('span', { className: 'a', lang: zhAnswer ? 'zh-CN' : 'en', text: w.answer || w.w }),
+            markBtn(w, true), markBtn(w, false),
+            other ? h('span', { className: 'b', lang: zhAnswer ? 'en' : 'zh-CN', text: other }) : null);
+        })),
+        checkFoot(left)));
+  }
+
+  function checkFoot(left) {
+    if (d.phase !== 'done') return h('div', { className: 'dict-foot' }, h('p', { className: 'small', text: `还有 ${left} 个没对` }));
+    const bad = d.wrong();
+    if (!bad.length) {
+      return h('div', { className: 'dict-foot' }, h('p', { className: 'dict-result', text: d.kind === 'main' ? '全对了。' : '这一遍全对了。' }),
+        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: '写完了', on: { click: finish } })));
+    }
+    return h('div', { className: 'dict-foot' },
+      h('p', { className: 'dict-result', text: `错了 ${bad.length} 个：现在再写一遍这 ${bad.length} 个` }),
+      h('div', { className: 'btn-row' },
+        h('button', { type: 'button', className: 'btn', text: '再写一遍', on: { click: () => { const next = d.retryRound(); if (next) { d = next; draw(); } } } }),
+        h('button', { type: 'button', className: 'text-btn', text: '先到这里', on: { click: finish } })));
+  }
+
+  function mark(w, ok) {
+    if (!d || d.phase === 'writing') return;
+    const was = d.phase;
+    d.mark(w.slug, ok);
+    log({ ...(d.event ? d.event(w.slug) : { type: 'dictation', step: 'dictation', slug: w.slug, correct: ok, mode: 'paper', choice: d.method }) });
+    if (d.phase === 'done') save();
+    // redraw in place: the list keeps its scroll position
+    const y = window.scrollY;
+    drawCheck();
+    if (was === d.phase) window.scrollTo(0, y);
+  }
+
   function save() {
-    const rec = d.record();
-    ctx.kv.set('dictation:' + dayOf(new Date()), rec).catch(() => {});
+    if (!d) return Promise.resolve(lastRec);
+    const p = D.saveDictation({ kv: ctx.kv, d, words: ctx.words, now: new Date() })
+      .then(rec => { lastRec = rec; return rec; })
+      .catch(e => { console.warn('dictation: not saved:', (e && e.message) || e); return lastRec; });
+    return p;
+  }
+
+  async function finish() {
+    const tonight = d && d.kind === 'tonight';
+    const rec = await save();
+    const bad = rec ? D.morningList(rec) : [];
+    log({ type: 'session_end', step: 'dictation', kind: 'dictation', min: minutes(), steps_done: ['dictation'], completed: true, pass, wrong: bad.length });
+    d = null;
+    setBusy(false);
+    stage.replaceChildren(header('听写', () => ctx.go('home')),
+      h('section', { className: 'dict-done' },
+        h('p', { className: 'lede', text: !bad.length ? '全对了。' : tonight ? '又写了一遍。' : '今天的听写写完了。' }),
+        bad.length && !tonight ? h('p', { className: 'dict-next-line', text: `${D.REMIND_AFTER_MIN || 10} 分钟后再写一次错的，首页会提醒你。` }) : null,
+        h('p', { className: 'small', text: bad.length ? '明天早上出门前，再看一眼这几个词。' : '明天听写顺利。' }),
+        bad.length ? h('ul', { className: 'dict-mini' }, bad.map(w => h('li', {}, h('span', { className: 'serif', lang: 'en', text: w.w }), h('span', { className: 'small', text: w.cn })))) : null,
+        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: '回到今天', on: { click: () => ctx.go('home') } }))));
+  }
+
+  function end() {
+    if (d) {
+      log({ type: 'exit', step: 'dictation', after_item: d.phase === 'writing' ? d.index : d.words.length, wrong_streak: 0 });
+      log({ type: 'session_end', step: 'dictation', kind: 'dictation', min: minutes(), steps_done: [], completed: false, pass });
+      if (d.phase === 'done') save();
+    }
+    d = null;
+    setBusy(false);
+    ctx.go('home');
+  }
+
+  // ---------------------------------------------------------------- the two reminders from 今天
+
+  function startTonight() {
+    const key = D.recordKey ? D.recordKey(dayOf(new Date())) : 'dictation:' + dayOf(new Date());
+    const rec = ctx.kv.peek(key, null);
+    const next = rec ? D.tonightDictation(rec) : null;
+    if (!next) { setup({}); return; }
+    pass = 'tonight';
+    method = next.method;
+    unit = next.unit;
+    stage.replaceChildren(header('再写一次错的', () => ctx.go('home')),
+      h('section', { className: 'dict-setup' },
+        h('p', { className: 'lede', text: `今天错的 ${next.words.length} 个，再写一次` }),
+        h('p', { className: 'dict-paper', text: '拿出纸和笔，大约 1 分钟。' }),
+        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn dict-start', on: { click: () => run(next) } }, '开始', icon('arrow')))));
+  }
+
+  function glance() {
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    const key = D.recordKey ? D.recordKey(dayOf(y)) : 'dictation:' + dayOf(y);
+    const rec = ctx.kv.peek(key, null);
+    const words = rec ? D.morningList(rec) : [];
+    if (!words.length) { setup({}); return; }
+    const done = () => {
+      ctx.kv.set(key, D.markMorningDone(rec)).catch(e => console.warn('dictation: glance:', (e && e.message) || e));
+      ctx.go('home');
+    };
+    stage.replaceChildren(header('出门前看一眼', () => ctx.go('home')),
+      h('section', { className: 'dict-glance' },
+        h('p', { className: 'lede', text: `昨晚错的 ${words.length} 个` }),
+        h('ul', { className: 'dict-glance-list' }, words.map(w => h('li', {},
+          h('span', { className: 'w', lang: 'en' }, w.w,
+            h('button', { type: 'button', className: 'say', 'aria-label': '听一遍', on: { click: ev => ctx.say(w.w, ev.currentTarget) } }, icon('speak'))),
+          h('span', { className: 'cn', text: w.cn })))),
+        h('p', { className: 'small', text: '心里拼一遍，看看自己记住没有。' }),
+        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: '看完了', on: { click: done } }))));
   }
 
   return {
-    show(params = {}) { setup(params); },
+    show(params = {}) {
+      d = null;
+      setBusy(false);
+      if (params.glance) { glance(); return; }
+      if (params.retry) { startTonight(); return; }
+      setup(params);
+    },
     inSession: () => !!(d && d.phase !== 'done'),
     holding: () => false,
   };
