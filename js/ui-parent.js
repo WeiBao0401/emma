@@ -599,7 +599,7 @@ export function createParentView(ctx) {
         right: h('button', { type: 'button', className: 'text-btn accent', text: '再试', on: { click: () => { ctx.budget.clearExhausted(); toast('好了，下一次查词会再试'); kit.render(); } } }) }) : null,
       kit.row({ label: '今天', sub: kindsText(t.byKind) || '今天还没花钱', value: yuan(t.total), cls: 'parent-money' }),
       kit.row({ label: '本月', sub: kindsText(m.byKind) || '这个月还没花钱', value: yuan(m.total), cls: 'parent-money' }),
-      kit.row({ key: 'cap', label: '每天上限', sub: '到了上限，当天只留离线词典、复习和已经备好的内容', value: capText(cap) + ' 元', panel: capPanel }),
+      kit.row({ key: 'cap', label: '每天上限', sub: '到了上限，当天只留离线词典、复习和已经备好的内容。问老师和语音输入不算在里面，各有自己的上限（问老师 5 元，语音 1 元）', value: capText(cap) + ' 元', panel: capPanel }),
     ], '按每次返回的用量估算，以百炼账单为准。');
   }
 

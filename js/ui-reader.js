@@ -134,7 +134,8 @@ export function renderEpisode(container, ctx, opts = {}) {
     function closeCard() { card.hidden = true; card.replaceChildren(); }
     function openWord(text, s) {
       pauseForHelp();
-      const info = R.wordInfo(text, env);
+      // the sentence goes along: its key words say what the word means here (gone 不见了, kind 和善的)
+      const info = R.wordInfo(text, { ...env, sentence: s });
       taps++;
       prog = R.noteTap(prog, ep.id, info.name ? '' : info.base, new Date());
       save();

@@ -1209,10 +1209,19 @@ export function createLessonView(ctx) {
         .filter(x => x.s && x.lv >= (R.HELP_MAX || 3)).sort((a, b) => a.s.i - b.s.i)[0];
       if (!hard) return null;
       const q = `故事里这句我看了中文才懂：“${hard.s.en}” 为什么这样说？`;
+      // the teacher gets what the App already showed her (its Chinese), the sentence before and who says it, so its
+      // translation matches the App's and she, it are the right ones (the names are the ones she picked)
+      const s = hard.s;
+      const prev = ep.sentences[s.i - 2];
+      const nameOf = key => ((named.names || []).find(n => n.key === key) || {}).name || '';
+      const hero = nameOf('hero'), cat = nameOf('cat');
+      const bits = [s.zh ? `App 的中文：${s.zh.replace(/[。！？!?.]+$/, '')}` : '', prev ? `前一句：“${prev.en}”` : '', s.speaker ? `${s.speaker} 说的` : '旁白',
+        hero && cat ? `主角是 ${hero}，她的小猫叫 ${cat}，故事里的 she 常指小猫` : ''].filter(Boolean);
+      const full = `故事里这句我看了中文才懂：“${s.en}”（${bits.join('；')}）。为什么这样说？`;
       return h('section', { className: 'lesson-ask lesson-readask', 'aria-label': '读的时候卡住的一句' },
         h('p', { className: 'small', text: '读的时候，这一句看了中文才懂：' }),
-        h('p', { className: 'lesson-en', lang: 'en', text: hard.s.en }),
-        h('button', { type: 'button', className: 'text-btn accent', text: '问老师这句为什么这样说', on: { click: () => ctx.go('chat', { ask: q, send: true }) } }));
+        h('p', { className: 'lesson-en', lang: 'en', text: s.en }),
+        h('button', { type: 'button', className: 'text-btn accent', text: '问老师这句为什么这样说', on: { click: () => ctx.go('chat', { ask: q, send: full }) } }));
     } catch (err) { return null; }
   }
 

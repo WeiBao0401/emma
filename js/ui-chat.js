@@ -6,7 +6,8 @@
 //
 // 导出
 //   createChatTab(ctx, { root }) -> { show(params), onChange(), hide(), inSession(), holding() }
-//     渲染进 #tab-chat（root 不给时）。params：{ ask?: 放进输入框的字, send?: true（直接发出去）, image?: data URL（带一张照片） }
+//     渲染进 #tab-chat（root 不给时）。params：{ ask?: 放进输入框的字, send?: true（直接发出去）| 字符串（直接发出去：气泡上
+//     显示 ask，发给老师的是这串字，带上 App 给她看过的中文、前一句这类背景）, image?: data URL（带一张照片） }
 //     别的页可以 ctx.go('chat', { ask: '这句话什么意思：…', send: true }) 把问题带进来（比如阅读里“这句还是不懂”）。
 //     inSession()：老师正在回答或者正在录音（App 不自动更新）；holding()：输入框里有没发的字或照片。
 //   CHAT_COPY   问老师这里换的几句报错（其余走 ctx.kidError）
@@ -457,6 +458,11 @@ export function createChatTab(ctx, { root = null } = {}) {
       const p = params || {};
       render();
       if (p.image) { pendingImage = String(p.image); showPhoto(); }
+      // send as a string: the bubble shows ask, the teacher gets the longer question with its background
+      if (p.ask && typeof p.send === 'string' && p.send.trim() && !p.image && !chat.isBusy() && !preparing) {
+        doSend({ text: String(p.ask), send: p.send.trim() });
+        return;
+      }
       if (p.ask) { input.value = String(p.ask); grow(); updateComposer(); }
       if (p.send && (p.ask || p.image)) doSend();
       else scrollEnd(true);

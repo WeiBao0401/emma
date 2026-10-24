@@ -1,5 +1,5 @@
 // Keep VERSION identical to VERSION in sw.js; bump both on every release (tests/run.mjs checks).
-export const VERSION = '0.4.0';
+export const VERSION = '0.4.1';
 
 export const API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
 
@@ -81,6 +81,8 @@ export const DEFAULT_SETTINGS = {
   qwenVoice: 'Ava_v3.1',   // Wei 10-24 picked Ava (tts-samples/listen-2-Ava); follows this default until picked by hand
   voiceChosen: false,
   dailyCapYuan: 1.5,  // in-app daily spending cap (DESIGN 10.7); budget.js reads it
+  // per-kind daily caps (budget.js). 问老师 and 语音输入 are not held by dailyCapYuan (v0.4.1), only by these
+  kindCapsYuan: { chat: 5, asr: 1 },
   // 问老师 (v0.3.0, chat.js chatRoute): 'auto' = Poe when the relay address and the Poe Key are both filled, else Bailian.
   // Poe uses poeUrl / poeKey above (POE_ENABLED only gates lookups, not 问老师).
   chatProvider: 'auto',

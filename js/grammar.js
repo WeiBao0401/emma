@@ -23,6 +23,7 @@
 //   答错 → 第 1 级提示自动出现；可以再选，也可以点“再给个提示”。每再答错一次，自动多给一级。
 //   答错以后改对 → 过关，用了提示记“模糊”，grade 2（teacher-memory 的 fixed_after = 改对时看到第几级）。
 //   到第 4 级（讲清楚，正确答案亮出来）→ 马上出变式题：做对才算这题过关（grade 2）；做错 grade 1，不算过。
+//   错到只剩正确那一个能点（选过的变灰）：不让她靠排除法“改对”，直接到第 4 级出变式题；没有变式题的，不算过（grade 1）。
 //   没答就点了“给个提示”再答对：过关但记“模糊”（grade 2），不进 1、3、7 天的复习。
 // 错过的题（第一次就选错了）在 1、3、7 天后用新句子再出：从同一张卡、同一类（family）的备用题里挑没出过的。
 // 复习题第一次就答对，走到下一档（3 天、7 天，算法从错的那天起数）；又错了，从那天起重新数 1、3、7。
@@ -236,6 +237,8 @@ export function createAttempt(q, { variant = null, now = () => Date.now() } = {}
     return { item: question.item, mode: MODE, unit: question.unit, card: question.card, point: question.point, family: question.family,
       choice: opt.text, correct: !!opt.correct, ms: Math.max(0, Math.round(ms)), misconception: opt.correct ? null : opt.tag || null, ...extra };
   }
+  // only the answer is left to tap (every wrong one picked and greyed out): that last tap would not be 改对了
+  const onlyAnswerLeft = () => { const left = options.filter((o, i) => !picked.has(i)); return left.length === 1 && !!left[0].correct; };
   a.hint = () => {
     if (phase !== 'ask' && phase !== 'retry') return null;
     if (level >= HINT_MAX) return null;
@@ -267,6 +270,8 @@ export function createAttempt(q, { variant = null, now = () => Date.now() } = {}
     phase = 'retry';
     if (level < HINT_MAX) {
       level++;
+      // the answer is all that is left: hint 4 (the answer and why) and the variant now, so only the variant can pass it
+      if (level < HINT_MAX && onlyAnswerLeft()) level = HINT_MAX;
       out.hintShown = { level, text: q.hints[level - 1] || '', auto: true };
       if (level >= HINT_MAX) reveal();
     }

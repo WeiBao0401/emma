@@ -43,7 +43,7 @@
 | 路由 | 页面 | 亮哪个标签 | 返回到 | 全屏（藏标签栏） | 谁画 |
 |---|---|---|---|---|---|
 | `home` | 今天 | 今天 | | | `ui-home.js` → `#tab-home` |
-| `chat` | 问老师（0.3.0，第 2 个标签） | 问老师 | | | `ui-chat.js` → `#tab-chat`；params `{ ask?, send?, image? }` |
+| `chat` | 问老师（0.3.0，第 2 个标签） | 问老师 | | | `ui-chat.js` → `#tab-chat`；params `{ ask?, send?: true \| 发给老师的完整问题, image? }` |
 | `lesson` | 上课 | 今天 | `home` | 是 | `ui-lesson.js` → `#tab-lesson` |
 | `dictation` | 明天有听写 | 今天 | `home` | 是 | `ui-dictation.js` → `#tab-dictation` |
 | `look` | 查词 | 查词 | | | `ui-look.js` → `#tab-look` |
@@ -58,7 +58,7 @@
 - 跳转：`ctx.go(route, params)`。`params` 原样传给那个 view 的 `show(params, { from })`；`from` 是从哪个路由来的。
 - 启动时 `onboard.needed()` 为真先进 `onboard`，否则进 `home`。
 - 进 `weekly`：首页“这周小结出来了”一行（`weekly.hasNewWeekly`）、首页底部“这周 N / M 天”、家长区“这周小结”。进 `capture`：家长区“拍课本”。离开 `capture` 时 app.js 调它的 `hide()`（丢掉照片）。
-- 进 `chat`：标签栏、首页底部“问老师”。别的页可以把问题带进来：`ctx.go('chat', { ask: '这句话什么意思：…', send: true })`（比如阅读里“这句还是不懂”）。离开 `chat` 时 app.js 调它的 `hide()`（收起查词卡、丢掉没说完的录音）。
+- 进 `chat`：标签栏、首页底部“问老师”。别的页可以把问题带进来：`ctx.go('chat', { ask: '这句话什么意思：…', send: true })`（比如阅读里“这句还是不懂”）；0.4.1：`send` 是字符串时气泡上显示 `ask`，发给老师的是 `send`（带上 App 给她看过的中文、前一句这类背景）。离开 `chat` 时 app.js 调它的 `hide()`（收起查词卡、丢掉没说完的录音）。
 
 ---
 
@@ -321,6 +321,7 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 ### 9.5 `budget.js`
 - `createBudget({ kv, now, getCap, getKindCaps? }) -> { load, record(usage, kind, model), canSpend(kind), blockReason(kind), today(), month(), markExhausted(), clearExhausted(), exhausted(), reset() }`
 - `blockReason` 返回 `''` / `'day'` / `'kind'` / `'month'`；app.js 传 `getKindCaps: () => settings.kindCapsYuan || {}`
+- 0.4.1：`OWN_CAP_KINDS = ['chat', 'asr']` 不看全天总额，只看自己这一类的上限；`DEFAULT_KIND_CAPS = { chat: 5, asr: 1 }`，设置 `kindCapsYuan`（config.js 缺省同样的值，0 = 这一类不封顶）盖过它。别的类算全天总额时去掉这两类，问老师花多少都挤不掉查词和朗读。`today().total` 还是全部加起来（家长区显示的花费）
 - 纯函数：`isBudgetExhausted(status, data)`、`costOf(usage, kind, model)`、`budgetKindOf(aiKind)`；给 tts 用的 `wrapFetch(fetchImpl, budget)`。`PRICES`、`FALLBACK_PRICE` 从 `config.js` 的模型表读
 - 类别：`lookup`、`tts`、`hint`、`story`、`reflect`、`photo`、`chat`（0.3.0 问老师，按 token）、`asr`（0.3.0 语音输入，`usage.seconds` × `ASR_PER_SEC` 0.00022 元）、`other`
 - 家长区：`exhausted()` 为真时显示“百炼说这个 Key 的预算用完了”和“再试”（`clearExhausted()`）
@@ -354,7 +355,7 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 | 文件 | 导出 | `show(params)` 的 params |
 |---|---|---|
 | `ui-home.js` | `createHomeTab(ctx)`；纯函数 `lessonDays(kv)`、`dictationToday(kv)`、`dictationNotice(kv, now)`、`phaseText` 等；v1 `slotText`、`isQuizDay`、`startLabel`、`writtenThisWeek`、`gainText`、`optionalModule`、`WRITE_KINDS`（0.4.0 加 `order: '连词成句'`）；0.4.0 `readNote(cell)`（“第 2 集”“第 2 集 · 2 道题”“再读第 4 集”） | 无 |
-| `ui-lesson.js` | `createLessonView(ctx)` -> `{ show, inSession, hide, onChange }`；v1 按需加载 `V1_MODULES`（listen、spell、grammar、ui-grammar、ui-phonics、sprint；0.4.0 加 reader = `ui-reader.js`、story = `reader.js`、order = `modes/order.js`），收尾调 `weekly.settleLesson`；0.4.0 纯函数 `readKind`、`orderRefs`，收尾“读完了第 N 集”“自己排对了 N 个句子”，看了整句中文才懂的那句给“问老师这句为什么这样说”（`go('chat', { ask, send: true })`） | `{ light, standard?（回归日或作业多的日子点了标准版）, again?（今天上完了再练一会儿）, first?（第一次打开直接进来）, sprint?（她自己点了考前小卷） }` |
+| `ui-lesson.js` | `createLessonView(ctx)` -> `{ show, inSession, hide, onChange }`；v1 按需加载 `V1_MODULES`（listen、spell、grammar、ui-grammar、ui-phonics、sprint；0.4.0 加 reader = `ui-reader.js`、story = `reader.js`、order = `modes/order.js`），收尾调 `weekly.settleLesson`；0.4.0 纯函数 `readKind`、`orderRefs`，收尾“读完了第 N 集”“自己排对了 N 个句子”，看了整句中文才懂的那句给“问老师这句为什么这样说”（0.4.1：`go('chat', { ask, send: full })`，full 带 App 的中文、前一句、谁说的、主角和猫的名字） | `{ light, standard?（回归日或作业多的日子点了标准版）, again?（今天上完了再练一会儿）, first?（第一次打开直接进来）, sprint?（她自己点了考前小卷） }` |
 | `ui-dictation.js` | `createDictationView(ctx)`；纯函数 `intakeMethod`、`defaultMethod`、`pickLine` | `{ unit?, retry?（再写一次错的）, glance?（出门前看一眼）, method? }` |
 | `ui-weekly.js`（v1） | `createWeeklyView(ctx)`；`buildBackup(ctx)`（发给家长附的备份，和家长区导出一样） | `{ week?: 'YYYY-MM-DD'（那周的周一） }` |
 | `ui-capture.js`（v1） | `createCaptureView(ctx)`，另有 `hide()`；纯函数 `rowsFrom`、`unitChoices`、`summaryText`、`savedText`、`photoStatus` | 无 |
@@ -372,6 +373,7 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 - 先上哪张：接着上次的 → 21 天里同一张地基卡的误解出现 2 次以上（`FIX_MIN = 2`、`FIX_DAYS = 21`，卡的 `fixes`），或家长问卷提到的语法点 → 跟课本单元 → 其余按 `order`（be 动词、复数、代词、there be、所有格、一般现在时、can、频度副词）。期中季只排范围内的卡和它们要用到的地基卡，先把每张的第一天做到；考完先上 Unit 4（一般现在时，再频度副词）。`AHEAD_DAYS = 7`：kv `progress.nextFrom`（下个单元哪天开始，家长区还没有这一项）给了就提前一周
 - 卡 id：`be_verb`、`plural`、`pronoun`、`there_be`、`possessive_s`、`present_simple`、`can`、`freq_adverb`（sprint.js `UNIT_CARDS` 仍是 Unit 1 到 3 的三张，只做兜底）。卡多了 `order`、`foundation`、`ahead`、`label`、`fixes` 字段，grammar.json 顶层多 `names`（`g:can`）。误解标签 0.4.0 已并进 `tags.json`（grammar.json 里的 `tags` 留着，名字一样）
 - 不写 FSRS，进度只在 kv `grammar:<cardId>`
+- 0.4.1 提示阶梯：错到只剩正确那一个能点，直接到第 4 级出变式题（这一下不记“改对了”）；没有变式题记 passed false、grade 1。读后题（`reader.js` 的 `createAttempt`）同一条，另把第 3 级划掉的 `drop` 也算不能点
 
 ### 9.12 `phonics.js`（v1，语音小卡）
 - `PHONICS_FILE`、`PHONICS_KEY = 'phonics.state'`、`syllables(word)`、`syllableWords(text)`、`hintFor(word, wrong)`、`missRule(word, wrong)` -> `{ rule, kind, hint } | null`、`recordMiss({ kv, word, wrong })`、`weekRule(now, progress, { state, unitOf, unitOrder, skipReview })`、`weekKey`、`weekInfo`、`assignWeek`、`markDone`、`noteMiss`、`readState(kv)`（老数据、坏数据读成空的）、`loadPhonics(fetchJSON)`、`usePhonics(data)`
@@ -401,6 +403,8 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 - 全部导出、stories.json 的格式、kv 和事件的形状在 `reader.js` 顶部注释；stories.json 的字段表另在 `../../tools/check_stories.mjs` 顶部。
 - 常用的：`FILE`、`KV_KEY = 'story:progress'`、`NAMES_KEY = 'story:names'`、`MODE = 'read'`、`loadStories({ fetchJSON })`、`content()`、`contentWith(names)`（换上她起的名字）、`nameList()`、`cleanNames(names)`、`readProgress(kv)`、`nextEpisode(kv)`、`readCell(kv, now, { light })` -> `{ id: 'read', mode: 'story', status, episodeId, n, of, title, titleZh, minutes, again, short, resume, note }`、`estimateMinutes(ep, { short })`、`wordsMet(kv)`、`readingSummary(kv)` -> `{ done, of, helps, full, hard: [{ ep, n, i, en, level, point }], bySkill: { skill: { name, n, clean, fuzzy, failed } }, words, looked }`、`checkEpisode(ep)`。
 - 名字：`names` 里 `replaceable: true` 的（Mia、Momo、Lucy、Tom、Snowy）按整词换进所有文字（中文里也写英文名），王老师、李奶奶、妈妈不换。
+- 0.4.1 点词：`wordInfo(word, { episode, curriculum, words, dict, sentence })`，`ui-reader.js` 传点词的那一句。顺序：名字 → 这句的单词 key（looks 对得上 look）→ 本集目标词和 glossary（各个写法都先查这里）→ 课本 → 单词本 → 基础词 → 离线词典。glossary 里 `known: true` 的是她认识、但离线词典第一个义项和故事不一样的词（little 小的、back 回来、cat 猫），不算生词（`check_stories.mjs` 查它在正文里、她认识）。`placeholderExport` 遇到 `source: 'dict'` 的 `brief_cn` 留空，交给 `needs_core` 补
+- `meta.grammar['g:third_s']` 只放说习惯或状态的句子（every Monday、lives abroad、has no home）；故事里叙述“这一次”的一般现在时句子不标 `point`，语法卡借例句时不会借到
 - 改了 stories.json 要跑 `node tools/check_stories.mjs --write`（报告写回 meta），不然 `tests/stories.test.mjs` 过不了。正文的词只用小学 505 和 Starter 到 Unit 3（含变化形式；不规则变化没列的算生词）。
 
 ### 9.18 `modes/order.js`、`curriculum/order.json`（0.4.0，连词成句）

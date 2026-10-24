@@ -612,8 +612,7 @@
        "w": "sound",
        "zh": "声音"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 24,
@@ -742,15 +741,15 @@
       "Ms Wang is angry with her.",
       "She forgets her schoolbag at school.",
       "Her cat is ill.",
-      "She can't find her red scarf, and Ms Wang checks it tomorrow."
+      "She can't find her red scarf, and Ms Wang will check it tomorrow."
      ],
      "options_zh": [
       "王老师生她的气了。",
       "她把书包忘在学校了。",
       "她的猫生病了。",
-      "她找不到红领巾，而王老师明天要检查。"
+      "她找不到红领巾，而王老师明天会检查。"
      ],
-     "answer": "She can't find her red scarf, and Ms Wang checks it tomorrow.",
+     "answer": "She can't find her red scarf, and Ms Wang will check it tomorrow.",
      "evidence": [
       3,
       4,
@@ -761,7 +760,7 @@
       "把第 3、4 句和第 17 句连起来看。",
       "关键词是 Monday 和 no red scarf：明天是星期一，可红领巾找不到。",
       "排除“Her cat is ill”：第 12 句说 Momo 在书桌上睡觉，没说它生病。",
-      "答案是“She can't find her red scarf, and Ms Wang checks it tomorrow”。明天是星期一（第 3 句），王老师星期一检查红领巾（第 4 句），可书包里没有红领巾（第 17 句）。原文没有一句直接说“因为”，要把几句连起来想。"
+      "答案是“She can't find her red scarf, and Ms Wang will check it tomorrow”。明天是星期一（第 3 句），王老师每个星期一都检查红领巾（第 4 句），所以明天会检查；可书包里没有红领巾（第 17 句）。原文没有一句直接说“因为”，要把几句连起来想。明天的事用 will check。"
      ],
      "variant": {
       "ask": "Are the blue eyes at the window Momo's?",
@@ -981,7 +980,33 @@
      "pos": "v."
     }
    ],
-   "glossary": [],
+   "glossary": [
+    {
+     "w": "little",
+     "zh": "小的",
+     "known": true
+    },
+    {
+     "w": "back",
+     "zh": "回来（is back 回来了）",
+     "known": true
+    },
+    {
+     "w": "make",
+     "zh": "发出（makes a sound 发出声音）",
+     "known": true
+    },
+    {
+     "w": "good",
+     "zh": "好的",
+     "known": true
+    },
+    {
+     "w": "cat",
+     "zh": "猫",
+     "known": true
+    }
+   ],
    "sentences": [
     {
      "id": 1,
@@ -1102,8 +1127,7 @@
        "w": "red scarves",
        "zh": "红领巾（scarf 的复数）"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 7,
@@ -1363,8 +1387,7 @@
        "w": "phone",
        "zh": "手机"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 20,
@@ -1384,8 +1407,7 @@
        "w": "face",
        "zh": "脸"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 21,
@@ -1405,8 +1427,7 @@
        "w": "grey",
        "zh": "灰色的"
       }
-     ],
-     "point": "g:third_s"
+     ]
     }
    ],
    "questions": [
@@ -1701,7 +1722,43 @@
      "pos": "adv."
     }
    ],
-   "glossary": [],
+   "glossary": [
+    {
+     "w": "little",
+     "zh": "小的",
+     "known": true
+    },
+    {
+     "w": "back",
+     "zh": "回来（come back 回来）",
+     "known": true
+    },
+    {
+     "w": "get",
+     "zh": "到（gets home 到家）",
+     "known": true
+    },
+    {
+     "w": "take",
+     "zh": "拿走，叼走",
+     "known": true
+    },
+    {
+     "w": "look",
+     "zh": "看",
+     "known": true
+    },
+    {
+     "w": "good",
+     "zh": "好的",
+     "known": true
+    },
+    {
+     "w": "cat",
+     "zh": "猫",
+     "known": true
+    }
+   ],
    "sentences": [
     {
      "id": 1,
@@ -1841,8 +1898,7 @@
        "w": "runs away",
        "zh": "跑开"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 8,
@@ -2100,8 +2156,7 @@
        "w": "six",
        "zh": "六（点）"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 21,
@@ -2217,8 +2272,7 @@
        "w": "calls",
        "zh": "喊，叫"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 27,
@@ -2227,19 +2281,18 @@
      "speaker": null,
      "role": null,
      "en": "But Momo does not come back.",
-     "zh": "可是 Momo 没有回来。",
+     "zh": "可是 Momo 就是不回来。",
      "chunks": "But Momo / does not come back.",
      "keys": [
       {
        "w": "does not",
-       "zh": "没有"
+       "zh": "不（= doesn't）"
       },
       {
        "w": "come back",
        "zh": "回来"
       }
-     ],
-     "point": "g:third_s"
+     ]
     }
    ],
    "questions": [
@@ -2548,7 +2601,33 @@
      "pos": "v."
     }
    ],
-   "glossary": [],
+   "glossary": [
+    {
+     "w": "old",
+     "zh": "旧的，老的",
+     "known": true
+    },
+    {
+     "w": "look",
+     "zh": "看（look for 寻找）",
+     "known": true
+    },
+    {
+     "w": "cat",
+     "zh": "猫",
+     "known": true
+    },
+    {
+     "w": "wake",
+     "zh": "醒（wakes up 醒来）",
+     "known": true
+    },
+    {
+     "w": "out",
+     "zh": "出来（comes out 出来）",
+     "known": true
+    }
+   ],
    "sentences": [
     {
      "id": 1,
@@ -2708,8 +2787,7 @@
        "w": "tail",
        "zh": "尾巴"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 9,
@@ -2729,8 +2807,7 @@
        "w": "says",
        "zh": "说"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 10,
@@ -2893,8 +2970,7 @@
        "w": "shakes",
        "zh": "摇，晃"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 18,
@@ -2914,8 +2990,7 @@
        "w": "milk",
        "zh": "牛奶"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 19,
@@ -2956,8 +3031,7 @@
        "w": "Grandma Li",
        "zh": "李奶奶"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 21,
@@ -3299,7 +3373,38 @@
      "pos": "v."
     }
    ],
-   "glossary": [],
+   "glossary": [
+    {
+     "w": "like",
+     "zh": "像（like snow 像雪一样）",
+     "known": true
+    },
+    {
+     "w": "cat",
+     "zh": "猫",
+     "known": true
+    },
+    {
+     "w": "want",
+     "zh": "想要（wants to 想要）",
+     "known": true
+    },
+    {
+     "w": "live",
+     "zh": "住（live with 和……一起住）",
+     "known": true
+    },
+    {
+     "w": "cold",
+     "zh": "冷的",
+     "known": true
+    },
+    {
+     "w": "last",
+     "zh": "上一个（last week 上个星期）",
+     "known": true
+    }
+   ],
    "sentences": [
     {
      "id": 1,
@@ -3621,8 +3726,7 @@
        "w": "home",
        "zh": "回家"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 17,
@@ -3683,8 +3787,7 @@
        "w": "Mum",
        "zh": "妈妈"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 20,
@@ -4100,6 +4203,16 @@
     {
      "w": "title",
      "zh": "标题，题目"
+    },
+    {
+     "w": "look",
+     "zh": "看（look after 照顾，looking at 看着）",
+     "known": true
+    },
+    {
+     "w": "live",
+     "zh": "住（live with 和……一起住）",
+     "known": true
     }
    ],
    "sentences": [
@@ -4323,8 +4436,7 @@
        "w": "report",
        "zh": "报告"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 12,
@@ -4364,8 +4476,7 @@
        "w": "smiles",
        "zh": "微笑"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 14,
@@ -4385,8 +4496,7 @@
        "w": "says",
        "zh": "说"
       }
-     ],
-     "point": "g:third_s"
+     ]
     },
     {
      "id": 15,
@@ -5152,33 +5262,14 @@
   "grammar": {
    "g:third_s": [
     "ep1:4",
-    "ep1:23",
     "ep2:5",
-    "ep2:6",
-    "ep2:19",
-    "ep2:20",
-    "ep2:21",
-    "ep3:7",
     "ep3:9",
     "ep3:13",
-    "ep3:20",
-    "ep3:26",
-    "ep3:27",
-    "ep4:8",
-    "ep4:9",
-    "ep4:17",
-    "ep4:18",
-    "ep4:20",
     "ep5:4",
     "ep5:9",
-    "ep5:16",
     "ep5:18",
-    "ep5:19",
     "ep6:2",
     "ep6:8",
-    "ep6:11",
-    "ep6:13",
-    "ep6:14",
     "ep6:16",
     "ep6:17"
    ],

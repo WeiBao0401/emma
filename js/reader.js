@@ -24,7 +24,8 @@
 //   parts: [{ kind: 'chat' | 'story' | 'diary' | 'talk', label, label_zh }]   一集分几段，句子的 part 指第几段
 //   names: [{ en, zh, key, replaceable }]   这集出场的人（点到名字时说“这是名字”）；也认字符串
 //   targets: [{ w: 'strict', zh: '严格的', pos }]（也认 target_words、字符串数组）
-//   glossary: [{ w, zh }] 或 { w: zh }   这集里词的意思（按故事里的意思写），点词时最先用它
+//   glossary: [{ w, zh, known? }] 或 { w: zh }   这集里词的意思（按故事里的意思写），点词时排在这句的 keys 后面；
+//        known: true 是她认识的词、写的是故事里的意思（离线词典第一个义项会错：little 一点点、back 后面的）
 //   sentences: [{ id: 1, part: 0, line: 1, speaker: 'Mia', role: 'hero', en, zh,
 //                 chunks: 'My red scarf / is not in my schoolbag!'（或数组）, keys: [{ w, zh }] × 2, point? }]
 //             line 一样的是同一条消息；也认 lines / text、{ speaker, sentences: [...] }
@@ -49,7 +50,9 @@
 //     Q  = { id, item: 'ep:<ep>:<q>', ep, skill, skillName, word, ask, zh, stem, stemZh, kind: 'choice' | 'tf',
 //            options: [{ text, correct, tag, zh, drop? }], answer, hints, explain, evidence: [i], variant: Q | null, isVariant, of }
 //   tokenize(en) -> [{ text, word? }]；wordCount(en)；splitSentences(text)
-//   formsOf(word, { dict, curriculum }) -> [写法]；wordInfo(word, { episode, curriculum, words, dict }) -> WordInfo
+//   formsOf(word, { dict, curriculum }) -> [写法]；wordInfo(word, { episode, curriculum, words, dict, sentence }) -> WordInfo
+//     中文按这个顺序取：名字 → 这句的关键词（sentence.keys，单个词，looks 对得上 look）→ 本集目标词和 glossary
+//     （glossary 里 known: true 的是她认识、但离线词典第一个义项不对的词：little 小的）→ 课本 → 单词本 → 基础词 → 离线词典
 //     WordInfo = { word, w, base, zh, phonetic, source: 'story' | 'textbook' | 'entry' | 'basic' | 'dict' | '', label, unit,
 //                  slug, name, target, inBook, canAdd }
 //   trimGloss(ecdictCn) -> 简短的两个义项
@@ -142,6 +145,7 @@ export const FUNCTION_ZH = {
   very: '很；非常', too: '也；太', all: '全部；都', some: '一些', any: '任何；一些（问句里）', one: '一；一个', "it's": '它是（= it is）',
   "what's": '是什么（= what is）', "let's": '让我们（= let us）', "i'm": '我是（= I am）', "you're": '你是（= you are）', "they're": '他们是（= they are）',
   "we're": '我们是（= we are）', "he's": '他是（= he is）', "she's": '她是（= she is）', "that's": '那是（= that is）', "there's": '有（= there is）',
+  mum: '妈妈', mom: '妈妈', dad: '爸爸', grandma: '奶奶；外婆', grandpa: '爷爷；外公',
   "o'clock": '……点钟', ms: '女士（放在姓前面，Ms Wang 王老师）', mr: '先生（放在姓前面）', mrs: '太太（放在姓前面）', oh: '哦', ok: '好的', okay: '好的', hi: '你好', hello: '你好', please: '请', thanks: '谢谢', sorry: '对不起',
 };
 
@@ -561,7 +565,22 @@ function textbookCn(f, curriculum, words) {
   return null;
 }
 
-export function wordInfo(raw, { episode = null, curriculum = null, words = null, dict = null } = {}) {
+// The sentence's own key words (stories.json keys) say what a word means right here: “My eraser is gone” is 不见了,
+// not ECDICT's 离去的. Only one-word keys count; looks matches a key look and the other way round.
+function keyOf(sentence, w, fs, sure, env) {
+  for (const k of (sentence && sentence.keys) || []) {
+    const kw = normW(k && k.w);
+    if (!kw || / /.test(kw) || !str(k.zh)) continue;
+    if (kw === w || fs.slice(0, sure).includes(kw)) return k;
+    const kf = forms(kw, env);
+    if (kf.list.slice(0, kf.sure).includes(w)) return k;
+    if (w.length >= 3 && kw.length >= 3 && (sameWord(w, kw) || sameWord(kw, w))) return k;
+  }
+  return null;
+}
+
+// sentence: the sentence she tapped the word in (its keys come first)
+export function wordInfo(raw, { episode = null, curriculum = null, words = null, dict = null, sentence = null } = {}) {
   const word = str(raw);
   const w = normW(raw);
   const info = { word, w, base: w, zh: '', phonetic: '', source: '', label: '', unit: null, slug: slugify(w), name: false, target: false, inBook: false, canAdd: false };
@@ -571,11 +590,15 @@ export function wordInfo(raw, { episode = null, curriculum = null, words = null,
   const names = ep.names || {};
   const nameHit = fs.slice(0, sure).find(f => f in names);
   if (nameHit) return { ...info, base: nameHit, name: true, zh: names[nameHit] || '', source: 'story', label: '名字' };
+  const key = keyOf(sentence, w, fs, sure, { dict, curriculum });
   let hit = null;
-  for (const [k, f] of fs.entries()) {
+  // the episode's own words first, for every form: “looking” is 看 (glossary look), not ECDICT's looking 有…相貌的
+  for (const f of fs) {
     const t = (ep.targets || []).find(x => normW(x.w) === f);
     const g = (ep.glossary || {})[f];
     if ((t && t.zh) || g) { hit = { base: f, zh: (t && t.zh) || g, source: 'story', target: !!t }; break; }
+  }
+  if (!hit) for (const [k, f] of fs.entries()) {
     const tb = textbookCn(f, curriculum, words);
     if (tb) { hit = { base: f, zh: tb.cn, source: 'textbook', unit: tb.unit }; break; }
     const e = entryOf(f, words);
@@ -583,6 +606,11 @@ export function wordInfo(raw, { episode = null, curriculum = null, words = null,
     if (FUNCTION_ZH[f] && k < sure) { hit = { base: f, zh: FUNCTION_ZH[f], source: 'basic' }; break; }
     const d = safe(() => (dict && dict.get ? dict.get(f) : null), null);
     if (d && trimGloss(d.cn)) { hit = { base: f, zh: trimGloss(d.cn), source: 'dict', phonetic: d.phonetic || '' }; break; }
+  }
+  // this sentence's meaning wins; the lookup above still gives the base form, the unit and the reading
+  if (key) {
+    const base = (hit && hit.base) || w;
+    hit = { ...(hit || {}), base, zh: str(key.zh), source: FUNCTION_ZH[base] || FUNCTION_ZH[w] ? 'basic' : 'story' };
   }
   const out = { ...info, ...(hit || {}) };
   if (!out.target) out.target = (ep.targets || []).some(x => fs.slice(0, sure).includes(normW(x.w)) || sameWord(w, normW(x.w)));
@@ -600,10 +628,13 @@ export function wordInfo(raw, { episode = null, curriculum = null, words = null,
 }
 
 // “加进单词本”的词还没有词条：做一个占位词条（和课本导入一样走 words.importData），讲解第一次打开时补（needs_core）
+// 离线词典的中文（source 'dict'）只是第一个义项，常常不是故事里的意思（kind 种类）：不写进 brief_cn（热身四选一拿它考），
+// 留空等讲解补。这句的关键词对得上时 wordInfo 已经给了故事里的意思（source 'story'）。
 export function placeholderExport(info, now = new Date()) {
   const at = localIso(toDate(now));
   const cnSource = info.source === 'dict' ? 'ecdict' : info.source === 'textbook' ? 'book-list' : 'story';
-  const e = { slug: info.slug, headword: info.base, brief_cn: info.zh || '', cn_source: cnSource, needs_core: true,
+  const brief = info.source === 'dict' ? '' : info.zh || '';
+  const e = { slug: info.slug, headword: info.base, brief_cn: brief, cn_source: cnSource, needs_core: true,
     favorited: true, favorited_at: at, created: at, updated: at, note: '', history: [{ at, query: info.w, source: 'story' }] };
   if (info.phonetic) e.phonetic = info.phonetic;
   return { format: 'emma-export', version: 1, source: 'story', exported_at: toDate(now).toISOString(), entries: [e], zh: [] };
@@ -672,6 +703,8 @@ export function helpEvent(ep, s, level, { phase = 'listen' } = {}) {
 // 答对（没看提示）→ 过关，grade 3。答错 → 第 1 级自动出来；每再错一次自动多一级；“再给个提示”给下一级。
 // 改对 → 过关，用了提示记“模糊”，grade 2。到第 4 级（讲清楚，答案亮出来）→ 马上出变式题：做对才算过（grade 2），做错 grade 1。
 // 没有变式题的题，到第 4 级就结束，不算过（grade 1）。没答就点“给个提示”再答对：过关，记模糊。
+// 排除法改不对：错到只剩正确那一个能点（选过的变灰，第 3 级划掉的 drop 也不能点），直接到第 4 级（答案加讲清楚）出变式题，
+// 最后一下不算“改对了”；没有变式题的，不算过（grade 1）。
 
 export function createAttempt(q, { now = () => Date.now() } = {}) {
   const clock = typeof now === 'function' ? () => +toDate(now()) : () => +toDate(now);
@@ -691,11 +724,16 @@ export function createAttempt(q, { now = () => Date.now() } = {}) {
     item: question.item, mode: MODE, episode: question.ep, skill: question.skill || null, ...(question.word ? { word: question.word } : {}),
     choice: opt.text, correct: !!opt.correct, ms: Math.max(0, Math.round(ms)), misconception: opt.correct ? null : opt.tag || null, ...extra,
   });
+  // the options she can still tap: not picked, and not the one hint 3 crossed out
+  const openLeft = () => q.options.filter((o, i) => !picked.has(i) && !(o.drop && level >= 3));
+  const onlyAnswerLeft = () => { const left = openLeft(); return left.length === 1 && !!left[0].correct; };
   a.hint = () => {
     if (phase !== 'ask' && phase !== 'retry') return null;
     if (level >= HINT_MAX) return null;
     if (!wrongs) hintEarly = true;
     level++;
+    // hint 3 crossing out the last wrong one would leave only the answer: show hint 4 and the variant instead
+    if (level < HINT_MAX && onlyAnswerLeft()) level = HINT_MAX;
     const out = { level, text: q.hints[level - 1] || '', auto: false };
     if (level >= HINT_MAX) reveal();
     return out;
@@ -721,6 +759,8 @@ export function createAttempt(q, { now = () => Date.now() } = {}) {
     phase = 'retry';
     if (level < HINT_MAX) {
       level++;
+      // only the answer is left to tap: tapping it would not be 改对了, so hint 4 (the answer and why) and the variant now
+      if (level < HINT_MAX && onlyAnswerLeft()) level = HINT_MAX;
       out.hintShown = { level, text: q.hints[level - 1] || '', auto: true };
       if (level >= HINT_MAX) reveal();
     }

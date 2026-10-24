@@ -17,7 +17,10 @@
 //     load() -> Promise                    启动时读 kv 'budget'
 //     record(usage, kind, model?) -> 元     记一笔（同步更新内存，异步写 kv），返回这笔估算的钱
 //     canSpend(kind) -> bool               今天还能花：总数没到 getCap()（默认 settings.dailyCapYuan = 1.5），
-//                                          这个类别没到 getKindCaps()[kind]（可选），今天也没收到过百炼的“预算用完”
+//                                          这个类别没到 getKindCaps()[kind]（可选），今天也没收到过百炼的“预算用完”。
+//                                          0.4.1 起问老师（'chat'）和语音输入（'asr'）不算进全天总额、也不受它拦：只看自己这一类的
+//                                          上限（settings.kindCapsYuan，缺省 DEFAULT_KIND_CAPS：问老师 5 元、语音 1 元）。学会优先：
+//                                          问几轮就把一天的上限用完、连查词和朗读一起停，不划算；Poe 本来就是预充的积分
 //     blockReason(kind) -> '' | 'day' | 'kind' | 'month'   为什么不能花；'month' = 今天收到过百炼的“预算用完”
 //     markExhausted()                      收到百炼“预算用完”的 429 时 ai.js 调：当天不再发请求（第二天再试一次）
 //     clearExhausted()                     家长在百炼控制台调了预算以后，在家长区点“再试”时调
@@ -32,6 +35,9 @@
 import { TTS_URL, TTS_MODEL, TTS_SPEECH_URL, TTS_SPEECH_MODEL, MODEL_CHOICES, POE_MODEL_CHOICES } from './config.js';
 
 export const KINDS = ['lookup', 'tts', 'hint', 'story', 'reflect', 'photo', 'chat', 'asr', 'other'];
+// 问老师和语音输入：各有自己的每天上限，不占全天总额（blockReason）
+export const OWN_CAP_KINDS = ['chat', 'asr'];
+export const DEFAULT_KIND_CAPS = { chat: 5, asr: 1 };
 export const BUDGET_ERROR = 'budget';
 export const USD_CNY = 7.2;
 
@@ -139,14 +145,19 @@ export function createBudget({ kv, now = () => new Date(), getCap = () => 1.5, g
     return { date: d, total, byKind, cap, left: Math.max(0, cap - total) };
   }
 
-  // 0 as the cap means no daily cap (the parent area may allow it); a per-kind cap only counts when set above 0
+  // 0 as the cap means no daily cap (the parent area may allow it); a per-kind cap only counts when set above 0.
+  // 问老师 and 语音输入 have only their own cap (DEFAULT_KIND_CAPS unless settings.kindCapsYuan says otherwise): a few
+  // questions to the teacher never use up the day's cap, and what they cost is left out of the total the other kinds see.
   function blockReason(kind = 'other') {
     const t = today();
     if (exhausted && exhausted === t.date) return 'month';
-    if (t.cap && t.total >= t.cap) return 'day';
     const k = KINDS.includes(kind) ? kind : 'other';
     let caps = {};
-    try { caps = getKindCaps() || {}; } catch (e) { caps = {}; }
+    try { caps = { ...DEFAULT_KIND_CAPS, ...(getKindCaps() || {}) }; } catch (e) { caps = { ...DEFAULT_KIND_CAPS }; }
+    if (!OWN_CAP_KINDS.includes(k)) {
+      const rest = Object.entries(t.byKind).filter(([x]) => !OWN_CAP_KINDS.includes(x)).reduce((a, [, v]) => a + (Number(v) || 0), 0);
+      if (t.cap && rest >= t.cap) return 'day';
+    }
     const kc = Number(caps[k]);
     if (kc > 0 && (t.byKind[k] || 0) >= kc) return 'kind';
     return '';

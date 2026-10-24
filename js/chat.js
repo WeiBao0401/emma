@@ -776,7 +776,7 @@ export function createChat(app, { fetchImpl = null, now = () => new Date(), slee
         if (!keyOk(route.key)) throw new AIError(`${route.name} 的 Key 格式不对：在家长区重新粘贴。`, 'badkey');
         const why = app.budget && app.budget.blockReason ? app.budget.blockReason(BUDGET_KIND) : '';
         if (why === 'month') throw new AIError('今天已经收到过百炼的“预算用完”（429），App 今天不再发请求。', 'budget');
-        if (why) throw new AIError('今天的花费到了 App 里设的上限，明天恢复。可以在家长区调高上限。', 'budget-day');
+        if (why) throw new AIError(why === 'kind' ? '今天问老师的花费到了上限（每天 5 元），明天恢复。' : '今天的花费到了 App 里设的上限，明天恢复。可以在家长区调高上限。', 'budget-day');
         const ctx = await gatherContext(app, { now: now(), exclude: user.id });
         messages = buildMessages(buildSystemPrompt(ctx), history, images);
         res = await streamChat({ route, messages, fetchImpl, signal, onDelta, budget: app.budget, sleep });
