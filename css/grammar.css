@@ -7,6 +7,8 @@
 /* the small yellow tag on top, like the home page running head */
 .gram-chip{display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-size:14px;color:var(--muted)}
 .gram-tag{display:inline-block;padding:3px 10px;border-radius:4px;background:var(--tag-bg);color:var(--ink);font-size:13px;font-weight:550;letter-spacing:.01em}
+/* why this card today (grammar.js nextCard), one quiet line under the title */
+.gram-why{margin:-4px 0 0;font:16px/1.55 var(--sans);color:var(--muted)}
 .gram-title{font:600 34px/1.25 var(--serif);letter-spacing:-.01em;color:var(--ink)}
 .gram-sub{margin-top:6px;font:600 15px/1.3 var(--sans);color:var(--muted)}
 

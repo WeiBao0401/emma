@@ -38,6 +38,9 @@
 //   拍课本：一行入口，go('capture')（ui-capture.js 的页面）；这周小结：一行入口，go('weekly')（ui-weekly.js）。
 //     两个页面是别的 agent 写的；nav.js 里还没有这个路由时，这一行灰着写“下一版”。
 //   开机问卷“听写怎么考”下面写明“明天有听写”现在的默认考法（ui-dictation.js intakeMethod，有 intake.js 时按它的）。
+// 0.4.0 “学得怎么样”一组：阅读（reader.js readingSummary：读了几集、每类题一次就对几道、最吃力的句子）、
+//   语法卡（grammar.js summary：每张卡在学 / 在练 / 练稳了，常错的误解）、连词成句（modes/order.js orderSummary：常错哪类句子）。
+//   只读，给家长看她卡在哪。
 import { h, icon, toast, dateCn } from './ui-dom.js';
 import { createMeTab } from './ui-me.js';
 import { accentOf, cleanName, DEFAULT_PARENT_NAME } from './ui-onboard.js';
@@ -48,6 +51,9 @@ import { METHOD_LABEL } from './dictation.js';
 import { intakeMethod } from './ui-dictation.js';
 import { optionalModule } from './ui-home.js';
 import { chatRoute, CHAT_DEFAULTS } from './chat.js';
+import * as R from './reader.js';
+import * as G from './grammar.js';
+import * as O from './modes/order.js';
 import { asrRoute, ASR_DEFAULTS, DOUBAO_RESOURCE } from './voice-input.js';
 import { normalizePoeUrl } from './ai.js';
 
@@ -523,6 +529,48 @@ export function createParentView(ctx) {
     ]);
   }
 
+  // ---------------------------------------------------------------- 学得怎么样 (0.4.0): where reading and grammar are still hard
+  const HELP_NAME = { 1: '要断句', 2: '要看关键词', 3: '要看整句中文' };
+  const CARD_STATUS = { new: '还没开始', learning: '在学', practicing: '在练', steady: '练稳了' };
+  const safe = f => { try { return f(); } catch (e) { console.warn('parent: learning:', (e && e.message) || e); return null; } };
+  function readingPanel(rs) {
+    return () => {
+      if (!rs || !rs.hard.length) return h('p', { className: 'small', text: '读的时候她点“看不懂”的句子，会列在这里。' });
+      return h('div', {},
+        h('p', { className: 'small', text: `点“看不懂”一共 ${rs.helps} 次，其中 ${rs.full} 句要看整句中文。在故事里点开看过的词 ${rs.looked} 个。` }),
+        h('ul', { className: 'parent-hard' }, rs.hard.slice(0, 6).map(x => {
+          const g = x.point ? safe(() => ctx.curriculum.grammarName(x.point)) : '';
+          return h('li', {},
+            h('p', { lang: 'en', className: 'serif', text: x.en }),
+            h('p', { className: 'small', text: `第 ${x.n} 集第 ${x.i} 句 · ${HELP_NAME[x.level] || '点过看不懂'}${g ? ' · ' + g : ''}` }));
+        })));
+    };
+  }
+  function grammarPanel(gs) {
+    return () => h('ul', { className: 'parent-hard' }, gs.map(g => h('li', {},
+      h('p', { text: `${g.label ? g.label + ' · ' : ''}${g.title}：${CARD_STATUS[g.status] || g.status}` }),
+      g.answered ? h('p', { className: 'small', text: `一次就对 ${g.right} 道，看了提示改对 ${g.fuzzy} 道，没过 ${g.failed} 道${g.tags.length ? '。常错：' + g.tags.slice(0, 2).map(t => t.zh).join('；') : ''}` }) : null)));
+  }
+  function learnGroup(kit) {
+    const now = new Date();
+    const rs = safe(() => (R.content() ? R.readingSummary(ctx.kv) : null));
+    const gs = safe(() => (G.content() ? G.summary(G.grammarState(ctx.kv), now, { tags: ctx.curriculum && ctx.curriculum.tags }) : [])) || [];
+    const os = safe(() => (O.content() ? O.orderSummary(ctx.kv, now) : null));
+    const skills = rs ? Object.values(rs.bySkill).filter(b => b.n).map(b => `${b.name} ${b.clean} / ${b.n}`).join(' · ') : '';
+    const started = gs.filter(g => g.status !== 'new');
+    const tagN = {};
+    for (const g of gs) for (const t of g.tags) tagN[t.zh] = (tagN[t.zh] || 0) + t.n;
+    const topTags = Object.entries(tagN).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([zh]) => zh);
+    return kit.group('学得怎么样', [
+      kit.row({ key: 'learn-read', label: '读一段（期中番外）', sub: skills ? `一次就对：${skills}` : '读完一集以后，这里写她哪类题容易错',
+        value: rs ? `${rs.done} / ${rs.of} 集` : '还没读', panel: readingPanel(rs) }),
+      kit.row({ key: 'learn-grammar', label: '语法卡', sub: topTags.length ? '常错：' + topTags.join('；') : '先补地基：be 动词、名词复数，再跟课本单元',
+        value: gs.length ? `${started.length} / ${gs.length} 张开始了` : '还没开始', panel: gs.length ? grammarPanel(gs) : null }),
+      kit.row({ label: '连词成句', sub: os && os.kinds.length ? '常错：' + os.kinds.slice(0, 2).map(k => k.name).join('、') : '星期三的“写几个词”和热身里会出',
+        value: os && os.tried ? `排过 ${os.tried} 句，一次就对 ${os.clean} 句` : '还没排' }),
+    ], '看她卡在哪，好对着补。');
+  }
+
   // ---------------------------------------------------------------- 花费
   const kindsText = byKind => Object.entries(byKind || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
     .map(([k, v]) => `${KIND_LABEL[k] || k} ${yuan(v).replace(' 元', '')}`).join(' · ');
@@ -834,6 +882,7 @@ export function createParentView(ctx) {
       h('p', { className: 'small parent-intro', text: name === DEFAULT_PARENT_NAME ? '这一页给家长用。' : `这一页给家长用。Emma 看到的“家长”会写成“${name}”。` }),
       setupGroup(kit),
       planGroup(kit),
+      learnGroup(kit),
       moneyGroup(kit),
       kit.ai(),
       chatGroup(kit),

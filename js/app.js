@@ -3,6 +3,9 @@
 // the first open), the status line, badge, sheet, service worker.
 // 0.3.0: 问老师 (ui-chat.js: free questions, streamed answers, a photo of a problem) and its hold-to-talk voice input
 // (voice-input.js through ctx.voiceInput: Bailian or 豆包 speech recognition).
+// 0.4.0: 读一段 opens (reader.js: the six midterm episodes in curriculum/stories.json, loaded at boot; ui-lesson draws them
+// with ui-reader.js), eight grammar cards with the foundations first (grammar.js nextCard), and 连词成句 (modes/order.js,
+// curriculum/order.json: Wednesday's 写几个词 and now and then one in the warm-up).
 // v1 (0.2.0): the grammar cards are loaded at boot (grammar.js) and their progress goes into the plan's state with the
 // parent's form (intake.js: busy days, recent mistakes) and the review outline (kv 'outline'); the spelling, listening,
 // grammar and phonics parts of a lesson are loaded by ui-lesson.js itself (import()).
@@ -40,6 +43,8 @@ import * as G from './grammar.js';
 import { intakeDefaults, isBusyDay } from './intake.js';
 import { createChatTab } from './ui-chat.js';
 import { createVoiceInput } from './voice-input.js';
+import * as R from './reader.js';
+import * as O from './modes/order.js';
 
 const params = new URLSearchParams(location.search);
 // ?mock=offline: mock mode where every model call fails like a dropped connection (tests the dictionary fallback)
@@ -113,21 +118,47 @@ const BOOST_DAYS = 21;
 // falls back (sprint.js's own grammar questions and card order, no busy day, no boost).
 function v1State(now, progress) {
   const out = { outline: kv.peek('outline', null) };
+  let focus = [];
   try {
     const d = app.intake();
     const t = Date.parse(d.updated || d.at || '');
-    if (d.review.slugs.length && (!Number.isFinite(t) || now - t < BOOST_DAYS * 864e5)) out.boost = d.review.slugs;
+    const fresh = !Number.isFinite(t) || now - t < BOOST_DAYS * 864e5;
+    if (d.review.slugs.length && fresh) out.boost = d.review.slugs;
+    // the grammar points the parent's form names bring their foundation card forward (grammar.js nextCard), 21 days too
+    if (fresh && Array.isArray(d.review.grammar)) focus = d.review.grammar;
     if (isBusyDay(d, now)) out.busyDay = true;
   } catch (e) { console.warn('plan state: intake:', (e && e.message) || e); }
-  // grammar.js content loaded: its progress decides the warm-up items and today's card (null = no card today)
+  // grammar.js content loaded: its progress decides the warm-up items and today's card (null = no card today).
+  // nextCard puts a foundation card first when her recent wrong answers (or the parent's form) point at it.
+  let gs = null;
   try {
     if (G.content()) {
-      const gs = G.grammarState(kv);
+      gs = G.grammarState(kv);
       out.grammar = gs;
       out.grammarWarm = G.grammarWarmItems(gs, now, { max: 2 });
-      out.grammarCard = G.todayCard(gs, now, { upTo: (progress && progress.unit) || '' });
+      out.grammarCard = G.nextCard({ grammar: gs, progress, grammarFocus: focus }, now, { upTo: (progress && progress.unit) || '' });
     }
   } catch (e) { console.warn('plan state: grammar:', (e && e.message) || e); }
+  // 读一段: which episode today (reader.js readCell); its target words are seen once in the warm-up before the story
+  try {
+    if (R.content()) {
+      const rc = R.readCell(kv, now);
+      if (rc.status === 'ready') {
+        const ep = R.content().episode(rc.episodeId);
+        rc.shortMinutes = R.estimateMinutes(ep, { short: true });
+        out.readTargets = ((ep && ep.targets) || []).map(t => t.slug || R.slugify(t.w)).filter(slug => { const e = words.get(slug); return !!(e && e.favorited && e.fsrs); });
+      }
+      out.readCell = rc;
+    }
+  } catch (e) { console.warn('plan state: reading:', (e && e.message) || e); }
+  // 连词成句: Wednesday's sentences and the odd one in the warm-up (modes/order.js)
+  try {
+    if (O.content()) {
+      out.orderItems = O.writeItems(kv, now, { grammar: gs });
+      // plan.js uses the warm-up sentence only on days 写几个词 is not 连词成句, so the two never overlap
+      out.orderWarm = O.warmItem(kv, now, { grammar: gs });
+    }
+  } catch (e) { console.warn('plan state: order:', (e && e.message) || e); }
   return out;
 }
 
@@ -266,6 +297,7 @@ function showRoute(name, { force = false, params: p = null } = {}) {
   if (route === 'lib' && lib && r.name !== 'lib') lib.hide();
   if (route === 'parent' && parent && r.name !== 'parent') parent.hide();   // drops the relay's model list (ui-parent.js)
   if (route === 'chat' && chat && r.name !== 'chat') chat.hide();         // closes the word card, drops a recording not finished
+  if (route === 'lesson' && lesson && r.name !== 'lesson' && lesson.hide) lesson.hide();   // the story stops reading aloud
   if (route === 'capture' && capture && r.name !== 'capture') capture.hide(); // leaving 拍课本 drops the photo
   const from = route;
   route = r.name;
@@ -432,8 +464,14 @@ async function boot() {
     // load() reads curriculum/questions.json too (the first-week button questions)
     lines = createLines({ data: linesData, kv, fetchJSON });
     await lines.load();
-    // the three grammar cards (curriculum/grammar.json); without them the plan uses sprint.js's own questions
-    try { await G.loadGrammar({ fetchJSON }); } catch (e) { console.warn('grammar:', (e && e.message) || e); }
+    // the grammar cards (curriculum/grammar.json); without them the plan uses sprint.js's own questions
+    // the six episodes (curriculum/stories.json) and the 连词成句 sentences (curriculum/order.json): without them 读一段 says
+    // 下周开播 and Wednesday's 写几个词 spells instead; the three load side by side
+    await Promise.all([
+      G.loadGrammar({ fetchJSON }).catch(e => console.warn('grammar:', (e && e.message) || e)),
+      R.loadStories({ fetchJSON }).catch(e => console.warn('stories:', (e && e.message) || e)),
+      O.loadOrder({ fetchJSON }).catch(e => console.warn('order:', (e && e.message) || e)),
+    ]);
   } catch (e) {
     console.error(e);
     fatal(e);

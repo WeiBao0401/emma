@@ -1,0 +1,5201 @@
+{
+ "version": 1,
+ "id": "midterm-extra",
+ "title": "Momo and the Window",
+ "title_zh": "期中番外：窗边的猫",
+ "about_zh": "6 集连载。初一女孩 Mia 的红领巾不见了，半夜窗边出现一双蓝眼睛。她的小灰猫 Momo 到底在忙什么？每集 100 到 130 词，只用小学词和 Starter 到 Unit 3 的词。",
+ "names": [
+  {
+   "key": "hero",
+   "default": "Mia",
+   "zh": "主角，初一（3）班的女孩",
+   "replaceable": true
+  },
+  {
+   "key": "cat",
+   "default": "Momo",
+   "zh": "Mia 的小灰猫，绿眼睛",
+   "replaceable": true
+  },
+  {
+   "key": "lucy",
+   "default": "Lucy",
+   "zh": "Mia 最好的朋友，同班",
+   "replaceable": true
+  },
+  {
+   "key": "tom",
+   "default": "Tom",
+   "zh": "同班男生，爱开玩笑、爱拍照",
+   "replaceable": true
+  },
+  {
+   "key": "kitten",
+   "default": "Snowy",
+   "zh": "没有家的小白猫，蓝眼睛（第 5 集起有名字）",
+   "replaceable": true
+  },
+  {
+   "key": "teacher",
+   "default": "Ms Wang",
+   "zh": "班主任王老师，很严格",
+   "replaceable": false
+  },
+  {
+   "key": "grandma",
+   "default": "Grandma Li",
+   "zh": "住在附近的李奶奶",
+   "replaceable": false
+  },
+  {
+   "key": "mum",
+   "default": "Mum",
+   "zh": "Mia 的妈妈",
+   "replaceable": false
+  }
+ ],
+ "episodes": [
+  {
+   "id": "ep1",
+   "n": 1,
+   "title": "Where Is My Red Scarf?",
+   "title_zh": "第 1 集 · 红领巾去哪了？",
+   "recap_zh": "Mia 刚上初一，养了一只小灰猫，叫 Momo。星期天晚上，她发现红领巾不见了。明天一早，班主任王老师就要检查。她赶紧在班级群里求助。",
+   "next_zh": "第 2 集：第二天早上，红领巾自己“回来”了，可它在一个奇怪的地方。",
+   "tip": {
+    "title": "先看题，再读文章",
+    "lines": [
+     "考试的阅读题都在文章后面。",
+     "先花半分钟看题，知道要找什么，再去读，就不会读完一遍什么都没记住。"
+    ],
+    "steps": [
+     "先读 4 道题的题目，选项先不看",
+     "圈出题里的关键词：every Monday、nervous、awake",
+     "带着问题读故事，读到关键词就停下来想一想"
+    ],
+    "exam": {
+     "en": "Read the passage and choose the best answer.",
+     "zh": "“阅读短文，选择最佳答案。”考试的阅读题都这样开头，题目就在文章后面。"
+    },
+    "preview": true,
+    "q": "q1"
+   },
+   "names": [
+    {
+     "en": "Mia",
+     "zh": "主角，初一（3）班的女孩",
+     "key": "hero",
+     "replaceable": true
+    },
+    {
+     "en": "Momo",
+     "zh": "Mia 的小灰猫，绿眼睛",
+     "key": "cat",
+     "replaceable": true
+    },
+    {
+     "en": "Lucy",
+     "zh": "Mia 最好的朋友，同班",
+     "key": "lucy",
+     "replaceable": true
+    },
+    {
+     "en": "Tom",
+     "zh": "同班男生，爱开玩笑、爱拍照",
+     "key": "tom",
+     "replaceable": true
+    },
+    {
+     "en": "Ms Wang",
+     "zh": "班主任王老师，很严格",
+     "key": "teacher",
+     "replaceable": false
+    },
+    {
+     "en": "Wang",
+     "zh": "班主任王老师，很严格",
+     "key": "teacher",
+     "replaceable": false
+    }
+   ],
+   "parts": [
+    {
+     "kind": "chat",
+     "label": "Class 7-3 Group",
+     "label_zh": "初一（3）班群聊 · 星期天晚上"
+    },
+    {
+     "kind": "story",
+     "label": "Later That Night",
+     "label_zh": "那天深夜"
+    }
+   ],
+   "targets": [
+    {
+     "w": "nervous",
+     "zh": "紧张的",
+     "pos": "adj."
+    },
+    {
+     "w": "strict",
+     "zh": "严格的",
+     "pos": "adj."
+    },
+    {
+     "w": "check",
+     "zh": "检查，查看",
+     "pos": "v."
+    },
+    {
+     "w": "forget",
+     "zh": "忘记",
+     "pos": "v."
+    },
+    {
+     "w": "ready",
+     "zh": "准备好的",
+     "pos": "adj."
+    },
+    {
+     "w": "awake",
+     "zh": "醒着的",
+     "pos": "adj."
+    }
+   ],
+   "glossary": [],
+   "sentences": [
+    {
+     "id": 1,
+     "part": 0,
+     "line": 1,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Help!",
+     "zh": "救命！",
+     "chunks": "Help!",
+     "keys": [
+      {
+       "w": "help",
+       "zh": "救命，帮帮我"
+      }
+     ]
+    },
+    {
+     "id": 2,
+     "part": 0,
+     "line": 1,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "My red scarf is not in my schoolbag!",
+     "zh": "我的红领巾不在书包里！",
+     "chunks": "My red scarf / is not in my schoolbag!",
+     "keys": [
+      {
+       "w": "red scarf",
+       "zh": "红领巾"
+      },
+      {
+       "w": "schoolbag",
+       "zh": "书包"
+      }
+     ]
+    },
+    {
+     "id": 3,
+     "part": 0,
+     "line": 2,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Tomorrow is Monday.",
+     "zh": "明天是星期一。",
+     "chunks": "Tomorrow is Monday.",
+     "keys": [
+      {
+       "w": "tomorrow",
+       "zh": "明天"
+      },
+      {
+       "w": "Monday",
+       "zh": "星期一"
+      }
+     ]
+    },
+    {
+     "id": 4,
+     "part": 0,
+     "line": 2,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Ms Wang checks our red scarves every Monday.",
+     "zh": "王老师每个星期一都检查我们的红领巾。",
+     "chunks": "Ms Wang checks our red scarves / every Monday.",
+     "keys": [
+      {
+       "w": "checks",
+       "zh": "检查"
+      },
+      {
+       "w": "every Monday",
+       "zh": "每个星期一"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 5,
+     "part": 0,
+     "line": 2,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "She is very strict.",
+     "zh": "她特别严格。",
+     "chunks": "She is very strict.",
+     "keys": [
+      {
+       "w": "strict",
+       "zh": "严格的"
+      },
+      {
+       "w": "very",
+       "zh": "很，特别"
+      }
+     ]
+    },
+    {
+     "id": 6,
+     "part": 0,
+     "line": 3,
+     "speaker": "Lucy",
+     "role": "lucy",
+     "en": "Don't be nervous.",
+     "zh": "别紧张。",
+     "chunks": "Don't be nervous.",
+     "keys": [
+      {
+       "w": "don't be",
+       "zh": "别，不要"
+      },
+      {
+       "w": "nervous",
+       "zh": "紧张的"
+      }
+     ]
+    },
+    {
+     "id": 7,
+     "part": 0,
+     "line": 3,
+     "speaker": "Lucy",
+     "role": "lucy",
+     "en": "Check under your bed.",
+     "zh": "看看你床底下。",
+     "chunks": "Check / under your bed.",
+     "keys": [
+      {
+       "w": "check",
+       "zh": "检查，查看"
+      },
+      {
+       "w": "under",
+       "zh": "在……下面"
+      }
+     ]
+    },
+    {
+     "id": 8,
+     "part": 0,
+     "line": 4,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "I checked.",
+     "zh": "我看过了。",
+     "chunks": "I checked.",
+     "keys": [
+      {
+       "w": "checked",
+       "zh": "检查过了（check 的过去式）"
+      }
+     ]
+    },
+    {
+     "id": 9,
+     "part": 0,
+     "line": 4,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "My eraser is gone, too.",
+     "zh": "我的橡皮也不见了。",
+     "chunks": "My eraser / is gone, too.",
+     "keys": [
+      {
+       "w": "eraser",
+       "zh": "橡皮"
+      },
+      {
+       "w": "gone",
+       "zh": "不见了"
+      }
+     ]
+    },
+    {
+     "id": 10,
+     "part": 0,
+     "line": 5,
+     "speaker": "Tom",
+     "role": "tom",
+     "en": "Ask your cat.",
+     "zh": "问问你家的猫吧。",
+     "chunks": "Ask your cat.",
+     "keys": [
+      {
+       "w": "ask",
+       "zh": "问"
+      },
+      {
+       "w": "cat",
+       "zh": "猫"
+      }
+     ]
+    },
+    {
+     "id": 11,
+     "part": 0,
+     "line": 5,
+     "speaker": "Tom",
+     "role": "tom",
+     "en": "Haha!",
+     "zh": "哈哈！",
+     "chunks": "Haha!",
+     "keys": [
+      {
+       "w": "haha",
+       "zh": "哈哈"
+      }
+     ]
+    },
+    {
+     "id": 12,
+     "part": 0,
+     "line": 6,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Momo is sleeping on my desk.",
+     "zh": "Momo 正在我书桌上睡觉呢。",
+     "chunks": "Momo is sleeping / on my desk.",
+     "keys": [
+      {
+       "w": "sleeping",
+       "zh": "正在睡觉"
+      },
+      {
+       "w": "desk",
+       "zh": "书桌"
+      }
+     ]
+    },
+    {
+     "id": 13,
+     "part": 0,
+     "line": 7,
+     "speaker": "Lucy",
+     "role": "lucy",
+     "en": "Did you forget it at school?",
+     "zh": "你是不是把它忘在学校了？",
+     "chunks": "Did you forget it / at school?",
+     "keys": [
+      {
+       "w": "forget",
+       "zh": "忘记"
+      },
+      {
+       "w": "at school",
+       "zh": "在学校"
+      }
+     ]
+    },
+    {
+     "id": 14,
+     "part": 0,
+     "line": 8,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "No, I never forget it.",
+     "zh": "没有，我从来不会忘了它。",
+     "chunks": "No, / I never forget it.",
+     "keys": [
+      {
+       "w": "never",
+       "zh": "从来不"
+      },
+      {
+       "w": "forget",
+       "zh": "忘记"
+      }
+     ]
+    },
+    {
+     "id": 15,
+     "part": 0,
+     "line": 9,
+     "speaker": "Lucy",
+     "role": "lucy",
+     "en": "Is your schoolbag ready?",
+     "zh": "书包收拾好了吗？",
+     "chunks": "Is your schoolbag ready?",
+     "keys": [
+      {
+       "w": "schoolbag",
+       "zh": "书包"
+      },
+      {
+       "w": "ready",
+       "zh": "准备好的"
+      }
+     ]
+    },
+    {
+     "id": 16,
+     "part": 0,
+     "line": 10,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Yes, it's ready.",
+     "zh": "收拾好了。",
+     "chunks": "Yes, / it's ready.",
+     "keys": [
+      {
+       "w": "ready",
+       "zh": "准备好的"
+      },
+      {
+       "w": "it's",
+       "zh": "它是（it is）"
+      }
+     ]
+    },
+    {
+     "id": 17,
+     "part": 0,
+     "line": 10,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "But there is no red scarf in it!",
+     "zh": "可是里面没有红领巾！",
+     "chunks": "But / there is no red scarf / in it!",
+     "keys": [
+      {
+       "w": "there is no",
+       "zh": "没有"
+      },
+      {
+       "w": "in it",
+       "zh": "在里面"
+      }
+     ],
+     "point": "g:there_be"
+    },
+    {
+     "id": 18,
+     "part": 0,
+     "line": 10,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "I'm so nervous.",
+     "zh": "我好紧张。",
+     "chunks": "I'm so nervous.",
+     "keys": [
+      {
+       "w": "I'm",
+       "zh": "我是（I am）"
+      },
+      {
+       "w": "nervous",
+       "zh": "紧张的"
+      }
+     ]
+    },
+    {
+     "id": 19,
+     "part": 0,
+     "line": 11,
+     "speaker": "Lucy",
+     "role": "lucy",
+     "en": "Ms Wang is strict, but she is kind.",
+     "zh": "王老师很严格，但是她人很好。",
+     "chunks": "Ms Wang is strict, / but she is kind.",
+     "keys": [
+      {
+       "w": "strict",
+       "zh": "严格的"
+      },
+      {
+       "w": "kind",
+       "zh": "和善的，好心的"
+      }
+     ]
+    },
+    {
+     "id": 20,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "Mia is in bed, but she is still awake.",
+     "zh": "Mia 躺在床上，可她还醒着。",
+     "chunks": "Mia is in bed, / but she is still awake.",
+     "keys": [
+      {
+       "w": "still",
+       "zh": "还，仍然"
+      },
+      {
+       "w": "awake",
+       "zh": "醒着的"
+      }
+     ]
+    },
+    {
+     "id": 21,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "Momo is awake, too.",
+     "zh": "Momo 也醒着。",
+     "chunks": "Momo is awake, too.",
+     "keys": [
+      {
+       "w": "awake",
+       "zh": "醒着的"
+      },
+      {
+       "w": "too",
+       "zh": "也"
+      }
+     ]
+    },
+    {
+     "id": 22,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "She is sitting at the window.",
+     "zh": "她正坐在窗边。",
+     "chunks": "She is sitting / at the window.",
+     "keys": [
+      {
+       "w": "sitting",
+       "zh": "坐着"
+      },
+      {
+       "w": "window",
+       "zh": "窗户"
+      }
+     ]
+    },
+    {
+     "id": 23,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "Mia hears a sound: tap, tap, tap.",
+     "zh": "Mia 听见一个声音：嗒，嗒，嗒。",
+     "chunks": "Mia hears a sound: / tap, tap, tap.",
+     "keys": [
+      {
+       "w": "hears",
+       "zh": "听见"
+      },
+      {
+       "w": "sound",
+       "zh": "声音"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 24,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "There are two small blue eyes at the window.",
+     "zh": "窗户那儿有两只小小的蓝眼睛。",
+     "chunks": "There are two small blue eyes / at the window.",
+     "keys": [
+      {
+       "w": "there are",
+       "zh": "有"
+      },
+      {
+       "w": "eyes",
+       "zh": "眼睛"
+      }
+     ],
+     "point": "g:there_be"
+    },
+    {
+     "id": 25,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "Momo's eyes are green.",
+     "zh": "Momo 的眼睛是绿色的。",
+     "chunks": "Momo's eyes / are green.",
+     "keys": [
+      {
+       "w": "Momo's",
+       "zh": "Momo 的"
+      },
+      {
+       "w": "green",
+       "zh": "绿色的"
+      }
+     ],
+     "point": "g:possessive_s"
+    },
+    {
+     "id": 26,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "So whose eyes are these?",
+     "zh": "那这是谁的眼睛？",
+     "chunks": "So / whose eyes are these?",
+     "keys": [
+      {
+       "w": "whose",
+       "zh": "谁的"
+      },
+      {
+       "w": "these",
+       "zh": "这些"
+      }
+     ]
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "What does Ms Wang do every Monday?",
+     "zh": "王老师每个星期一做什么？",
+     "options": [
+      "She cleans the classroom.",
+      "She checks the students' red scarves.",
+      "She looks for Mia's eraser.",
+      "She visits Mia's home."
+     ],
+     "options_zh": [
+      "她打扫教室。",
+      "她检查学生的红领巾。",
+      "她找 Mia 的橡皮。",
+      "她去 Mia 家。"
+     ],
+     "answer": "She checks the students' red scarves.",
+     "evidence": [
+      4
+     ],
+     "drop": "She looks for Mia's eraser.",
+     "hints": [
+      "回到第 4 句，是 Mia 在群里说的。",
+      "题里的关键词是 every Monday（每个星期一）。在原文里找到它，看它前面的动词。",
+      "排除“She looks for Mia's eraser”：第 9 句只说 Mia 的橡皮不见了，没说王老师去找。",
+      "答案是“She checks the students' red scarves”。第 4 句：Ms Wang checks our red scarves every Monday，意思是“王老师每个星期一都检查我们的红领巾”。"
+     ],
+     "variant": {
+      "ask": "Mia's red scarf is not in her schoolbag. What is gone, too?",
+      "zh": "Mia 的红领巾不在书包里。还有什么也不见了？",
+      "options": [
+       "Mia's bed.",
+       "Mia's desk.",
+       "Mia's cat.",
+       "Mia's eraser."
+      ],
+      "options_zh": [
+       "Mia 的床。",
+       "Mia 的书桌。",
+       "Mia 的猫。",
+       "Mia 的橡皮。"
+      ],
+      "answer": "Mia's eraser.",
+      "evidence": [
+       9
+      ],
+      "explain": "第 9 句：My eraser is gone, too.（我的橡皮也不见了。）too 就是“也”。"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "infer",
+     "skill": "infer",
+     "skill_zh": "把几句连起来想",
+     "ask": "Why is Mia so nervous?",
+     "zh": "Mia 为什么这么紧张？",
+     "options": [
+      "Ms Wang is angry with her.",
+      "She forgets her schoolbag at school.",
+      "Her cat is ill.",
+      "She can't find her red scarf, and Ms Wang checks it tomorrow."
+     ],
+     "options_zh": [
+      "王老师生她的气了。",
+      "她把书包忘在学校了。",
+      "她的猫生病了。",
+      "她找不到红领巾，而王老师明天要检查。"
+     ],
+     "answer": "She can't find her red scarf, and Ms Wang checks it tomorrow.",
+     "evidence": [
+      3,
+      4,
+      17
+     ],
+     "drop": "Her cat is ill.",
+     "hints": [
+      "把第 3、4 句和第 17 句连起来看。",
+      "关键词是 Monday 和 no red scarf：明天是星期一，可红领巾找不到。",
+      "排除“Her cat is ill”：第 12 句说 Momo 在书桌上睡觉，没说它生病。",
+      "答案是“She can't find her red scarf, and Ms Wang checks it tomorrow”。明天是星期一（第 3 句），王老师星期一检查红领巾（第 4 句），可书包里没有红领巾（第 17 句）。原文没有一句直接说“因为”，要把几句连起来想。"
+     ],
+     "variant": {
+      "ask": "Are the blue eyes at the window Momo's?",
+      "zh": "窗户那儿的蓝眼睛是 Momo 的吗？",
+      "options": [
+       "Yes. Momo is at the window.",
+       "No. Momo's eyes are green.",
+       "Yes. Momo is awake.",
+       "No. Momo is at school."
+      ],
+      "options_zh": [
+       "是。Momo 就在窗边。",
+       "不是。Momo 的眼睛是绿色的。",
+       "是。Momo 醒着。",
+       "不是。Momo 在学校。"
+      ],
+      "answer": "No. Momo's eyes are green.",
+      "evidence": [
+       24,
+       25
+      ],
+      "explain": "第 24 句说窗户那儿是 two small blue eyes（蓝眼睛），第 25 句说 Momo 的眼睛是绿色的。颜色对不上，所以不是 Momo。Momo 在窗边，也醒着，可这两点证明不了眼睛是她的。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "cloze",
+     "skill": "word",
+     "skill_zh": "用目标词填空",
+     "word": "strict",
+     "ask": "Choose the right word.",
+     "zh": "选一个词，填进句子里。",
+     "stem": "Ms Wang is ______, but she is kind.",
+     "stem_zh": "王老师很____，但是她人很好。",
+     "options": [
+      "ready",
+      "strict",
+      "awake",
+      "nervous"
+     ],
+     "options_zh": [
+      "准备好的",
+      "严格的",
+      "醒着的",
+      "紧张的"
+     ],
+     "answer": "strict",
+     "evidence": [
+      19
+     ],
+     "drop": "ready",
+     "hints": [
+      "回到第 19 句，是 Lucy 说的。",
+      "看空格后面的 but she is kind（但是她人很好）。but 前后的意思是反着的。",
+      "排除 ready：ready 是“准备好的”，说书包准备好了，不说老师是什么样的人。",
+      "答案是 strict（严格的）。“很严格，但是人很好”，前后正好相反，用 but 连起来。第 5 句 Mia 也说 She is very strict."
+     ],
+     "variant": {
+      "ask": "Choose the right word.",
+      "zh": "选一个词，填进句子里。",
+      "stem": "Our PE teacher is very ______. We can never be late.",
+      "stem_zh": "我们体育老师非常____。我们从来不能迟到。",
+      "options": [
+       "nervous",
+       "awake",
+       "ready",
+       "strict"
+      ],
+      "options_zh": [
+       "紧张的",
+       "醒着的",
+       "准备好的",
+       "严格的"
+      ],
+      "answer": "strict",
+      "explain": "从来不许迟到，说明老师要求很高，是 strict（严格的）。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "meaning",
+     "skill": "word",
+     "skill_zh": "看前后句猜词义",
+     "word": "awake",
+     "ask": "What is “awake” in Chinese? (Sentence 20)",
+     "zh": "第 20 句里的 awake 是什么意思？",
+     "options": [
+      "紧张的",
+      "睡着的",
+      "饿了的",
+      "醒着的"
+     ],
+     "answer": "醒着的",
+     "evidence": [
+      20
+     ],
+     "drop": "睡着的",
+     "hints": [
+      "回到第 20 句，“那天深夜”的第一句。",
+      "看 but：“她躺在床上，但是……”。躺在床上本来该睡觉，but 后面说的是另一回事。",
+      "排除“睡着的”：前面有 but，意思要反过来。“躺在床上，但是睡着了”说不通。",
+      "答案是“醒着的”。awake = 醒着的：Mia 躺在床上，可还没睡着。下一句 Momo is awake, too. Momo 也醒着，正坐在窗边。"
+     ],
+     "variant": {
+      "ask": "Momo sleeps during the day. At night, she is ______.",
+      "zh": "Momo 白天睡觉。到了晚上，她是____的。",
+      "options": [
+       "ready",
+       "awake",
+       "strict",
+       "nervous"
+      ],
+      "options_zh": [
+       "准备好的",
+       "醒着的",
+       "严格的",
+       "紧张的"
+      ],
+      "answer": "awake",
+      "explain": "白天睡觉，晚上就醒着，用 awake（醒着的）。"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ep2",
+   "n": 2,
+   "title": "A Face at the Window",
+   "title_zh": "第 2 集 · 窗边的小脸",
+   "recap_zh": "上一集：星期天晚上，Mia 找不到红领巾，第二天王老师就要检查。半夜，Momo 坐在窗边，窗户那儿出现了一双蓝眼睛。可 Momo 的眼睛是绿色的。",
+   "next_zh": "第 3 集：Mia 和妈妈一起看手机拍下的照片。半夜窗边到底发生了什么？",
+   "tip": {
+    "title": "题里的关键词是路标",
+    "lines": [
+     "题目里的名字、时间、地点，就是路标。",
+     "先在题里圈出来，再回原文找同一个词，答案多半就在那一句，或者前后一句。"
+    ],
+    "steps": [
+     "圈出题里的关键词：red scarf、morning",
+     "回原文找同一个词，或者意思一样的词",
+     "读那一句和前后一句，再去选"
+    ],
+    "exam": {
+     "en": "According to the passage, where is the red scarf?",
+     "zh": "according to the passage 是“根据短文”。看到它，就回原文找，不凭自己想。"
+    },
+    "preview": true,
+    "q": "q1"
+   },
+   "names": [
+    {
+     "en": "Mia",
+     "zh": "主角，初一（3）班的女孩",
+     "key": "hero",
+     "replaceable": true
+    },
+    {
+     "en": "Momo",
+     "zh": "Mia 的小灰猫，绿眼睛",
+     "key": "cat",
+     "replaceable": true
+    },
+    {
+     "en": "Ms Wang",
+     "zh": "班主任王老师，很严格",
+     "key": "teacher",
+     "replaceable": false
+    },
+    {
+     "en": "Wang",
+     "zh": "班主任王老师，很严格",
+     "key": "teacher",
+     "replaceable": false
+    }
+   ],
+   "parts": [
+    {
+     "kind": "diary",
+     "label": "Mia's Diary · Monday Morning",
+     "label_zh": "Mia 的日记 · 星期一早上"
+    },
+    {
+     "kind": "talk",
+     "label": "At School",
+     "label_zh": "在学校"
+    },
+    {
+     "kind": "diary",
+     "label": "Mia's Diary · Monday Evening",
+     "label_zh": "Mia 的日记 · 星期一晚上"
+    }
+   ],
+   "targets": [
+    {
+     "w": "hide",
+     "zh": "藏",
+     "pos": "v."
+    },
+    {
+     "w": "remember",
+     "zh": "记得，记住",
+     "pos": "v."
+    },
+    {
+     "w": "polite",
+     "zh": "有礼貌的",
+     "pos": "adj."
+    },
+    {
+     "w": "plan",
+     "zh": "计划",
+     "pos": "n."
+    },
+    {
+     "w": "appear",
+     "zh": "出现",
+     "pos": "v."
+    }
+   ],
+   "glossary": [],
+   "sentences": [
+    {
+     "id": 1,
+     "part": 0,
+     "line": 1,
+     "speaker": null,
+     "role": null,
+     "en": "My red scarf is back!",
+     "zh": "我的红领巾回来了！",
+     "chunks": "My red scarf / is back!",
+     "keys": [
+      {
+       "w": "is back",
+       "zh": "回来了"
+      },
+      {
+       "w": "red scarf",
+       "zh": "红领巾"
+      }
+     ]
+    },
+    {
+     "id": 2,
+     "part": 0,
+     "line": 1,
+     "speaker": null,
+     "role": null,
+     "en": "It is under the big tree in the garden.",
+     "zh": "它在院子里那棵大树下面。",
+     "chunks": "It is under the big tree / in the garden.",
+     "keys": [
+      {
+       "w": "under",
+       "zh": "在……下面"
+      },
+      {
+       "w": "garden",
+       "zh": "院子，花园"
+      }
+     ]
+    },
+    {
+     "id": 3,
+     "part": 0,
+     "line": 1,
+     "speaker": null,
+     "role": null,
+     "en": "Who can hide it there?",
+     "zh": "谁会把它藏到那儿去？",
+     "chunks": "Who can hide it there?",
+     "keys": [
+      {
+       "w": "hide",
+       "zh": "藏"
+      },
+      {
+       "w": "there",
+       "zh": "那儿"
+      }
+     ]
+    },
+    {
+     "id": 4,
+     "part": 0,
+     "line": 2,
+     "speaker": null,
+     "role": null,
+     "en": "Momo, my grey cat, is sleeping on my bed.",
+     "zh": "我的灰猫 Momo 正在我床上睡觉。",
+     "chunks": "Momo, my grey cat, / is sleeping on my bed.",
+     "keys": [
+      {
+       "w": "grey",
+       "zh": "灰色的"
+      },
+      {
+       "w": "sleeping",
+       "zh": "正在睡觉"
+      }
+     ]
+    },
+    {
+     "id": 5,
+     "part": 0,
+     "line": 2,
+     "speaker": null,
+     "role": null,
+     "en": "She looks very tired.",
+     "zh": "她看起来很累。",
+     "chunks": "She looks very tired.",
+     "keys": [
+      {
+       "w": "looks",
+       "zh": "看起来"
+      },
+      {
+       "w": "tired",
+       "zh": "累的"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 6,
+     "part": 1,
+     "line": 3,
+     "speaker": null,
+     "role": null,
+     "en": "Ms Wang checks our red scarves.",
+     "zh": "王老师检查我们的红领巾。",
+     "chunks": "Ms Wang checks / our red scarves.",
+     "keys": [
+      {
+       "w": "checks",
+       "zh": "检查"
+      },
+      {
+       "w": "red scarves",
+       "zh": "红领巾（scarf 的复数）"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 7,
+     "part": 1,
+     "line": 4,
+     "speaker": "Ms Wang",
+     "role": "teacher",
+     "en": "Mia, your red scarf is very dirty.",
+     "zh": "Mia，你的红领巾很脏。",
+     "chunks": "Mia, / your red scarf / is very dirty.",
+     "keys": [
+      {
+       "w": "your",
+       "zh": "你的"
+      },
+      {
+       "w": "dirty",
+       "zh": "脏的"
+      }
+     ]
+    },
+    {
+     "id": 8,
+     "part": 1,
+     "line": 5,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "I'm sorry, Ms Wang.",
+     "zh": "对不起，王老师。",
+     "chunks": "I'm sorry, / Ms Wang.",
+     "keys": [
+      {
+       "w": "I'm sorry",
+       "zh": "对不起"
+      },
+      {
+       "w": "Ms Wang",
+       "zh": "王老师"
+      }
+     ]
+    },
+    {
+     "id": 9,
+     "part": 1,
+     "line": 5,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "I can wash it this evening.",
+     "zh": "我今天晚上就洗。",
+     "chunks": "I can wash it / this evening.",
+     "keys": [
+      {
+       "w": "wash",
+       "zh": "洗"
+      },
+      {
+       "w": "this evening",
+       "zh": "今天晚上"
+      }
+     ]
+    },
+    {
+     "id": 10,
+     "part": 1,
+     "line": 6,
+     "speaker": "Ms Wang",
+     "role": "teacher",
+     "en": "OK. Remember to wash it.",
+     "zh": "好。记得要洗。",
+     "chunks": "OK. / Remember to wash it.",
+     "keys": [
+      {
+       "w": "remember",
+       "zh": "记得"
+      },
+      {
+       "w": "wash",
+       "zh": "洗"
+      }
+     ]
+    },
+    {
+     "id": 11,
+     "part": 2,
+     "line": 7,
+     "speaker": null,
+     "role": null,
+     "en": "Ms Wang is strict, but she is always polite.",
+     "zh": "王老师很严格，可她一直很有礼貌。",
+     "chunks": "Ms Wang is strict, / but she is always polite.",
+     "keys": [
+      {
+       "w": "strict",
+       "zh": "严格的"
+      },
+      {
+       "w": "polite",
+       "zh": "有礼貌的"
+      }
+     ]
+    },
+    {
+     "id": 12,
+     "part": 2,
+     "line": 7,
+     "speaker": null,
+     "role": null,
+     "en": "So I am polite to her, too.",
+     "zh": "所以我对她也很有礼貌。",
+     "chunks": "So I am polite / to her, too.",
+     "keys": [
+      {
+       "w": "polite",
+       "zh": "有礼貌的"
+      },
+      {
+       "w": "too",
+       "zh": "也"
+      }
+     ]
+    },
+    {
+     "id": 13,
+     "part": 2,
+     "line": 7,
+     "speaker": null,
+     "role": null,
+     "en": "I remember her words and wash it.",
+     "zh": "我记着她的话，把红领巾洗了。",
+     "chunks": "I remember her words / and wash it.",
+     "keys": [
+      {
+       "w": "remember",
+       "zh": "记得，记着"
+      },
+      {
+       "w": "words",
+       "zh": "话"
+      }
+     ]
+    },
+    {
+     "id": 14,
+     "part": 2,
+     "line": 7,
+     "speaker": null,
+     "role": null,
+     "en": "But who hid it?",
+     "zh": "可到底是谁把它藏起来的？",
+     "chunks": "But who hid it?",
+     "keys": [
+      {
+       "w": "who",
+       "zh": "谁"
+      },
+      {
+       "w": "hid",
+       "zh": "藏（hide 的过去式）"
+      }
+     ]
+    },
+    {
+     "id": 15,
+     "part": 2,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "Now I have a plan.",
+     "zh": "现在我有一个计划。",
+     "chunks": "Now / I have a plan.",
+     "keys": [
+      {
+       "w": "plan",
+       "zh": "计划"
+      },
+      {
+       "w": "now",
+       "zh": "现在"
+      }
+     ]
+    },
+    {
+     "id": 16,
+     "part": 2,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "I put my phone at the window.",
+     "zh": "我把手机放在窗边。",
+     "chunks": "I put my phone / at the window.",
+     "keys": [
+      {
+       "w": "put",
+       "zh": "放"
+      },
+      {
+       "w": "phone",
+       "zh": "手机"
+      }
+     ]
+    },
+    {
+     "id": 17,
+     "part": 2,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "It can take photos at night.",
+     "zh": "它晚上也能拍照。",
+     "chunks": "It can take photos / at night.",
+     "keys": [
+      {
+       "w": "take photos",
+       "zh": "拍照"
+      },
+      {
+       "w": "at night",
+       "zh": "在晚上"
+      }
+     ]
+    },
+    {
+     "id": 18,
+     "part": 2,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "Good plan, Mia!",
+     "zh": "好计划，Mia！",
+     "chunks": "Good plan, Mia!",
+     "keys": [
+      {
+       "w": "good",
+       "zh": "好的"
+      },
+      {
+       "w": "plan",
+       "zh": "计划"
+      }
+     ]
+    },
+    {
+     "id": 19,
+     "part": 2,
+     "line": 9,
+     "speaker": null,
+     "role": null,
+     "en": "At 12:05, my phone makes a sound.",
+     "zh": "12 点 05 分，我的手机响了一声。",
+     "chunks": "At 12:05, / my phone makes a sound.",
+     "keys": [
+      {
+       "w": "makes a sound",
+       "zh": "发出声音"
+      },
+      {
+       "w": "phone",
+       "zh": "手机"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 20,
+     "part": 2,
+     "line": 9,
+     "speaker": null,
+     "role": null,
+     "en": "A little white face appears at the window.",
+     "zh": "一张白色的小脸出现在窗边。",
+     "chunks": "A little white face / appears at the window.",
+     "keys": [
+      {
+       "w": "appears",
+       "zh": "出现"
+      },
+      {
+       "w": "face",
+       "zh": "脸"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 21,
+     "part": 2,
+     "line": 9,
+     "speaker": null,
+     "role": null,
+     "en": "Then a grey tail appears, too.",
+     "zh": "接着，一条灰色的尾巴也出现了。",
+     "chunks": "Then / a grey tail / appears, too.",
+     "keys": [
+      {
+       "w": "tail",
+       "zh": "尾巴"
+      },
+      {
+       "w": "grey",
+       "zh": "灰色的"
+      }
+     ],
+     "point": "g:third_s"
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "Where is Mia's red scarf in the morning?",
+     "zh": "早上，Mia 的红领巾在哪儿？",
+     "options": [
+      "Under the big tree in the garden.",
+      "In her schoolbag.",
+      "On her bed.",
+      "At school."
+     ],
+     "options_zh": [
+      "在院子里的大树下。",
+      "在她的书包里。",
+      "在她床上。",
+      "在学校。"
+     ],
+     "answer": "Under the big tree in the garden.",
+     "evidence": [
+      2
+     ],
+     "drop": "On her bed.",
+     "hints": [
+      "回到第 2 句，日记的开头。",
+      "题里的关键词是 red scarf 和 morning。日记第一段写的就是星期一早上。",
+      "排除“On her bed”：第 4 句说在床上睡觉的是 Momo，不是红领巾。",
+      "答案是“Under the big tree in the garden”。第 1 句说红领巾回来了，第 2 句说 It is under the big tree in the garden.（它在院子里的大树下。）"
+     ],
+     "variant": {
+      "ask": "Where does Mia put her phone?",
+      "zh": "Mia 把手机放在哪儿？",
+      "options": [
+       "In her schoolbag.",
+       "Under the tree.",
+       "At the window.",
+       "On Momo's bed."
+      ],
+      "options_zh": [
+       "书包里。",
+       "树下。",
+       "窗边。",
+       "Momo 的床上。"
+      ],
+      "answer": "At the window.",
+      "evidence": [
+       16
+      ],
+      "explain": "第 16 句：I put my phone at the window.（我把手机放在窗边。）放在那儿是为了晚上拍照。"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "infer",
+     "skill": "infer",
+     "skill_zh": "把几句连起来想",
+     "ask": "Whose grey tail appears at the window, do you think?",
+     "zh": "你觉得，窗边出现的灰尾巴是谁的？",
+     "options": [
+      "A dog's.",
+      "The white cat's.",
+      "Momo's.",
+      "A mouse's."
+     ],
+     "options_zh": [
+      "一只狗的。",
+      "那只白猫的。",
+      "Momo 的。",
+      "一只老鼠的。"
+     ],
+     "answer": "Momo's.",
+     "evidence": [
+      4,
+      21
+     ],
+     "drop": "A dog's.",
+     "hints": [
+      "看第 4 句和最后一句（第 21 句）。",
+      "关键词是 grey（灰色的）。故事里还有谁是灰色的？",
+      "排除“A dog's”：这两集里根本没有出现过狗。",
+      "答案是“Momo's”。第 4 句说 Momo, my grey cat（我的灰猫），最后出现的是 a grey tail（一条灰尾巴）。原文没直接说是谁，两句一对就能推出来。早上 Momo 很累（第 5 句），也是线索：她夜里没睡。"
+     ],
+     "variant": {
+      "ask": "Why is Momo very tired in the morning, do you think?",
+      "zh": "你觉得，Momo 早上为什么那么累？",
+      "options": [
+       "She is awake at night.",
+       "She goes to school.",
+       "She washes the red scarf.",
+       "She takes photos."
+      ],
+      "options_zh": [
+       "她夜里醒着。",
+       "她去上学了。",
+       "她洗了红领巾。",
+       "她拍了照片。"
+      ],
+      "answer": "She is awake at night.",
+      "evidence": [
+       5,
+       21
+      ],
+      "explain": "半夜窗边出现了 Momo 的灰尾巴（第 21 句），说明她夜里没睡，所以早上累。第 1 集里她半夜也是醒着的。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "cloze",
+     "skill": "word",
+     "skill_zh": "用目标词填空",
+     "word": "polite",
+     "ask": "Choose the right word.",
+     "zh": "选一个词，填进句子里。",
+     "stem": "Ms Wang is strict, but she is always ______.",
+     "stem_zh": "王老师很严格，可她一直很____。",
+     "options": [
+      "polite",
+      "dirty",
+      "grey",
+      "ready"
+     ],
+     "options_zh": [
+      "有礼貌的",
+      "脏的",
+      "灰色的",
+      "准备好的"
+     ],
+     "answer": "polite",
+     "evidence": [
+      11
+     ],
+     "drop": "dirty",
+     "hints": [
+      "回到第 11 句，晚上那段日记的第一句。",
+      "but 前面说“严格”，后面说她一个好的地方。下一句 So I am ___ to her, too. 用的是同一个词。",
+      "排除 dirty：dirty 是“脏的”，说红领巾，不说人。",
+      "答案是 polite（有礼貌的）。“很严格，但一直很有礼貌”，所以 Mia 对她也有礼貌（第 12 句）。"
+     ],
+     "variant": {
+      "ask": "Choose the right word.",
+      "zh": "选一个词，填进句子里。",
+      "stem": "Say “please” and “thank you”. Be ______ to people.",
+      "stem_zh": "要说“请”和“谢谢”。对人要____。",
+      "options": [
+       "tired",
+       "dirty",
+       "polite",
+       "awake"
+      ],
+      "options_zh": [
+       "累的",
+       "脏的",
+       "有礼貌的",
+       "醒着的"
+      ],
+      "answer": "polite",
+      "explain": "说“请”和“谢谢”，是有礼貌，用 polite。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "meaning",
+     "skill": "word",
+     "skill_zh": "看前后句猜词义",
+     "word": "appear",
+     "ask": "What is “appears” in Chinese? (Sentence 20)",
+     "zh": "第 20 句里的 appears 是什么意思？",
+     "options": [
+      "睡觉",
+      "消失",
+      "出现",
+      "拍照"
+     ],
+     "answer": "出现",
+     "evidence": [
+      20
+     ],
+     "drop": "消失",
+     "hints": [
+      "回到第 20 句，12:05 以后。",
+      "手机刚响了一声，窗边就有了一张白色的小脸。",
+      "排除“消失”：窗边是“多了”一张脸，不是“没了”。",
+      "答案是“出现”。appear = 出现。appears 是 appear 加了 s，因为主语 a little white face 是“一张脸”，单数。下一句 a grey tail appears, too：灰尾巴也出现了。"
+     ],
+     "variant": {
+      "ask": "In the morning, the sun ______.",
+      "zh": "早上，太阳____了。",
+      "options": [
+       "appears",
+       "understands",
+       "remembers",
+       "forgets"
+      ],
+      "options_zh": [
+       "出现",
+       "明白",
+       "记得",
+       "忘记"
+      ],
+      "answer": "appears",
+      "explain": "早上太阳出来了，用 appears（出现）。主语 the sun 是单数，所以加 s。"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ep3",
+   "n": 3,
+   "title": "The Photos",
+   "title_zh": "第 3 集 · 手机里的照片",
+   "recap_zh": "上一集：红领巾在院子的大树下找到了，脏兮兮的。Mia 被王老师说了一句，晚上她想了个办法：把手机放在窗边，夜里拍照。12:05，窗边出现了一张白色的小脸，接着是一条灰尾巴。",
+   "next_zh": "第 4 集：Momo 不见了。Mia 和 Lucy 出门去找，一路跟着一条灰尾巴。",
+   "tip": {
+    "title": "生词别停，看前后句猜",
+    "lines": [
+     "读到不认识的词，先别停下来查。",
+     "看它前后的句子，常常就能猜出意思。",
+     "猜不出来，又不影响答题，就跳过去接着读。"
+    ],
+    "steps": [
+     "在生词下面画一条线，接着往下读",
+     "看前后句：前面说了什么，后面又说了什么",
+     "猜一个意思，放回句子里读一遍，看通不通"
+    ],
+    "exam": {
+     "en": "What does the underlined word “lonely” mean?",
+     "zh": "“画线的词是什么意思？”这类题考的是它在这一句里的意思，用前后句猜。"
+    },
+    "preview": false,
+    "q": "q4"
+   },
+   "names": [
+    {
+     "en": "Mia",
+     "zh": "主角，初一（3）班的女孩",
+     "key": "hero",
+     "replaceable": true
+    },
+    {
+     "en": "Momo",
+     "zh": "Mia 的小灰猫，绿眼睛",
+     "key": "cat",
+     "replaceable": true
+    },
+    {
+     "en": "Mum",
+     "zh": "Mia 的妈妈",
+     "key": "mum",
+     "replaceable": false
+    }
+   ],
+   "parts": [
+    {
+     "kind": "talk",
+     "label": "Tuesday Morning, in the Kitchen",
+     "label_zh": "星期二早上，厨房里"
+    },
+    {
+     "kind": "story",
+     "label": "That Evening",
+     "label_zh": "那天晚上"
+    }
+   ],
+   "targets": [
+    {
+     "w": "carry",
+     "zh": "带，搬（这里是叼着）",
+     "pos": "v."
+    },
+    {
+     "w": "lonely",
+     "zh": "孤单的",
+     "pos": "adj."
+    },
+    {
+     "w": "understand",
+     "zh": "明白，懂",
+     "pos": "v."
+    },
+    {
+     "w": "happen",
+     "zh": "发生",
+     "pos": "v."
+    },
+    {
+     "w": "together",
+     "zh": "一起",
+     "pos": "adv."
+    }
+   ],
+   "glossary": [],
+   "sentences": [
+    {
+     "id": 1,
+     "part": 0,
+     "line": 1,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Mum, look at these photos!",
+     "zh": "妈妈，快看这些照片！",
+     "chunks": "Mum, / look at these photos!",
+     "keys": [
+      {
+       "w": "look at",
+       "zh": "看"
+      },
+      {
+       "w": "photos",
+       "zh": "照片"
+      }
+     ]
+    },
+    {
+     "id": 2,
+     "part": 0,
+     "line": 2,
+     "speaker": "Mum",
+     "role": "mum",
+     "en": "What happened?",
+     "zh": "怎么了？",
+     "chunks": "What happened?",
+     "keys": [
+      {
+       "w": "what",
+       "zh": "什么"
+      },
+      {
+       "w": "happened",
+       "zh": "发生了（happen 的过去式）"
+      }
+     ]
+    },
+    {
+     "id": 3,
+     "part": 0,
+     "line": 3,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Momo is awake at night.",
+     "zh": "Momo 晚上是醒着的。",
+     "chunks": "Momo is awake / at night.",
+     "keys": [
+      {
+       "w": "awake",
+       "zh": "醒着的"
+      },
+      {
+       "w": "at night",
+       "zh": "在晚上"
+      }
+     ]
+    },
+    {
+     "id": 4,
+     "part": 0,
+     "line": 3,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Look, she is carrying my sock to the window.",
+     "zh": "你看，她正叼着我的袜子往窗边去。",
+     "chunks": "Look, / she is carrying my sock / to the window.",
+     "keys": [
+      {
+       "w": "carrying",
+       "zh": "带着，搬着（这里是叼着）"
+      },
+      {
+       "w": "sock",
+       "zh": "袜子"
+      }
+     ]
+    },
+    {
+     "id": 5,
+     "part": 0,
+     "line": 4,
+     "speaker": "Mum",
+     "role": "mum",
+     "en": "And who is this?",
+     "zh": "那这个是谁？",
+     "chunks": "And who is this?",
+     "keys": [
+      {
+       "w": "who",
+       "zh": "谁"
+      },
+      {
+       "w": "this",
+       "zh": "这个"
+      }
+     ]
+    },
+    {
+     "id": 6,
+     "part": 0,
+     "line": 5,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "A little white cat.",
+     "zh": "一只白色的小猫。",
+     "chunks": "A little white cat.",
+     "keys": [
+      {
+       "w": "little",
+       "zh": "小的"
+      },
+      {
+       "w": "white",
+       "zh": "白色的"
+      }
+     ]
+    },
+    {
+     "id": 7,
+     "part": 0,
+     "line": 5,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "She takes my sock and runs away.",
+     "zh": "她叼走我的袜子就跑了。",
+     "chunks": "She takes my sock / and runs away.",
+     "keys": [
+      {
+       "w": "takes",
+       "zh": "拿走"
+      },
+      {
+       "w": "runs away",
+       "zh": "跑开"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 8,
+     "part": 0,
+     "line": 6,
+     "speaker": "Mum",
+     "role": "mum",
+     "en": "Oh, I understand now.",
+     "zh": "哦，我现在明白了。",
+     "chunks": "Oh, / I understand now.",
+     "keys": [
+      {
+       "w": "understand",
+       "zh": "明白"
+      },
+      {
+       "w": "now",
+       "zh": "现在"
+      }
+     ]
+    },
+    {
+     "id": 9,
+     "part": 0,
+     "line": 6,
+     "speaker": "Mum",
+     "role": "mum",
+     "en": "Momo carries your socks to her friend.",
+     "zh": "Momo 把你的袜子带给她的朋友。",
+     "chunks": "Momo carries your socks / to her friend.",
+     "keys": [
+      {
+       "w": "carries",
+       "zh": "带去，搬去"
+      },
+      {
+       "w": "friend",
+       "zh": "朋友"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 10,
+     "part": 0,
+     "line": 7,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "But why?",
+     "zh": "可是为什么呢？",
+     "chunks": "But why?",
+     "keys": [
+      {
+       "w": "but",
+       "zh": "可是"
+      },
+      {
+       "w": "why",
+       "zh": "为什么"
+      }
+     ]
+    },
+    {
+     "id": 11,
+     "part": 0,
+     "line": 8,
+     "speaker": "Mum",
+     "role": "mum",
+     "en": "Look at the white cat.",
+     "zh": "看看那只白猫。",
+     "chunks": "Look at the white cat.",
+     "keys": [
+      {
+       "w": "look at",
+       "zh": "看"
+      },
+      {
+       "w": "white cat",
+       "zh": "白猫"
+      }
+     ]
+    },
+    {
+     "id": 12,
+     "part": 0,
+     "line": 8,
+     "speaker": "Mum",
+     "role": "mum",
+     "en": "She is very thin.",
+     "zh": "她很瘦。",
+     "chunks": "She is very thin.",
+     "keys": [
+      {
+       "w": "thin",
+       "zh": "瘦的"
+      },
+      {
+       "w": "very",
+       "zh": "很"
+      }
+     ]
+    },
+    {
+     "id": 13,
+     "part": 0,
+     "line": 8,
+     "speaker": "Mum",
+     "role": "mum",
+     "en": "I think she has no home.",
+     "zh": "我想她没有家。",
+     "chunks": "I think / she has no home.",
+     "keys": [
+      {
+       "w": "think",
+       "zh": "想，认为"
+      },
+      {
+       "w": "no home",
+       "zh": "没有家"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 14,
+     "part": 0,
+     "line": 8,
+     "speaker": "Mum",
+     "role": "mum",
+     "en": "She is cold and lonely.",
+     "zh": "她又冷又孤单。",
+     "chunks": "She is cold / and lonely.",
+     "keys": [
+      {
+       "w": "cold",
+       "zh": "冷的"
+      },
+      {
+       "w": "lonely",
+       "zh": "孤单的"
+      }
+     ]
+    },
+    {
+     "id": 15,
+     "part": 0,
+     "line": 9,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "So Momo is helping her?",
+     "zh": "所以 Momo 是在帮她？",
+     "chunks": "So Momo is helping her?",
+     "keys": [
+      {
+       "w": "so",
+       "zh": "所以"
+      },
+      {
+       "w": "helping",
+       "zh": "正在帮助"
+      }
+     ]
+    },
+    {
+     "id": 16,
+     "part": 0,
+     "line": 10,
+     "speaker": "Mum",
+     "role": "mum",
+     "en": "Yes, they are good friends.",
+     "zh": "是的，她们是好朋友。",
+     "chunks": "Yes, / they are good friends.",
+     "keys": [
+      {
+       "w": "yes",
+       "zh": "是的"
+      },
+      {
+       "w": "good friends",
+       "zh": "好朋友"
+      }
+     ]
+    },
+    {
+     "id": 17,
+     "part": 0,
+     "line": 10,
+     "speaker": "Mum",
+     "role": "mum",
+     "en": "They play together at night.",
+     "zh": "她们晚上一起玩。",
+     "chunks": "They play together / at night.",
+     "keys": [
+      {
+       "w": "play",
+       "zh": "玩"
+      },
+      {
+       "w": "together",
+       "zh": "一起"
+      }
+     ]
+    },
+    {
+     "id": 18,
+     "part": 0,
+     "line": 11,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "I understand.",
+     "zh": "我懂了。",
+     "chunks": "I understand.",
+     "keys": [
+      {
+       "w": "understand",
+       "zh": "懂，明白"
+      }
+     ]
+    },
+    {
+     "id": 19,
+     "part": 0,
+     "line": 11,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Now they are not lonely.",
+     "zh": "现在她们不孤单了。",
+     "chunks": "Now / they are not lonely.",
+     "keys": [
+      {
+       "w": "now",
+       "zh": "现在"
+      },
+      {
+       "w": "lonely",
+       "zh": "孤单的"
+      }
+     ]
+    },
+    {
+     "id": 20,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "Mia gets home at six.",
+     "zh": "Mia 六点到家。",
+     "chunks": "Mia gets home / at six.",
+     "keys": [
+      {
+       "w": "gets home",
+       "zh": "到家"
+      },
+      {
+       "w": "six",
+       "zh": "六（点）"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 21,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "The window is open.",
+     "zh": "窗户开着。",
+     "chunks": "The window is open.",
+     "keys": [
+      {
+       "w": "window",
+       "zh": "窗户"
+      },
+      {
+       "w": "open",
+       "zh": "开着的"
+      }
+     ]
+    },
+    {
+     "id": 22,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "Momo is not in the house.",
+     "zh": "Momo 不在家里。",
+     "chunks": "Momo is not / in the house.",
+     "keys": [
+      {
+       "w": "house",
+       "zh": "房子，家里"
+      },
+      {
+       "w": "not in",
+       "zh": "不在……里"
+      }
+     ]
+    },
+    {
+     "id": 23,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "What happened to Momo?",
+     "zh": "Momo 出什么事了？",
+     "chunks": "What happened to Momo?",
+     "keys": [
+      {
+       "w": "happened",
+       "zh": "发生了"
+      },
+      {
+       "w": "what",
+       "zh": "什么"
+      }
+     ]
+    },
+    {
+     "id": 24,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "Is she hiding in the garden?",
+     "zh": "她是不是躲在院子里？",
+     "chunks": "Is she hiding / in the garden?",
+     "keys": [
+      {
+       "w": "hiding",
+       "zh": "躲着，藏着"
+      },
+      {
+       "w": "garden",
+       "zh": "院子"
+      }
+     ]
+    },
+    {
+     "id": 25,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "Are they together again?",
+     "zh": "她们是不是又在一起了？",
+     "chunks": "Are they together again?",
+     "keys": [
+      {
+       "w": "together",
+       "zh": "一起"
+      },
+      {
+       "w": "again",
+       "zh": "又，再"
+      }
+     ]
+    },
+    {
+     "id": 26,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "Mia calls, “Momo!”",
+     "zh": "Mia 喊：“Momo！”",
+     "chunks": "Mia calls, / “Momo!”",
+     "keys": [
+      {
+       "w": "calls",
+       "zh": "喊，叫"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 27,
+     "part": 1,
+     "line": 12,
+     "speaker": null,
+     "role": null,
+     "en": "But Momo does not come back.",
+     "zh": "可是 Momo 没有回来。",
+     "chunks": "But Momo / does not come back.",
+     "keys": [
+      {
+       "w": "does not",
+       "zh": "没有"
+      },
+      {
+       "w": "come back",
+       "zh": "回来"
+      }
+     ],
+     "point": "g:third_s"
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "What does the white cat take?",
+     "zh": "那只白猫拿走了什么？",
+     "options": [
+      "Momo's food.",
+      "Mia's red scarf.",
+      "Mia's phone.",
+      "Mia's sock."
+     ],
+     "options_zh": [
+      "Momo 的食物。",
+      "Mia 的红领巾。",
+      "Mia 的手机。",
+      "Mia 的袜子。"
+     ],
+     "answer": "Mia's sock.",
+     "evidence": [
+      7
+     ],
+     "drop": "Mia's phone.",
+     "hints": [
+      "回到第 7 句，是 Mia 说的。",
+      "关键词是 white cat 和 take（拿）。先找到 white cat（第 6 句），再往后读一句。",
+      "排除“Mia's phone”：手机是 Mia 放在窗边拍照用的，白猫没有拿。",
+      "答案是“Mia's sock”。第 7 句：She takes my sock and runs away.（她叼走我的袜子就跑了。）这里的 she 指那只白猫。"
+     ],
+     "variant": {
+      "ask": "What is the white cat like?",
+      "zh": "那只白猫是什么样子的？",
+      "options": [
+       "Big and happy.",
+       "Thin, cold and lonely.",
+       "Clean and busy.",
+       "Old and angry."
+      ],
+      "options_zh": [
+       "又大又开心。",
+       "又瘦，又冷，又孤单。",
+       "又干净又忙。",
+       "又老又生气。"
+      ],
+      "answer": "Thin, cold and lonely.",
+      "evidence": [
+       12,
+       14
+      ],
+      "explain": "妈妈说 She is very thin.（第 12 句）和 She is cold and lonely.（第 14 句）。"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "infer",
+     "skill": "infer",
+     "skill_zh": "把几句连起来想",
+     "ask": "Why does Momo carry Mia's socks to the window?",
+     "zh": "Momo 为什么把 Mia 的袜子叼到窗边？",
+     "options": [
+      "To play a game with Mia.",
+      "To help her friend, the white cat.",
+      "To hide them from Mum.",
+      "To make Mia angry."
+     ],
+     "options_zh": [
+      "为了和 Mia 玩游戏。",
+      "为了帮她的朋友，那只白猫。",
+      "为了把袜子藏起来，不让妈妈看见。",
+      "为了让 Mia 生气。"
+     ],
+     "answer": "To help her friend, the white cat.",
+     "evidence": [
+      9,
+      13,
+      15
+     ],
+     "drop": "To make Mia angry.",
+     "hints": [
+      "看第 9 句到第 15 句，妈妈和 Mia 的几句对话。",
+      "关键词是 friend 和 helping：袜子是带给谁的？那只猫过得怎么样？",
+      "排除“To make Mia angry”：原文没有一句说 Momo 想让 Mia 生气。原文没说的，不能选。",
+      "答案是“To help her friend, the white cat”。妈妈说 Momo carries your socks to her friend（把袜子带给她的朋友），那只白猫 has no home（没有家），又冷又孤单。Mia 问 So Momo is helping her?，妈妈说 Yes。所以 Momo 是在帮朋友。"
+     ],
+     "variant": {
+      "ask": "Why is the white cat thin, do you think?",
+      "zh": "你觉得，那只白猫为什么很瘦？",
+      "options": [
+       "She plays too much.",
+       "She runs every day.",
+       "She is a baby cat.",
+       "She has no home and little food."
+      ],
+      "options_zh": [
+       "她玩得太多了。",
+       "她每天跑步。",
+       "她是一只小奶猫。",
+       "她没有家，吃的也少。"
+      ],
+      "answer": "She has no home and little food.",
+      "evidence": [
+       12,
+       13
+      ],
+      "explain": "妈妈说她没有家（第 13 句）。没家的猫常常吃不饱，所以很瘦。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "cloze",
+     "skill": "word",
+     "skill_zh": "用目标词填空",
+     "word": "carry",
+     "ask": "Choose the right word.",
+     "zh": "选一个词，填进句子里。",
+     "stem": "Momo ______ your socks to her friend.",
+     "stem_zh": "Momo 把你的袜子____给她的朋友。",
+     "options": [
+      "understands",
+      "remembers",
+      "hides",
+      "carries"
+     ],
+     "options_zh": [
+      "明白",
+      "记得",
+      "藏",
+      "带去"
+     ],
+     "answer": "carries",
+     "evidence": [
+      9
+     ],
+     "drop": "remembers",
+     "hints": [
+      "回到第 9 句，是妈妈说的。",
+      "空格后面是 your socks to her friend：把袜子“带到”朋友那儿。",
+      "排除 remembers：remember 是“记得”，“记得袜子到朋友那儿”说不通。",
+      "答案是 carries（带去，搬去）。主语 Momo 是单数，carry 要变成 carries：y 变 i，再加 es。第 4 句 she is carrying my sock 也是这个词。"
+     ],
+     "variant": {
+      "ask": "Choose the right word.",
+      "zh": "选一个词，填进句子里。",
+      "stem": "Can you help me ______ this box to the classroom?",
+      "stem_zh": "你能帮我把这个箱子____到教室吗？",
+      "options": [
+       "understand",
+       "carry",
+       "remember",
+       "happen"
+      ],
+      "options_zh": [
+       "明白",
+       "搬",
+       "记得",
+       "发生"
+      ],
+      "answer": "carry",
+      "explain": "把箱子搬到教室，用 carry。help me 后面用原形，所以是 carry，不是 carries。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "meaning",
+     "skill": "word",
+     "skill_zh": "看前后句猜词义",
+     "word": "lonely",
+     "ask": "What is “lonely” in Chinese? (Sentence 14)",
+     "zh": "第 14 句里的 lonely 是什么意思？",
+     "options": [
+      "开心的",
+      "孤单的",
+      "生气的",
+      "干净的"
+     ],
+     "answer": "孤单的",
+     "evidence": [
+      14
+     ],
+     "drop": "开心的",
+     "hints": [
+      "回到第 14 句。",
+      "前一句说她没有家，这一句又说她很冷。没有家、没有人陪，心里是什么感觉？",
+      "排除“开心的”：没家又冷，不会开心。",
+      "答案是“孤单的”。lonely = 孤单的。后面 Mia 说 Now they are not lonely.（现在她们不孤单了），因为两只猫晚上一起玩。"
+     ],
+     "variant": {
+      "ask": "Tom has no friends at his new school. He is ______.",
+      "zh": "Tom 在新学校里没有朋友。他很____。",
+      "options": [
+       "strict",
+       "polite",
+       "ready",
+       "lonely"
+      ],
+      "options_zh": [
+       "严格的",
+       "有礼貌的",
+       "准备好的",
+       "孤单的"
+      ],
+      "answer": "lonely",
+      "explain": "一个朋友都没有，会觉得孤单，用 lonely。"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ep4",
+   "n": 4,
+   "title": "Follow That Tail!",
+   "title_zh": "第 4 集 · 跟着那条尾巴！",
+   "recap_zh": "上一集：照片拍到了 Momo 半夜叼着 Mia 的袜子去窗边，一只又瘦又孤单的小白猫把袜子叼走了。妈妈说，Momo 是在帮她的朋友。可那天晚上，Momo 不见了，窗户开着。",
+   "next_zh": "第 5 集：李奶奶讲了小白猫的故事。Mia 遇到了一个大难题。",
+   "tip": {
+    "title": "推断题，先找证据句",
+    "lines": [
+     "有的题答案不会原样写在文中，比如问“我们能推出什么”。",
+     "先找能证明的句子，再选证据撑得住的那个。",
+     "只是自己觉得、原文找不到证据的，不选。"
+    ],
+    "steps": [
+     "认出推断题：题里有 do you think、can we learn",
+     "回原文找能证明的一两句，画出来",
+     "每个选项都问一句“证据在哪？”，找不到就划掉"
+    ],
+    "exam": {
+     "en": "What can we learn from the passage?",
+     "zh": "“从短文中我们可以知道什么？”选的那个要能在原文里找到证据。"
+    },
+    "preview": false,
+    "q": "q2"
+   },
+   "names": [
+    {
+     "en": "Mia",
+     "zh": "主角，初一（3）班的女孩",
+     "key": "hero",
+     "replaceable": true
+    },
+    {
+     "en": "Momo",
+     "zh": "Mia 的小灰猫，绿眼睛",
+     "key": "cat",
+     "replaceable": true
+    },
+    {
+     "en": "Lucy",
+     "zh": "Mia 最好的朋友，同班",
+     "key": "lucy",
+     "replaceable": true
+    },
+    {
+     "en": "Grandma Li",
+     "zh": "住在附近的李奶奶",
+     "key": "grandma",
+     "replaceable": false
+    },
+    {
+     "en": "Li",
+     "zh": "住在附近的李奶奶",
+     "key": "grandma",
+     "replaceable": false
+    }
+   ],
+   "parts": [
+    {
+     "kind": "chat",
+     "label": "Mia and Lucy · Tuesday Evening",
+     "label_zh": "Mia 和 Lucy 的聊天 · 星期二晚上"
+    },
+    {
+     "kind": "story",
+     "label": "Along the Street",
+     "label_zh": "沿着街道"
+    }
+   ],
+   "targets": [
+    {
+     "w": "follow",
+     "zh": "跟着",
+     "pos": "v."
+    },
+    {
+     "w": "silent",
+     "zh": "不出声的，安静的",
+     "pos": "adj."
+    },
+    {
+     "w": "along",
+     "zh": "沿着",
+     "pos": "prep."
+    },
+    {
+     "w": "almost",
+     "zh": "差不多，几乎",
+     "pos": "adv."
+    },
+    {
+     "w": "shake",
+     "zh": "摇，晃",
+     "pos": "v."
+    }
+   ],
+   "glossary": [],
+   "sentences": [
+    {
+     "id": 1,
+     "part": 0,
+     "line": 1,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Momo is not at home!",
+     "zh": "Momo 不在家！",
+     "chunks": "Momo is not at home!",
+     "keys": [
+      {
+       "w": "at home",
+       "zh": "在家"
+      },
+      {
+       "w": "not",
+       "zh": "不"
+      }
+     ]
+    },
+    {
+     "id": 2,
+     "part": 0,
+     "line": 2,
+     "speaker": "Lucy",
+     "role": "lucy",
+     "en": "Don't be nervous.",
+     "zh": "别紧张。",
+     "chunks": "Don't be nervous.",
+     "keys": [
+      {
+       "w": "don't be",
+       "zh": "别"
+      },
+      {
+       "w": "nervous",
+       "zh": "紧张的"
+      }
+     ]
+    },
+    {
+     "id": 3,
+     "part": 0,
+     "line": 2,
+     "speaker": "Lucy",
+     "role": "lucy",
+     "en": "Let's look for her together.",
+     "zh": "我们一起去找她吧。",
+     "chunks": "Let's look for her / together.",
+     "keys": [
+      {
+       "w": "look for",
+       "zh": "寻找"
+      },
+      {
+       "w": "together",
+       "zh": "一起"
+      }
+     ]
+    },
+    {
+     "id": 4,
+     "part": 0,
+     "line": 3,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "I have a plan.",
+     "zh": "我有个计划。",
+     "chunks": "I have a plan.",
+     "keys": [
+      {
+       "w": "have",
+       "zh": "有"
+      },
+      {
+       "w": "plan",
+       "zh": "计划"
+      }
+     ]
+    },
+    {
+     "id": 5,
+     "part": 0,
+     "line": 3,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Find the white cat, and we can find Momo.",
+     "zh": "找到那只白猫，就能找到 Momo。",
+     "chunks": "Find the white cat, / and we can find Momo.",
+     "keys": [
+      {
+       "w": "find",
+       "zh": "找到"
+      },
+      {
+       "w": "white cat",
+       "zh": "白猫"
+      }
+     ]
+    },
+    {
+     "id": 6,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "Mia and Lucy walk along the street.",
+     "zh": "Mia 和 Lucy 沿着街道走。",
+     "chunks": "Mia and Lucy / walk along the street.",
+     "keys": [
+      {
+       "w": "walk",
+       "zh": "走"
+      },
+      {
+       "w": "along",
+       "zh": "沿着"
+      }
+     ]
+    },
+    {
+     "id": 7,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "It is almost seven.",
+     "zh": "快七点了。",
+     "chunks": "It is almost seven.",
+     "keys": [
+      {
+       "w": "almost",
+       "zh": "差不多，快要"
+      },
+      {
+       "w": "seven",
+       "zh": "七（点）"
+      }
+     ]
+    },
+    {
+     "id": 8,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "Then a grey tail appears.",
+     "zh": "这时，一条灰尾巴出现了。",
+     "chunks": "Then / a grey tail appears.",
+     "keys": [
+      {
+       "w": "appears",
+       "zh": "出现"
+      },
+      {
+       "w": "tail",
+       "zh": "尾巴"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 9,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "“Follow that tail!” Lucy says.",
+     "zh": "“跟着那条尾巴！”Lucy 说。",
+     "chunks": "“Follow that tail!” / Lucy says.",
+     "keys": [
+      {
+       "w": "follow",
+       "zh": "跟着"
+      },
+      {
+       "w": "says",
+       "zh": "说"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 10,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "The girls follow Momo along an old wall.",
+     "zh": "两个女孩跟着 Momo，沿着一堵旧墙走。",
+     "chunks": "The girls follow Momo / along an old wall.",
+     "keys": [
+      {
+       "w": "follow",
+       "zh": "跟着"
+      },
+      {
+       "w": "wall",
+       "zh": "墙"
+      }
+     ]
+    },
+    {
+     "id": 11,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "They are silent.",
+     "zh": "她们一声不出。",
+     "chunks": "They are silent.",
+     "keys": [
+      {
+       "w": "they",
+       "zh": "她们"
+      },
+      {
+       "w": "silent",
+       "zh": "不出声的"
+      }
+     ]
+    },
+    {
+     "id": 12,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "The street is silent, too.",
+     "zh": "街上也静悄悄的。",
+     "chunks": "The street is silent, too.",
+     "keys": [
+      {
+       "w": "street",
+       "zh": "街道"
+      },
+      {
+       "w": "silent",
+       "zh": "安静的，不出声的"
+      }
+     ]
+    },
+    {
+     "id": 13,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "Momo goes into Grandma Li's garden.",
+     "zh": "Momo 走进了李奶奶家的院子。",
+     "chunks": "Momo goes into / Grandma Li's garden.",
+     "keys": [
+      {
+       "w": "goes into",
+       "zh": "走进"
+      },
+      {
+       "w": "Grandma Li's",
+       "zh": "李奶奶的"
+      }
+     ],
+     "point": "g:possessive_s"
+    },
+    {
+     "id": 14,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "There is a box under a tree.",
+     "zh": "树下有一个箱子。",
+     "chunks": "There is a box / under a tree.",
+     "keys": [
+      {
+       "w": "there is",
+       "zh": "有"
+      },
+      {
+       "w": "box",
+       "zh": "箱子"
+      }
+     ],
+     "point": "g:there_be"
+    },
+    {
+     "id": 15,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "In the box, the white cat is sleeping.",
+     "zh": "箱子里，那只白猫正在睡觉。",
+     "chunks": "In the box, / the white cat is sleeping.",
+     "keys": [
+      {
+       "w": "in the box",
+       "zh": "在箱子里"
+      },
+      {
+       "w": "sleeping",
+       "zh": "正在睡觉"
+      }
+     ]
+    },
+    {
+     "id": 16,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "Almost all of Mia's socks are in it!",
+     "zh": "Mia 的袜子差不多全在里面！",
+     "chunks": "Almost all of Mia's socks / are in it!",
+     "keys": [
+      {
+       "w": "almost all",
+       "zh": "差不多全部"
+      },
+      {
+       "w": "socks",
+       "zh": "袜子"
+      }
+     ],
+     "point": "g:possessive_s"
+    },
+    {
+     "id": 17,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "The white cat wakes up and shakes her head.",
+     "zh": "白猫醒了，晃了晃脑袋。",
+     "chunks": "The white cat wakes up / and shakes her head.",
+     "keys": [
+      {
+       "w": "wakes up",
+       "zh": "醒来"
+      },
+      {
+       "w": "shakes",
+       "zh": "摇，晃"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 18,
+     "part": 1,
+     "line": 4,
+     "speaker": null,
+     "role": null,
+     "en": "Grandma Li comes out with some milk.",
+     "zh": "李奶奶端着一些牛奶走了出来。",
+     "chunks": "Grandma Li comes out / with some milk.",
+     "keys": [
+      {
+       "w": "comes out",
+       "zh": "出来"
+      },
+      {
+       "w": "milk",
+       "zh": "牛奶"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 19,
+     "part": 1,
+     "line": 5,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Is this cat yours, Grandma Li?",
+     "zh": "李奶奶，这只猫是您的吗？",
+     "chunks": "Is this cat yours, / Grandma Li?",
+     "keys": [
+      {
+       "w": "yours",
+       "zh": "你的（这里是“您的”）"
+      },
+      {
+       "w": "cat",
+       "zh": "猫"
+      }
+     ],
+     "point": "g:possessive_pronoun"
+    },
+    {
+     "id": 20,
+     "part": 1,
+     "line": 6,
+     "speaker": null,
+     "role": null,
+     "en": "Grandma Li shakes her head.",
+     "zh": "李奶奶摇了摇头。",
+     "chunks": "Grandma Li shakes her head.",
+     "keys": [
+      {
+       "w": "shakes her head",
+       "zh": "摇头"
+      },
+      {
+       "w": "Grandma Li",
+       "zh": "李奶奶"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 21,
+     "part": 1,
+     "line": 7,
+     "speaker": "Grandma Li",
+     "role": "grandma",
+     "en": "She is not mine, but I know her story.",
+     "zh": "她不是我的猫，可我知道她的故事。",
+     "chunks": "She is not mine, / but I know her story.",
+     "keys": [
+      {
+       "w": "mine",
+       "zh": "我的（后面不跟名词）"
+      },
+      {
+       "w": "story",
+       "zh": "故事"
+      }
+     ],
+     "point": "g:possessive_pronoun"
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "Where is the white cat sleeping?",
+     "zh": "那只白猫在哪儿睡觉？",
+     "options": [
+      "In Lucy's schoolbag.",
+      "On Mia's bed.",
+      "In a box under a tree.",
+      "On the old wall."
+     ],
+     "options_zh": [
+      "在 Lucy 的书包里。",
+      "在 Mia 的床上。",
+      "在树下的一个箱子里。",
+      "在那堵旧墙上。"
+     ],
+     "answer": "In a box under a tree.",
+     "evidence": [
+      14,
+      15
+     ],
+     "drop": "On the old wall.",
+     "hints": [
+      "回到第 14 句和第 15 句。",
+      "关键词是 sleeping（正在睡觉）。在原文里找到 sleeping，再往前看一句。",
+      "排除“On the old wall”：旧墙是她们跟着 Momo 走过的地方（第 10 句），白猫不在墙上。",
+      "答案是“In a box under a tree”。第 14 句说 There is a box under a tree.（树下有个箱子），第 15 句说 In the box, the white cat is sleeping.（白猫在箱子里睡觉）。"
+     ],
+     "variant": {
+      "ask": "Who comes out with some milk?",
+      "zh": "谁端着牛奶走了出来？",
+      "options": [
+       "Grandma Li.",
+       "Lucy.",
+       "Mum.",
+       "Ms Wang."
+      ],
+      "options_zh": [
+       "李奶奶。",
+       "Lucy。",
+       "妈妈。",
+       "王老师。"
+      ],
+      "answer": "Grandma Li.",
+      "evidence": [
+       18
+      ],
+      "explain": "第 18 句：Grandma Li comes out with some milk.（李奶奶端着一些牛奶走了出来。）"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "infer",
+     "skill": "infer",
+     "skill_zh": "找证据句再推断",
+     "ask": "What can we learn about Grandma Li, do you think?",
+     "zh": "关于李奶奶，我们能推出什么？",
+     "options": [
+      "She gives the white cat milk.",
+      "She is angry with the girls.",
+      "The white cat is her pet.",
+      "She doesn't like cats."
+     ],
+     "options_zh": [
+      "她给小白猫喝牛奶。",
+      "她在生两个女孩的气。",
+      "小白猫是她养的宠物。",
+      "她不喜欢猫。"
+     ],
+     "answer": "She gives the white cat milk.",
+     "evidence": [
+      18,
+      20,
+      21
+     ],
+     "drop": "The white cat is her pet.",
+     "hints": [
+      "看第 18 句到最后一句（第 21 句）。",
+      "关键词是 milk 和 shakes her head：她端着牛奶出来，又摇了头。",
+      "排除“The white cat is her pet”：Mia 问这只猫是不是她的，李奶奶摇头（第 20 句），还说 She is not mine（她不是我的猫）。",
+      "答案是“She gives the white cat milk”。李奶奶端着牛奶走到放白猫的院子里（第 18 句），猫又不是她的，那牛奶多半是给白猫喝的。原文没直接写“她喂猫”，是从这几句推出来的。下一集会告诉你推得对不对。"
+     ],
+     "variant": {
+      "ask": "Why are Mia's socks in the box, do you think?",
+      "zh": "你觉得，Mia 的袜子为什么在箱子里？",
+      "options": [
+       "Grandma Li buys them.",
+       "Lucy puts them there.",
+       "Momo carries them there for her friend.",
+       "The wind takes them there."
+      ],
+      "options_zh": [
+       "李奶奶买的。",
+       "Lucy 放进去的。",
+       "Momo 把袜子叼来给她的朋友。",
+       "风把袜子吹过去的。"
+      ],
+      "answer": "Momo carries them there for her friend.",
+      "evidence": [
+       15,
+       16
+      ],
+      "explain": "第 3 集妈妈说过，Momo 把 Mia 的袜子带给她的朋友。箱子里睡着的就是那只白猫，所以袜子是 Momo 叼来给她铺床的。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "cloze",
+     "skill": "word",
+     "skill_zh": "用目标词填空",
+     "word": "follow",
+     "ask": "Choose the right word.",
+     "zh": "选一个词，填进句子里。",
+     "stem": "The girls ______ Momo along an old wall.",
+     "stem_zh": "两个女孩____ Momo，沿着一堵旧墙走。",
+     "options": [
+      "carry",
+      "shake",
+      "follow",
+      "hide"
+     ],
+     "options_zh": [
+      "搬",
+      "摇",
+      "跟着",
+      "藏"
+     ],
+     "answer": "follow",
+     "evidence": [
+      10
+     ],
+     "drop": "shake",
+     "hints": [
+      "回到第 10 句。",
+      "她们走在 Momo 后面，Momo 去哪儿，她们就去哪儿。前一句 Lucy 喊的是“跟着那条尾巴”。",
+      "排除 shake：shake 是“摇，晃”，“晃 Momo”说不通。",
+      "答案是 follow（跟着）。前面 Lucy 说 Follow that tail!，接着两个人就跟着 Momo 进了李奶奶家的院子。"
+     ],
+     "variant": {
+      "ask": "Choose the right word.",
+      "zh": "选一个词，填进句子里。",
+      "stem": "Please ______ me. I can show you the way to the library.",
+      "stem_zh": "请____我。我带你去图书馆。",
+      "options": [
+       "follow",
+       "shake",
+       "hide",
+       "appear"
+      ],
+      "options_zh": [
+       "跟着",
+       "摇",
+       "藏",
+       "出现"
+      ],
+      "answer": "follow",
+      "explain": "我带路，你跟着我走，用 follow。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "meaning",
+     "skill": "word",
+     "skill_zh": "看前后句猜词义",
+     "word": "silent",
+     "ask": "What is “silent” in Chinese? (Sentence 11)",
+     "zh": "第 11 句里的 silent 是什么意思？",
+     "options": [
+      "不出声的",
+      "很吵的",
+      "很累的",
+      "很冷的"
+     ],
+     "answer": "不出声的",
+     "evidence": [
+      11
+     ],
+     "drop": "很吵的",
+     "hints": [
+      "回到第 11 句。",
+      "她们在偷偷跟着 Momo，不想让 Momo 发现。这时候会怎么样？下一句说街上也一样。",
+      "排除“很吵的”：偷偷跟着猫的人不会吵，一吵 Momo 就跑了。",
+      "答案是“不出声的”。silent = 不出声的，安静的。The street is silent, too. 是说街上也静悄悄的。"
+     ],
+     "variant": {
+      "ask": "In the library, we must be ______.",
+      "zh": "在图书馆里，我们必须____。",
+      "options": [
+       "lonely",
+       "loud",
+       "silent",
+       "ready"
+      ],
+      "options_zh": [
+       "孤单的",
+       "大声的",
+       "不出声的",
+       "准备好的"
+      ],
+      "answer": "silent",
+      "explain": "图书馆里要安静，用 silent。loud 是“大声的”，正好相反。"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ep5",
+   "n": 5,
+   "title": "Grandma Li's Story",
+   "title_zh": "第 5 集 · 李奶奶讲的故事",
+   "recap_zh": "上一集：Mia 和 Lucy 跟着 Momo 的灰尾巴，进了李奶奶家的院子。树下的箱子里，小白猫睡在 Mia 的袜子上。李奶奶端着牛奶出来，说这不是她的猫，可她知道这只猫的故事。",
+   "next_zh": "第 6 集：Mia 在班级群里发了一条消息。全班能帮上忙吗？",
+   "tip": {
+    "title": "排除法：一个一个对",
+    "lines": [
+     "四个选项先别急着选。",
+     "拿每个选项回原文对一对：原文没说的、和原文说反的、说过头的（像 always、all），先划掉。",
+     "剩下的那个，再找一句证据确认。"
+    ],
+    "steps": [
+     "一个一个读选项",
+     "回原文对：没说的、说反的、说过头的，划掉",
+     "剩下的那个，找一句证据"
+    ],
+    "exam": {
+     "en": "Which of the following is TRUE?",
+     "zh": "“下面哪一项是正确的？”四个选项一个一个回原文核对，错的划掉。"
+    },
+    "preview": false,
+    "q": "q2"
+   },
+   "names": [
+    {
+     "en": "Mia",
+     "zh": "主角，初一（3）班的女孩",
+     "key": "hero",
+     "replaceable": true
+    },
+    {
+     "en": "Momo",
+     "zh": "Mia 的小灰猫，绿眼睛",
+     "key": "cat",
+     "replaceable": true
+    },
+    {
+     "en": "Lucy",
+     "zh": "Mia 最好的朋友，同班",
+     "key": "lucy",
+     "replaceable": true
+    },
+    {
+     "en": "Snowy",
+     "zh": "没有家的小白猫，蓝眼睛（第 5 集起有名字）",
+     "key": "kitten",
+     "replaceable": true
+    },
+    {
+     "en": "Grandma Li",
+     "zh": "住在附近的李奶奶",
+     "key": "grandma",
+     "replaceable": false
+    },
+    {
+     "en": "Li",
+     "zh": "住在附近的李奶奶",
+     "key": "grandma",
+     "replaceable": false
+    },
+    {
+     "en": "Mum",
+     "zh": "Mia 的妈妈",
+     "key": "mum",
+     "replaceable": false
+    }
+   ],
+   "parts": [
+    {
+     "kind": "talk",
+     "label": "In Grandma Li's Garden",
+     "label_zh": "在李奶奶的院子里"
+    },
+    {
+     "kind": "diary",
+     "label": "Mia's Diary · Tuesday Night",
+     "label_zh": "Mia 的日记 · 星期二晚上"
+    }
+   ],
+   "targets": [
+    {
+     "w": "storm",
+     "zh": "暴风雨",
+     "pos": "n."
+    },
+    {
+     "w": "abroad",
+     "zh": "在国外，到国外",
+     "pos": "adv."
+    },
+    {
+     "w": "son",
+     "zh": "儿子",
+     "pos": "n."
+    },
+    {
+     "w": "problem",
+     "zh": "问题，难题",
+     "pos": "n."
+    },
+    {
+     "w": "protect",
+     "zh": "保护",
+     "pos": "v."
+    }
+   ],
+   "glossary": [],
+   "sentences": [
+    {
+     "id": 1,
+     "part": 0,
+     "line": 1,
+     "speaker": "Grandma Li",
+     "role": "grandma",
+     "en": "Last week, she came along this road in a big storm.",
+     "zh": "上个星期，她顺着这条路走来，那天下着大暴雨。",
+     "chunks": "Last week, / she came along this road / in a big storm.",
+     "keys": [
+      {
+       "w": "came",
+       "zh": "来（come 的过去式）"
+      },
+      {
+       "w": "storm",
+       "zh": "暴风雨"
+      }
+     ]
+    },
+    {
+     "id": 2,
+     "part": 0,
+     "line": 1,
+     "speaker": "Grandma Li",
+     "role": "grandma",
+     "en": "She was cold, hungry and lonely.",
+     "zh": "她又冷又饿，孤零零的。",
+     "chunks": "She was cold, hungry / and lonely.",
+     "keys": [
+      {
+       "w": "hungry",
+       "zh": "饿的"
+      },
+      {
+       "w": "lonely",
+       "zh": "孤单的"
+      }
+     ]
+    },
+    {
+     "id": 3,
+     "part": 0,
+     "line": 1,
+     "speaker": "Grandma Li",
+     "role": "grandma",
+     "en": "So I give her milk every day.",
+     "zh": "所以我每天给她喝牛奶。",
+     "chunks": "So I give her milk / every day.",
+     "keys": [
+      {
+       "w": "give",
+       "zh": "给"
+      },
+      {
+       "w": "every day",
+       "zh": "每天"
+      }
+     ]
+    },
+    {
+     "id": 4,
+     "part": 0,
+     "line": 1,
+     "speaker": "Grandma Li",
+     "role": "grandma",
+     "en": "And your cat carries socks here every night.",
+     "zh": "你家的猫每天晚上都叼袜子过来。",
+     "chunks": "And your cat / carries socks here / every night.",
+     "keys": [
+      {
+       "w": "carries",
+       "zh": "带来，搬来"
+      },
+      {
+       "w": "every night",
+       "zh": "每天晚上"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 5,
+     "part": 0,
+     "line": 2,
+     "speaker": "Lucy",
+     "role": "lucy",
+     "en": "Thank you, Grandma Li.",
+     "zh": "谢谢您，李奶奶。",
+     "chunks": "Thank you, / Grandma Li.",
+     "keys": [
+      {
+       "w": "thank you",
+       "zh": "谢谢"
+      },
+      {
+       "w": "Grandma Li",
+       "zh": "李奶奶"
+      }
+     ]
+    },
+    {
+     "id": 6,
+     "part": 0,
+     "line": 3,
+     "speaker": "Grandma Li",
+     "role": "grandma",
+     "en": "You are polite girls.",
+     "zh": "你们真是有礼貌的孩子。",
+     "chunks": "You are polite girls.",
+     "keys": [
+      {
+       "w": "polite",
+       "zh": "有礼貌的"
+      },
+      {
+       "w": "girls",
+       "zh": "女孩"
+      }
+     ]
+    },
+    {
+     "id": 7,
+     "part": 0,
+     "line": 4,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Can she live with you?",
+     "zh": "她能跟您一起住吗？",
+     "chunks": "Can she live with you?",
+     "keys": [
+      {
+       "w": "live with",
+       "zh": "和……一起住"
+      },
+      {
+       "w": "you",
+       "zh": "你（这里是“您”）"
+      }
+     ]
+    },
+    {
+     "id": 8,
+     "part": 0,
+     "line": 5,
+     "speaker": "Grandma Li",
+     "role": "grandma",
+     "en": "I'm sorry, but I can't keep her.",
+     "zh": "对不起，我养不了她。",
+     "chunks": "I'm sorry, / but I can't keep her.",
+     "keys": [
+      {
+       "w": "keep",
+       "zh": "养，留下"
+      },
+      {
+       "w": "can't",
+       "zh": "不能"
+      }
+     ]
+    },
+    {
+     "id": 9,
+     "part": 0,
+     "line": 5,
+     "speaker": "Grandma Li",
+     "role": "grandma",
+     "en": "My son lives abroad.",
+     "zh": "我儿子住在国外。",
+     "chunks": "My son lives abroad.",
+     "keys": [
+      {
+       "w": "son",
+       "zh": "儿子"
+      },
+      {
+       "w": "abroad",
+       "zh": "在国外"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 10,
+     "part": 0,
+     "line": 5,
+     "speaker": "Grandma Li",
+     "role": "grandma",
+     "en": "He is a good son.",
+     "zh": "他是个好儿子。",
+     "chunks": "He is a good son.",
+     "keys": [
+      {
+       "w": "good",
+       "zh": "好的"
+      },
+      {
+       "w": "son",
+       "zh": "儿子"
+      }
+     ]
+    },
+    {
+     "id": 11,
+     "part": 0,
+     "line": 5,
+     "speaker": "Grandma Li",
+     "role": "grandma",
+     "en": "Next month, I'm going abroad, too.",
+     "zh": "下个月，我也要出国了。",
+     "chunks": "Next month, / I'm going abroad, too.",
+     "keys": [
+      {
+       "w": "next month",
+       "zh": "下个月"
+      },
+      {
+       "w": "going abroad",
+       "zh": "出国"
+      }
+     ]
+    },
+    {
+     "id": 12,
+     "part": 0,
+     "line": 5,
+     "speaker": "Grandma Li",
+     "role": "grandma",
+     "en": "Who can protect her in the next storm?",
+     "zh": "下一场暴风雨来了，谁来保护她呢？",
+     "chunks": "Who can protect her / in the next storm?",
+     "keys": [
+      {
+       "w": "protect",
+       "zh": "保护"
+      },
+      {
+       "w": "next",
+       "zh": "下一个"
+      }
+     ]
+    },
+    {
+     "id": 13,
+     "part": 0,
+     "line": 6,
+     "speaker": "Lucy",
+     "role": "lucy",
+     "en": "That's a big problem.",
+     "zh": "这可是个大问题。",
+     "chunks": "That's a big problem.",
+     "keys": [
+      {
+       "w": "problem",
+       "zh": "问题，难题"
+      },
+      {
+       "w": "big",
+       "zh": "大的"
+      }
+     ]
+    },
+    {
+     "id": 14,
+     "part": 0,
+     "line": 7,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "She is white like snow.",
+     "zh": "她白得像雪一样。",
+     "chunks": "She is white / like snow.",
+     "keys": [
+      {
+       "w": "white",
+       "zh": "白色的"
+      },
+      {
+       "w": "like snow",
+       "zh": "像雪一样"
+      }
+     ]
+    },
+    {
+     "id": 15,
+     "part": 0,
+     "line": 7,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Let's call her Snowy.",
+     "zh": "我们就叫她 Snowy 吧。",
+     "chunks": "Let's call her Snowy.",
+     "keys": [
+      {
+       "w": "let's",
+       "zh": "我们……吧"
+      },
+      {
+       "w": "call",
+       "zh": "叫，称呼"
+      }
+     ]
+    },
+    {
+     "id": 16,
+     "part": 1,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "Momo follows us home.",
+     "zh": "Momo 跟着我们回了家。",
+     "chunks": "Momo follows us home.",
+     "keys": [
+      {
+       "w": "follows",
+       "zh": "跟着"
+      },
+      {
+       "w": "home",
+       "zh": "回家"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 17,
+     "part": 1,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "Now I understand her.",
+     "zh": "现在我懂她了。",
+     "chunks": "Now I understand her.",
+     "keys": [
+      {
+       "w": "now",
+       "zh": "现在"
+      },
+      {
+       "w": "understand",
+       "zh": "懂，理解"
+      }
+     ]
+    },
+    {
+     "id": 18,
+     "part": 1,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "She wants to protect her friend.",
+     "zh": "她想保护她的朋友。",
+     "chunks": "She wants to protect / her friend.",
+     "keys": [
+      {
+       "w": "wants to",
+       "zh": "想要"
+      },
+      {
+       "w": "protect",
+       "zh": "保护"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 19,
+     "part": 1,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "But Mum shakes her head.",
+     "zh": "可妈妈摇了摇头。",
+     "chunks": "But Mum shakes her head.",
+     "keys": [
+      {
+       "w": "shakes her head",
+       "zh": "摇头"
+      },
+      {
+       "w": "Mum",
+       "zh": "妈妈"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 20,
+     "part": 1,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "Two cats are too many for us.",
+     "zh": "我们家养两只猫太多了。",
+     "chunks": "Two cats are too many / for us.",
+     "keys": [
+      {
+       "w": "too many",
+       "zh": "太多"
+      },
+      {
+       "w": "for us",
+       "zh": "对我们来说"
+      }
+     ]
+    },
+    {
+     "id": 21,
+     "part": 1,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "What a big problem!",
+     "zh": "真是个大问题！",
+     "chunks": "What a big problem!",
+     "keys": [
+      {
+       "w": "what a",
+       "zh": "真是"
+      },
+      {
+       "w": "problem",
+       "zh": "问题"
+      }
+     ]
+    },
+    {
+     "id": 22,
+     "part": 1,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "Then I remember our class project.",
+     "zh": "这时我想起了我们班的课题。",
+     "chunks": "Then I remember / our class project.",
+     "keys": [
+      {
+       "w": "remember",
+       "zh": "想起，记得"
+      },
+      {
+       "w": "project",
+       "zh": "（学校的）课题"
+      }
+     ]
+    },
+    {
+     "id": 23,
+     "part": 1,
+     "line": 8,
+     "speaker": null,
+     "role": null,
+     "en": "I have an idea!",
+     "zh": "我有主意了！",
+     "chunks": "I have an idea!",
+     "keys": [
+      {
+       "w": "have",
+       "zh": "有"
+      },
+      {
+       "w": "idea",
+       "zh": "主意"
+      }
+     ]
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "When did the white cat come here?",
+     "zh": "小白猫是什么时候来这儿的？",
+     "options": [
+      "Last month, on a sunny day.",
+      "Last week, in a big storm.",
+      "Yesterday morning.",
+      "Last night, with Momo."
+     ],
+     "options_zh": [
+      "上个月，一个晴天。",
+      "上个星期，下大暴雨的时候。",
+      "昨天早上。",
+      "昨天晚上，和 Momo 一起。"
+     ],
+     "answer": "Last week, in a big storm.",
+     "evidence": [
+      1
+     ],
+     "drop": "Last month, on a sunny day.",
+     "hints": [
+      "回到第 1 句，李奶奶说的第一句。",
+      "题里问 When（什么时候）。在原文里找表示时间的词：last week。",
+      "排除“Last month, on a sunny day”：原文说的是 last week 和 storm（暴风雨），不是上个月，也不是晴天。",
+      "答案是“Last week, in a big storm”。第 1 句：Last week, she came along this road in a big storm.（上个星期，她在一场大暴雨里顺着这条路走来。）"
+     ],
+     "variant": {
+      "ask": "Where does Grandma Li's son live?",
+      "zh": "李奶奶的儿子住在哪儿？",
+      "options": [
+       "In Grandma Li's house.",
+       "With Mia.",
+       "Next to Lucy.",
+       "Abroad."
+      ],
+      "options_zh": [
+       "在李奶奶家。",
+       "和 Mia 一起。",
+       "在 Lucy 家旁边。",
+       "在国外。"
+      ],
+      "answer": "Abroad.",
+      "evidence": [
+       9
+      ],
+      "explain": "第 9 句：My son lives abroad.（我儿子住在国外。）"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "infer",
+     "skill": "infer",
+     "skill_zh": "排除法",
+     "ask": "What is Mia's idea, do you think?",
+     "zh": "你觉得，Mia 想到的主意是什么？",
+     "options": [
+      "Momo can live with Grandma Li.",
+      "Mia can take Snowy to school every day.",
+      "Mia can go abroad with Grandma Li.",
+      "Her class can help Snowy find a home."
+     ],
+     "options_zh": [
+      "让 Momo 去跟李奶奶住。",
+      "Mia 每天带 Snowy 去上学。",
+      "Mia 跟李奶奶一起出国。",
+      "全班一起帮 Snowy 找个家。"
+     ],
+     "answer": "Her class can help Snowy find a home.",
+     "evidence": [
+      20,
+      21,
+      22,
+      23
+     ],
+     "drop": "Mia can go abroad with Grandma Li.",
+     "hints": [
+      "看日记的最后四句（第 20 句到最后）。",
+      "关键词是 problem 和 class project：Mia 遇到了大问题，接着想起了班里的课题。",
+      "排除“Mia can go abroad with Grandma Li”：要出国的是李奶奶（第 11 句），Mia 还要上学，原文也没这么说。",
+      "答案是“Her class can help Snowy find a home”。问题是 Snowy 没人养：李奶奶要出国，Mia 家养不了两只猫。这时 Mia 想起了班里的课题，说“我有主意了”。最说得通的是让全班一起帮 Snowy 找个家。带 Snowy 上学、让 Momo 去跟李奶奶住，原文都没有证据；Mia 出国，和原文对不上。"
+     ],
+     "variant": {
+      "ask": "Why does Mia say “What a big problem!”?",
+      "zh": "Mia 为什么说“真是个大问题”？",
+      "options": [
+       "Mia can't find her red scarf.",
+       "Snowy needs a home, but Mia's family can't keep two cats.",
+       "Grandma Li is angry with Mia.",
+       "Momo is ill."
+      ],
+      "options_zh": [
+       "Mia 找不到红领巾了。",
+       "Snowy 需要一个家，可 Mia 家养不了两只猫。",
+       "李奶奶生 Mia 的气。",
+       "Momo 生病了。"
+      ],
+      "answer": "Snowy needs a home, but Mia's family can't keep two cats.",
+      "evidence": [
+       19,
+       20,
+       21
+      ],
+      "explain": "妈妈摇头（第 19 句），说两只猫太多（第 20 句），紧接着 Mia 写了 What a big problem!。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "cloze",
+     "skill": "word",
+     "skill_zh": "用目标词填空",
+     "word": "protect",
+     "ask": "Choose the right word.",
+     "zh": "选一个词，填进句子里。",
+     "stem": "Who can ______ her in the next storm?",
+     "stem_zh": "下一场暴风雨来了，谁能____她？",
+     "options": [
+      "follow",
+      "protect",
+      "shake",
+      "forget"
+     ],
+     "options_zh": [
+      "跟着",
+      "保护",
+      "摇",
+      "忘记"
+     ],
+     "answer": "protect",
+     "evidence": [
+      12
+     ],
+     "drop": "forget",
+     "hints": [
+      "回到第 12 句，李奶奶说的。",
+      "下一场暴风雨来了，小猫需要有人“护着”她。",
+      "排除 forget：“谁能忘了她”说不通，李奶奶担心的是她的安全。",
+      "答案是 protect（保护）。日记里 Mia 也写了 She wants to protect her friend.（第 18 句，Momo 想保护她的朋友。）"
+     ],
+     "variant": {
+      "ask": "Choose the right word.",
+      "zh": "选一个词，填进句子里。",
+      "stem": "A hat can ______ your head from the sun.",
+      "stem_zh": "帽子能____你的头不被太阳晒。",
+      "options": [
+       "remember",
+       "follow",
+       "understand",
+       "protect"
+      ],
+      "options_zh": [
+       "记得",
+       "跟着",
+       "明白",
+       "保护"
+      ],
+      "answer": "protect",
+      "explain": "帽子挡住太阳，是保护你的头，用 protect。protect ... from ... 就是“保护……不受……”。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "meaning",
+     "skill": "word",
+     "skill_zh": "看前后句猜词义",
+     "word": "abroad",
+     "ask": "What is “abroad” in Chinese? (Sentence 9)",
+     "zh": "第 9 句里的 abroad 是什么意思？",
+     "options": [
+      "在院子里",
+      "在家里",
+      "在学校",
+      "在国外"
+     ],
+     "answer": "在国外",
+     "evidence": [
+      9
+     ],
+     "drop": "在家里",
+     "hints": [
+      "回到第 9 句。",
+      "李奶奶说下个月她也要 go abroad，所以养不了猫了。那个地方一定很远。",
+      "排除“在家里”：要是儿子就住在家里，李奶奶就不用搬走了。",
+      "答案是“在国外”。abroad = 在国外。live abroad 是住在国外，go abroad 是出国。"
+     ],
+     "variant": {
+      "ask": "Lucy's uncle lives ______. He is in Canada now.",
+      "zh": "Lucy 的叔叔住在____。他现在在加拿大。",
+      "options": [
+       "together",
+       "abroad",
+       "silent",
+       "almost"
+      ],
+      "options_zh": [
+       "一起",
+       "在国外",
+       "不出声的",
+       "几乎"
+      ],
+      "answer": "abroad",
+      "explain": "加拿大在中国以外，住在那儿就是住在国外，用 abroad。"
+     }
+    }
+   ]
+  },
+  {
+   "id": "ep6",
+   "n": 6,
+   "title": "A Home for Snowy",
+   "title_zh": "第 6 集 · 给 Snowy 一个家",
+   "recap_zh": "上一集：小白猫是上个星期下大暴雨时来的，李奶奶每天喂她牛奶。可李奶奶下个月要出国去儿子那儿，Mia 家又养不了两只猫。Mia 给小白猫起名叫 Snowy，想起了班里的课题。",
+   "next_zh": "番外完。那天夜里，Momo 又坐到了窗边。她在看什么？下一季告诉你。",
+   "tip": {
+    "title": "主旨题，看开头和结尾",
+    "lines": [
+     "问“最好的标题”或者“主要讲什么”，先看开头和结尾，再问自己：从头到尾在说哪件事？只说了一个细节、一个人的选项，再对也不是主旨。"
+    ],
+    "steps": [
+     "读开头两三句：故事从什么事开始",
+     "读最后两三句：事情变成什么样了",
+     "选能把头和尾连起来的那个"
+    ],
+    "exam": {
+     "en": "What is the best title for the passage?",
+     "zh": "“这篇短文最好的标题是什么？”看开头和结尾，选能管住全文的。"
+    },
+    "preview": false,
+    "q": "q2"
+   },
+   "names": [
+    {
+     "en": "Mia",
+     "zh": "主角，初一（3）班的女孩",
+     "key": "hero",
+     "replaceable": true
+    },
+    {
+     "en": "Momo",
+     "zh": "Mia 的小灰猫，绿眼睛",
+     "key": "cat",
+     "replaceable": true
+    },
+    {
+     "en": "Lucy",
+     "zh": "Mia 最好的朋友，同班",
+     "key": "lucy",
+     "replaceable": true
+    },
+    {
+     "en": "Tom",
+     "zh": "同班男生，爱开玩笑、爱拍照",
+     "key": "tom",
+     "replaceable": true
+    },
+    {
+     "en": "Snowy",
+     "zh": "没有家的小白猫，蓝眼睛（第 5 集起有名字）",
+     "key": "kitten",
+     "replaceable": true
+    },
+    {
+     "en": "Ms Wang",
+     "zh": "班主任王老师，很严格",
+     "key": "teacher",
+     "replaceable": false
+    },
+    {
+     "en": "Wang",
+     "zh": "班主任王老师，很严格",
+     "key": "teacher",
+     "replaceable": false
+    },
+    {
+     "en": "Grandma Li",
+     "zh": "住在附近的李奶奶",
+     "key": "grandma",
+     "replaceable": false
+    },
+    {
+     "en": "Li",
+     "zh": "住在附近的李奶奶",
+     "key": "grandma",
+     "replaceable": false
+    }
+   ],
+   "parts": [
+    {
+     "kind": "chat",
+     "label": "Class 7-3 Group · Wednesday",
+     "label_zh": "初一（3）班群聊 · 星期三"
+    },
+    {
+     "kind": "diary",
+     "label": "Mia's Diary · Friday",
+     "label_zh": "Mia 的日记 · 星期五"
+    }
+   ],
+   "targets": [
+    {
+     "w": "online",
+     "zh": "在网上",
+     "pos": "adv."
+    },
+    {
+     "w": "volunteer",
+     "zh": "志愿者",
+     "pos": "n."
+    },
+    {
+     "w": "join",
+     "zh": "加入，参加",
+     "pos": "v."
+    },
+    {
+     "w": "smile",
+     "zh": "微笑",
+     "pos": "v."
+    },
+    {
+     "w": "heart",
+     "zh": "心，心肠",
+     "pos": "n."
+    }
+   ],
+   "glossary": [
+    {
+     "w": "title",
+     "zh": "标题，题目"
+    }
+   ],
+   "sentences": [
+    {
+     "id": 1,
+     "part": 0,
+     "line": 1,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "I need your help.",
+     "zh": "我需要大家帮忙。",
+     "chunks": "I need your help.",
+     "keys": [
+      {
+       "w": "need",
+       "zh": "需要"
+      },
+      {
+       "w": "help",
+       "zh": "帮助"
+      }
+     ]
+    },
+    {
+     "id": 2,
+     "part": 0,
+     "line": 1,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Snowy has no home.",
+     "zh": "Snowy 没有家。",
+     "chunks": "Snowy has no home.",
+     "keys": [
+      {
+       "w": "has no",
+       "zh": "没有"
+      },
+      {
+       "w": "home",
+       "zh": "家"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 3,
+     "part": 0,
+     "line": 1,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Can she be our class project?",
+     "zh": "她能当我们班的课题吗？",
+     "chunks": "Can she be / our class project?",
+     "keys": [
+      {
+       "w": "project",
+       "zh": "（学校的）课题"
+      },
+      {
+       "w": "class",
+       "zh": "班级"
+      }
+     ]
+    },
+    {
+     "id": 4,
+     "part": 0,
+     "line": 2,
+     "speaker": "Tom",
+     "role": "tom",
+     "en": "I'm ready to join!",
+     "zh": "我准备好加入了！",
+     "chunks": "I'm ready to join!",
+     "keys": [
+      {
+       "w": "ready",
+       "zh": "准备好的"
+      },
+      {
+       "w": "join",
+       "zh": "加入"
+      }
+     ]
+    },
+    {
+     "id": 5,
+     "part": 0,
+     "line": 2,
+     "speaker": "Tom",
+     "role": "tom",
+     "en": "I can put her photos online.",
+     "zh": "我可以把她的照片发到网上。",
+     "chunks": "I can put her photos / online.",
+     "keys": [
+      {
+       "w": "photos",
+       "zh": "照片"
+      },
+      {
+       "w": "online",
+       "zh": "在网上"
+      }
+     ]
+    },
+    {
+     "id": 6,
+     "part": 0,
+     "line": 3,
+     "speaker": "Lucy",
+     "role": "lucy",
+     "en": "Can I join, too?",
+     "zh": "我也能加入吗？",
+     "chunks": "Can I join, too?",
+     "keys": [
+      {
+       "w": "join",
+       "zh": "加入，参加"
+      },
+      {
+       "w": "too",
+       "zh": "也"
+      }
+     ]
+    },
+    {
+     "id": 7,
+     "part": 0,
+     "line": 3,
+     "speaker": "Lucy",
+     "role": "lucy",
+     "en": "We need volunteers to look after her.",
+     "zh": "我们需要志愿者来照顾她。",
+     "chunks": "We need volunteers / to look after her.",
+     "keys": [
+      {
+       "w": "volunteers",
+       "zh": "志愿者"
+      },
+      {
+       "w": "look after",
+       "zh": "照顾"
+      }
+     ]
+    },
+    {
+     "id": 8,
+     "part": 0,
+     "line": 4,
+     "speaker": "Mia",
+     "role": "hero",
+     "en": "Don't forget: she needs a home.",
+     "zh": "别忘了：她需要一个家。",
+     "chunks": "Don't forget: / she needs a home.",
+     "keys": [
+      {
+       "w": "don't forget",
+       "zh": "别忘了"
+      },
+      {
+       "w": "needs",
+       "zh": "需要"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 9,
+     "part": 1,
+     "line": 5,
+     "speaker": null,
+     "role": null,
+     "en": "Almost all my classmates are volunteers now.",
+     "zh": "现在差不多全班同学都当了志愿者。",
+     "chunks": "Almost all my classmates / are volunteers now.",
+     "keys": [
+      {
+       "w": "almost all",
+       "zh": "差不多全部"
+      },
+      {
+       "w": "volunteers",
+       "zh": "志愿者"
+      }
+     ]
+    },
+    {
+     "id": 10,
+     "part": 1,
+     "line": 5,
+     "speaker": null,
+     "role": null,
+     "en": "People put hearts on her photos online.",
+     "zh": "大家在网上给她的照片点了小红心。",
+     "chunks": "People put hearts / on her photos online.",
+     "keys": [
+      {
+       "w": "hearts",
+       "zh": "心形（点赞）"
+      },
+      {
+       "w": "online",
+       "zh": "在网上"
+      }
+     ]
+    },
+    {
+     "id": 11,
+     "part": 1,
+     "line": 5,
+     "speaker": null,
+     "role": null,
+     "en": "Ms Wang reads our report today.",
+     "zh": "今天，王老师看了我们的报告。",
+     "chunks": "Ms Wang reads our report / today.",
+     "keys": [
+      {
+       "w": "reads",
+       "zh": "读，看"
+      },
+      {
+       "w": "report",
+       "zh": "报告"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 12,
+     "part": 1,
+     "line": 5,
+     "speaker": null,
+     "role": null,
+     "en": "The class is silent.",
+     "zh": "全班一声不出。",
+     "chunks": "The class is silent.",
+     "keys": [
+      {
+       "w": "class",
+       "zh": "全班"
+      },
+      {
+       "w": "silent",
+       "zh": "不出声的"
+      }
+     ]
+    },
+    {
+     "id": 13,
+     "part": 1,
+     "line": 5,
+     "speaker": null,
+     "role": null,
+     "en": "Ms Wang smiles.",
+     "zh": "王老师笑了。",
+     "chunks": "Ms Wang smiles.",
+     "keys": [
+      {
+       "w": "Ms Wang",
+       "zh": "王老师"
+      },
+      {
+       "w": "smiles",
+       "zh": "微笑"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 14,
+     "part": 1,
+     "line": 5,
+     "speaker": null,
+     "role": null,
+     "en": "“I have a big garden,” she says.",
+     "zh": "“我家有个大院子，”她说。",
+     "chunks": "“I have a big garden,” / she says.",
+     "keys": [
+      {
+       "w": "garden",
+       "zh": "院子"
+      },
+      {
+       "w": "says",
+       "zh": "说"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 15,
+     "part": 1,
+     "line": 5,
+     "speaker": null,
+     "role": null,
+     "en": "“Can Snowy live with me?”",
+     "zh": "“Snowy 能跟我一起住吗？”",
+     "chunks": "“Can Snowy live with me?”",
+     "keys": [
+      {
+       "w": "live with",
+       "zh": "和……一起住"
+      },
+      {
+       "w": "me",
+       "zh": "我"
+      }
+     ]
+    },
+    {
+     "id": 16,
+     "part": 1,
+     "line": 6,
+     "speaker": null,
+     "role": null,
+     "en": "Ms Wang is strict, but she has a big heart.",
+     "zh": "王老师很严格，可她心肠特别好。",
+     "chunks": "Ms Wang is strict, / but she has a big heart.",
+     "keys": [
+      {
+       "w": "strict",
+       "zh": "严格的"
+      },
+      {
+       "w": "heart",
+       "zh": "心，心肠"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 17,
+     "part": 1,
+     "line": 6,
+     "speaker": null,
+     "role": null,
+     "en": "Snowy has a home!",
+     "zh": "Snowy 有家了！",
+     "chunks": "Snowy has a home!",
+     "keys": [
+      {
+       "w": "has",
+       "zh": "有"
+      },
+      {
+       "w": "home",
+       "zh": "家"
+      }
+     ],
+     "point": "g:third_s"
+    },
+    {
+     "id": 18,
+     "part": 1,
+     "line": 6,
+     "speaker": null,
+     "role": null,
+     "en": "Ms Wang can protect her from storms.",
+     "zh": "王老师能护着她，不怕暴风雨了。",
+     "chunks": "Ms Wang can protect her / from storms.",
+     "keys": [
+      {
+       "w": "protect",
+       "zh": "保护"
+      },
+      {
+       "w": "storms",
+       "zh": "暴风雨（复数）"
+      }
+     ]
+    },
+    {
+     "id": 19,
+     "part": 1,
+     "line": 6,
+     "speaker": null,
+     "role": null,
+     "en": "Grandma Li can go to her son abroad.",
+     "zh": "李奶奶也能放心出国，去儿子那儿了。",
+     "chunks": "Grandma Li can go / to her son abroad.",
+     "keys": [
+      {
+       "w": "son",
+       "zh": "儿子"
+      },
+      {
+       "w": "abroad",
+       "zh": "在国外"
+      }
+     ]
+    },
+    {
+     "id": 20,
+     "part": 1,
+     "line": 6,
+     "speaker": null,
+     "role": null,
+     "en": "Problem solved!",
+     "zh": "问题解决了！",
+     "chunks": "Problem solved!",
+     "keys": [
+      {
+       "w": "problem",
+       "zh": "问题"
+      },
+      {
+       "w": "solved",
+       "zh": "解决了"
+      }
+     ]
+    },
+    {
+     "id": 21,
+     "part": 1,
+     "line": 6,
+     "speaker": null,
+     "role": null,
+     "en": "We all smile.",
+     "zh": "我们都笑了。",
+     "chunks": "We all smile.",
+     "keys": [
+      {
+       "w": "all",
+       "zh": "都"
+      },
+      {
+       "w": "smile",
+       "zh": "微笑"
+      }
+     ]
+    },
+    {
+     "id": 22,
+     "part": 1,
+     "line": 7,
+     "speaker": null,
+     "role": null,
+     "en": "That night, Momo is at the window again.",
+     "zh": "那天夜里，Momo 又坐到了窗边。",
+     "chunks": "That night, / Momo is at the window again.",
+     "keys": [
+      {
+       "w": "that night",
+       "zh": "那天夜里"
+      },
+      {
+       "w": "again",
+       "zh": "又，再"
+      }
+     ]
+    },
+    {
+     "id": 23,
+     "part": 1,
+     "line": 7,
+     "speaker": null,
+     "role": null,
+     "en": "What is she looking at?",
+     "zh": "她在看什么呢？",
+     "chunks": "What is she looking at?",
+     "keys": [
+      {
+       "w": "looking at",
+       "zh": "看着"
+      },
+      {
+       "w": "what",
+       "zh": "什么"
+      }
+     ]
+    },
+    {
+     "id": 24,
+     "part": 1,
+     "line": 7,
+     "speaker": null,
+     "role": null,
+     "en": "What happens next?",
+     "zh": "接下来会发生什么？",
+     "chunks": "What happens next?",
+     "keys": [
+      {
+       "w": "happens",
+       "zh": "发生"
+      },
+      {
+       "w": "next",
+       "zh": "接下来"
+      }
+     ]
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "What can Tom do for Snowy?",
+     "zh": "Tom 能为 Snowy 做什么？",
+     "options": [
+      "Put her photos online.",
+      "Look after her at his home.",
+      "Read the report.",
+      "Give her milk every day."
+     ],
+     "options_zh": [
+      "把她的照片发到网上。",
+      "把她带回家照顾。",
+      "读报告。",
+      "每天给她喝牛奶。"
+     ],
+     "answer": "Put her photos online.",
+     "evidence": [
+      5
+     ],
+     "drop": "Look after her at his home.",
+     "hints": [
+      "回到第 5 句，Tom 在群里说的。",
+      "题里的关键词是 Tom。找到 Tom 说的话：第 4 句和第 5 句。",
+      "排除“Look after her at his home”：原文没说 Tom 要把 Snowy 带回家。照顾她的是志愿者（第 7 句）。",
+      "答案是“Put her photos online”。第 5 句：I can put her photos online.（我可以把她的照片发到网上。）"
+     ],
+     "variant": {
+      "ask": "Who wants Snowy to live with her?",
+      "zh": "谁想让 Snowy 跟自己一起住？",
+      "options": [
+       "Grandma Li.",
+       "Lucy.",
+       "Ms Wang.",
+       "Mia's mum."
+      ],
+      "options_zh": [
+       "李奶奶。",
+       "Lucy。",
+       "王老师。",
+       "Mia 的妈妈。"
+      ],
+      "answer": "Ms Wang.",
+      "evidence": [
+       13,
+       15
+      ],
+      "explain": "第 13 句王老师笑了，接着她说 Can Snowy live with me?（第 15 句）。"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "main",
+     "skill": "main",
+     "skill_zh": "主旨题看开头和结尾",
+     "ask": "What is the best title for this story?",
+     "zh": "这一集最好的标题是哪个？",
+     "options": [
+      "A Strict Teacher",
+      "Tom's Photos",
+      "A Home for Snowy",
+      "Grandma Li Goes Abroad"
+     ],
+     "options_zh": [
+      "一位严格的老师",
+      "Tom 拍的照片",
+      "给 Snowy 一个家",
+      "李奶奶出国了"
+     ],
+     "answer": "A Home for Snowy",
+     "evidence": [
+      2,
+      17
+     ],
+     "drop": "Tom's Photos",
+     "hints": [
+      "主旨题先看开头和结尾：读群聊开头的第 2 句，再读日记后半段的第 17 句。",
+      "开头 Mia 说 Snowy has no home，后面说 Snowy has a home!，中间都是大家怎么帮忙。",
+      "排除“Tom's Photos”：Tom 发照片只在第 5 句，是一个细节，管不住整集。",
+      "答案是“A Home for Snowy”（给 Snowy 一个家）。这一集从“没有家”讲到“有家了”，整集都在说这件事。A Strict Teacher 和 Grandma Li Goes Abroad 也都只说了一个人。"
+     ],
+     "variant": {
+      "ask": "What is the best title for the story, from Sunday to Friday?",
+      "zh": "从星期天到星期五，整个故事最好的标题是哪个？",
+      "options": [
+       "Momo and Her New Friend",
+       "Mia's Red Scarf",
+       "A Day at School",
+       "Ms Wang's Big Garden"
+      ],
+      "options_zh": [
+       "Momo 和她的新朋友",
+       "Mia 的红领巾",
+       "学校里的一天",
+       "王老师的大院子"
+      ],
+      "answer": "Momo and Her New Friend",
+      "explain": "红领巾只是开头的线索。从星期天到星期五，故事一直围着 Momo 和小白猫：她半夜给朋友送袜子，大家又帮朋友找了家。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "cloze",
+     "skill": "word",
+     "skill_zh": "用目标词填空",
+     "word": "volunteer",
+     "ask": "Choose the right word.",
+     "zh": "选一个词，填进句子里。",
+     "stem": "Almost all my classmates are ______ now.",
+     "stem_zh": "现在差不多全班同学都是____了。",
+     "options": [
+      "volunteers",
+      "storms",
+      "problems",
+      "hearts"
+     ],
+     "options_zh": [
+      "志愿者",
+      "暴风雨",
+      "问题",
+      "心"
+     ],
+     "answer": "volunteers",
+     "evidence": [
+      9
+     ],
+     "drop": "storms",
+     "hints": [
+      "回到第 9 句，星期五日记的第一句。",
+      "群里 Lucy 说 We need volunteers to look after her（我们需要志愿者来照顾她），后来同学们都报了名。",
+      "排除 storms：storm 是“暴风雨”，同学不会是暴风雨。",
+      "答案是 volunteers（志愿者）。同学们报名来照顾 Snowy，就是志愿者。前面是 all my classmates（很多人），所以用复数 volunteers。"
+     ],
+     "variant": {
+      "ask": "Choose the right word.",
+      "zh": "选一个词，填进句子里。",
+      "stem": "Our school needs ______ for Sports Day. Can you help?",
+      "stem_zh": "我们学校运动会需要____。你能帮忙吗？",
+      "options": [
+       "hearts",
+       "storms",
+       "volunteers",
+       "problems"
+      ],
+      "options_zh": [
+       "心",
+       "暴风雨",
+       "志愿者",
+       "问题"
+      ],
+      "answer": "volunteers",
+      "explain": "运动会需要人来帮忙，这些人就是志愿者，用 volunteers。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "meaning",
+     "skill": "word",
+     "skill_zh": "看前后句猜意思",
+     "word": "heart",
+     "ask": "What is “she has a big heart” in Chinese? (Sentence 16)",
+     "zh": "第 16 句里的 she has a big heart 是什么意思？",
+     "options": [
+      "她很生气",
+      "她的心脏很大",
+      "她心肠好，很善良",
+      "她很严格"
+     ],
+     "answer": "她心肠好，很善良",
+     "evidence": [
+      16
+     ],
+     "drop": "她很严格",
+     "hints": [
+      "回到第 16 句。",
+      "前面有 but：“王老师很严格，但是……”。but 后面会说她好的一面。她刚刚说要收养 Snowy。",
+      "排除“她很严格”：but 前面已经说了 strict，后面要说一个不一样的意思。",
+      "答案是“她心肠好，很善良”。a big heart 不是说心脏大，是说人热心、善良：王老师愿意收养 Snowy。"
+     ],
+     "variant": {
+      "ask": "Grandma Li gives Snowy milk every day. She has a big ______.",
+      "zh": "李奶奶每天给 Snowy 喝牛奶。她心肠很____。",
+      "options": [
+       "heart",
+       "storm",
+       "tail",
+       "nose"
+      ],
+      "options_zh": [
+       "心，心肠",
+       "暴风雨",
+       "尾巴",
+       "鼻子"
+      ],
+      "answer": "heart",
+      "explain": "每天喂没有家的小猫，是心肠好，用 a big heart。"
+     }
+    }
+   ]
+  }
+ ],
+ "meta": {
+  "checked_by": "tools/check_stories.mjs",
+  "known": "课标 505 词 + 课标另列（数词、月份星期、国家）+ 课本 Starter 到 Unit 3 的词（含短语里的单词）+ 语气词 oh、wow、hmm、haha、ah + 角色名；词形按课标 forms 和规则变化，forms 没列的不规则形式算生词",
+  "rules": {
+   "episodes": 6,
+   "words": [
+    100,
+    130
+   ],
+   "avgSentence": 9,
+   "targets": [
+    5,
+    6
+   ],
+   "targetTimes": 2,
+   "coverage": 0.98,
+   "maxUnknown": 3,
+   "keys": 2,
+   "questions": 4,
+   "hints": 4
+  },
+  "summary": {
+   "ok": true,
+   "episodes": 6,
+   "words": 772,
+   "coverage_min": 1,
+   "avg_sentence_max": 6.1,
+   "targets": 31,
+   "unknown": 0,
+   "problems": 0
+  },
+  "episodes": [
+   {
+    "id": "ep1",
+    "words": 129,
+    "sentences": 26,
+    "avg_sentence": 5,
+    "longest": 9,
+    "dialogue": 0.73,
+    "targets": {
+     "nervous": 2,
+     "strict": 2,
+     "check": 3,
+     "forget": 2,
+     "ready": 2,
+     "awake": 2
+    },
+    "coverage": 1,
+    "checked_words": 109,
+    "known_words": 109,
+    "name_words": 7,
+    "unknown": [],
+    "question_glossed": [],
+    "question_unknown": [],
+    "problems": []
+   },
+   {
+    "id": "ep2",
+    "words": 128,
+    "sentences": 21,
+    "avg_sentence": 6.1,
+    "longest": 9,
+    "dialogue": 0.19,
+    "targets": {
+     "hide": 2,
+     "remember": 2,
+     "polite": 2,
+     "plan": 2,
+     "appear": 2
+    },
+    "coverage": 1,
+    "checked_words": 112,
+    "known_words": 112,
+    "name_words": 6,
+    "unknown": [],
+    "question_glossed": [],
+    "question_unknown": [],
+    "problems": []
+   },
+   {
+    "id": "ep3",
+    "words": 129,
+    "sentences": 27,
+    "avg_sentence": 4.8,
+    "longest": 9,
+    "dialogue": 0.7,
+    "targets": {
+     "carry": 2,
+     "lonely": 2,
+     "understand": 2,
+     "happen": 2,
+     "together": 2
+    },
+    "coverage": 1,
+    "checked_words": 110,
+    "known_words": 110,
+    "name_words": 9,
+    "unknown": [],
+    "question_glossed": [],
+    "question_unknown": [],
+    "problems": []
+   },
+   {
+    "id": "ep4",
+    "words": 128,
+    "sentences": 21,
+    "avg_sentence": 6.1,
+    "longest": 9,
+    "dialogue": 0.33,
+    "targets": {
+     "follow": 2,
+     "silent": 2,
+     "along": 2,
+     "almost": 2,
+     "shake": 2
+    },
+    "coverage": 1,
+    "checked_words": 106,
+    "known_words": 106,
+    "name_words": 12,
+    "unknown": [],
+    "question_glossed": [],
+    "question_unknown": [],
+    "problems": []
+   },
+   {
+    "id": "ep5",
+    "words": 128,
+    "sentences": 23,
+    "avg_sentence": 5.6,
+    "longest": 11,
+    "dialogue": 0.65,
+    "targets": {
+     "storm": 2,
+     "abroad": 2,
+     "son": 2,
+     "problem": 2,
+     "protect": 2
+    },
+    "coverage": 1,
+    "checked_words": 115,
+    "known_words": 115,
+    "name_words": 3,
+    "unknown": [],
+    "question_glossed": [],
+    "question_unknown": [],
+    "problems": []
+   },
+   {
+    "id": "ep6",
+    "words": 130,
+    "sentences": 24,
+    "avg_sentence": 5.4,
+    "longest": 10,
+    "dialogue": 0.33,
+    "targets": {
+     "online": 2,
+     "volunteer": 2,
+     "join": 2,
+     "smile": 2,
+     "heart": 2
+    },
+    "coverage": 1,
+    "checked_words": 111,
+    "known_words": 111,
+    "name_words": 9,
+    "unknown": [],
+    "question_glossed": [
+     "title"
+    ],
+    "question_unknown": [],
+    "problems": []
+   }
+  ],
+  "reuse": {
+   "nervous": {
+    "from": "ep1",
+    "later": [
+     "ep4"
+    ]
+   },
+   "strict": {
+    "from": "ep1",
+    "later": [
+     "ep2",
+     "ep6"
+    ]
+   },
+   "check": {
+    "from": "ep1",
+    "later": [
+     "ep2"
+    ]
+   },
+   "forget": {
+    "from": "ep1",
+    "later": [
+     "ep6"
+    ]
+   },
+   "ready": {
+    "from": "ep1",
+    "later": [
+     "ep6"
+    ]
+   },
+   "awake": {
+    "from": "ep1",
+    "later": [
+     "ep3"
+    ]
+   },
+   "hide": {
+    "from": "ep2",
+    "later": [
+     "ep3"
+    ]
+   },
+   "remember": {
+    "from": "ep2",
+    "later": [
+     "ep5"
+    ]
+   },
+   "polite": {
+    "from": "ep2",
+    "later": [
+     "ep5"
+    ]
+   },
+   "plan": {
+    "from": "ep2",
+    "later": [
+     "ep4"
+    ]
+   },
+   "appear": {
+    "from": "ep2",
+    "later": [
+     "ep4"
+    ]
+   },
+   "carry": {
+    "from": "ep3",
+    "later": [
+     "ep5"
+    ]
+   },
+   "lonely": {
+    "from": "ep3",
+    "later": [
+     "ep5"
+    ]
+   },
+   "understand": {
+    "from": "ep3",
+    "later": [
+     "ep5"
+    ]
+   },
+   "happen": {
+    "from": "ep3",
+    "later": [
+     "ep6"
+    ]
+   },
+   "together": {
+    "from": "ep3",
+    "later": [
+     "ep4"
+    ]
+   },
+   "follow": {
+    "from": "ep4",
+    "later": [
+     "ep5"
+    ]
+   },
+   "silent": {
+    "from": "ep4",
+    "later": [
+     "ep6"
+    ]
+   },
+   "along": {
+    "from": "ep4",
+    "later": [
+     "ep5"
+    ]
+   },
+   "almost": {
+    "from": "ep4",
+    "later": [
+     "ep6"
+    ]
+   },
+   "shake": {
+    "from": "ep4",
+    "later": [
+     "ep5"
+    ]
+   },
+   "storm": {
+    "from": "ep5",
+    "later": [
+     "ep6"
+    ]
+   },
+   "abroad": {
+    "from": "ep5",
+    "later": [
+     "ep6"
+    ]
+   },
+   "son": {
+    "from": "ep5",
+    "later": [
+     "ep6"
+    ]
+   },
+   "problem": {
+    "from": "ep5",
+    "later": [
+     "ep6"
+    ]
+   },
+   "protect": {
+    "from": "ep5",
+    "later": [
+     "ep6"
+    ]
+   },
+   "online": {
+    "from": "ep6",
+    "later": []
+   },
+   "volunteer": {
+    "from": "ep6",
+    "later": []
+   },
+   "join": {
+    "from": "ep6",
+    "later": []
+   },
+   "smile": {
+    "from": "ep6",
+    "later": []
+   },
+   "heart": {
+    "from": "ep6",
+    "later": []
+   }
+  },
+  "grammar": {
+   "g:third_s": [
+    "ep1:4",
+    "ep1:23",
+    "ep2:5",
+    "ep2:6",
+    "ep2:19",
+    "ep2:20",
+    "ep2:21",
+    "ep3:7",
+    "ep3:9",
+    "ep3:13",
+    "ep3:20",
+    "ep3:26",
+    "ep3:27",
+    "ep4:8",
+    "ep4:9",
+    "ep4:17",
+    "ep4:18",
+    "ep4:20",
+    "ep5:4",
+    "ep5:9",
+    "ep5:16",
+    "ep5:18",
+    "ep5:19",
+    "ep6:2",
+    "ep6:8",
+    "ep6:11",
+    "ep6:13",
+    "ep6:14",
+    "ep6:16",
+    "ep6:17"
+   ],
+   "g:there_be": [
+    "ep1:17",
+    "ep1:24",
+    "ep4:14"
+   ],
+   "g:possessive_s": [
+    "ep1:25",
+    "ep4:13",
+    "ep4:16"
+   ],
+   "g:possessive_pronoun": [
+    "ep4:19",
+    "ep4:21"
+   ]
+  }
+ }
+}

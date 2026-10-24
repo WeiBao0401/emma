@@ -1,0 +1,193 @@
+/* 读一段（ui-reader.js）. Owner: 阅读器 agent. Class names start with rd-. Colors come from index.html :root
+   (--paper, --ink, --accent, --tag-bg, --marker, --rule ...); one column up to --col, big buttons for the iPad.
+   The story is set like the dictionary: serif English, one sentence a row, quiet rules, the current sentence under a marker. */
+.rd-shell{flex:1;display:flex;flex-direction:column;max-width:var(--col);width:100%;margin:0 auto}
+.rd-body{flex:1;display:flex;flex-direction:column}
+.rd{display:flex;flex-direction:column;gap:18px;padding:24px 0 48px}
+.rd-wait{padding:40px 0}
+
+.rd-chip{display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-size:14px;color:var(--muted)}
+.rd-tag{display:inline-block;padding:3px 10px;border-radius:4px;background:var(--tag-bg);color:var(--ink);font-size:13px;font-weight:550;letter-spacing:.01em}
+.rd-sub{color:var(--muted)}
+.rd-title{font:600 34px/1.2 var(--serif);letter-spacing:-.01em;color:var(--ink);text-wrap:balance}
+.rd-title.small-title{font-size:24px}
+.rd-title-zh{margin-top:-10px;font-size:17px;color:var(--muted)}
+.rd-label{font:600 13px/1.3 var(--sans);letter-spacing:.04em;color:var(--muted)}
+.rd-how{color:var(--muted)}
+
+/* 读的方法 page */
+.rd-recap{display:flex;flex-direction:column;gap:6px;padding:14px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.rd-recap-text{font:400 18px/1.65 var(--sans);color:var(--ink);text-wrap:pretty}
+.rd-targets{display:flex;flex-direction:column;gap:10px}
+.rd-tw{display:flex;flex-wrap:wrap;gap:10px 22px}
+.rd-tw li{display:flex;align-items:baseline;gap:8px}
+.rd-tw-w{font:500 22px/1.3 var(--serif);color:var(--ink);min-height:44px;padding:0;text-decoration:underline;text-decoration-color:var(--rule-strong);text-decoration-thickness:1px;text-underline-offset:4px}
+.rd-tw-w.playing{color:var(--accent)}
+.rd-tw-zh{font-size:15px;color:var(--muted)}
+.rd-tw.end{flex-direction:column;gap:4px}
+.rd-tw.end li{gap:12px;border-bottom:1px solid var(--rule);padding:2px 0}
+.rd-tw.end li.miss .rd-tw-w{color:var(--danger)}
+.rd-tw-ok{color:var(--good)}
+.rd-tw-ok .icon{width:18px;height:18px;vertical-align:-3px}
+.rd-tip{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-left:3px solid var(--accent);background:color-mix(in srgb,var(--tag-bg) 55%,var(--paper))}
+.rd-tip-title{font:600 20px/1.4 var(--sans);color:var(--ink)}
+.rd-tip-line{font:400 17px/1.6 var(--sans);color:var(--ink)}
+.rd-preview{list-style:decimal;padding-left:1.4em;display:flex;flex-direction:column;gap:4px;font-size:17px;line-height:1.5;color:var(--ink)}
+.rd-preview li{display:list-item}
+.rd-preview li::marker{color:var(--accent);font-weight:650}
+.rd-preview li{padding:2px 0}
+.rd-pv-en{display:block;font-size:17px}
+.rd-pv-en:lang(en){font-family:var(--serif);font-size:19px}
+.rd-pv-zh{display:block;font-size:14px;color:var(--muted)}
+.rd-steps{list-style:decimal;padding-left:1.4em;display:flex;flex-direction:column;gap:4px;font:400 16px/1.55 var(--sans);color:var(--ink)}
+.rd-steps li{display:list-item}
+.rd-steps li::marker{color:var(--accent);font-weight:650}
+
+.rd-actions{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:16px 26px;margin-top:8px}
+.rd-actions .btn{min-width:180px;min-height:56px;font-size:17px}
+@media (max-width:599px){.rd-actions .btn{width:100%}}
+
+/* 给她们起名字 (episode 1, once) */
+.rd-namer{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.rd-namer-q{font-size:17px;line-height:1.6;color:var(--ink)}
+.rd-namer-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px 26px}
+.rd-namer-actions .text-btn{font-size:16px}
+.rd-name-row{display:flex;align-items:center;gap:14px}
+.rd-name-who{flex:none;width:3em;font-size:15px;color:var(--muted)}
+.rd-name-in{font:500 22px var(--serif)}
+.rd-namer-msg{color:var(--danger)}
+
+/* the story: one sentence a row, words are tap targets, 看不懂 at the end of the row */
+.rd-story{display:flex;flex-direction:column;gap:2px}
+.rd-s{padding:8px 10px;margin:0 -10px;border-radius:8px;transition:background-color .25s var(--ease)}
+.rd-who{font:600 13px/1.3 var(--sans);letter-spacing:.04em;color:var(--accent);margin-top:8px}
+.rd-line{display:flex;align-items:flex-start;gap:6px}
+.rd-no{flex:none;min-width:1.6em;padding-top:.62em;font:500 12px/1 var(--sans);font-variant-numeric:tabular-nums;color:var(--faint);text-align:right}
+.rd-s.cont{padding-top:0}
+.rd-part{display:flex;flex-direction:column;gap:2px;margin:18px 0 6px;padding-top:12px;border-top:1px solid var(--rule)}
+.rd-story>.rd-part:first-child{margin-top:4px;border-top:0;padding-top:0}
+.rd-part-en{font:italic 500 16px/1.3 var(--serif);color:var(--muted)}
+.rd-part-zh{font-size:13px;color:var(--faint)}
+.rd-en{flex:1;min-width:0;font:400 25px/1.55 var(--serif);color:var(--ink);text-wrap:pretty}
+.rd-s.talk .rd-en{padding-left:12px;border-left:2px solid var(--rule)}
+.rd-s.talk .rd-who{margin-left:calc(1.6em + 6px)}
+.rd-w{cursor:pointer;border-radius:3px;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.rd-w:active{background:var(--tag-bg)}
+.rd-line .say{flex:none;width:40px;height:40px;margin-top:2px}
+.rd-line .say .icon{width:19px;height:19px}
+.text-btn.rd-help-btn{flex:none;margin:2px -6px 0 0;padding:0 8px;font-size:14px;color:var(--muted);white-space:nowrap}
+.rd-s.now{background:color-mix(in srgb,var(--marker) 38%,var(--paper))}
+.rd-s.now .rd-en{color:var(--marker-ink)}
+.rd-s.evidence{background:var(--tag-bg);box-shadow:inset 3px 0 0 var(--accent)}
+
+/* 看不懂: 1 断句, 2 两个关键词, 3 整句中文 */
+.rd-help{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px;padding:10px 14px;border-radius:8px;background:color-mix(in srgb,var(--tag-bg) 60%,var(--paper))}
+.rd-s.talk .rd-help{margin-left:14px}
+.rd-chunks{font:500 22px/1.55 var(--serif);color:var(--ink)}
+.rd-slash{color:var(--accent);font-weight:600;padding:0 .1em}
+.rd-help-note{font-size:14px;color:var(--muted)}
+.rd-keys{display:flex;flex-wrap:wrap;gap:4px 20px;font-size:17px;color:var(--ink)}
+.rd-key b{font:600 19px/1.4 var(--serif)}
+.rd-zh{font-size:17px;line-height:1.6;color:var(--ink)}
+
+/* listening controls stay at the bottom of the screen */
+.rd-bar{position:sticky;bottom:0;z-index:var(--z-sticky);display:flex;align-items:center;flex-wrap:wrap;gap:12px 22px;
+  margin:8px calc(-1 * var(--gutter)) -48px;padding:14px var(--gutter) calc(14px + var(--bottom));background:var(--paper);border-top:1px solid var(--rule)}
+.rd-bar .btn{min-width:132px;min-height:56px;font-size:17px}
+.rd-bar .text-btn{font-size:16px}
+.rd-speaker{display:inline-grid;place-items:center;width:28px;height:28px;color:var(--faint)}
+.rd-speaker .icon{width:22px;height:22px}
+.rd-speaker.playing{color:var(--accent)}
+.text-btn.rd-quit{margin-left:auto;font-size:14px;color:var(--faint)}
+.rd-bar.done{justify-content:flex-end}
+.rd-bar-msg{margin-right:auto;font:500 20px/1.3 var(--serif);color:var(--ink)}
+
+/* the word card: a sheet at the bottom */
+.rd-card{position:fixed;left:50%;bottom:0;z-index:var(--z-sheet);width:min(var(--col),100%);transform:translateX(-50%);
+  display:flex;flex-direction:column;gap:8px;padding:18px var(--gutter) calc(22px + var(--bottom));
+  background:var(--paper);border-top:1px solid var(--rule-strong);border-radius:14px 14px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.08)}
+.rd-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.rd-card-w{font:650 36px/1.15 var(--serif);letter-spacing:-.01em;color:var(--ink);overflow-wrap:anywhere}
+.rd-card-w .say{width:40px;height:40px;margin-left:8px;vertical-align:-4px}
+.rd-card-w .say .icon{width:21px;height:21px}
+.text-btn.rd-card-x{margin:-4px -10px 0 0}
+.rd-card-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;font-size:15px;color:var(--muted)}
+.rd-card-ph{font-family:var(--serif)}
+.rd-card-base b{font:600 16px var(--serif);color:var(--ink)}
+.rd-card-tag{padding:2px 8px;border-radius:4px;background:var(--tag-bg);color:var(--ink);font-size:13px}
+.rd-card-zh{font:500 22px/1.45 var(--sans);color:var(--ink)}
+.rd-card-zh.none{font-size:17px;font-weight:400;color:var(--muted)}
+.rd-card-foot{display:flex;align-items:center;flex-wrap:wrap;gap:10px 28px;margin-top:6px}
+.rd-card-foot .btn{min-height:52px}
+.text-btn.rd-card-go{font-size:17px;margin-left:auto}
+.rd-card-in{font-size:15px;color:var(--good)}
+
+/* a question */
+.rd-top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;border-bottom:1px solid var(--rule)}
+.rd-pos{font:600 15px/1.3 var(--serif);color:var(--ink)}
+.rd-pos .sub{font-weight:400;color:var(--muted)}
+.text-btn.rd-flag{font-size:14px;color:var(--faint);margin-right:-10px}
+.rd-ask{font:500 24px/1.45 var(--sans);color:var(--ink);text-wrap:pretty}
+.rd-ask:lang(en){font:500 26px/1.45 var(--serif)}
+.rd-q-zh{margin-top:-10px;font-size:16px;color:var(--muted)}
+.text-btn.rd-q-zh-btn{align-self:flex-start;margin-top:-12px;font-size:14px}
+.rd-stem{font:500 28px/1.45 var(--serif);color:var(--ink);text-wrap:pretty}
+.rd-blank{display:inline-block;width:3.6em;margin:0 .18em;border-bottom:2px solid var(--ink);vertical-align:-.12em;height:1em}
+.rd-options{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:600px){.rd-options{grid-template-columns:1fr 1fr;gap:14px}.rd-options.one-col{grid-template-columns:1fr}}
+.rd-opt{display:flex;align-items:center;gap:14px;min-height:68px;padding:12px 18px;text-align:left;
+  border:1px solid var(--rule-strong);border-radius:12px;background:var(--paper);color:var(--ink);
+  transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease)}
+.rd-letter{flex:none;width:26px;font:600 15px/1 var(--sans);color:var(--faint)}
+.rd-text{font:500 21px/1.35 var(--serif)}
+.rd-opt:lang(zh-CN) .rd-text{font:500 20px/1.4 var(--sans)}
+.rd-opt:active:not(:disabled){background:var(--tag-bg)}
+.rd-opt:disabled{cursor:default;opacity:.55}
+.rd-opt.right,.rd-opt.is-answer{opacity:1;border-color:var(--good);color:var(--good);box-shadow:inset 0 0 0 1px var(--good)}
+.rd-opt.right{background:var(--tag-bg)}
+.rd-opt.right .rd-letter,.rd-opt.is-answer .rd-letter{color:var(--good)}
+.rd-opt.wrong{opacity:1;border-color:var(--danger);color:var(--danger)}
+.rd-opt.wrong .rd-text{text-decoration:line-through;text-decoration-thickness:1px}
+.rd-opt.dropped{opacity:.45}
+.rd-opt.dropped .rd-text{text-decoration:line-through;text-decoration-thickness:1px}
+.rd-text{display:flex;flex-direction:column;gap:2px}
+.rd-opt-zh{font:400 14px/1.4 var(--sans);color:var(--muted)}
+.rd-tip-note{font-size:14px;color:var(--accent)}
+.rd-tip-note b{font-weight:600}
+
+.rd-hints{list-style:none;padding:2px 0 2px 16px;border-left:2px solid var(--accent);display:flex;flex-direction:column;gap:10px}
+.rd-hint{display:flex;gap:12px;font:18px/1.55 var(--sans);color:var(--ink)}
+.rd-hint.full{font-weight:500}
+.rd-n{flex:none;width:22px;height:22px;margin-top:3px;border-radius:50%;background:var(--tag-bg);color:var(--ink);font:600 13px/22px var(--sans);text-align:center}
+.rd-qtools{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.text-btn.rd-more{margin-left:auto;font-size:16px}
+.text-btn.rd-look-btn{font-size:16px;color:var(--accent)}
+.text-btn.rd-look-btn.on{color:var(--muted)}
+.rd-lookback{position:relative;padding:6px 14px 10px;border:1px solid var(--rule);border-radius:12px;max-height:46vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.rd-story.compact .rd-en{font-size:20px;line-height:1.5}
+.rd-story.compact .rd-s{padding:5px 8px;margin:0 -8px}
+.rd-story.compact .rd-who{margin-top:4px}
+.rd-story.compact .rd-part{margin:10px 0 2px;padding-top:8px}
+
+.rd-variant{display:flex;flex-direction:column;gap:14px;padding-top:18px;border-top:1px solid var(--rule)}
+.rd-now{font:600 17px/1.3 var(--sans);color:var(--accent)}
+.rd-feedback{font:600 19px/1.5 var(--sans);color:var(--ink)}
+.rd-feedback.ok{color:var(--good)}
+.rd-why{font-size:17px;line-height:1.6;color:var(--ink)}
+.rd-proof{display:flex;flex-direction:column;gap:4px;padding:12px 0 4px;border-top:1px solid var(--rule)}
+.rd-proof-en{font:400 21px/1.5 var(--serif);color:var(--ink)}
+
+/* the end */
+.rd-end .lede{font-size:30px}
+.rd-sum{font-size:17px;color:var(--muted)}
+.rd-learned{display:flex;flex-direction:column;gap:10px}
+.text-btn.rd-hear{align-self:flex-start;margin-left:-10px;font-size:16px}
+.rd-teaser{font-size:17px;line-height:1.6;color:var(--ink);padding:14px 0;border-top:1px solid var(--rule)}
+.text-btn.rd-boring{margin-right:auto;font-size:14px;color:var(--faint)}
+
+@media (min-width:700px){
+  .rd-title{font-size:38px}
+  .rd-en{font-size:27px}
+  .rd-stem{font-size:32px}
+}
+@media (prefers-reduced-motion:reduce){.rd-s,.rd-opt{transition:none}}

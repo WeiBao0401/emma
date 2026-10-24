@@ -27,7 +27,8 @@
 //     wrongWords(rec) -> [{ slug, w, cn }]           这次听写里打过叉的词（各轮合在一起）
 //     dictationNotice(kv, now) -> null | { kind: 'tonight' | 'soon' | 'morning', key, words, minutes?, label? }
 //     dictationToday(kv, now) -> bool         今天写过听写（给 plan 的 state.dictationTonight）
-//     slotText(cell) -> { name, note }        四格里一格的名字和下面那行小字
+//     slotText(cell) -> { name, note }        四格里一格的名字和下面那行小字（读一段：“第 2 集”，0.4.0；连词成句：“3 个句子”）
+//     readNote(cell) -> string                读一段那格的小字
 //     isQuizDay(plan) -> bool、startLabel(plan) -> string   主按钮
 //     writtenThisWeek(events, now) -> [slug]  这周第一次写对的词：spell 事件、纸笔听写、answer 里 mode 是拼写的，
 //                                              correct 为真；这周以前写对过的不算
@@ -153,7 +154,14 @@ export function optionalModule(path) {
 
 // The 写几个词 cell once it opens (DESIGN 2.2): what today holds. Keys are the write cell's mode from plan.js.
 export const WRITE_KINDS = { spell: '拼几个词', spelling: '拼几个词', tiles: '拼几个词', tile: '拼几个词', keys: '拼几个词',
-  grammar: '语法卡', 'grammar-card': '语法卡', card: '语法卡', phonics: '语音小卡', sound: '语音小卡', quiz: '小卷', sprint: '小卷' };
+  grammar: '语法卡', 'grammar-card': '语法卡', card: '语法卡', phonics: '语音小卡', sound: '语音小卡', quiz: '小卷', sprint: '小卷',
+  order: '连词成句' };
+// 读一段 once it opens (0.4.0): which episode, “第 2 集”; a light day reads it with 2 questions, after all six she reads one again
+export function readNote(c) {
+  if (!c || !c.n) return c && c.note ? c.note : '';
+  if (c.again) return `再读第 ${c.n} 集`;
+  return c.short ? `第 ${c.n} 集 · 2 道题` : `第 ${c.n} 集`;
+}
 export function slotText(c) {
   const open = c.status === 'ready' || c.status === 'done';
   const kind = c.id === 'write' && open ? WRITE_KINDS[c.mode] || WRITE_KINDS[c.kind] || '' : '';
@@ -165,6 +173,8 @@ export function slotText(c) {
   else if (c.status === 'skip') note = c.note || (c.id === 'write' ? '下周开播' : '今天不做');
   else if (c.id === 'warmup') note = items ? `${items} 张` : `${c.minutes} 分钟`;
   else if (c.id === 'wrap') note = '一个小问题';
+  else if (c.id === 'read') note = readNote(c) || (c.minutes ? `${c.minutes} 分钟` : '');
+  else if (kind === '连词成句') note = items ? `${items} 个句子` : '';
   else if (kind === '拼几个词') note = items ? `${items} 个词` : c.note || (c.minutes ? `${c.minutes} 分钟` : '');
   else if (kind) note = c.note || c.title || (c.minutes ? `${c.minutes} 分钟` : '');
   else note = c.note || (c.minutes ? `${c.minutes} 分钟` : '');

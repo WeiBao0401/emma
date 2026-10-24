@@ -1,0 +1,49 @@
+/* 连词成句（modes/order.js，类名 ord-）. Owner: 接线 (第 2 批). Colours only from index.html :root. Big tiles for fingers:
+   at least 60px high; the sentence line under a thin rule; feedback is a colour and one line, no motion. */
+.ord{flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px;padding:24px 0 40px}
+.ord-q{display:flex;flex-direction:column;gap:8px}
+.ord-now{font:600 15px/1.4 var(--sans);color:var(--accent);letter-spacing:.02em}
+.ord-title{color:var(--muted)}
+.ord-zh{font:600 28px/1.45 var(--sans);color:var(--ink);overflow-wrap:anywhere}
+.ord-ask{color:var(--muted);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ord-en{font:500 24px/1.4 var(--serif);color:var(--ink)}
+.ord-ask .say{width:40px;height:40px}
+
+/* her sentence: tiles in a row, empty slots dashed, the full stop or question mark at the end */
+.ord-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:84px;padding:10px 0 14px;border-bottom:1px solid var(--rule-strong)}
+.ord-slot{display:inline-block;min-width:64px;height:60px;border-radius:10px;border:1px dashed var(--rule-strong);opacity:.6}
+.ord-end{font:500 30px/1 var(--serif);color:var(--muted);padding:0 2px}
+.ord-bank{display:flex;flex-wrap:wrap;gap:12px}
+.ord-tile{display:inline-flex;align-items:center;justify-content:center;min-width:64px;min-height:60px;padding:0 18px;
+  font:500 26px/1.1 var(--serif);color:var(--ink);background:var(--paper);border:1px solid var(--rule-strong);border-radius:10px;
+  -webkit-user-select:none;user-select:none;touch-action:manipulation;
+  transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease)}
+.ord-tile:active:not(:disabled){background:var(--tag-bg)}
+.ord-tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ord-bank .ord-tile.used{visibility:hidden}
+.ord-placed{background:color-mix(in srgb,var(--accent) 7%,var(--paper));border-color:var(--accent)}
+.ord-placed:disabled{opacity:1;cursor:default}
+/* placed by the teacher (hint 2 and 3): a dotted edge, it stays */
+.ord-placed.locked{border-style:dashed;color:var(--muted)}
+.ord-placed.right,.ord-placed.reveal{border-color:var(--good);color:var(--good);font-weight:600;background:var(--tag-bg);box-shadow:inset 0 0 0 1px var(--good)}
+.ord.is-right .ord-line,.ord.is-revealed .ord-line{border-bottom-color:var(--good)}
+.ord.is-wrong .ord-line{border-bottom-color:var(--danger)}
+
+.ord-hints{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ord-hint{display:flex;gap:12px;align-items:baseline;border-left:2px solid var(--accent);padding:2px 0 2px 14px}
+.ord-hint p{margin:0;font:18px/1.55 var(--sans);color:var(--ink)}
+.ord-n{font:600 14px/1 var(--sans);color:var(--accent);min-width:1em}
+.ord-feedback{min-height:1.5em;font:17px/1.6 var(--sans);color:var(--ink)}
+.ord.is-right .ord-feedback b{color:var(--good)}
+.ord-why{color:var(--ink)}
+.ord-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:var(--btn-h)}
+.ord-actions .btn{margin-left:auto;min-width:140px}
+.ord-tools{display:flex;justify-content:flex-end}
+.ord-tools .text-btn{color:var(--muted);font-size:15px}
+
+@media (max-width:420px){
+  .ord-zh{font-size:24px}
+  .ord-tile{min-height:52px;font-size:22px;padding:0 14px}
+  .ord-slot{min-width:48px;height:52px}
+}
+@media (prefers-reduced-motion:reduce){.ord-tile{transition:none}}

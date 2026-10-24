@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "误解标签表（teacher-memory 2.2）。标签只增不改名。单词题干扰项用 form / category / meaning / sound。",
+  "source": "误解标签表（teacher-memory 2.2）。标签只增不改名。单词题干扰项用 form / category / meaning / sound。0.4.0 并进了语法卡的 20 个标签和连词成句的 5 个顺序标签。",
   "tags": {
     "form": { "zh": "形近", "kind": "word" },
     "category": { "zh": "同类", "kind": "word" },
@@ -19,6 +19,31 @@
     "plural_missing": { "zh": "漏了名词复数", "kind": "grammar" },
     "uncountable_plural": { "zh": "不可数名词加了复数", "kind": "grammar" },
     "third_s_missing": { "zh": "漏了三单 -s", "kind": "grammar" },
-    "do_does": { "zh": "do 和 does 混用", "kind": "grammar" }
+    "do_does": { "zh": "do 和 does 混用", "kind": "grammar" },
+    "subj_vs_poss": { "zh": "主格和物主代词（I / my）", "kind": "grammar" },
+    "be_agree": { "zh": "be 动词和主语不一致（I is / they is）", "kind": "grammar" },
+    "poss_plural": { "zh": "复数名词的所有格（students' / students's）", "kind": "grammar" },
+    "not_order": { "zh": "not 放错了位置（She not is / not can）", "kind": "grammar" },
+    "be_do_mix": { "zh": "be 动词和 do / does 混用（She doesn't happy / Is he like）", "kind": "grammar" },
+    "short_answer": { "zh": "简略回答没配对（Yes, it isn't / Yes, I'm）", "kind": "grammar" },
+    "q_order": { "zh": "问句没把 be / do / can 放到前面（You can swim?）", "kind": "grammar" },
+    "plural_rule": { "zh": "复数加 s / es / ies 加错了（boxs / babys）", "kind": "grammar" },
+    "plural_irregular": { "zh": "要单独记的复数（childs / mans / sheeps）", "kind": "grammar" },
+    "a_plural": { "zh": "一个的时候用了复数（a cats / this books）", "kind": "grammar" },
+    "third_s_extra": { "zh": "不该加 -s 的加了（I likes / they plays）", "kind": "grammar" },
+    "does_verb_s": { "zh": "do / does 后面的动词又变了（Does he likes）", "kind": "grammar" },
+    "third_s_spelling": { "zh": "三单 -s 加错了（watchs / studys / haves）", "kind": "grammar" },
+    "modal_s": { "zh": "can 或后面的动词加了 s（He cans / can swims）", "kind": "grammar" },
+    "modal_to": { "zh": "can 后面加了 to（can to swim）", "kind": "grammar" },
+    "modal_do": { "zh": "can 的否定和问句借了 do / does（doesn't can / Do you can）", "kind": "grammar" },
+    "can_who": { "zh": "Can I 和 Can you 用反了", "kind": "grammar" },
+    "adv_meaning": { "zh": "频度副词的意思弄混（always / never）", "kind": "grammar" },
+    "adv_position": { "zh": "频度副词放错位置（go often / always is）", "kind": "grammar" },
+    "how_often": { "zh": "How often 和 How many 弄混", "kind": "grammar" },
+    "word_order": { "zh": "句子的顺序乱了（谁 + 是 / 做什么 + 其他）", "kind": "grammar" },
+    "adj_order": { "zh": "形容词放到了名词后面，或两个形容词顺序反了（a cat white）", "kind": "grammar" },
+    "place_time": { "zh": "地点和时间放错了位置（at school 放到了中间）", "kind": "grammar" },
+    "there_order": { "zh": "there be 句的顺序（a box there is under the tree）", "kind": "grammar" },
+    "wh_order": { "zh": "特殊疑问句的顺序（Where your bag is）", "kind": "grammar" }
   }
 }

@@ -1,15 +1,36 @@
 {
   "version": 1,
-  "source": "语法卡（DESIGN 5.4、5.5）：v1 的三张卡，Claude 原创预写，Wei 过目。例句和题目只用小学 505 词和七上 Starter 到 Unit 3 的词，不含课文。be 动词和名词复数两块地基并在三张卡的例句和干扰项里。每题：answer 是正确选项，wrong 是干扰项和它的误解标签；hints 是四级提示（1 点出考点、2 给一个像的例子、3 给第一步、4 讲清楚）；variant 是第 4 级之后马上出的变式题；spares 是备用题，错过的题 1、3、7 天后从这里挑同类的新句子，热身里每天混 1-2 道也从这里出。kind：fill 填空（stem 里的 ____ 是空，cue 是括号里的提示），pick 选出正确的一项（ask 是题目要求）。",
+  "source": "语法卡（DESIGN 5.4、5.5）：Claude 原创预写，Wei 过目。v1 的三张（代词、there be、名词所有格）；10-25 加了四张打地基的卡（be 动词、名词复数、一般现在时和三单、can，foundation: true）和一张下个单元的卡（Unit 4 频度副词，ahead: true，提前练）。order 是排课的先后（grammar.js nextCard）；fixes 是她选了就该先补这张地基卡的误解标签；label 是卡片上的小标签。例句和题目只用小学 505 词、课标另列的数词和星期、七上 Starter 到 Unit 3 的词，不含课文；usually 由频度副词卡教。names 是还没并进 prereq.json 的语法点名字。每题：answer 是正确选项，wrong 是干扰项和它的误解标签；hints 是四级提示（1 点出考点、2 给一个像的例子、3 给第一步、4 讲清楚）；variant 是第 4 级之后马上出的变式题；spares 是备用题，错过的题 1、3、7 天后从这里挑同类的新句子，热身里每天混 1-2 道也从这里出。kind：fill 填空（stem 里的 ____ 是空，cue 是括号里的提示），pick 选出正确的一项（ask 是题目要求）。",
   "tags": {
     "subj_vs_poss": { "zh": "主格和物主代词（I / my）", "kind": "grammar" },
     "be_agree": { "zh": "be 动词和主语不一致（I is / they is）", "kind": "grammar" },
-    "poss_plural": { "zh": "复数名词的所有格（students' / students's）", "kind": "grammar" }
+    "poss_plural": { "zh": "复数名词的所有格（students' / students's）", "kind": "grammar" },
+    "not_order": { "zh": "not 放错了位置（She not is / not can）", "kind": "grammar" },
+    "be_do_mix": { "zh": "be 动词和 do / does 混用（She doesn't happy / Is he like）", "kind": "grammar" },
+    "short_answer": { "zh": "简略回答没配对（Yes, it isn't / Yes, I'm）", "kind": "grammar" },
+    "q_order": { "zh": "问句没把 be / do / can 放到前面（You can swim?）", "kind": "grammar" },
+    "plural_rule": { "zh": "复数加 s / es / ies 加错了（boxs / babys）", "kind": "grammar" },
+    "plural_irregular": { "zh": "要单独记的复数（childs / mans / sheeps）", "kind": "grammar" },
+    "a_plural": { "zh": "一个的时候用了复数（a cats / this books）", "kind": "grammar" },
+    "third_s_extra": { "zh": "不该加 -s 的加了（I likes / they plays）", "kind": "grammar" },
+    "does_verb_s": { "zh": "do / does 后面的动词又变了（Does he likes）", "kind": "grammar" },
+    "third_s_spelling": { "zh": "三单 -s 加错了（watchs / studys / haves）", "kind": "grammar" },
+    "modal_s": { "zh": "can 或后面的动词加了 s（He cans / can swims）", "kind": "grammar" },
+    "modal_to": { "zh": "can 后面加了 to（can to swim）", "kind": "grammar" },
+    "modal_do": { "zh": "can 的否定和问句借了 do / does（doesn't can / Do you can）", "kind": "grammar" },
+    "can_who": { "zh": "Can I 和 Can you 用反了", "kind": "grammar" },
+    "adv_meaning": { "zh": "频度副词的意思弄混（always / never）", "kind": "grammar" },
+    "adv_position": { "zh": "频度副词放错位置（go often / always is）", "kind": "grammar" },
+    "how_often": { "zh": "How often 和 How many 弄混", "kind": "grammar" }
+  },
+  "names": {
+    "g:can": "can（会、能、请求）"
   },
   "cards": [
     {
       "id": "pronoun",
       "unit": "U1",
+      "order": 3,
       "title": "人称代词和物主代词",
       "points": ["g:personal_pronoun", "g:possessive_pronoun"],
       "foundations": ["g:be", "g:subject_pronoun", "g:plural"],
@@ -346,6 +367,7 @@
     {
       "id": "there_be",
       "unit": "U2",
+      "order": 4,
       "title": "there be",
       "points": ["g:there_be", "g:how_many_much"],
       "foundations": ["g:be_agree", "g:plural", "g:countable"],
@@ -663,6 +685,7 @@
     {
       "id": "possessive_s",
       "unit": "U3",
+      "order": 5,
       "title": "名词所有格 's",
       "points": ["g:possessive_s"],
       "foundations": ["g:plural", "g:possessive_pronoun", "g:be"],
@@ -967,6 +990,1602 @@
           "answer": "is", "wrong": { "are": "be_agree", "am": "be_agree" },
           "zh": "我哥哥的房间很整洁。",
           "hints": ["主语是 My brother's room，说的是一个房间。", "像这样：Lily's cat is very cute. 一只猫，用 is。", "一个房间，用 is 还是 are？别被 's 骗了。", "答案是 is。brother's 是“哥哥的”，不是复数；room 是一个，用 is。"]
+        }
+      ]
+    },
+    {
+      "id": "be_verb",
+      "unit": "S",
+      "order": 1,
+      "foundation": true,
+      "label": "打地基",
+      "title": "be 动词 am / is / are",
+      "points": ["g:be", "g:be_agree"],
+      "foundations": ["g:subject_pronoun"],
+      "fixes": ["be_agree", "be_missing", "be_plus_verb", "there_be_agree", "not_order", "be_do_mix"],
+      "rule": [
+        "be 动词跟着主语走：I 用 am；he、she、it 和一个人、一样东西用 is；we、you、they 和两个以上用 are。",
+        "中文“她很高”没有“是”，英语也要说 She is tall；可是“我喜欢猫”是 I like cats，不说 I am like cats。",
+        "否定在 be 后面加 not：I am not，is not 就是 isn't，are not 就是 aren't。",
+        "问“是不是”，把 be 放到最前面：Is she your sister? 回答 Yes, she is. 或 No, she isn't."
+      ],
+      "table": {
+        "head": ["主语", "肯定", "否定", "问句"],
+        "rows": [
+          ["I", "I am", "I am not", "Am I …?"],
+          ["he、she、it，一个", "She is", "She isn't", "Is she …?"],
+          ["we、you、they，两个以上", "They are", "They aren't", "Are they …?"]
+        ]
+      },
+      "examples": [
+        { "en": "I am a student. I am twelve.", "zh": "我是学生。我十二岁。", "mark": ["am"] },
+        { "en": "My mother is a doctor. She is very kind.", "zh": "我妈妈是医生。她很和蔼。", "mark": ["is"] },
+        { "en": "Lily and Lucy are my friends.", "zh": "莉莉和露西是我的朋友。", "mark": ["are"] },
+        { "en": "I like cats. My cat is very cute.", "zh": "我喜欢猫。我的猫很可爱。", "mark": ["like", "is"] },
+        { "en": "My cats are white. They aren't big.", "zh": "我的猫是白色的。它们不大。", "mark": ["are", "aren't"] },
+        { "en": "Is he your brother? Yes, he is.", "zh": "他是你哥哥吗？是的，他是。", "mark": ["Is", "is"] },
+        { "en": "Are you ready? No, I am not.", "zh": "你准备好了吗？还没有。", "mark": ["Are", "am not"] }
+      ],
+      "families": {
+        "agree": { "name": "am、is、are 怎么选", "point": "g:be_agree" },
+        "missing": { "name": "别漏了 be", "point": "g:be" },
+        "extra": { "name": "be 和 like 这类动词", "point": "g:be" },
+        "neg": { "name": "be 的否定", "point": "g:be" },
+        "q": { "name": "be 的问句和回答", "point": "g:be" }
+      },
+      "questions": [
+        {
+          "id": "q01", "part": 1, "family": "agree", "kind": "fill",
+          "stem": "My sister ____ a nurse.",
+          "answer": "is", "wrong": { "am": "be_agree", "are": "be_agree" },
+          "zh": "我姐姐是护士。",
+          "hints": [
+            "空前面的主语是 my sister，一个人。",
+            "像这样：My mother is a doctor. 一个人用 is。",
+            "my sister 可以换成 she。she 用 am、is 还是 are？",
+            "答案是 is。my sister 是一个人，等于 she，用 is。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "My father ____ a teacher.",
+            "answer": "is", "wrong": { "am": "be_agree", "are": "be_agree" },
+            "zh": "我爸爸是老师。", "explain": "my father 是一个人，等于 he，用 is。"
+          }
+        },
+        {
+          "id": "q02", "part": 1, "family": "agree", "kind": "fill",
+          "stem": "Tom and I ____ classmates.",
+          "answer": "are", "wrong": { "am": "be_agree", "is": "be_agree" },
+          "zh": "汤姆和我是同学。",
+          "hints": [
+            "主语是 Tom and I，有几个人？",
+            "像这样：Lily and Lucy are my friends. 两个人用 are。",
+            "Tom and I 等于 we。we 用哪一个？",
+            "答案是 are。Tom and I 是两个人，等于 we，用 are；别看到 I 就用 am。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "Amy and her sister ____ at home.",
+            "answer": "are", "wrong": { "is": "be_agree", "am": "be_agree" },
+            "zh": "埃米和她妹妹在家。", "explain": "Amy and her sister 是两个人，等于 they，用 are。"
+          }
+        },
+        {
+          "id": "q03", "part": 1, "family": "missing", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "My cat is very cute.", "wrong": { "My cat very cute.": "be_missing", "My cat are very cute.": "be_agree" },
+          "zh": "我的猫很可爱。",
+          "hints": [
+            "中文说“我的猫很可爱”，没有“是”。英语这句要不要 be 动词？",
+            "像这样：She is tall. “她很高”英语里要有 is。",
+            "先去掉没有 be 动词的那句，再看 my cat 用 is 还是 are。",
+            "答案是 My cat is very cute. 说“怎么样”也要有 be 动词；my cat 是一只，用 is。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "I am very happy today.", "wrong": { "I very happy today.": "be_missing", "I is very happy today.": "be_agree" },
+            "zh": "我今天很开心。", "explain": "说“很开心”也要有 be 动词；I 用 am。"
+          }
+        },
+        {
+          "id": "q04", "part": 1, "family": "extra", "kind": "fill",
+          "stem": "I ____ cats very much.", "cue": "喜欢",
+          "answer": "like", "wrong": { "am like": "be_plus_verb", "is like": "be_plus_verb" },
+          "zh": "我非常喜欢猫。",
+          "hints": [
+            "括号里是“喜欢”，英语是动词 like。",
+            "像这样：We go to school. 有了动词 go，前面不加 are。",
+            "like 已经是动词了，前面还要不要 am？",
+            "答案是 like。I like cats. like 是动词，前面不加 am；am 后面跟名词、形容词或地点，比如 I am happy。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "We ____ English.", "cue": "喜欢",
+            "answer": "like", "wrong": { "are like": "be_plus_verb", "is like": "be_plus_verb" },
+            "zh": "我们喜欢英语。", "explain": "like 是动词，前面不加 are。"
+          }
+        },
+        {
+          "id": "q05", "part": 1, "family": "neg", "kind": "fill",
+          "stem": "My brother ____ at school today. He is ill.",
+          "answer": "isn't", "wrong": { "aren't": "be_agree", "not": "be_missing", "don't": "be_do_mix" },
+          "zh": "我哥哥今天不在学校。他生病了。",
+          "hints": [
+            "这句是“不在学校”，要用 be 动词的否定。",
+            "像这样：They aren't big. 否定是在 be 后面加 not。",
+            "my brother 是一个人，用 is。is 加 not 是什么？",
+            "答案是 isn't。my brother 用 is，否定是 is not，缩写 isn't；不用 don't，也不能只写 not。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "My shoes ____ new. They are old.",
+            "answer": "aren't", "wrong": { "isn't": "be_agree", "not": "be_missing", "don't": "be_do_mix" },
+            "zh": "我的鞋不是新的。它们是旧的。", "explain": "my shoes 是两只，用 are，否定是 aren't。"
+          }
+        },
+        {
+          "id": "q06", "part": 2, "family": "agree", "kind": "fill",
+          "stem": "These books ____ very interesting.",
+          "answer": "are", "wrong": { "is": "be_agree", "am": "be_agree" },
+          "zh": "这些书很有趣。",
+          "hints": [
+            "主语是 these books，有几本？",
+            "像这样：My cats are white. 两只以上用 are。",
+            "these books 等于 they。they 用哪一个？",
+            "答案是 are。these books 是好几本，等于 they，用 are。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "The children ____ in the park.",
+            "answer": "are", "wrong": { "is": "be_agree", "am": "be_agree" },
+            "zh": "孩子们在公园里。", "explain": "children 是 child 的复数，好几个孩子，用 are。"
+          }
+        },
+        {
+          "id": "q07", "part": 2, "family": "q", "kind": "fill",
+          "stem": "____ your mother a teacher? Yes, she is.",
+          "answer": "Is", "wrong": { "Are": "be_agree", "Does": "be_do_mix", "Am": "be_agree" },
+          "zh": "你妈妈是老师吗？是的，她是。",
+          "hints": [
+            "这是问“是不是”，be 动词放在最前面。",
+            "像这样：Is he your brother? Yes, he is. 问句开头是 Is。",
+            "问的是 your mother，一个人，等于 she。开头用 Is 还是 Are？",
+            "答案是 Is。问“是不是”把 be 放到最前面；your mother 是一个人，用 Is；不用 Does。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "____ you and Tom good friends? Yes, we are.",
+            "answer": "Are", "wrong": { "Is": "be_agree", "Do": "be_do_mix", "Am": "be_agree" },
+            "zh": "你和汤姆是好朋友吗？是的，我们是。", "explain": "you and Tom 是两个人，问句开头用 Are。"
+          }
+        },
+        {
+          "id": "q08", "part": 2, "family": "q", "kind": "pick",
+          "ask": "“Is this your bag?” 怎么回答“是的”？",
+          "answer": "Yes, it is.", "wrong": { "Yes, it does.": "be_do_mix", "Yes, it isn't.": "short_answer", "No, it is.": "short_answer" },
+          "zh": "是的，它是。",
+          "hints": [
+            "问句用 Is 开头，回答也要用 is。",
+            "像这样：Is he your brother? Yes, he is. 问 Is，答 is。",
+            "Yes 后面跟 is，No 后面跟 isn't。说“是的”该选哪一个？",
+            "答案是 Yes, it is. 问句用 Is，回答也用 is；Yes 配 is，No 配 isn't；this 在回答里换成 it。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "“Are they your cats?” 怎么回答“不是”？",
+            "answer": "No, they aren't.", "wrong": { "No, they don't.": "be_do_mix", "No, they are.": "short_answer", "No, they isn't.": "be_agree" },
+            "zh": "不，它们不是。", "explain": "问句用 Are，回答也用 are；“不是”用 aren't。"
+          }
+        },
+        {
+          "id": "q09", "part": 2, "family": "neg", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "I am not hungry now.", "wrong": { "I not hungry now.": "be_missing", "I don't hungry now.": "be_do_mix", "I not am hungry now.": "not_order" },
+          "zh": "我现在不饿。",
+          "hints": [
+            "看两处：有没有 be 动词，not 放在哪里。",
+            "像这样：No, I am not. not 放在 am 后面。",
+            "先去掉没有 be 动词的那句和用 don't 的那句。not 在 am 前面还是后面？",
+            "答案是 I am not hungry now. “饿”是形容词，要用 be 动词；否定把 not 放在 am 后面，不用 don't。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "She isn't at home.", "wrong": { "She not at home.": "be_missing", "She doesn't at home.": "be_do_mix", "She not is at home.": "not_order" },
+            "zh": "她不在家。", "explain": "she 用 is，否定是 isn't；不用 doesn't。"
+          }
+        },
+        {
+          "id": "q10", "part": 2, "family": "missing", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Lily is in the library now.", "wrong": { "Lily in the library now.": "be_missing", "Lily are in the library now.": "be_agree" },
+          "zh": "莉莉现在在图书馆。",
+          "hints": [
+            "中文“在图书馆”没有“是”，英语说“在哪儿”也要用 be 动词。",
+            "像这样：The cat is under the bed. 说猫在哪儿，用了 is。",
+            "先去掉没有 be 动词的那句。Lily 是一个人，用 is 还是 are？",
+            "答案是 Lily is in the library now. 说“在哪儿”要有 be 动词；Lily 是一个人，用 is。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "My parents are at work.", "wrong": { "My parents at work.": "be_missing", "My parents is at work.": "be_agree" },
+            "zh": "我爸爸妈妈在上班。", "explain": "说“在哪儿”要有 be 动词；my parents 是两个人，用 are。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01", "family": "agree", "kind": "fill",
+          "stem": "I ____ in Class Two.",
+          "answer": "am", "wrong": { "is": "be_agree", "are": "be_agree" },
+          "zh": "我在二班。",
+          "hints": ["主语是 I。", "像这样：I am a student. I 后面用 am。", "I 只配一个 be 动词，是哪一个？", "答案是 am。I 后面用 am：I am。"]
+        },
+        {
+          "id": "s02", "family": "agree", "kind": "fill",
+          "stem": "Mike ____ my good friend.",
+          "answer": "is", "wrong": { "am": "be_agree", "are": "be_agree" },
+          "zh": "迈克是我的好朋友。",
+          "hints": ["主语是 Mike，一个人。", "像这样：My mother is a doctor. 一个人用 is。", "Mike 等于 he。he 用哪一个？", "答案是 is。Mike 是一个人，等于 he，用 is。"]
+        },
+        {
+          "id": "s03", "family": "agree", "kind": "fill",
+          "stem": "My grandfather and grandmother ____ very healthy.",
+          "answer": "are", "wrong": { "is": "be_agree", "am": "be_agree" },
+          "zh": "我爷爷奶奶身体很好。",
+          "hints": ["主语是 my grandfather and grandmother，有几个人？", "像这样：Lily and Lucy are my friends. 两个人用 are。", "两个人等于 they。they 用哪一个？", "答案是 are。两个人用 are：They are very healthy."]
+        },
+        {
+          "id": "s04", "family": "agree", "kind": "fill",
+          "stem": "This bag ____ very heavy.",
+          "answer": "is", "wrong": { "are": "be_agree", "am": "be_agree" },
+          "zh": "这个包很重。",
+          "hints": ["主语是 this bag，一个包。", "像这样：My cat is very cute. 一只猫用 is。", "this bag 等于 it。it 用哪一个？", "答案是 is。this bag 是一个，等于 it，用 is。"]
+        },
+        {
+          "id": "s05", "family": "missing", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Tom is tall and strong.", "wrong": { "Tom tall and strong.": "be_missing", "Tom are tall and strong.": "be_agree" },
+          "zh": "汤姆又高又壮。",
+          "hints": ["中文“汤姆又高又壮”没有“是”。英语要不要 be 动词？", "像这样：She is tall. “她很高”英语里有 is。", "先去掉没有 be 动词的那句，再看 Tom 用 is 还是 are。", "答案是 Tom is tall and strong. 说“怎么样”要有 be 动词；Tom 是一个人，用 is。"]
+        },
+        {
+          "id": "s06", "family": "missing", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "We are in the same class.", "wrong": { "We in the same class.": "be_missing", "We is in the same class.": "be_agree" },
+          "zh": "我们在同一个班。",
+          "hints": ["中文“在同一个班”没有“是”，英语说“在哪儿”要有 be 动词。", "像这样：Lily is in the library. 说在哪儿，用了 is。", "先去掉没有 be 动词的那句。we 用 is 还是 are？", "答案是 We are in the same class. 说“在哪儿”要有 be 动词；we 用 are。"]
+        },
+        {
+          "id": "s07", "family": "extra", "kind": "fill",
+          "stem": "I ____ my school.", "cue": "爱",
+          "answer": "love", "wrong": { "am love": "be_plus_verb", "is love": "be_plus_verb" },
+          "zh": "我爱我的学校。",
+          "hints": ["括号里是“爱”，英语是动词 love。", "像这样：I like cats. 有了动词 like，前面不加 am。", "love 已经是动词了，前面还要不要 am？", "答案是 love。love 是动词，前面不加 am：I love my school."]
+        },
+        {
+          "id": "s08", "family": "extra", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "They play basketball after school.", "wrong": { "They are play basketball after school.": "be_plus_verb", "They plays basketball after school.": "third_s_extra" },
+          "zh": "他们放学后打篮球。",
+          "hints": ["句子里有动词 play。看前面有没有多出来的 are，play 加不加 s。", "像这样：We go to school. go 前面不加 are。", "先去掉 are play 那句。they 后面的 play 加不加 s？", "答案是 They play basketball after school. 有了动词 play，前面不加 are；they 后面用原形 play。"]
+        },
+        {
+          "id": "s09", "family": "neg", "kind": "fill",
+          "stem": "We ____ late for school.",
+          "answer": "aren't", "wrong": { "isn't": "be_agree", "don't": "be_do_mix", "not": "be_missing" },
+          "zh": "我们上学没迟到。",
+          "hints": ["这句是“没迟到”，late 是形容词，要用 be 动词的否定。", "像这样：They aren't big. 否定是在 be 后面加 not。", "we 用 are。are 加 not 是什么？", "答案是 aren't。we 用 are，否定是 are not，缩写 aren't；不用 don't。"]
+        },
+        {
+          "id": "s10", "family": "neg", "kind": "fill",
+          "stem": "This ____ my pen. It's Tom's.",
+          "answer": "isn't", "wrong": { "aren't": "be_agree", "don't": "be_do_mix", "not": "be_missing" },
+          "zh": "这不是我的钢笔。是汤姆的。",
+          "hints": ["这句是“不是我的”，要用 be 动词的否定。", "像这样：She isn't at home. is 加 not 是 isn't。", "this 是一个，用 is。is 的否定是什么？", "答案是 isn't。this 用 is，否定是 isn't；不用 don't，也不能只写 not。"]
+        },
+        {
+          "id": "s11", "family": "neg", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "They aren't my books.", "wrong": { "They not my books.": "be_missing", "They don't my books.": "be_do_mix", "They isn't my books.": "be_agree" },
+          "zh": "它们不是我的书。",
+          "hints": ["看两处：有没有 be 动词，they 用 is 还是 are。", "像这样：My shoes aren't new. 两只鞋用 aren't。", "先去掉没有 be 动词的那句和用 don't 的那句。", "答案是 They aren't my books. they 用 are，否定是 aren't；不用 don't。"]
+        },
+        {
+          "id": "s12", "family": "q", "kind": "fill",
+          "stem": "____ they your classmates? No, they aren't.",
+          "answer": "Are", "wrong": { "Is": "be_agree", "Do": "be_do_mix", "Am": "be_agree" },
+          "zh": "他们是你的同学吗？不，他们不是。",
+          "hints": ["这是问“是不是”，be 动词放在最前面。", "像这样：Are you ready? 问句开头是 Are。", "问的是 they。开头用 Is 还是 Are？", "答案是 Are。问“是不是”把 be 放到最前面；they 用 Are；不用 Do。"]
+        },
+        {
+          "id": "s13", "family": "q", "kind": "fill",
+          "stem": "____ Mike in Class One? Yes, he is.",
+          "answer": "Is", "wrong": { "Are": "be_agree", "Does": "be_do_mix", "Am": "be_agree" },
+          "zh": "迈克在一班吗？是的，他在。",
+          "hints": ["这是问“在不在”，be 动词放在最前面。", "像这样：Is he your brother? 问句开头是 Is。", "Mike 是一个人。开头用 Is 还是 Are？", "答案是 Is。问句把 be 放到最前面；Mike 是一个人，用 Is；不用 Does。"]
+        },
+        {
+          "id": "s14", "family": "q", "kind": "pick",
+          "ask": "“Are you a student?” 怎么回答“是的”？",
+          "answer": "Yes, I am.", "wrong": { "Yes, I do.": "be_do_mix", "Yes, you are.": "short_answer", "Yes, I'm.": "short_answer" },
+          "zh": "是的，我是。",
+          "hints": ["问句用 Are 开头，回答也要用 be 动词。", "像这样：Is he your brother? Yes, he is. 问 Is，答 is。", "问的是 you，回答说 I。I 用哪个 be 动词？", "答案是 Yes, I am. 问 you，答 I；I 用 am；回答最后不缩写成 I'm。"]
+        },
+        {
+          "id": "s15", "family": "q", "kind": "pick",
+          "ask": "选出正确的问句。",
+          "answer": "Is your sister at home?", "wrong": { "Your sister is at home?": "q_order", "Does your sister at home?": "be_do_mix", "Are your sister at home?": "be_agree" },
+          "zh": "你姐姐在家吗？",
+          "hints": ["问“在不在”，be 动词要放在最前面。", "像这样：Is Mike in Class One? Is 在最前面。", "先去掉 be 没放前面的那句和用 Does 的那句。your sister 用 Is 还是 Are？", "答案是 Is your sister at home? 问句把 be 放到最前面；your sister 是一个人，用 Is。"]
+        }
+      ]
+    },
+    {
+      "id": "plural",
+      "unit": "S",
+      "order": 2,
+      "foundation": true,
+      "label": "打地基",
+      "title": "名词复数",
+      "points": ["g:plural"],
+      "foundations": [],
+      "fixes": ["plural_missing", "plural_rule", "plural_irregular", "a_plural"],
+      "rule": [
+        "一个用 a 或 an 加单数（a cat）；两个以上名词变复数，一般加 s：two cats，many books。",
+        "s、x、ch、sh 结尾加 es：bus 变 buses，box 变 boxes，watch 变 watches；potato、tomato 也加 es。",
+        "y 结尾，y 前面不是 a、e、i、o、u，把 y 变成 i 再加 es：baby 变 babies；boy、day 这样的直接加 s。",
+        "有的要单独记：man 变 men，woman 变 women，child 变 children，foot 变 feet，mouse 变 mice；sheep、fish 单复数一样。"
+      ],
+      "table": {
+        "head": ["怎么变", "例子"],
+        "rows": [
+          ["一般加 s", "book → books, cat → cats"],
+          ["s、x、ch、sh 结尾加 es", "bus → buses, box → boxes, watch → watches"],
+          ["y 前面不是 a、e、i、o、u：y 变 i 加 es", "baby → babies, city → cities"],
+          ["y 前面是 a、e、i、o、u：直接加 s", "boy → boys, day → days"],
+          ["单独记", "man → men, child → children, foot → feet"],
+          ["单复数一样", "sheep → sheep, fish → fish"]
+        ]
+      },
+      "examples": [
+        { "en": "I have a cat. Lily has two cats.", "zh": "我有一只猫。莉莉有两只猫。", "mark": ["a cat", "two cats"] },
+        { "en": "There are three boxes on the desk.", "zh": "书桌上有三个盒子。", "mark": ["boxes"] },
+        { "en": "There are two babies in the photo.", "zh": "照片里有两个宝宝。", "mark": ["babies"] },
+        { "en": "Many boys like football.", "zh": "很多男孩喜欢足球。", "mark": ["boys"] },
+        { "en": "There are five children in the garden.", "zh": "花园里有五个孩子。", "mark": ["children"] },
+        { "en": "My feet are cold.", "zh": "我的脚很冷。", "mark": ["feet"] },
+        { "en": "I can see three sheep and two fish.", "zh": "我能看见三只羊和两条鱼。", "mark": ["sheep", "fish"] }
+      ],
+      "families": {
+        "s": { "name": "一般加 s", "point": "g:plural" },
+        "es": { "name": "加 es", "point": "g:plural" },
+        "y": { "name": "y 结尾", "point": "g:plural" },
+        "irr": { "name": "要单独记的复数", "point": "g:plural" },
+        "num": { "name": "a 和 two 后面", "point": "g:plural" },
+        "these": { "name": "these 和 those", "point": "g:plural" }
+      },
+      "questions": [
+        {
+          "id": "q01", "part": 1, "family": "s", "kind": "fill",
+          "stem": "I have two ____.", "cue": "cat",
+          "answer": "cats", "wrong": { "cat": "plural_missing", "cates": "plural_rule" },
+          "zh": "我有两只猫。",
+          "hints": [
+            "前面有 two，是两只，cat 要变成复数。",
+            "像这样：three books。book 后面加了 s。",
+            "cat 是一般的词，复数加 s 还是 es？",
+            "答案是 cats。two 后面跟复数；cat 一般加 s：cats。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "There are three ____ in the box.", "cue": "pen",
+            "answer": "pens", "wrong": { "pen": "plural_missing", "penes": "plural_rule" },
+            "zh": "盒子里有三支钢笔。", "explain": "three 后面跟复数，pen 一般加 s：pens。"
+          }
+        },
+        {
+          "id": "q02", "part": 1, "family": "es", "kind": "fill",
+          "stem": "There are four ____ under the bed.", "cue": "box",
+          "answer": "boxes", "wrong": { "boxs": "plural_rule", "box": "plural_missing" },
+          "zh": "床底下有四个盒子。",
+          "hints": [
+            "four 是四个，box 要变复数。看 box 是什么字母结尾。",
+            "像这样：bus 变 buses，s 结尾加 es。",
+            "box 是 x 结尾。x 结尾加 s 还是 es？",
+            "答案是 boxes。s、x、ch、sh 结尾加 es：box 变 boxes。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "My mother has two ____.", "cue": "watch",
+            "answer": "watches", "wrong": { "watchs": "plural_rule", "watch": "plural_missing" },
+            "zh": "我妈妈有两块手表。", "explain": "ch 结尾加 es：watch 变 watches。"
+          }
+        },
+        {
+          "id": "q03", "part": 1, "family": "y", "kind": "fill",
+          "stem": "There are two ____ in the photo.", "cue": "baby",
+          "answer": "babies", "wrong": { "babys": "plural_rule", "babyes": "plural_rule", "baby": "plural_missing" },
+          "zh": "照片里有两个宝宝。",
+          "hints": [
+            "two 是两个，baby 要变复数。看 baby 最后两个字母。",
+            "像这样：city 变 cities，y 变成 i 再加 es。",
+            "baby 的 y 前面是 b，不是 a、e、i、o、u。y 要不要变？",
+            "答案是 babies。y 前面不是 a、e、i、o、u，把 y 变成 i 再加 es：baby 变 babies。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "There are many ____ in our library.", "cue": "story",
+            "answer": "stories", "wrong": { "storys": "plural_rule", "storyes": "plural_rule", "story": "plural_missing" },
+            "zh": "我们的图书馆里有很多故事书。", "explain": "y 前面是 r，把 y 变成 i 再加 es：story 变 stories。"
+          }
+        },
+        {
+          "id": "q04", "part": 1, "family": "irr", "kind": "fill",
+          "stem": "There are three ____ in the garden.", "cue": "child",
+          "answer": "children", "wrong": { "childs": "plural_irregular", "childrens": "plural_irregular", "child": "plural_missing" },
+          "zh": "花园里有三个孩子。",
+          "hints": [
+            "three 是三个，child 要变复数。child 是要单独记的词。",
+            "像这样：man 变 men，woman 变 women，都不加 s。",
+            "child 的复数不加 s，是哪个词？",
+            "答案是 children。child 的复数要单独记：children；不说 childs，children 后面也不再加 s。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "My ____ are cold.", "cue": "foot",
+            "answer": "feet", "wrong": { "foots": "plural_irregular", "feets": "plural_irregular", "foot": "plural_missing" },
+            "zh": "我的脚很冷。", "explain": "foot 的复数单独记：feet。"
+          }
+        },
+        {
+          "id": "q05", "part": 1, "family": "num", "kind": "pick",
+          "ask": "“一只猫和三只兔子”英语怎么说？",
+          "answer": "a cat and three rabbits", "wrong": { "a cats and three rabbits": "a_plural", "a cat and three rabbit": "plural_missing", "cats and three rabbits": "a_plural" },
+          "zh": "一只猫和三只兔子",
+          "hints": [
+            "看两处：一只猫，三只兔子。",
+            "像这样：a book and two pens。a 后面用单数，two 后面用复数。",
+            "a 后面的 cat 加不加 s？three 后面的 rabbit 加不加 s？",
+            "答案是 a cat and three rabbits。a 是一个，后面用 cat；three 是三个，rabbit 加 s。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "“一个橙子和两个苹果”英语怎么说？",
+            "answer": "an orange and two apples", "wrong": { "an oranges and two apples": "a_plural", "an orange and two apple": "plural_missing" },
+            "zh": "一个橙子和两个苹果", "explain": "an 后面用单数 orange；two 后面 apple 加 s。"
+          }
+        },
+        {
+          "id": "q06", "part": 2, "family": "es", "kind": "fill",
+          "stem": "There are many ____ on the street.", "cue": "bus",
+          "answer": "buses", "wrong": { "buss": "plural_rule", "bus": "plural_missing" },
+          "zh": "街上有很多公共汽车。",
+          "hints": [
+            "many 是很多，bus 要变复数。看 bus 是什么字母结尾。",
+            "像这样：box 变 boxes，x 结尾加 es。",
+            "bus 是 s 结尾。s 结尾加 s 还是 es？",
+            "答案是 buses。s、x、ch、sh 结尾加 es：bus 变 buses。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "We need some ____ for the soup.", "cue": "tomato",
+            "answer": "tomatoes", "wrong": { "tomatos": "plural_rule", "tomato": "plural_missing" },
+            "zh": "我们做汤需要一些西红柿。", "explain": "tomato、potato 加 es：tomatoes。"
+          }
+        },
+        {
+          "id": "q07", "part": 2, "family": "y", "kind": "fill",
+          "stem": "There are seven ____ in a week.", "cue": "day",
+          "answer": "days", "wrong": { "daies": "plural_rule", "day": "plural_missing" },
+          "zh": "一个星期有七天。",
+          "hints": [
+            "seven 是七个，day 要变复数。看 y 前面的字母。",
+            "像这样：boy 变 boys，y 前面是 o，直接加 s。",
+            "day 的 y 前面是 a。a 是 a、e、i、o、u 里的，y 要不要变？",
+            "答案是 days。y 前面是 a、e、i、o、u 的，直接加 s：day 变 days。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "There are two ____ in my family.", "cue": "boy",
+            "answer": "boys", "wrong": { "boies": "plural_rule", "boy": "plural_missing" },
+            "zh": "我家有两个男孩。", "explain": "y 前面是 o，直接加 s：boy 变 boys。"
+          }
+        },
+        {
+          "id": "q08", "part": 2, "family": "irr", "kind": "fill",
+          "stem": "There are many ____ and women in the park.", "cue": "man",
+          "answer": "men", "wrong": { "mans": "plural_irregular", "mens": "plural_irregular", "man": "plural_missing" },
+          "zh": "公园里有很多男人和女人。",
+          "hints": [
+            "many 是很多，man 要变复数。man 是要单独记的词。",
+            "像这样：woman 变 women，a 变成了 e。",
+            "man 的复数不加 s，是哪个词？",
+            "答案是 men。man 的复数单独记：men；不说 mans，men 后面也不再加 s。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "I can see three ____ in the picture.", "cue": "mouse",
+            "answer": "mice", "wrong": { "mouses": "plural_irregular", "mices": "plural_irregular", "mouse": "plural_missing" },
+            "zh": "我能看见图里有三只老鼠。", "explain": "mouse 的复数单独记：mice。"
+          }
+        },
+        {
+          "id": "q09", "part": 2, "family": "irr", "kind": "fill",
+          "stem": "There are five ____ on the farm.", "cue": "sheep",
+          "answer": "sheep", "wrong": { "sheeps": "plural_irregular", "sheepes": "plural_irregular" },
+          "zh": "农场上有五只羊。",
+          "hints": [
+            "five 是五只。sheep 是个特别的词。",
+            "像这样：one fish, two fish。fish 的复数和单数一样。",
+            "sheep 和 fish 一样，复数要不要加 s？",
+            "答案是 sheep。sheep 的单数和复数一样：five sheep，不加 s。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "Look! There are ten ____ on the hill.", "cue": "sheep",
+            "answer": "sheep", "wrong": { "sheeps": "plural_irregular", "sheepes": "plural_irregular" },
+            "zh": "看！山上有十只羊。", "explain": "sheep 的单数和复数一样，ten sheep 不加 s。"
+          }
+        },
+        {
+          "id": "q10", "part": 2, "family": "these", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "These boxes are very heavy.", "wrong": { "These boxs are very heavy.": "plural_rule", "These boxes is very heavy.": "be_agree", "This boxes are very heavy.": "a_plural" },
+          "zh": "这些盒子很重。",
+          "hints": [
+            "看三处：these 还是 this，box 怎么变，is 还是 are。",
+            "像这样：These books are new. these 后面跟复数，用 are。",
+            "box 是 x 结尾，复数加 es。先去掉 boxs 那句，再看 these 和 are。",
+            "答案是 These boxes are very heavy. these 是“这些”，后面跟复数 boxes，用 are。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "Those children are my classmates.", "wrong": { "Those childs are my classmates.": "plural_irregular", "Those children is my classmates.": "be_agree", "That children are my classmates.": "a_plural" },
+            "zh": "那些孩子是我的同学。", "explain": "those 后面跟复数 children，用 are。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01", "family": "s", "kind": "fill",
+          "stem": "I have three ____ in my schoolbag.", "cue": "book",
+          "answer": "books", "wrong": { "book": "plural_missing", "bookes": "plural_rule" },
+          "zh": "我书包里有三本书。",
+          "hints": ["three 是三本，book 要变复数。", "像这样：two cats。cat 后面加了 s。", "book 是一般的词，加 s 还是 es？", "答案是 books。three 后面跟复数；book 一般加 s：books。"]
+        },
+        {
+          "id": "s02", "family": "s", "kind": "fill",
+          "stem": "There are many ____ in the zoo.", "cue": "animal",
+          "answer": "animals", "wrong": { "animal": "plural_missing", "an animals": "a_plural" },
+          "zh": "动物园里有很多动物。",
+          "hints": ["many 是很多，animal 要变复数。", "像这样：many books。book 后面加了 s。", "many 后面能不能放 an？animal 加不加 s？", "答案是 animals。many 后面跟复数，不放 an；animal 一般加 s。"]
+        },
+        {
+          "id": "s03", "family": "es", "kind": "fill",
+          "stem": "There are two ____ on the table.", "cue": "glass",
+          "answer": "glasses", "wrong": { "glasss": "plural_rule", "glass": "plural_missing" },
+          "zh": "桌子上有两个玻璃杯。",
+          "hints": ["two 是两个，glass 要变复数。看 glass 是什么字母结尾。", "像这样：bus 变 buses，s 结尾加 es。", "glass 是 s 结尾，加 s 还是 es？", "答案是 glasses。s 结尾加 es：glass 变 glasses。"]
+        },
+        {
+          "id": "s04", "family": "es", "kind": "fill",
+          "stem": "We have six ____ today.", "cue": "class",
+          "answer": "classes", "wrong": { "classs": "plural_rule", "class": "plural_missing" },
+          "zh": "我们今天有六节课。",
+          "hints": ["six 是六节，class 要变复数。看 class 是什么字母结尾。", "像这样：glass 变 glasses，s 结尾加 es。", "class 是 s 结尾，加 s 还是 es？", "答案是 classes。s 结尾加 es：class 变 classes。"]
+        },
+        {
+          "id": "s05", "family": "es", "kind": "fill",
+          "stem": "My mother wants some ____.", "cue": "potato",
+          "answer": "potatoes", "wrong": { "potatos": "plural_rule", "potato": "plural_missing" },
+          "zh": "我妈妈想要一些土豆。",
+          "hints": ["some 后面跟复数，potato 要变。", "像这样：tomato 变 tomatoes，加了 es。", "potato 和 tomato 一样，加 s 还是 es？", "答案是 potatoes。potato、tomato 加 es：potatoes。"]
+        },
+        {
+          "id": "s06", "family": "y", "kind": "fill",
+          "stem": "There are many big ____ in China.", "cue": "city",
+          "answer": "cities", "wrong": { "citys": "plural_rule", "city": "plural_missing" },
+          "zh": "中国有很多大城市。",
+          "hints": ["many 是很多，city 要变复数。看 city 最后两个字母。", "像这样：baby 变 babies，y 变成 i 再加 es。", "city 的 y 前面是 t，不是 a、e、i、o、u。y 要不要变？", "答案是 cities。y 前面不是 a、e、i、o、u，把 y 变成 i 再加 es：cities。"]
+        },
+        {
+          "id": "s07", "family": "y", "kind": "fill",
+          "stem": "There are five ____ in this building.", "cue": "family",
+          "answer": "families", "wrong": { "familys": "plural_rule", "family": "plural_missing" },
+          "zh": "这栋楼里有五户人家。",
+          "hints": ["five 是五户，family 要变复数。看 family 最后两个字母。", "像这样：story 变 stories，y 变成 i 再加 es。", "family 的 y 前面是 l。y 要不要变？", "答案是 families。y 前面是 l，把 y 变成 i 再加 es：families。"]
+        },
+        {
+          "id": "s08", "family": "y", "kind": "fill",
+          "stem": "There are many ____ in the zoo.", "cue": "monkey",
+          "answer": "monkeys", "wrong": { "monkies": "plural_rule", "monkey": "plural_missing" },
+          "zh": "动物园里有很多猴子。",
+          "hints": ["many 是很多，monkey 要变复数。看 y 前面的字母。", "像这样：day 变 days，y 前面是 a，直接加 s。", "monkey 的 y 前面是 e。e 是 a、e、i、o、u 里的，y 要不要变？", "答案是 monkeys。y 前面是 e，直接加 s：monkeys。"]
+        },
+        {
+          "id": "s09", "family": "irr", "kind": "fill",
+          "stem": "There are four ____ in the classroom.", "cue": "woman",
+          "answer": "women", "wrong": { "womans": "plural_irregular", "womens": "plural_irregular", "woman": "plural_missing" },
+          "zh": "教室里有四位女士。",
+          "hints": ["four 是四位，woman 要变复数。woman 是要单独记的词。", "像这样：man 变 men，a 变成了 e。", "woman 的复数不加 s，是哪个词？", "答案是 women。woman 的复数单独记：women，不加 s。"]
+        },
+        {
+          "id": "s10", "family": "irr", "kind": "fill",
+          "stem": "Our cat can catch two ____.", "cue": "mouse",
+          "answer": "mice", "wrong": { "mouses": "plural_irregular", "mices": "plural_irregular", "mouse": "plural_missing" },
+          "zh": "我们的猫能抓到两只老鼠。",
+          "hints": ["two 是两只，mouse 要变复数。mouse 是要单独记的词。", "像这样：foot 变 feet，不加 s。", "mouse 的复数不加 s，是哪个词？", "答案是 mice。mouse 的复数单独记：mice；不说 mouses，mice 后面也不再加 s。"]
+        },
+        {
+          "id": "s11", "family": "irr", "kind": "fill",
+          "stem": "All the ____ in my class like music.", "cue": "child",
+          "answer": "children", "wrong": { "childs": "plural_irregular", "childrens": "plural_irregular", "child": "plural_missing" },
+          "zh": "我们班所有的孩子都喜欢音乐。",
+          "hints": ["all the 是“所有的”，child 要变复数。child 是要单独记的词。", "像这样：woman 变 women，不加 s。", "child 的复数不加 s，是哪个词？", "答案是 children。child 的复数单独记：children，后面不再加 s。"]
+        },
+        {
+          "id": "s12", "family": "num", "kind": "pick",
+          "ask": "“一个鸡蛋和两个西红柿”英语怎么说？",
+          "answer": "an egg and two tomatoes", "wrong": { "an eggs and two tomatoes": "a_plural", "an egg and two tomato": "plural_missing", "an egg and two tomatos": "plural_rule" },
+          "zh": "一个鸡蛋和两个西红柿",
+          "hints": ["看两处：一个鸡蛋，两个西红柿。", "像这样：a cat and three rabbits。a 后面用单数，three 后面用复数。", "an 后面的 egg 加不加 s？tomato 的复数加 s 还是 es？", "答案是 an egg and two tomatoes。an 后面用单数 egg；two 后面用复数，tomato 加 es。"]
+        },
+        {
+          "id": "s13", "family": "num", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "I have a sister and two brothers.", "wrong": { "I have a sisters and two brothers.": "a_plural", "I have a sister and two brother.": "plural_missing" },
+          "zh": "我有一个姐姐和两个哥哥。",
+          "hints": ["看两处：a 后面，two 后面。", "像这样：a cat and three rabbits。a 后面用单数，three 后面用复数。", "a 后面的 sister 加不加 s？two 后面的 brother 加不加 s？", "答案是 I have a sister and two brothers. a 后面用单数 sister；two 后面 brother 加 s。"]
+        },
+        {
+          "id": "s14", "family": "these", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "These apples are red.", "wrong": { "These apple are red.": "plural_missing", "This apples are red.": "a_plural", "These apples is red.": "be_agree" },
+          "zh": "这些苹果是红的。",
+          "hints": ["看三处：these 还是 this，apple 加不加 s，is 还是 are。", "像这样：These books are new. these 后面跟复数，用 are。", "this 是“这一个”，these 是“这些”。apples 是好几个，前面用哪个？", "答案是 These apples are red. these 后面跟复数 apples，用 are。"]
+        },
+        {
+          "id": "s15", "family": "these", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Those buses are new.", "wrong": { "Those buss are new.": "plural_rule", "That buses are new.": "a_plural", "Those buses is new.": "be_agree" },
+          "zh": "那些公共汽车是新的。",
+          "hints": ["看三处：that 还是 those，bus 怎么变，is 还是 are。", "像这样：Those children are my classmates. those 后面跟复数，用 are。", "bus 是 s 结尾，复数加 es。先去掉 buss 那句，再看 those 和 are。", "答案是 Those buses are new. those 是“那些”，后面跟复数 buses，用 are。"]
+        }
+      ]
+    },
+    {
+      "id": "present_simple",
+      "unit": "S",
+      "order": 6,
+      "foundation": true,
+      "label": "打地基",
+      "title": "一般现在时和三单 -s",
+      "points": ["g:third_s", "g:do_does_q", "g:present_simple"],
+      "foundations": ["g:subject_pronoun"],
+      "fixes": ["third_s_missing", "third_s_extra", "do_does", "does_verb_s", "third_s_spelling"],
+      "rule": [
+        "说常常做的事、喜欢什么，用一般现在时：I like cats. We go to school every day.",
+        "主语是 he、she、it 或一个人、一样东西，动词加 s：She likes cats. 主语是 I、you、we、they，用原形。",
+        "一般加 s（plays）；s、x、ch、sh、o 结尾加 es（watches、goes）；y 前面不是 a、e、i、o、u，y 变 i 加 es（studies）；have 变 has。",
+        "否定和问句借 do 或 does：He doesn't like milk. Does he like milk? 用了 does，后面的动词变回原形。"
+      ],
+      "table": {
+        "head": ["主语", "肯定", "否定", "问句"],
+        "rows": [
+          ["I、you、we、they", "I like cats.", "I don't like cats.", "Do you like cats?"],
+          ["he、she、it，一个", "She likes cats.", "She doesn't like cats.", "Does she like cats?"]
+        ]
+      },
+      "examples": [
+        { "en": "I like cats. My sister likes cats too.", "zh": "我喜欢猫。我姐姐也喜欢猫。", "mark": ["like", "likes"] },
+        { "en": "We go to school every day.", "zh": "我们每天去上学。", "mark": ["go"] },
+        { "en": "Tom gets up at six.", "zh": "汤姆六点起床。", "mark": ["gets"] },
+        { "en": "My father watches TV after dinner.", "zh": "我爸爸晚饭后看电视。", "mark": ["watches"] },
+        { "en": "Lily has a cute cat.", "zh": "莉莉有一只可爱的猫。", "mark": ["has"] },
+        { "en": "He doesn't like milk.", "zh": "他不喜欢牛奶。", "mark": ["doesn't like"] },
+        { "en": "Does she like music? Yes, she does.", "zh": "她喜欢音乐吗？是的，她喜欢。", "mark": ["Does", "like", "does"] }
+      ],
+      "families": {
+        "s": { "name": "三单加 s", "point": "g:third_s" },
+        "base": { "name": "什么时候用原形", "point": "g:third_s" },
+        "spell": { "name": "加 s 还是 es", "point": "g:third_s" },
+        "neg": { "name": "don't 和 doesn't", "point": "g:do_does_q" },
+        "q": { "name": "Do 和 Does 问句", "point": "g:do_does_q" }
+      },
+      "questions": [
+        {
+          "id": "q01", "part": 1, "family": "s", "kind": "fill",
+          "stem": "My sister ____ cats very much.", "cue": "like",
+          "answer": "likes", "wrong": { "like": "third_s_missing", "is like": "be_plus_verb" },
+          "zh": "我姐姐非常喜欢猫。",
+          "hints": [
+            "主语是 my sister，一个人，等于 she。",
+            "像这样：Lily has a cute cat. Lily 是一个人，动词变了。",
+            "she 后面的 like 要不要加 s？前面要不要 is？",
+            "答案是 likes。主语是一个人（she），动词加 s：likes；like 已经是动词，前面不加 is。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "Tom ____ football after school.", "cue": "play",
+            "answer": "plays", "wrong": { "play": "third_s_missing", "is play": "be_plus_verb" },
+            "zh": "汤姆放学后踢足球。", "explain": "Tom 是一个人，等于 he，play 加 s：plays。"
+          }
+        },
+        {
+          "id": "q02", "part": 1, "family": "base", "kind": "fill",
+          "stem": "My friends ____ to school by bike.", "cue": "go",
+          "answer": "go", "wrong": { "goes": "third_s_extra", "are go": "be_plus_verb" },
+          "zh": "我的朋友们骑自行车上学。",
+          "hints": [
+            "主语是 my friends，有几个人？",
+            "像这样：We go to school every day. we 后面用原形 go。",
+            "my friends 等于 they。they 后面的动词加不加 es？",
+            "答案是 go。my friends 是好几个人，等于 they，动词用原形 go，不加 es，前面也不加 are。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "I ____ breakfast at seven.", "cue": "have",
+            "answer": "have", "wrong": { "has": "third_s_extra", "am have": "be_plus_verb" },
+            "zh": "我七点吃早饭。", "explain": "主语是 I，用原形 have；has 只跟 he、she、it 这类主语。"
+          }
+        },
+        {
+          "id": "q03", "part": 1, "family": "spell", "kind": "fill",
+          "stem": "Mike ____ TV every evening.", "cue": "watch",
+          "answer": "watches", "wrong": { "watchs": "third_s_spelling", "watch": "third_s_missing" },
+          "zh": "迈克每天晚上看电视。",
+          "hints": [
+            "Mike 是一个人，watch 要变。看 watch 是什么字母结尾。",
+            "像这样：box 变 boxes，ch、x 结尾加 es。动词也一样。",
+            "watch 是 ch 结尾，加 s 还是 es？",
+            "答案是 watches。Mike 是一个人，动词要变；ch 结尾加 es：watch 变 watches。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "My father ____ to work by bus.", "cue": "go",
+            "answer": "goes", "wrong": { "gos": "third_s_spelling", "go": "third_s_missing" },
+            "zh": "我爸爸坐公共汽车去上班。", "explain": "my father 是一个人；go 是 o 结尾，加 es：goes。"
+          }
+        },
+        {
+          "id": "q04", "part": 1, "family": "neg", "kind": "fill",
+          "stem": "My brother ____ like milk.",
+          "answer": "doesn't", "wrong": { "don't": "do_does", "isn't": "be_do_mix" },
+          "zh": "我哥哥不喜欢牛奶。",
+          "hints": [
+            "这句是“不喜欢”。like 是动词，否定要借 do 或 does。",
+            "像这样：I don't like rain. 主语是 I 用 don't；主语是一个人（he、she）用 doesn't。",
+            "my brother 是一个人，等于 he。用 don't 还是 doesn't？",
+            "答案是 doesn't。like 是动词，否定借 do 或 does；my brother 是一个人，用 doesn't；isn't 不跟 like 这类动词。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "We ____ go to school on Sunday.",
+            "answer": "don't", "wrong": { "doesn't": "do_does", "aren't": "be_do_mix" },
+            "zh": "我们星期天不上学。", "explain": "主语是 we，动词 go 的否定用 don't。"
+          }
+        },
+        {
+          "id": "q05", "part": 1, "family": "q", "kind": "fill",
+          "stem": "____ your mother cook dinner every day?",
+          "answer": "Does", "wrong": { "Do": "do_does", "Is": "be_do_mix" },
+          "zh": "你妈妈每天做晚饭吗？",
+          "hints": [
+            "这是问“做不做”。句子里有动词 cook，问句开头借 Do 或 Does。",
+            "像这样：Do you like English? 主语是 you，开头用 Do。",
+            "your mother 是一个人，开头用 Do 还是 Does？",
+            "答案是 Does。有动词 cook 的问句借 Do 或 Does；your mother 是一个人，用 Does，后面 cook 用原形。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "____ you like English? Yes, I do.",
+            "answer": "Do", "wrong": { "Does": "do_does", "Are": "be_do_mix" },
+            "zh": "你喜欢英语吗？是的，我喜欢。", "explain": "主语是 you，问句开头用 Do。"
+          }
+        },
+        {
+          "id": "q06", "part": 2, "family": "s", "kind": "fill",
+          "stem": "Lily ____ a white cat.", "cue": "have",
+          "answer": "has", "wrong": { "have": "third_s_missing", "haves": "third_s_spelling" },
+          "zh": "莉莉有一只白猫。",
+          "hints": [
+            "主语是 Lily，一个人，have 要变。",
+            "像这样：Tom gets up at six. Tom 是一个人，get 变成了 gets。",
+            "have 是特别的：主语是一个人的时候，不加 s，变成哪个词？",
+            "答案是 has。主语是一个人（she），have 变成 has，不说 haves。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "My uncle ____ a big farm.", "cue": "have",
+            "answer": "has", "wrong": { "have": "third_s_missing", "haves": "third_s_spelling" },
+            "zh": "我叔叔有一个大农场。", "explain": "my uncle 是一个人，have 变成 has。"
+          }
+        },
+        {
+          "id": "q07", "part": 2, "family": "spell", "kind": "fill",
+          "stem": "Tom ____ English every morning.", "cue": "study",
+          "answer": "studies", "wrong": { "studys": "third_s_spelling", "study": "third_s_missing" },
+          "zh": "汤姆每天早上学英语。",
+          "hints": [
+            "Tom 是一个人，study 要变。看 study 最后两个字母。",
+            "像这样：baby 变 babies，y 前面不是 a、e、i、o、u，y 变 i 加 es。",
+            "study 的 y 前面是 d。y 要不要变？",
+            "答案是 studies。Tom 是一个人，动词要变；y 前面是 d，把 y 变成 i 再加 es：studies。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "The baby ____ at night.", "cue": "cry",
+            "answer": "cries", "wrong": { "crys": "third_s_spelling", "cry": "third_s_missing" },
+            "zh": "这个宝宝晚上会哭。", "explain": "y 前面是 r，y 变 i 加 es：cry 变 cries。"
+          }
+        },
+        {
+          "id": "q08", "part": 2, "family": "q", "kind": "pick",
+          "ask": "选出正确的问句。",
+          "answer": "Does he like football?", "wrong": { "Does he likes football?": "does_verb_s", "Do he like football?": "do_does", "Is he like football?": "be_do_mix" },
+          "zh": "他喜欢足球吗？",
+          "hints": [
+            "看两处：开头用 Do 还是 Does，后面的 like 加不加 s。",
+            "像这样：Does she like music? 开头是 Does，like 没加 s。",
+            "he 是一个人，开头用 Does。用了 Does，后面的动词还加不加 s？",
+            "答案是 Does he like football? 一个人用 Does 开头；用了 does，后面的动词变回原形 like。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的问句。",
+            "answer": "Does your cat eat fish?", "wrong": { "Does your cat eats fish?": "does_verb_s", "Do your cat eat fish?": "do_does", "Is your cat eat fish?": "be_do_mix" },
+            "zh": "你的猫吃鱼吗？", "explain": "your cat 是一只，用 Does 开头，后面 eat 用原形。"
+          }
+        },
+        {
+          "id": "q09", "part": 2, "family": "neg", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "My cat doesn't like water.", "wrong": { "My cat doesn't likes water.": "does_verb_s", "My cat don't like water.": "do_does", "My cat isn't like water.": "be_do_mix" },
+          "zh": "我的猫不喜欢水。",
+          "hints": [
+            "看两处：用 don't 还是 doesn't，后面的 like 加不加 s。",
+            "像这样：He doesn't like milk. doesn't 后面是原形 like。",
+            "my cat 是一只，用 doesn't。用了 doesn't，like 还加不加 s？",
+            "答案是 My cat doesn't like water. my cat 是一只（it），否定用 doesn't；用了 doesn't，like 用原形。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "Tom doesn't play the piano.", "wrong": { "Tom doesn't plays the piano.": "does_verb_s", "Tom don't play the piano.": "do_does", "Tom isn't play the piano.": "be_do_mix" },
+            "zh": "汤姆不弹钢琴。", "explain": "Tom 是一个人，否定用 doesn't，后面 play 用原形。"
+          }
+        },
+        {
+          "id": "q10", "part": 2, "family": "q", "kind": "pick",
+          "ask": "“Does Lily like dogs?” 怎么回答“喜欢”？",
+          "answer": "Yes, she does.", "wrong": { "Yes, she is.": "be_do_mix", "Yes, she do.": "do_does", "Yes, she likes.": "short_answer" },
+          "zh": "是的，她喜欢。",
+          "hints": [
+            "问句用 Does 开头，回答也要用 does。",
+            "像这样：Do you like cats? Yes, I do. 问 Do，答 do。",
+            "问 Does，答什么？回答里 Lily 换成 she。",
+            "答案是 Yes, she does. 问句用 Does，回答也用 does；不用 is。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "“Do your parents like music?” 怎么回答“不喜欢”？",
+            "answer": "No, they don't.", "wrong": { "No, they aren't.": "be_do_mix", "No, they doesn't.": "do_does", "No, they don't like.": "short_answer" },
+            "zh": "不，他们不喜欢。", "explain": "问句用 Do，回答也用 do；“不喜欢”用 don't。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01", "family": "s", "kind": "fill",
+          "stem": "Amy ____ her grandmother on Sunday.", "cue": "visit",
+          "answer": "visits", "wrong": { "visit": "third_s_missing", "is visit": "be_plus_verb" },
+          "zh": "埃米星期天去看望奶奶。",
+          "hints": ["主语是 Amy，一个人，等于 she。", "像这样：Tom gets up at six. Tom 是一个人，get 加了 s。", "she 后面的 visit 要不要加 s？前面要不要 is？", "答案是 visits。Amy 是一个人，动词加 s：visits；前面不加 is。"]
+        },
+        {
+          "id": "s02", "family": "s", "kind": "fill",
+          "stem": "Our cat ____ on my bed.", "cue": "sleep",
+          "answer": "sleeps", "wrong": { "sleep": "third_s_missing", "is sleep": "be_plus_verb" },
+          "zh": "我们的猫睡在我的床上。",
+          "hints": ["主语是 our cat，一只猫，等于 it。", "像这样：Lily has a cute cat. Lily 是一个，动词变了。", "it 后面的 sleep 要不要加 s？", "答案是 sleeps。our cat 是一只（it），动词加 s：sleeps。"]
+        },
+        {
+          "id": "s03", "family": "s", "kind": "fill",
+          "stem": "My mother ____ in a hospital.", "cue": "work",
+          "answer": "works", "wrong": { "work": "third_s_missing", "is work": "be_plus_verb" },
+          "zh": "我妈妈在一家医院工作。",
+          "hints": ["主语是 my mother，一个人，等于 she。", "像这样：My sister likes cats. 一个人，like 加了 s。", "she 后面的 work 要不要加 s？", "答案是 works。my mother 是一个人，动词加 s：works；前面不加 is。"]
+        },
+        {
+          "id": "s04", "family": "base", "kind": "fill",
+          "stem": "Lucy and Lily ____ songs together.", "cue": "sing",
+          "answer": "sing", "wrong": { "sings": "third_s_extra", "are sing": "be_plus_verb" },
+          "zh": "露西和莉莉一起唱歌。",
+          "hints": ["主语是 Lucy and Lily，有几个人？", "像这样：My friends go to school by bike. 好几个人，用原形 go。", "Lucy and Lily 等于 they。they 后面的动词加不加 s？", "答案是 sing。两个人等于 they，动词用原形 sing，不加 s。"]
+        },
+        {
+          "id": "s05", "family": "base", "kind": "fill",
+          "stem": "You ____ very good English.", "cue": "speak",
+          "answer": "speak", "wrong": { "speaks": "third_s_extra", "are speak": "be_plus_verb" },
+          "zh": "你英语说得很好。",
+          "hints": ["主语是 you。", "像这样：I like cats. 主语是 I，用原形 like。", "you 后面的动词加不加 s？", "答案是 speak。主语是 you，动词用原形 speak，不加 s，前面也不加 are。"]
+        },
+        {
+          "id": "s06", "family": "base", "kind": "fill",
+          "stem": "Does Tom ____ to school by bus?", "cue": "go",
+          "answer": "go", "wrong": { "goes": "does_verb_s", "gos": "third_s_spelling" },
+          "zh": "汤姆坐公共汽车上学吗？",
+          "hints": ["问句开头已经有 Does 了。", "像这样：Does she like music? 用了 Does，like 是原形。", "用了 Does，后面的 go 还要不要变？", "答案是 go。用了 does，后面的动词变回原形：Does Tom go to school by bus?"]
+        },
+        {
+          "id": "s07", "family": "spell", "kind": "fill",
+          "stem": "Lily ____ the piano after school.", "cue": "play",
+          "answer": "plays", "wrong": { "plaies": "third_s_spelling", "play": "third_s_missing" },
+          "zh": "莉莉放学后弹钢琴。",
+          "hints": ["Lily 是一个人，play 要变。看 y 前面的字母。", "像这样：boy 变 boys，y 前面是 o，直接加 s。", "play 的 y 前面是 a。y 要不要变成 i？", "答案是 plays。y 前面是 a，直接加 s：plays。"]
+        },
+        {
+          "id": "s08", "family": "spell", "kind": "fill",
+          "stem": "My brother ____ his face every morning.", "cue": "wash",
+          "answer": "washes", "wrong": { "washs": "third_s_spelling", "wash": "third_s_missing" },
+          "zh": "我哥哥每天早上洗脸。",
+          "hints": ["my brother 是一个人，wash 要变。看 wash 是什么字母结尾。", "像这样：watch 变 watches，ch 结尾加 es。", "wash 是 sh 结尾，加 s 还是 es？", "答案是 washes。sh 结尾加 es：wash 变 washes。"]
+        },
+        {
+          "id": "s09", "family": "spell", "kind": "fill",
+          "stem": "My cat ____ mice.", "cue": "catch",
+          "answer": "catches", "wrong": { "catchs": "third_s_spelling", "catch": "third_s_missing" },
+          "zh": "我的猫会抓老鼠。",
+          "hints": ["my cat 是一只，catch 要变。看 catch 是什么字母结尾。", "像这样：watch 变 watches，ch 结尾加 es。", "catch 也是 ch 结尾，加 s 还是 es？", "答案是 catches。ch 结尾加 es：catch 变 catches。"]
+        },
+        {
+          "id": "s10", "family": "neg", "kind": "fill",
+          "stem": "Lily ____ eat meat.",
+          "answer": "doesn't", "wrong": { "don't": "do_does", "isn't": "be_do_mix" },
+          "zh": "莉莉不吃肉。",
+          "hints": ["这句是“不吃”，eat 是动词，否定借 do 或 does。", "像这样：He doesn't like milk. 一个人用 doesn't。", "Lily 是一个人。用 don't 还是 doesn't？", "答案是 doesn't。eat 是动词，否定借 does；Lily 是一个人，用 doesn't。"]
+        },
+        {
+          "id": "s11", "family": "neg", "kind": "fill",
+          "stem": "I ____ have a dog.",
+          "answer": "don't", "wrong": { "doesn't": "do_does", "am not": "be_do_mix" },
+          "zh": "我没有狗。",
+          "hints": ["这句是“没有狗”，have 是动词，否定借 do 或 does。", "像这样：They don't eat meat. 主语是 they，用 don't。", "主语是 I。用 don't 还是 doesn't？", "答案是 don't。have 是动词，否定借 do；主语是 I，用 don't；不用 am not。"]
+        },
+        {
+          "id": "s12", "family": "q", "kind": "fill",
+          "stem": "____ they play football after school?",
+          "answer": "Do", "wrong": { "Does": "do_does", "Are": "be_do_mix" },
+          "zh": "他们放学后踢足球吗？",
+          "hints": ["句子里有动词 play，问句开头借 Do 或 Does。", "像这样：Do you like English? 主语是 you，用 Do。", "主语是 they。开头用 Do 还是 Does？", "答案是 Do。有动词 play 的问句借 Do；they 用 Do。"]
+        },
+        {
+          "id": "s13", "family": "q", "kind": "fill",
+          "stem": "____ Mike live near the school?",
+          "answer": "Does", "wrong": { "Do": "do_does", "Is": "be_do_mix" },
+          "zh": "迈克住在学校附近吗？",
+          "hints": ["句子里有动词 live，问句开头借 Do 或 Does。", "像这样：Does she like music? 一个人用 Does。", "Mike 是一个人。开头用 Do 还是 Does？", "答案是 Does。有动词 live 的问句借 Does；Mike 是一个人，用 Does，后面 live 用原形。"]
+        },
+        {
+          "id": "s14", "family": "q", "kind": "pick",
+          "ask": "选出正确的问句。",
+          "answer": "Do you have a pet?", "wrong": { "Does you have a pet?": "do_does", "Are you have a pet?": "be_do_mix", "Do you has a pet?": "does_verb_s" },
+          "zh": "你有宠物吗？",
+          "hints": ["看两处：开头用 Do、Does 还是 Are，后面用 have 还是 has。", "像这样：Do you like English? 主语是 you，用 Do。", "you 用 Do 开头。用了 Do，后面是 have 还是 has？", "答案是 Do you have a pet? 主语是 you，用 Do；用了 do，后面用原形 have。"]
+        },
+        {
+          "id": "s15", "family": "q", "kind": "pick",
+          "ask": "“Does your brother like cats?” 怎么回答“不喜欢”？",
+          "answer": "No, he doesn't.", "wrong": { "No, he isn't.": "be_do_mix", "No, he don't.": "do_does" },
+          "zh": "不，他不喜欢。",
+          "hints": ["问句用 Does 开头，回答也要用 does。", "像这样：Do you like cats? No, I don't. 问 Do，答 don't。", "问 Does，答“不喜欢”用 doesn't 还是 don't？", "答案是 No, he doesn't. 问句用 Does，回答用 doesn't；不用 isn't。"]
+        }
+      ]
+    },
+    {
+      "id": "can",
+      "unit": "S",
+      "order": 7,
+      "foundation": true,
+      "label": "打地基",
+      "title": "can：会、能、请别人帮忙",
+      "points": ["g:can"],
+      "foundations": [],
+      "fixes": ["modal_s", "modal_to", "modal_do", "can_who"],
+      "rule": [
+        "can 是“会、能”：不管主语是谁，can 都不变，后面跟动词原形：He can swim，不说 He cans swim、He can swims。",
+        "can 后面直接跟动词，不加 to：I can sing，不说 I can to sing。",
+        "否定是 can't；问句把 can 放到最前面：Can you swim? Yes, I can. 或 No, I can't.",
+        "请别人帮忙说 Can you…?；问自己可不可以说 Can I…?：Can you help me? Can I use your pen?"
+      ],
+      "table": {
+        "head": ["", "例子"],
+        "rows": [
+          ["会", "I can swim. He can swim."],
+          ["不会", "I can't swim. She can't swim."],
+          ["问", "Can you swim?"],
+          ["回答", "Yes, I can. / No, I can't."],
+          ["请别人帮忙", "Can you help me?"],
+          ["问自己可不可以", "Can I use your pen?"]
+        ]
+      },
+      "examples": [
+        { "en": "I can swim. My cat can't swim.", "zh": "我会游泳。我的猫不会游泳。", "mark": ["can", "can't"] },
+        { "en": "My brother can play the piano.", "zh": "我哥哥会弹钢琴。", "mark": ["can play"] },
+        { "en": "Lily can draw cats very well.", "zh": "莉莉画猫画得很好。", "mark": ["can draw"] },
+        { "en": "Can you speak English? Yes, I can.", "zh": "你会说英语吗？会。", "mark": ["Can", "can"] },
+        { "en": "We can't play football here.", "zh": "我们不能在这里踢足球。", "mark": ["can't play"] },
+        { "en": "Can you help me, please? Sure.", "zh": "你能帮帮我吗？当然。", "mark": ["Can you"] },
+        { "en": "Can I use your ruler? Yes, you can.", "zh": "我能用一下你的尺子吗？可以。", "mark": ["Can I"] }
+      ],
+      "families": {
+        "base": { "name": "can 后面用原形", "point": "g:can" },
+        "to": { "name": "can 后面不加 to", "point": "g:can" },
+        "neg": { "name": "can't", "point": "g:can" },
+        "q": { "name": "Can 问句和回答", "point": "g:can" },
+        "ask": { "name": "Can I 和 Can you", "point": "g:can" }
+      },
+      "questions": [
+        {
+          "id": "q01", "part": 1, "family": "base", "kind": "fill",
+          "stem": "My sister can ____ very well.", "cue": "dance",
+          "answer": "dance", "wrong": { "dances": "modal_s", "to dance": "modal_to", "is dance": "be_plus_verb" },
+          "zh": "我姐姐跳舞跳得很好。",
+          "hints": [
+            "空前面有 can，can 后面跟动词。",
+            "像这样：He can swim. can 后面是原形 swim，没加 s。",
+            "can 后面的动词加不加 s？要不要 to？",
+            "答案是 dance。can 后面直接跟动词原形：can dance；主语是 she 也不加 s，也不加 to。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "Tom can ____ fast.", "cue": "run",
+            "answer": "run", "wrong": { "runs": "modal_s", "to run": "modal_to" },
+            "zh": "汤姆能跑得很快。", "explain": "can 后面用原形 run，不加 s，也不加 to。"
+          }
+        },
+        {
+          "id": "q02", "part": 1, "family": "base", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "He can play basketball.", "wrong": { "He cans play basketball.": "modal_s", "He can plays basketball.": "modal_s", "He can to play basketball.": "modal_to" },
+          "zh": "他会打篮球。",
+          "hints": [
+            "看 can 和后面的 play：哪里不该加 s，有没有多出来的 to？",
+            "像这样：My brother can play the piano. can 不变，play 也不变。",
+            "主语是 he，can 要不要变成 cans？play 要不要加 s？",
+            "答案是 He can play basketball. 不管主语是谁，can 都不变，后面的动词用原形。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "My cat can jump high.", "wrong": { "My cat cans jump high.": "modal_s", "My cat can jumps high.": "modal_s", "My cat can to jump high.": "modal_to" },
+            "zh": "我的猫能跳得很高。", "explain": "can 不变，后面 jump 用原形。"
+          }
+        },
+        {
+          "id": "q03", "part": 1, "family": "to", "kind": "fill",
+          "stem": "I can ____ English songs.", "cue": "sing",
+          "answer": "sing", "wrong": { "to sing": "modal_to", "sings": "modal_s" },
+          "zh": "我会唱英文歌。",
+          "hints": [
+            "can 后面直接跟动词。",
+            "像这样：Lily can draw cats. can 后面直接是 draw。",
+            "can 和 sing 中间要不要 to？",
+            "答案是 sing。can 后面直接跟动词原形，不加 to：I can sing。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "We can ____ the window.", "cue": "open",
+            "answer": "open", "wrong": { "to open": "modal_to", "opens": "modal_s" },
+            "zh": "我们可以打开窗户。", "explain": "can 后面直接跟 open，不加 to。"
+          }
+        },
+        {
+          "id": "q04", "part": 1, "family": "neg", "kind": "fill",
+          "stem": "Mike ____ swim, but he can run fast.",
+          "answer": "can't", "wrong": { "doesn't can": "modal_do", "not can": "not_order" },
+          "zh": "迈克不会游泳，但他跑得很快。",
+          "hints": [
+            "前半句是“不会游泳”，要用 can 的否定。",
+            "像这样：My cat can't swim. 否定直接在 can 后面加 not。",
+            "can 的否定要不要借 doesn't？not 放在 can 前面还是后面？",
+            "答案是 can't。can 的否定直接加 not：can't；不借 doesn't，也不说 not can。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "I ____ find my pen. Can you help me?",
+            "answer": "can't", "wrong": { "don't can": "modal_do", "not can": "not_order" },
+            "zh": "我找不到我的钢笔了。你能帮我吗？", "explain": "can 的否定是 can't，不说 don't can。"
+          }
+        },
+        {
+          "id": "q05", "part": 1, "family": "q", "kind": "fill",
+          "stem": "____ you swim? Yes, I can.",
+          "answer": "Can", "wrong": { "Do": "modal_do", "Are": "be_do_mix" },
+          "zh": "你会游泳吗？会。",
+          "hints": [
+            "看后面的回答 Yes, I can.，问句用的是哪个词？",
+            "像这样：Can you speak English? Yes, I can. 问 Can，答 can。",
+            "回答里是 can，问句开头用 Can、Do 还是 Are？",
+            "答案是 Can。问“会不会”把 can 放到最前面：Can you swim? 回答 Yes, I can."
+          ],
+          "variant": {
+            "kind": "fill", "stem": "____ your brother cook? No, he can't.",
+            "answer": "Can", "wrong": { "Does": "modal_do", "Is": "be_do_mix" },
+            "zh": "你哥哥会做饭吗？不，他不会。", "explain": "回答用 can't，问句用 Can 开头。"
+          }
+        },
+        {
+          "id": "q06", "part": 2, "family": "ask", "kind": "pick",
+          "ask": "你想借同桌的橡皮，该怎么说？",
+          "answer": "Can I use your eraser?", "wrong": { "Can you use my eraser?": "can_who", "Do I can use your eraser?": "modal_do", "I can use your eraser?": "q_order" },
+          "zh": "我能用一下你的橡皮吗？",
+          "hints": [
+            "是你自己想用别人的橡皮。问“我能不能”，主语是谁？",
+            "像这样：Can I use your ruler? 是“我能用一下你的尺子吗”。",
+            "问“我可以吗”用 Can I…?，请别人做用 Can you…?。这里是哪一种？",
+            "答案是 Can I use your eraser? 问自己可不可以用，说 Can I…?；问句把 can 放到最前面，不借 do。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "你想请妈妈帮你开门，该怎么说？",
+            "answer": "Can you open the door, please?", "wrong": { "Can I open the door, please?": "can_who", "Do you can open the door, please?": "modal_do", "You can open the door, please?": "q_order" },
+            "zh": "你能帮我开一下门吗？", "explain": "请别人帮忙做，用 Can you 开头。"
+          }
+        },
+        {
+          "id": "q07", "part": 2, "family": "base", "kind": "fill",
+          "stem": "Amy can ____ Chinese and English.", "cue": "speak",
+          "answer": "speak", "wrong": { "speaks": "modal_s", "to speak": "modal_to" },
+          "zh": "埃米会说中文和英文。",
+          "hints": [
+            "空前面有 can。",
+            "像这样：Lily can draw cats. Lily 是一个人，draw 也没加 s。",
+            "Amy 是一个人，可前面有 can。speak 还加不加 s？",
+            "答案是 speak。有了 can，后面的动词一律用原形；Amy 是一个人也不加 s。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "The baby can ____ now.", "cue": "walk",
+            "answer": "walk", "wrong": { "walks": "modal_s", "to walk": "modal_to" },
+            "zh": "这个宝宝现在会走路了。", "explain": "can 后面用原形 walk。"
+          }
+        },
+        {
+          "id": "q08", "part": 2, "family": "q", "kind": "pick",
+          "ask": "选出正确的问句。",
+          "answer": "Can your cat swim?", "wrong": { "Does your cat can swim?": "modal_do", "Can your cat swims?": "modal_s", "Your cat can swim?": "q_order" },
+          "zh": "你的猫会游泳吗？",
+          "hints": [
+            "问“会不会”，看 can 放在哪里，后面的 swim 对不对。",
+            "像这样：Can you speak English? can 放在最前面。",
+            "先去掉借了 does 的那句。can 后面的 swim 要不要加 s？",
+            "答案是 Can your cat swim? 问句把 can 放到最前面，不借 does；can 后面用原形 swim。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的问句。",
+            "answer": "Can Tom play the piano?", "wrong": { "Does Tom can play the piano?": "modal_do", "Can Tom plays the piano?": "modal_s", "Tom can play the piano?": "q_order" },
+            "zh": "汤姆会弹钢琴吗？", "explain": "问句把 can 放到最前面，后面 play 用原形。"
+          }
+        },
+        {
+          "id": "q09", "part": 2, "family": "q", "kind": "pick",
+          "ask": "“Can you draw a cat?” 怎么回答“不会”？",
+          "answer": "No, I can't.", "wrong": { "No, I don't.": "modal_do", "No, I can.": "short_answer", "No, you can't.": "short_answer" },
+          "zh": "不，我不会。",
+          "hints": [
+            "问句用 Can，回答也用 can。",
+            "像这样：Can you swim? Yes, I can. 问 Can，答 can。",
+            "“不会”是否定，No 后面跟 can 还是 can't？问 you，答 I。",
+            "答案是 No, I can't. 问 Can，答 can；No 配 can't；问的是 you，回答说 I。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "“Can Lily sing?” 怎么回答“会”？",
+            "answer": "Yes, she can.", "wrong": { "Yes, she does.": "modal_do", "Yes, she can't.": "short_answer", "Yes, she cans.": "modal_s" },
+            "zh": "是的，她会。", "explain": "问 Can，答 can；“会”用 Yes 配 can。"
+          }
+        },
+        {
+          "id": "q10", "part": 2, "family": "neg", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Sam can't come to the party.", "wrong": { "Sam doesn't can come to the party.": "modal_do", "Sam can't comes to the party.": "modal_s", "Sam not can come to the party.": "not_order" },
+          "zh": "萨姆不能来参加聚会。",
+          "hints": [
+            "看两处：can 的否定怎么说，后面的 come 对不对。",
+            "像这样：We can't play football here. can't 后面是原形 play。",
+            "先去掉借了 doesn't 的那句。can't 后面的 come 加不加 s？",
+            "答案是 Sam can't come to the party. can 的否定是 can't，不借 doesn't；can't 后面用原形 come。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "My grandmother can't read English.", "wrong": { "My grandmother doesn't can read English.": "modal_do", "My grandmother can't reads English.": "modal_s", "My grandmother not can read English.": "not_order" },
+            "zh": "我奶奶看不懂英文。", "explain": "can't 后面用原形 read，不借 doesn't。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01", "family": "base", "kind": "fill",
+          "stem": "Lucy can ____ very well.", "cue": "draw",
+          "answer": "draw", "wrong": { "draws": "modal_s", "to draw": "modal_to" },
+          "zh": "露西画画画得很好。",
+          "hints": ["空前面有 can。", "像这样：He can swim. can 后面是原形 swim。", "Lucy 是一个人，可前面有 can。draw 加不加 s？", "答案是 draw。can 后面用原形 draw，不加 s，也不加 to。"]
+        },
+        {
+          "id": "s02", "family": "base", "kind": "fill",
+          "stem": "My father can ____ nice food.", "cue": "cook",
+          "answer": "cook", "wrong": { "cooks": "modal_s", "to cook": "modal_to" },
+          "zh": "我爸爸会做好吃的。",
+          "hints": ["空前面有 can。", "像这样：My brother can play the piano. play 没加 s。", "can 后面的 cook 加不加 s？要不要 to？", "答案是 cook。can 后面直接跟原形 cook。"]
+        },
+        {
+          "id": "s03", "family": "base", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "She can make kites.", "wrong": { "She cans make kites.": "modal_s", "She can makes kites.": "modal_s", "She can to make kites.": "modal_to" },
+          "zh": "她会做风筝。",
+          "hints": ["看 can 和后面的 make：哪里不该加 s，有没有多出来的 to？", "像这样：He can play basketball. can 不变，play 也不变。", "主语是 she，can 要不要变成 cans？make 要不要加 s？", "答案是 She can make kites. can 都不变，后面用原形 make。"]
+        },
+        {
+          "id": "s04", "family": "to", "kind": "fill",
+          "stem": "You can ____ my book.", "cue": "read",
+          "answer": "read", "wrong": { "to read": "modal_to", "reads": "modal_s" },
+          "zh": "你可以看我的书。",
+          "hints": ["can 后面直接跟动词。", "像这样：I can sing English songs. can 后面直接是 sing。", "can 和 read 中间要不要 to？", "答案是 read。can 后面直接跟动词原形，不加 to。"]
+        },
+        {
+          "id": "s05", "family": "to", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "We can sit here.", "wrong": { "We can to sit here.": "modal_to", "We can sits here.": "modal_s" },
+          "zh": "我们可以坐在这里。",
+          "hints": ["看 can 后面：有没有多出来的 to，sit 加不加 s。", "像这样：We can open the window. can 后面直接是 open。", "can 和 sit 中间要不要 to？", "答案是 We can sit here. can 后面直接跟原形 sit。"]
+        },
+        {
+          "id": "s06", "family": "neg", "kind": "fill",
+          "stem": "My little cat ____ open the door.",
+          "answer": "can't", "wrong": { "doesn't can": "modal_do", "not can": "not_order" },
+          "zh": "我的小猫打不开门。",
+          "hints": ["这句是“打不开”，要用 can 的否定。", "像这样：My cat can't swim. 否定直接在 can 后面加 not。", "can 的否定要不要借 doesn't？", "答案是 can't。can 的否定是 can't，不借 doesn't，也不说 not can。"]
+        },
+        {
+          "id": "s07", "family": "neg", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "I can't hear you.", "wrong": { "I don't can hear you.": "modal_do", "I not can hear you.": "not_order", "I can't to hear you.": "modal_to" },
+          "zh": "我听不见你说话。",
+          "hints": ["看两处：can 的否定怎么说，后面有没有多出来的 to。", "像这样：We can't play football here. can't 后面直接是 play。", "先去掉借了 don't 的那句。not 放在 can 前面还是后面？", "答案是 I can't hear you. can 的否定是 can't，后面直接跟原形 hear。"]
+        },
+        {
+          "id": "s08", "family": "q", "kind": "fill",
+          "stem": "____ she play basketball? Yes, she can.",
+          "answer": "Can", "wrong": { "Does": "modal_do", "Is": "be_do_mix" },
+          "zh": "她会打篮球吗？会。",
+          "hints": ["看后面的回答 Yes, she can.，问句用的是哪个词？", "像这样：Can you swim? Yes, I can. 问 Can，答 can。", "回答里是 can，问句开头用 Can、Does 还是 Is？", "答案是 Can。问“会不会”把 can 放到最前面：Can she play basketball?"]
+        },
+        {
+          "id": "s09", "family": "q", "kind": "fill",
+          "stem": "____ they speak English? No, they can't.",
+          "answer": "Can", "wrong": { "Do": "modal_do", "Are": "be_do_mix" },
+          "zh": "他们会说英语吗？不，他们不会。",
+          "hints": ["看后面的回答 No, they can't.，问句用的是哪个词？", "像这样：Can your brother cook? No, he can't. 问 Can，答 can't。", "回答里是 can't，问句开头用 Can、Do 还是 Are？", "答案是 Can。回答用 can't，问句用 Can 开头。"]
+        },
+        {
+          "id": "s10", "family": "q", "kind": "pick",
+          "ask": "选出正确的问句。",
+          "answer": "Can you help me?", "wrong": { "Do you can help me?": "modal_do", "Can you helps me?": "modal_s", "You can help me?": "q_order" },
+          "zh": "你能帮帮我吗？",
+          "hints": ["看 can 放在哪里，后面的 help 对不对。", "像这样：Can your cat swim? can 放在最前面。", "先去掉借了 do 的那句。can 后面的 help 加不加 s？", "答案是 Can you help me? 问句把 can 放到最前面，后面用原形 help。"]
+        },
+        {
+          "id": "s11", "family": "q", "kind": "pick",
+          "ask": "“Can your brother swim?” 怎么回答“会”？",
+          "answer": "Yes, he can.", "wrong": { "Yes, he does.": "modal_do", "Yes, he can't.": "short_answer", "Yes, he is.": "be_do_mix" },
+          "zh": "是的，他会。",
+          "hints": ["问句用 Can，回答也用 can。", "像这样：Can you swim? Yes, I can. 问 Can，答 can。", "“会”是肯定，Yes 后面跟 can 还是 can't？", "答案是 Yes, he can. 问 Can，答 can；Yes 配 can。"]
+        },
+        {
+          "id": "s12", "family": "ask", "kind": "pick",
+          "ask": "你想问老师“我可以进来吗”，该怎么说？",
+          "answer": "Can I come in?", "wrong": { "Can you come in?": "can_who", "Do I can come in?": "modal_do", "I can come in?": "q_order" },
+          "zh": "我可以进来吗？",
+          "hints": ["是你自己想进来。问“我可以吗”，主语是谁？", "像这样：Can I use your ruler? 问自己可不可以，用 Can I。", "问“我可以吗”用 Can I…?，请别人做用 Can you…?。这里是哪一种？", "答案是 Can I come in? 问自己可不可以，说 Can I…?，can 放到最前面。"]
+        },
+        {
+          "id": "s13", "family": "ask", "kind": "pick",
+          "ask": "你想请同学帮你拿一下书包，该怎么说？",
+          "answer": "Can you carry my schoolbag?", "wrong": { "Can I carry my schoolbag?": "can_who", "Do you can carry my schoolbag?": "modal_do", "You can carry my schoolbag?": "q_order" },
+          "zh": "你能帮我拿一下书包吗？",
+          "hints": ["是请同学帮你做事。主语是谁？", "像这样：Can you help me? 请别人帮忙，用 Can you。", "请别人做用 Can you…?，问自己可不可以用 Can I…?。这里是哪一种？", "答案是 Can you carry my schoolbag? 请别人帮忙，说 Can you…?"]
+        },
+        {
+          "id": "s14", "family": "ask", "kind": "pick",
+          "ask": "你想借好朋友的手机打个电话，该怎么说？",
+          "answer": "Can I use your phone?", "wrong": { "Can you use my phone?": "can_who", "Do I can use your phone?": "modal_do" },
+          "zh": "我能用一下你的手机吗？",
+          "hints": ["是你自己想用别人的手机。主语是谁？", "像这样：Can I use your ruler? 是“我能用一下你的尺子吗”。", "问“我可以吗”用 Can I…?。先去掉借了 do 的那句。", "答案是 Can I use your phone? 问自己可不可以用，说 Can I…?"]
+        }
+      ]
+    },
+    {
+      "id": "freq_adverb",
+      "unit": "U4",
+      "order": 8,
+      "ahead": true,
+      "label": "下个单元",
+      "title": "频度副词 always、often、never",
+      "points": ["g:freq_adverb"],
+      "foundations": ["g:third_s", "g:do_does_q"],
+      "fixes": [],
+      "rule": [
+        "说“多常做”用频度副词，从多到少：always 总是，usually 通常，often 经常，sometimes 有时，seldom 很少，never 从不。",
+        "放在 like、go 这类动词前面：I always get up at six. 有 am、is、are 的时候，放在它们后面：She is always happy.",
+        "加了频度副词，三单 -s 照样要加：He often plays football. Lily never eats meat.",
+        "问“多久一次”用 How often：How often do you swim? 可以答 every day，也可以用频度副词。"
+      ],
+      "table": {
+        "head": ["意思", "词"],
+        "rows": [
+          ["总是", "always"],
+          ["通常", "usually"],
+          ["经常", "often"],
+          ["有时", "sometimes"],
+          ["很少", "seldom"],
+          ["从不", "never"]
+        ]
+      },
+      "examples": [
+        { "en": "I always get up at six.", "zh": "我总是六点起床。", "mark": ["always"] },
+        { "en": "My cat usually sleeps on my bed.", "zh": "我的猫通常睡在我床上。", "mark": ["usually"] },
+        { "en": "We often play games after school.", "zh": "我们放学后经常玩游戏。", "mark": ["often"] },
+        { "en": "Lily sometimes reads in the library.", "zh": "莉莉有时在图书馆看书。", "mark": ["sometimes"] },
+        { "en": "Tom seldom watches TV.", "zh": "汤姆很少看电视。", "mark": ["seldom"] },
+        { "en": "She is always happy.", "zh": "她总是很开心。", "mark": ["is always"] },
+        { "en": "I am never late for school.", "zh": "我上学从不迟到。", "mark": ["am never"] },
+        { "en": "How often do you swim? I swim every week.", "zh": "你多久游一次泳？我每周都游。", "mark": ["How often"] }
+      ],
+      "families": {
+        "meaning": { "name": "哪个词表示多常", "point": "g:freq_adverb" },
+        "verb": { "name": "放在动词前面", "point": "g:freq_adverb" },
+        "be": { "name": "放在 be 动词后面", "point": "g:freq_adverb" },
+        "s": { "name": "频度副词和三单", "point": "g:third_s" },
+        "howoften": { "name": "How often", "point": "g:freq_adverb" }
+      },
+      "questions": [
+        {
+          "id": "q01", "part": 1, "family": "meaning", "kind": "fill",
+          "stem": "I ____ get up at six.", "cue": "总是",
+          "answer": "always", "wrong": { "never": "adv_meaning", "sometimes": "adv_meaning" },
+          "zh": "我总是六点起床。",
+          "hints": [
+            "括号里是“总是”。哪个词表示每次都这样？",
+            "像这样：We often play games. often 是“经常”。",
+            "always、sometimes、never 里，哪个是“总是”？",
+            "答案是 always。always 是“总是”，sometimes 是“有时”，never 是“从不”。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "My cat ____ drinks milk.", "cue": "从不",
+            "answer": "never", "wrong": { "always": "adv_meaning", "often": "adv_meaning" },
+            "zh": "我的猫从不喝牛奶。", "explain": "never 是“从不”。"
+          }
+        },
+        {
+          "id": "q02", "part": 1, "family": "meaning", "kind": "fill",
+          "stem": "We ____ play basketball after school.", "cue": "经常",
+          "answer": "often", "wrong": { "seldom": "adv_meaning", "never": "adv_meaning" },
+          "zh": "我们放学后经常打篮球。",
+          "hints": [
+            "括号里是“经常”。",
+            "像这样：Tom seldom watches TV. seldom 是“很少”。",
+            "often 和 seldom 正好相反。哪个是“经常”？",
+            "答案是 often。often 是“经常”；seldom 是“很少”，never 是“从不”。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "Mike ____ plays the guitar.", "cue": "有时",
+            "answer": "sometimes", "wrong": { "always": "adv_meaning", "usually": "adv_meaning" },
+            "zh": "迈克有时弹吉他。", "explain": "sometimes 是“有时”。"
+          }
+        },
+        {
+          "id": "q03", "part": 1, "family": "verb", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "I often go to the park.", "wrong": { "I go often to the park.": "adv_position", "I often goes to the park.": "third_s_extra" },
+          "zh": "我经常去公园。",
+          "hints": [
+            "看 often 放在哪里，还有 go 要不要加 es。",
+            "像这样：I always get up at six. always 放在动词 get 前面。",
+            "often 放在 go 前面还是后面？主语是 I，go 加不加 es？",
+            "答案是 I often go to the park. 频度副词放在动词前面；主语是 I，go 用原形。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "We usually have lunch at school.", "wrong": { "We have usually lunch at school.": "adv_position", "We usually has lunch at school.": "third_s_extra" },
+            "zh": "我们通常在学校吃午饭。", "explain": "usually 放在动词 have 前面；主语是 we，用 have。"
+          }
+        },
+        {
+          "id": "q04", "part": 1, "family": "be", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "My cat is always hungry.", "wrong": { "My cat always is hungry.": "adv_position", "My cat always hungry.": "be_missing" },
+          "zh": "我的猫总是很饿。",
+          "hints": [
+            "这句有 be 动词。看 always 放在 is 前面还是后面。",
+            "像这样：She is always happy. always 放在 is 后面。",
+            "先去掉没有 is 的那句。有 be 动词时，always 放在哪里？",
+            "答案是 My cat is always hungry. 有 be 动词，频度副词放在 be 后面；“很饿”也要有 is。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "We are usually busy on Monday.", "wrong": { "We usually are busy on Monday.": "adv_position", "We usually busy on Monday.": "be_missing" },
+            "zh": "我们星期一通常很忙。", "explain": "有 be 动词，usually 放在 are 后面。"
+          }
+        },
+        {
+          "id": "q05", "part": 1, "family": "s", "kind": "fill",
+          "stem": "Tom often ____ football with his friends.", "cue": "play",
+          "answer": "plays", "wrong": { "play": "third_s_missing", "is play": "be_plus_verb" },
+          "zh": "汤姆经常和朋友们踢足球。",
+          "hints": [
+            "主语是 Tom，一个人。中间有 often，动词照样要看主语。",
+            "像这样：Lily never eats meat. 中间有 never，eat 照样加 s。",
+            "Tom 等于 he。he 后面的动词加不加 s？",
+            "答案是 plays。Tom 是一个人，动词加 s；中间有 often 也一样：Tom often plays football。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "My sister always ____ breakfast at seven.", "cue": "have",
+            "answer": "has", "wrong": { "have": "third_s_missing", "haves": "third_s_spelling" },
+            "zh": "我姐姐总是七点吃早饭。", "explain": "my sister 是一个人，have 变成 has；中间有 always 也一样。"
+          }
+        },
+        {
+          "id": "q06", "part": 2, "family": "meaning", "kind": "fill",
+          "stem": "Amy likes noodles. She eats noodles every day. She ____ eats noodles.",
+          "answer": "always", "wrong": { "never": "adv_meaning", "seldom": "adv_meaning" },
+          "zh": "埃米喜欢面条。她每天都吃面条。她总是吃面条。",
+          "hints": [
+            "看前面两句：她每天都吃面条。",
+            "像这样：Tom doesn't like TV. He seldom watches TV. 不喜欢，就很少看。",
+            "每天都吃，是“总是”还是“很少”？",
+            "答案是 always。每天都吃，就是“总是”：always；never 是“从不”，seldom 是“很少”。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "Mike doesn't like milk. He ____ drinks milk.",
+            "answer": "never", "wrong": { "always": "adv_meaning", "usually": "adv_meaning" },
+            "zh": "迈克不喜欢牛奶。他从不喝牛奶。", "explain": "不喜欢牛奶，就从不喝：never。"
+          }
+        },
+        {
+          "id": "q07", "part": 2, "family": "verb", "kind": "fill",
+          "stem": "I ____ to school by bus.",
+          "answer": "usually go", "wrong": { "go usually": "adv_position", "usually goes": "third_s_extra" },
+          "zh": "我通常坐公共汽车上学。",
+          "hints": [
+            "空里是两个词：usually 和 go。看谁在前。",
+            "像这样：I always get up at six. always 在 get 前面。",
+            "usually 放在 go 前面还是后面？主语是 I，go 加不加 es？",
+            "答案是 usually go。频度副词放在动词前面；主语是 I，go 用原形。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "They ____ games on Saturday.",
+            "answer": "often play", "wrong": { "play often": "adv_position", "often plays": "third_s_extra" },
+            "zh": "他们星期六经常玩游戏。", "explain": "often 放在 play 前面；they 后面用原形 play。"
+          }
+        },
+        {
+          "id": "q08", "part": 2, "family": "s", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "She usually goes to bed at nine.", "wrong": { "She usually go to bed at nine.": "third_s_missing", "She goes usually to bed at nine.": "adv_position", "She is usually go to bed at nine.": "be_plus_verb" },
+          "zh": "她通常九点睡觉。",
+          "hints": [
+            "看三处：usually 的位置，go 要不要变，有没有多出来的 is。",
+            "像这样：Tom seldom watches TV. seldom 在动词前面，watch 加了 es。",
+            "先去掉多了 is 的那句。she 是一个人，go 要不要变成 goes？",
+            "答案是 She usually goes to bed at nine. usually 放在动词前面；she 是一个人，go 变成 goes；不加 is。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "My father often cooks dinner.", "wrong": { "My father often cook dinner.": "third_s_missing", "My father cooks often dinner.": "adv_position", "My father is often cook dinner.": "be_plus_verb" },
+            "zh": "我爸爸经常做晚饭。", "explain": "often 放在动词前面；my father 是一个人，cook 加 s。"
+          }
+        },
+        {
+          "id": "q09", "part": 2, "family": "howoften", "kind": "fill",
+          "stem": "____ do you go to the zoo? I go there every month.",
+          "answer": "How often", "wrong": { "How many": "how_often", "How old": "how_often" },
+          "zh": "你多久去一次动物园？我每个月都去。",
+          "hints": [
+            "看回答：I go there every month. 说的是多久一次。",
+            "像这样：How often do you swim? I swim every week. 问“多久一次”用 How often。",
+            "How many 问“多少个”，How old 问“几岁”。问“多久一次”用哪个？",
+            "答案是 How often。问“多久一次”用 How often；回答说 every month 这样的话。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "____ does Lily visit her grandmother? She visits her every Sunday.",
+            "answer": "How often", "wrong": { "How many": "how_often", "How old": "how_often" },
+            "zh": "莉莉多久去看一次奶奶？她每个星期天都去。", "explain": "问“多久一次”用 How often。"
+          }
+        },
+        {
+          "id": "q10", "part": 2, "family": "be", "kind": "fill",
+          "stem": "Lucy ____ late for class.",
+          "answer": "is never", "wrong": { "never is": "adv_position", "never": "be_missing" },
+          "zh": "露西上课从不迟到。",
+          "hints": [
+            "“从不迟到”，late 是形容词，句子里要有 be 动词。",
+            "像这样：She is always happy. always 放在 is 后面。",
+            "never 放在 is 前面还是后面？能不能没有 is？",
+            "答案是 is never。late 前面要有 be 动词 is；频度副词放在 be 后面：Lucy is never late。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "The children ____ happy at the party.",
+            "answer": "are always", "wrong": { "always are": "adv_position", "always": "be_missing" },
+            "zh": "孩子们在聚会上总是很开心。", "explain": "happy 前面要有 are；always 放在 are 后面。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01", "family": "meaning", "kind": "fill",
+          "stem": "Tom ____ goes to school by bike.", "cue": "通常",
+          "answer": "usually", "wrong": { "never": "adv_meaning", "seldom": "adv_meaning" },
+          "zh": "汤姆通常骑自行车上学。",
+          "hints": ["括号里是“通常”。", "像这样：We often play games. often 是“经常”。", "usually、seldom、never 里，哪个是“通常”？", "答案是 usually。usually 是“通常”，seldom 是“很少”，never 是“从不”。"]
+        },
+        {
+          "id": "s02", "family": "meaning", "kind": "fill",
+          "stem": "I don't like TV. I ____ watch TV.",
+          "answer": "seldom", "wrong": { "always": "adv_meaning", "usually": "adv_meaning" },
+          "zh": "我不喜欢电视。我很少看电视。",
+          "hints": ["看前一句：我不喜欢电视。", "像这样：Mike doesn't like milk. He never drinks milk. 不喜欢，就不喝。", "不喜欢电视，是“总是看”还是“很少看”？", "答案是 seldom。不喜欢，就很少看：seldom；always 是“总是”，usually 是“通常”。"]
+        },
+        {
+          "id": "s03", "family": "meaning", "kind": "fill",
+          "stem": "My father ____ reads books at night.", "cue": "有时",
+          "answer": "sometimes", "wrong": { "always": "adv_meaning", "never": "adv_meaning" },
+          "zh": "我爸爸有时晚上看书。",
+          "hints": ["括号里是“有时”。", "像这样：I always get up at six. always 是“总是”。", "sometimes、always、never 里，哪个是“有时”？", "答案是 sometimes。sometimes 是“有时”。"]
+        },
+        {
+          "id": "s04", "family": "verb", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "We always help our mother.", "wrong": { "We help always our mother.": "adv_position", "We always helps our mother.": "third_s_extra" },
+          "zh": "我们总是帮妈妈的忙。",
+          "hints": ["看 always 放在哪里，还有 help 要不要加 s。", "像这样：I often go to the park. often 放在 go 前面。", "always 放在 help 前面还是后面？主语是 we，help 加不加 s？", "答案是 We always help our mother. 频度副词放在动词前面；we 后面用原形 help。"]
+        },
+        {
+          "id": "s05", "family": "verb", "kind": "fill",
+          "stem": "I ____ my room on Sunday.",
+          "answer": "sometimes clean", "wrong": { "clean sometimes": "adv_position", "sometimes cleans": "third_s_extra" },
+          "zh": "我有时星期天打扫房间。",
+          "hints": ["空里是两个词：sometimes 和 clean。看谁在前。", "像这样：I usually go to school by bus. usually 在 go 前面。", "sometimes 放在 clean 前面还是后面？主语是 I，clean 加不加 s？", "答案是 sometimes clean。频度副词放在动词前面；主语是 I，clean 用原形。"]
+        },
+        {
+          "id": "s06", "family": "verb", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "They never eat meat.", "wrong": { "They eat never meat.": "adv_position", "They never eats meat.": "third_s_extra" },
+          "zh": "他们从不吃肉。",
+          "hints": ["看 never 放在哪里，还有 eat 要不要加 s。", "像这样：We usually have lunch at school. usually 放在 have 前面。", "never 放在 eat 前面还是后面？they 后面的 eat 加不加 s？", "答案是 They never eat meat. 频度副词放在动词前面；they 后面用原形 eat。"]
+        },
+        {
+          "id": "s07", "family": "be", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Our classroom is always clean.", "wrong": { "Our classroom always is clean.": "adv_position", "Our classroom always clean.": "be_missing" },
+          "zh": "我们的教室总是很干净。",
+          "hints": ["这句有 be 动词。看 always 放在 is 前面还是后面。", "像这样：My cat is always hungry. always 放在 is 后面。", "先去掉没有 is 的那句。有 be 动词时，always 放在哪里？", "答案是 Our classroom is always clean. 有 be 动词，频度副词放在 be 后面。"]
+        },
+        {
+          "id": "s08", "family": "be", "kind": "fill",
+          "stem": "I ____ tired after school.",
+          "answer": "am often", "wrong": { "often am": "adv_position", "often": "be_missing" },
+          "zh": "我放学后经常很累。",
+          "hints": ["tired 是形容词，句子里要有 be 动词。", "像这样：Lucy is never late. never 放在 is 后面。", "often 放在 am 前面还是后面？能不能没有 am？", "答案是 am often。tired 前面要有 am；频度副词放在 be 后面：I am often tired。"]
+        },
+        {
+          "id": "s09", "family": "be", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "The children are often hungry after PE.", "wrong": { "The children often are hungry after PE.": "adv_position", "The children often hungry after PE.": "be_missing" },
+          "zh": "孩子们上完体育课经常很饿。",
+          "hints": ["这句有 be 动词。看 often 放在 are 前面还是后面。", "像这样：We are usually busy on Monday. usually 放在 are 后面。", "先去掉没有 are 的那句。有 be 动词时，often 放在哪里？", "答案是 The children are often hungry after PE. 有 be 动词，频度副词放在 be 后面。"]
+        },
+        {
+          "id": "s10", "family": "s", "kind": "fill",
+          "stem": "Lily sometimes ____ to music in the evening.", "cue": "listen",
+          "answer": "listens", "wrong": { "listen": "third_s_missing", "is listen": "be_plus_verb" },
+          "zh": "莉莉有时晚上听音乐。",
+          "hints": ["主语是 Lily，一个人。中间有 sometimes，动词照样要看主语。", "像这样：Tom often plays football. 中间有 often，play 照样加 s。", "Lily 等于 she。she 后面的 listen 加不加 s？", "答案是 listens。Lily 是一个人，动词加 s；中间有 sometimes 也一样。"]
+        },
+        {
+          "id": "s11", "family": "s", "kind": "fill",
+          "stem": "My cat never ____ fish.", "cue": "eat",
+          "answer": "eats", "wrong": { "eat": "third_s_missing", "is eat": "be_plus_verb" },
+          "zh": "我的猫从不吃鱼。",
+          "hints": ["主语是 my cat，一只猫，等于 it。中间有 never。", "像这样：Lily never eats meat. 中间有 never，eat 照样加 s。", "it 后面的 eat 加不加 s？", "答案是 eats。my cat 是一只（it），动词加 s；中间有 never 也一样。"]
+        },
+        {
+          "id": "s12", "family": "s", "kind": "fill",
+          "stem": "Mike usually ____ TV after dinner.", "cue": "watch",
+          "answer": "watches", "wrong": { "watchs": "third_s_spelling", "watch": "third_s_missing" },
+          "zh": "迈克通常晚饭后看电视。",
+          "hints": ["主语是 Mike，一个人。中间有 usually，watch 照样要变。", "像这样：Tom seldom watches TV. 中间有 seldom，watch 加了 es。", "watch 是 ch 结尾，加 s 还是 es？", "答案是 watches。Mike 是一个人，watch 加 es；中间有 usually 也一样。"]
+        },
+        {
+          "id": "s13", "family": "howoften", "kind": "fill",
+          "stem": "____ do you have English class? Every day.",
+          "answer": "How often", "wrong": { "How many": "how_often", "How old": "how_often" },
+          "zh": "你们多久上一次英语课？每天都上。",
+          "hints": ["看回答：Every day. 说的是多久一次。", "像这样：How often do you swim? I swim every week.", "How many 问“多少个”，How old 问“几岁”。问“多久一次”用哪个？", "答案是 How often。问“多久一次”用 How often。"]
+        },
+        {
+          "id": "s14", "family": "howoften", "kind": "pick",
+          "ask": "“How often do you clean your room?” 哪个回答对？",
+          "answer": "Every Saturday.", "wrong": { "Two rooms.": "how_often", "I am twelve.": "how_often" },
+          "zh": "每个星期六。",
+          "hints": ["How often 问的是“多久一次”。", "像这样：How often do you swim? I swim every week.", "Two rooms 是“几个”，I am twelve 是“几岁”。哪个说的是“多久一次”？", "答案是 Every Saturday. How often 问多久一次，回答 every Saturday 这样的话。"]
         }
       ]
     }

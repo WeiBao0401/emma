@@ -5,7 +5,8 @@
 //
 // 导出
 //   EVENT_TYPES                      事件类型清单（见下），新类型只增不改名
-//   MODES                            作答题型：'mc4' 四选一、'listen' 听音选词、'tiles' 字母块、'keys' 键盘、'cloze'、'order'、'paper' 纸笔
+//   MODES                            作答题型：'mc4' 四选一、'listen' 听音选词、'tiles' 字母块、'keys' 键盘、'cloze'、'order' 连词成句、'paper' 纸笔、
+//                                    'card' 闪卡、'grammar' 语法题、'read' 读后题（0.4.0）
 //   normalizeEvent(ev, now) -> rec   纯函数：补 at、去掉 undefined、校验 type；不认识的 type 抛错
 //   isoLocal(date) -> '2026-11-03T19:42:11+08:00'
 //   predictCorrect(entry, now, { mode }) -> 0..1   纯函数：这个词这次做对的概率（见“词的预测”）
@@ -72,13 +73,16 @@ export const EVENT_TYPES = [
   'parent_note', 'predict', 'hint', 'spell', 'line', 'onboard',
   // v1: “这不对” on the weekly page (weekly.js dispute: line_id, choice, about; step 'weekly')
   'dispute',
+  // 0.4.0 读一段 (reader.js): a “看不懂” tap on a sentence (level 1 断句, 2 关键词, 3 整句中文) and the time one reading took
+  'read_help', 'read_time',
 ];
 // card: the flashcard the warm-up falls back to when four choices cannot be built (ui-lesson.js)
 // grammar: a grammar card or warm-up grammar question (grammar.js, ui-grammar.js; v1)
-export const MODES = ['mc4', 'listen', 'tiles', 'keys', 'cloze', 'order', 'paper', 'card', 'grammar'];
+// read: a question after a story episode (reader.js, 0.4.0); order: 连词成句 (modes/order.js, 0.4.0)
+export const MODES = ['mc4', 'listen', 'tiles', 'keys', 'cloze', 'order', 'paper', 'card', 'grammar', 'read'];
 
 export const NEW_CARD_PRIOR = 0.5;                               // a card never reviewed here: met in class, not yet checked
-export const GUESS = { mc4: 0.25, listen: 0.25, cloze: 0, tiles: 0, keys: 0, order: 0, paper: 0, card: 0 };
+export const GUESS = { mc4: 0.25, listen: 0.25, cloze: 0, tiles: 0, keys: 0, order: 0, paper: 0, card: 0, read: 0.25 };
 export const MS_CAP = 60000;                                     // answers slower than this count as 60 s in the averages
 export const STATS_DAYS = 28;
 

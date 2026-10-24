@@ -191,14 +191,17 @@ function questionView(run, ctx, { label, onNext, autoNextMs = 0, nextLabel = '�
 
 // ---------------------------------------------------------------- the card
 
-function ruleView(card, part, { remaining, total, onStart, ctx }) {
+function ruleView(card, part, { remaining, total, onStart, ctx, why = '' }) {
   const table = card.table ? h('table', { className: 'gram-table' },
     h('thead', null, h('tr', null, card.table.head.map(t => h('th', null, t)))),
     h('tbody', null, card.table.rows.map(r => h('tr', null, r.map((t, i) => h(i ? 'td' : 'th', i ? { lang: 'en' } : { scope: 'row' }, t)))))) : null;
   const resume = remaining < total;
   return h('div', { className: 'gram gram-intro' },
-    h('p', { className: 'gram-chip' }, h('span', { className: 'gram-tag' }, `${unitName(card.unit)} · 语法卡`), h('span', { className: 'gram-part' }, PART_LABEL[part] || '')),
+    // the foundation cards say 打地基 and the Unit 4 one 下个单元 (card.label), the others their unit
+    h('p', { className: 'gram-chip' }, h('span', { className: 'gram-tag' }, `${card.label || unitName(card.unit)} · 语法卡`), h('span', { className: 'gram-part' }, PART_LABEL[part] || '')),
     h('h2', { className: 'gram-title' }, card.title),
+    // why today (grammar.js nextCard): “这几天有几处错和名词复数有关，今天先把它补牢。”
+    why ? h('p', { className: 'gram-why' }, why) : null,
     h('ol', { className: 'gram-rule' }, card.rule.map(t => h('li', null, t))),
     table,
     h('h3', { className: 'gram-sub' }, '例句'),
@@ -215,13 +218,13 @@ function endView(card, part, stats, { onDone, label = '接着上课' }) {
   if (n) lines.push(`第一次就对了 ${stats.right} 道${stats.fuzzy ? `，${stats.fuzzy} 道看了提示改对` : ''}${stats.failed ? `，${stats.failed} 道过几天换个句子再练` : ''}。`);
   lines.push(Number(part) === 1 ? '明天接着做后 5 道。' : '这张卡做完了。以后热身里会混进它的题。');
   return h('div', { className: 'gram gram-end' },
-    h('p', { className: 'gram-chip' }, h('span', { className: 'gram-tag' }, `${unitName(card.unit)} · ${card.title}`)),
+    h('p', { className: 'gram-chip' }, h('span', { className: 'gram-tag' }, `${card.label || unitName(card.unit)} · ${card.title}`)),
     h('p', { className: 'lede' }, n ? `今天的 ${n} 道做完了。` : '今天这份做完了。'),
     lines.map(t => h('p', { className: 'gram-zh' }, t)),
     h('div', { className: 'gram-actions' }, h('button', { type: 'button', className: 'btn gram-done', on: { click: onDone } }, label)));
 }
 
-export function renderGrammarCard(container, ctx, { cardId, part = 1, onDone = () => {}, sid = '', step = G.STEP, doneLabel = '接着上课' } = {}) {
+export function renderGrammarCard(container, ctx, { cardId, part = 1, onDone = () => {}, sid = '', step = G.STEP, doneLabel = '接着上课', why = '' } = {}) {
   const shell = h('div', { className: 'gram-shell' }, h('p', { className: 'gram-wait small' }, '稍等……'));
   container.replaceChildren(shell);
   let qv = null, run = null, stopped = false;
@@ -242,7 +245,7 @@ export function renderGrammarCard(container, ctx, { cardId, part = 1, onDone = (
       shell.replaceChildren(qv.el);
     };
     if (!run.total) { end(); return; }
-    shell.replaceChildren(ruleView(card, part, { remaining: run.total, total, onStart: show, ctx }));
+    shell.replaceChildren(ruleView(card, part, { remaining: run.total, total, onStart: show, ctx, why: String(why || '') }));
   }).catch(() => {
     if (stopped) return;
     shell.replaceChildren(h('p', { className: 'gram-wait small' }, '语法卡没有打开，等一下再试。'), h('button', { type: 'button', className: 'btn', on: { click: () => onDone({ cardId, part, done: false }) } }, doneLabel));

@@ -78,7 +78,8 @@ export const NEW_FROM_HOUR = 18;         // Sunday from 18:00 the home page may 
 export const HISTORY_DAYS = 56;          // how far back ui-weekly reads events for one week's page
 export const MS_CAP = 60000;
 
-export const OBJECTIVE_MODES = ['mc4', 'listen', 'tiles', 'keys', 'cloze', 'order', 'paper'];
+// read: a story question about a target word (item 'ep:…' with its slug) counts, and as “in a new sentence” (attemptOf)
+export const OBJECTIVE_MODES = ['mc4', 'listen', 'tiles', 'keys', 'cloze', 'order', 'paper', 'read'];
 export const WRITE_MODES = ['tiles', 'keys', 'paper', 'cloze', 'order'];
 export const WORD_TAGS = ['form', 'category', 'meaning', 'sound'];
 
@@ -88,6 +89,13 @@ export const TAG_SHORT = {
   there_have: 'there be 和 have', there_be_agree: 'there is 和 there are', poss_s_missing: "名词所有格的 's",
   poss_of_overuse: "'s 和 of", be_missing: 'be 动词', be_plus_verb: 'be 动词后面的词', plural_missing: '名词复数',
   uncountable_plural: '不可数名词', third_s_missing: '三单 -s', do_does: 'do 和 does',
+  // 0.4.0: the eight grammar cards' tags and 连词成句's word-order tags
+  subj_vs_poss: 'I 和 my', be_agree: 'am、is 和 are', poss_plural: "复数的 's", not_order: 'not 的位置', be_do_mix: 'be 动词和 do / does',
+  short_answer: '简略回答', q_order: '问句的顺序', plural_rule: '复数加 s 还是 es', plural_irregular: '要单独记的复数', a_plural: 'a 后面用单数',
+  third_s_extra: '不该加 -s 的地方', does_verb_s: 'does 后面用原形', third_s_spelling: '三单 -s 的拼法', modal_s: 'can 后面用原形',
+  modal_to: 'can 后面不加 to', modal_do: "can 的问句和否定", can_who: 'Can I 和 Can you', adv_meaning: '频度副词的意思',
+  adv_position: '频度副词的位置', how_often: 'How often', word_order: '句子的顺序', adj_order: '形容词的位置', place_time: '地点和时间的位置',
+  there_order: 'there be 句的顺序', wh_order: '特殊疑问句的顺序',
 };
 
 export const DISPUTE_CHOICES = [{ id: 'wrong', zh: '不对' }, { id: 'changed', zh: '我变了' }, { id: 'forget', zh: '别记这个' }];

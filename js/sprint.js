@@ -15,9 +15,9 @@
 //   PULL_MAX = 10           期中季热身有空位时，最多把几个还没到期的重点词提前拿来复习
 //   QUIZ_SPELL = 10, QUIZ_GRAMMAR = 5
 //   DEFAULT_RANGE = { from: 'S', to: 'U3' }   只填了日期没填范围时
-//   MODE_SECONDS            每种卡大约几秒：mc4 / listen / card 15，tiles 25，grammar 25
-//   WRITE_MINUTES           “写几个词”几分钟：spell 2，grammar 3，phonics 3
-//   WRITE_ROTATION          [周日..周六] 的“写几个词”：一、二、六语法卡，四语音小卡，其余拼写
+//   MODE_SECONDS            每种卡大约几秒：mc4 / listen / card 15，tiles 25，grammar 25，order 45（连词成句，0.4.0）
+//   WRITE_MINUTES           “写几个词”几分钟：spell 2，grammar 3，phonics 3，order 3
+//   WRITE_ROTATION          [周日..周六] 的“写几个词”：一、二、六语法卡，三连词成句（0.4.0，原来是拼写），四语音小卡，日、五拼写
 //   UNIT_CARDS              v1 三张语法卡的 id（和 grammar.json 一样：pronoun、there_be、possessive_s）；
 //                           grammar.js 给了 state.grammarCard（todayCard 的 { cardId, part }）就用它的，给了 null 就是今天没有卡
 //   GRAMMAR_FALLBACK        兜底语法题（grammar.js 没给题的时候用），Unit 1 到 Unit 3 各 4-5 道
@@ -38,6 +38,7 @@
 //   grammarQuiz(state, now, n, sprint?) -> [GrammarItem]   小卷的语法选择题：state.grammarQuiz / grammarQuizItems 给了带选项的整题就用，
 //                                          否则兜底（grammar.js 还没有出小卷题的函数）
 //   writePlan({ now, state, sprint, words, warm, light, first, quiz, isKey }) -> { status, mode, items, minutes, note, card?, week?, quiz? }
+//       mode 'order'（连词成句）：items 是 state.orderItems（modes/order.js writeItems 给的句子 id），没给或 state.noOrder 就跳过这一种
 //   wordsOf(state, now) -> words           state.words（plan 的形状）；没有就从 state.entries 或 words.js 实例（state.words.favorites()）
 //                                          加 state.curriculum 现拼；state.progress / state.outline 没给时读 state.kv.peek
 //   buildQuiz(state, now, { force?, sprint?, mode? }) -> Quiz | null   考前小卷；不是小卷日返回 null（force 为真照样出）。
@@ -65,9 +66,9 @@ export const PULL_MAX = 10;
 export const QUIZ_SPELL = 10;
 export const QUIZ_GRAMMAR = 5;
 export const DEFAULT_RANGE = { from: 'S', to: 'U3' };
-export const MODE_SECONDS = { mc4: 15, listen: 15, card: 15, tiles: 25, keys: 25, grammar: 25 };
-export const WRITE_MINUTES = { spell: 2, grammar: 3, phonics: 3 };
-export const WRITE_ROTATION = ['spell', 'grammar', 'grammar', 'spell', 'phonics', 'spell', 'grammar'];   // 周日..周六
+export const MODE_SECONDS = { mc4: 15, listen: 15, card: 15, tiles: 25, keys: 25, grammar: 25, order: 45 };
+export const WRITE_MINUTES = { spell: 2, grammar: 3, phonics: 3, order: 3 };
+export const WRITE_ROTATION = ['spell', 'grammar', 'grammar', 'order', 'phonics', 'spell', 'grammar'];   // 周日..周六
 export const UNIT_CARDS = { U1: 'pronoun', U2: 'there_be', U3: 'possessive_s' };   // grammar.json 的卡 id
 
 const pad = n => String(n).padStart(2, '0');
@@ -357,7 +358,7 @@ export function writePlan({ now = new Date(), state = {}, sprint = null, words =
   // 考前小卷: the spelling half sits here, its grammar half in the warm-up (as ui-lesson's sprintCells lays it out)
   if (quiz) return { status: 'ready', mode: 'spell', items: quiz.items.slice(), minutes: Math.max(1, Math.round((quiz.items.length * 45) / 60)), note: '考前小卷', quiz };
   const today = WRITE_ROTATION[now.getDay()];
-  const order = [today, ...['spell', 'grammar', 'phonics'].filter(m => m !== today)];
+  const order = [today, ...['spell', 'grammar', 'order', 'phonics'].filter(m => m !== today)];
   for (const mode of order) {
     if (mode === 'spell') {
       const list = spellPick(words, { warm, sprint, isKey, state, n: WRITE_SPELL });
@@ -365,6 +366,9 @@ export function writePlan({ now = new Date(), state = {}, sprint = null, words =
     } else if (mode === 'grammar' && !state.noGrammar) {
       const card = grammarCard(state, sprint, now);
       if (card) return { status: 'ready', mode, items: [], minutes: WRITE_MINUTES.grammar, note: '', card };
+    } else if (mode === 'order' && !state.noOrder) {
+      const list = Array.isArray(state.orderItems) ? state.orderItems.filter(Boolean) : [];
+      if (list.length) return { status: 'ready', mode, items: list.slice(), minutes: WRITE_MINUTES.order, note: '' };
     } else if (mode === 'phonics' && !state.noPhonics) {
       return { status: 'ready', mode, items: [], minutes: WRITE_MINUTES.phonics, note: '', card: state.phonicsCard || null, week: dayOf(mondayOf(now)) };
     }

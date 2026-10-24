@@ -9,7 +9,8 @@
     "g:possessive_s": ["g:plural", "g:possessive_pronoun"],
     "g:freq_adverb": ["g:third_s", "g:do_does_q"],
     "g:present_simple": ["g:third_s", "g:do_does_q"],
-    "g:present_continuous": ["g:be", "g:ing_spelling"]
+    "g:present_continuous": ["g:be", "g:ing_spelling"],
+    "g:can": ["g:subject_pronoun"]
   },
   "names": {
     "g:be": "be 动词",
@@ -27,7 +28,8 @@
     "g:freq_adverb": "频度副词",
     "g:present_simple": "一般现在时",
     "g:present_continuous": "现在进行时",
-    "g:ing_spelling": "动词加 -ing 的拼写"
+    "g:ing_spelling": "动词加 -ing 的拼写",
+    "g:can": "can（会、能、请求）"
   },
   "units": {
     "U1": ["g:personal_pronoun", "g:possessive_pronoun"],
@@ -37,15 +39,18 @@
     "U6": ["g:present_continuous"]
   },
   "tags": {
-    "g:be": ["be_missing", "be_plus_verb"],
+    "g:be": ["be_missing", "be_plus_verb", "be_agree", "be_do_mix", "not_order", "short_answer", "q_order"],
     "g:subject_pronoun": ["he_she", "subj_obj"],
     "g:personal_pronoun": ["he_she", "subj_obj"],
-    "g:possessive_pronoun": ["poss_adj_vs_pron", "obj_vs_poss"],
-    "g:plural": ["plural_missing"],
+    "g:possessive_pronoun": ["poss_adj_vs_pron", "obj_vs_poss", "subj_vs_poss"],
+    "g:plural": ["plural_missing", "plural_rule", "plural_irregular", "a_plural"],
     "g:countable": ["uncountable_plural"],
-    "g:there_be": ["there_have", "there_be_agree"],
-    "g:possessive_s": ["poss_s_missing", "poss_of_overuse"],
-    "g:third_s": ["third_s_missing"],
-    "g:do_does_q": ["do_does"]
+    "g:there_be": ["there_have", "there_be_agree", "there_order"],
+    "g:possessive_s": ["poss_s_missing", "poss_of_overuse", "poss_plural"],
+    "g:third_s": ["third_s_missing", "third_s_extra", "third_s_spelling", "does_verb_s"],
+    "g:do_does_q": ["do_does"],
+    "g:can": ["modal_s", "modal_to", "modal_do", "can_who"],
+    "g:freq_adverb": ["adv_meaning", "adv_position", "how_often"],
+    "g:be_agree": ["be_agree"]
   }
 }

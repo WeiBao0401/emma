@@ -1,6 +1,18 @@
-// 语法卡（DESIGN 5.4、5.5、8.2）：v1 三张卡，人称代词和物主代词（Unit 1）、there be（Unit 2）、名词所有格 's（Unit 3）。
-// be 动词和名词复数两块地基并在三张卡的例句和干扰项里。内容全部预写在 curriculum/grammar.json，运行时不让模型讲规则。
+// 语法卡（DESIGN 5.4、5.5、8.2）：v1 三张卡，人称代词和物主代词（Unit 1）、there be（Unit 2）、名词所有格 's（Unit 3）；
+// 10-25 加了四张打地基的卡（be 动词、名词复数、一般现在时和三单、can，foundation: true）和 Unit 4 的频度副词（ahead: true）。
+// 内容全部预写在 curriculum/grammar.json，运行时不让模型讲规则。
 // 负责：语法卡 agent（grammar.js、ui-grammar.js、css/grammar.css、curriculum/grammar.json、tests/grammar.test.mjs）。
+//
+// 先上哪张卡（nextCard，todayCard 用它）：一天一份 5 道；同一张卡的第二天要等到第一天以后。按这个先后：
+//   1 接着做：上次开了头、没做完的那一份
+//   2 补地基：她最近 21 天选错的干扰项里，有 2 次以上的误解属于某张地基卡（卡的 fixes，比如常错 is / are 就是 be 动词卡），
+//     或者家长问卷说了这个语法点（state.grammarFocus），这张地基卡提前；错得多的先
+//   3 跟单元：期中季以外，眼下的单元（课本进度；期中考完了就是下一个单元；家长给了 progress.nextFrom 就从开课前 7 天起算下一个单元）
+//     的卡和它要用到的卡（foundations 对上卡的 points）
+//   4 其余按卡的 order：be 动词、名词复数、代词、there be、所有格、一般现在时、can、频度副词；同一张卡先做完两天再换下一张
+//   期中季（离考试 14 天以内，sprint.js examPhase）：只排期中范围的卡和它们要用到的地基卡，先把每张的第一天都做到，再做第二天；
+//   范围以外的卡（一般现在时、can、频度副词）考完再上。
+// 能排到的卡：地基卡一直能排；单元卡排到课本进度为止；ahead 的卡（频度副词）可以提前一个单元，期中季不提前。
 //
 // 这个文件是纯逻辑（不碰 DOM、不读数据库），Node 里直接测。画界面在 ui-grammar.js。
 //
@@ -20,19 +32,23 @@
 // 导出
 //   FILE = 'curriculum/grammar.json'；KV_PREFIX = 'grammar:'；MODE = 'grammar'；STEP = 'grammar'；BLANK = '____'
 //   PART_SIZE = 5；HINT_MAX = 4；REVIEW_DAYS = [1, 3, 7]；WARM_MAX = 2；STEADY_STREAK = 3
+//   FIX_MIN = 2；FIX_DAYS = 21（误解 21 天里出现 2 次就补地基）；AHEAD_DAYS = 7（下个单元开课前一周开始练）
 //   loadGrammar({ fetchJSON }) -> Promise<Content>   读 grammar.json 并缓存（app.js 启动时调一次）；读不到抛错
 //   setContent(data) -> Content | null；content() -> 缓存的 Content 或 null
 //   createContent(data) -> Content
 //     Content = { version, cards: [Card], card(id), item(itemId) -> Question | null, part(cardId, n) -> [Question],
 //                 tags: { tag: { zh, kind } }（grammar.json 里还没合进 tags.json 的新标签）, tagName(tag, extra?) }
-//     Card = { id, unit, title, points, foundations, rule: [句], table?, examples: [{ en, zh, mark }], families: { id: { name, point } },
-//              questions: [Question × 10], spares: [Question], index }
+//     Card = { id, unit, order, foundation?, ahead?, label?, title, points, foundations, fixes?: [误解标签], rule: [句], table?,
+//              examples: [{ en, zh, mark }], families: { id: { name, point } }, questions: [Question × 10], spares: [Question], index }
+//     （地基卡的 unit 是 'S'，label '打地基'；没有 order 的卡排在有 order 的后面，按文件里的顺序）
+//     names: { 'g:can': 中文名 }（grammar.json 里还没并进 prereq.json 的语法点）
 //     Question = { id: 'q01' | 'q01v' | 's03', item: 'g:<card>:<id>', card, unit, part?, family, familyName, point, kind: 'fill' | 'pick',
 //                  stem?, cue?, ask, answer, wrong: { 选项: 误解标签 }, zh, hints: [4 句] | [], explain, variant: Question | null,
 //                  spare: bool, isVariant: bool }
 //   kvKey(cardId) -> 'grammar:<cardId>'
 //   emptyState(cardId) / normState(raw, cardId)   一张卡的进度（kv 'grammar:<cardId>'，形状见下）；normState 兼容缺字段的老数据
-//   grammarState(kv, c?) -> { cards: { cardId: State } }   从 kv 读（kv.peek 同步）。ctx.planState() 用它填 state.grammar
+//   grammarState(kv, c?) -> { cards: { cardId: State }, progress? }   从 kv 读（kv.peek 同步）。ctx.planState() 用它填 state.grammar。
+//       progress 是 kv 'progress'（只读），nextCard 拿它看课本进度和期中日期
 //   optionsOf(q) -> [{ text, correct, tag }]   选项顺序按题目 id 固定打乱（同一题每次一样）
 //   sentenceOf(q) -> string   答完以后显示和朗读的完整英文（填空把答案填进去；选择题就是答案）
 //   createAttempt(q, { variant, now }) -> Attempt   一道题的状态（见下）
@@ -40,11 +56,17 @@
 //   startPart / markPart(state, part, { now }) -> State；partQuestions(c, state, cardId, part) -> [还没做的题]
 //   flagQuestion(state, qid) -> State   “这题有问题”：以后不再出
 //   cardStatus(state, now) -> 'new' | 'learning' | 'practicing' | 'steady'
-//   todayCard(gstate, now, { content, upTo }) -> { cardId, part } | null
-//       今天做哪张卡的哪一天：按卡的顺序（U1、U2、U3）第一张没做完的；一天只做一份 5 道，第二天的那份要等到第一天以后。
-//       upTo 是单元 id（家长区的 progress.unit）：只排到这个单元为止
+//   nextCard(state, now, { content, upTo }) -> NextCard | null   今天做哪张卡的哪一天（规则见上面“先上哪张卡”）
+//       state：grammarState 的返回值，或 planState 拼好的整份（读 state.grammar、state.progress）；另认 state.history / state.events
+//       （事件数组：grammar.js 以外的语法题，比如 sprint.js 的兜底题，选错的误解也算）、state.grammarFocus（家长说的语法点 id）。
+//       upTo 给了就当课本进度（覆盖 progress.unit）。null = 今天没有卡（做过一份了，或者能排的都做完了）
+//       NextCard = { cardId, part: 1 | 2, reason: 'continue' | 'fix' | 'ahead' | 'unit' | 'exam' | 'order', why: 孩子能看的一句, tags?: [补地基的误解] }
+//   todayCard(gstate, now, { content, upTo }) -> NextCard | null   就是 nextCard（app.js 一直调它）
+//   misconceptionHits(state, now, { content, days }) -> { 误解标签: 次数 }   最近 days 天（默认 21）选错的干扰项；kv 里每道题算一次
 //   grammarWarmItems(state, now, { content, max }) -> [WarmItem]   给 plan.js：今天热身混哪 1-2 道语法题
 //       state 可以是 planState 拼好的整份（读 state.grammar）或 grammarState 的返回值。没内容、没在练的卡时返回 []。
+//       先出到期的复习（到期早的先，同一天按卡的 order）；再从在练的卡里出备用题，最久没在热身里练过的卡先，一样久按 order，
+//       这样在练的卡多了也轮得到每一张。
 //       WarmItem = { item: 'g:<card>:<id>', card, qid, kind: 'review' | 'practice', of?: 原来错的那题 id, family, unit, mode: 'grammar' }
 //       同一天、同样的进度，返回的一样（不随机）。今天热身已经做了几道，就少给几道。
 //   resolveWarmItem(item, c?) -> Question | null
@@ -77,6 +99,8 @@
 //   hint { item, mode: 'grammar', step, sid, unit, card, level, auto }   auto：答错自动出现的
 //   flag { item, mode: 'grammar', step, sid, unit, card }
 
+import { examPhase } from './sprint.js';   // the exam season (14 days before kv 'progress'.examDate), the same rule plan.js uses
+
 export const FILE = 'curriculum/grammar.json';
 export const KV_PREFIX = 'grammar:';
 export const MODE = 'grammar';
@@ -87,6 +111,9 @@ export const HINT_MAX = 4;
 export const REVIEW_DAYS = [1, 3, 7];
 export const WARM_MAX = 2;
 export const STEADY_STREAK = 3;
+export const FIX_MIN = 2;
+export const FIX_DAYS = 21;
+export const AHEAD_DAYS = 7;
 
 // ---------------------------------------------------------------- dates (local days, like plan.js)
 
@@ -103,6 +130,10 @@ const isoLocal = d => {
 };
 const clone = x => (x == null ? x : JSON.parse(JSON.stringify(x)));
 const unitRank = id => { const s = String(id ?? '').trim(); if (/^s(tarter)?$/i.test(s)) return 0; const m = s.match(/^u(?:nit)?\s*(\d+)$/i); return m ? Number(m[1]) : 1000; };
+const isDay = s => /^\d{4}-\d{2}-\d{2}/.test(String(s || ''));
+// the order cards are taught in (grammar.json "order"); cards without one come after, in file order
+const orderOf = card => (card && Number.isFinite(card.order) ? card.order : 100 + ((card && card.index) || 0));
+const byOrder = (a, b) => orderOf(a) - orderOf(b);
 
 // ---------------------------------------------------------------- content
 
@@ -156,6 +187,7 @@ export function createContent(data) {
     version: (data && data.version) || 1,
     cards,
     tags,
+    names: { ...((data && data.names) || {}) },
     card: id => byId.get(id) || null,
     item: itemId => items.get(itemId) || null,
     part: (cardId, n) => { const c = byId.get(cardId); return c ? c.questions.filter(q => Number(q.part) === Number(n)) : []; },
@@ -284,7 +316,11 @@ export function grammarState(kv, c = cached) {
   const ids = c ? c.cards.map(x => x.id) : [];
   if (kv && typeof kv.keys === 'function') for (const k of kv.keys(KV_PREFIX)) { const id = k.slice(KV_PREFIX.length); if (id && !ids.includes(id)) ids.push(id); }
   for (const id of ids) cards[id] = normState(kv && typeof kv.peek === 'function' ? kv.peek(kvKey(id), null) : null, id);
-  return { cards };
+  const out = { cards };
+  // the textbook unit and the exam date decide which card comes next (nextCard); read only
+  const progress = kv && typeof kv.peek === 'function' ? kv.peek('progress', null) : null;
+  if (progress && typeof progress === 'object') out.progress = progress;
+  return out;
 }
 const stateOf = (g, id) => normState(g && g.cards && g.cards[id], id);
 
@@ -374,19 +410,120 @@ export function cardStatus(state, now = new Date()) {
   return 'practicing';
 }
 
-export function todayCard(gstate, now = new Date(), { content: c = cached, upTo = '' } = {}) {
-  if (!c) return null;
-  const day = dayOf(now);
-  const states = c.cards.map(card => [card, stateOf(gstate, card.id)]);
-  if (states.some(([, s]) => Object.values(s.parts).some(p => p && p.done === day))) return null;   // one part a day
-  const limit = upTo ? unitRank(upTo) : Infinity;
-  for (const [card, s] of states) {
-    if (unitRank(card.unit) > limit) continue;
-    const p1 = s.parts['1'] || {}, p2 = s.parts['2'] || {};
-    if (!p1.done) return { cardId: card.id, part: 1 };
-    if (!p2.done) return p1.done < day ? { cardId: card.id, part: 2 } : null;
+// ---------------------------------------------------------------- which card next
+
+// state.grammar (planState), or grammarState's return value itself
+const gOf = state => (state && state.grammar && state.grammar.cards ? state.grammar : state && state.cards ? state : null);
+
+// The misconceptions she picked in the last `days` days: every grammar question in kv (card days and warm-up) counts each
+// tag once; events (state.history / state.events) add the grammar questions kv does not keep, like sprint.js's fallback ones.
+export function misconceptionHits(state, now = new Date(), { content: c = null, days = FIX_DAYS } = {}) {
+  const ct = c || cached;
+  const g = gOf(state);
+  const from = addDays(dayOf(now), -days);   // later than this day counts
+  const hits = {};
+  const add = t => { if (t) hits[t] = (hits[t] || 0) + 1; };
+  for (const raw of Object.values((g && g.cards) || {})) {
+    const s = normState(raw);
+    for (const it of Object.values(s.items)) {
+      if (!it || !it.last || String(it.last) <= from) continue;
+      for (const t of new Set(Array.isArray(it.tags) ? it.tags : [])) add(t);
+    }
   }
-  return null;
+  const evs = state && (Array.isArray(state.history) ? state.history : Array.isArray(state.events) ? state.events : null);
+  for (const e of evs || []) {
+    if (!e || e.type !== 'answer' || e.correct !== false || !e.misconception) continue;
+    if (String(e.at || '').slice(0, 10) <= from) continue;
+    if (ct && e.item && ct.item(e.item)) continue;   // a grammar.js question: already counted from kv
+    add(e.misconception);
+  }
+  return hits;
+}
+
+const nameOf = card => String(card.title || card.id).split('：')[0];
+// a space between Chinese and an English word: 练 be 动词，所有格 's 练一练
+const spL = s => (/^[A-Za-z']/.test(s) ? ' ' : '') + s;
+const spLR = s => spL(s) + (/[A-Za-z']$/.test(s) ? ' ' : '');
+function whyOf(card, reason, lead) {
+  const name = nameOf(card);
+  switch (reason) {
+    case 'continue': return `上次的${spLR(name)}还没做完，接着做。`;
+    case 'fix': return `这几天有几处错和${spLR(name)}有关，今天先把它补牢。`;
+    case 'ahead': return lead ? `下个单元要学${spL(name)}，提前练一练。` : `下个单元要用到${spL(name)}，先练它。`;
+    case 'unit': return lead ? `课本这个单元学${spL(name)}，跟上课本。` : `这个单元要用到${spL(name)}，先练它。`;
+    case 'exam': return `期中前把${spLR(name)}练一练。`;
+    default: return card.foundation ? `先把地基打牢：今天练${spL(name)}。` : `今天学${spL(name)}。`;
+  }
+}
+
+export function nextCard(state, now = new Date(), { content: c = null, upTo = null } = {}) {
+  const ct = c || cached;
+  if (!ct) return null;
+  const g = gOf(state) || { cards: {} };
+  const progress = (state && state.progress) || g.progress || {};
+  const day = dayOf(now);
+  const states = new Map(ct.cards.map(card => [card.id, stateOf(g, card.id)]));
+  if ([...states.values()].some(s => Object.values(s.parts).some(p => p && p.done === day))) return null;   // one part a day
+
+  const cur = upTo != null && upTo !== '' ? upTo : progress.unit || '';
+  const curRank = cur ? unitRank(cur) : Infinity;   // no textbook unit set: every unit counts as learned
+  const ex = examPhase(progress, toDate(now));
+  const season = ex.on || ex.phase === 'day';
+  const lo = unitRank(ex.from), hi = unitRank(ex.to);
+  const rank = card => unitRank(card.unit);
+  // the unit in focus outside the season: the one after the exam range once the exam is over, the next one from 7 days
+  // before the parent's start date (progress.nextFrom), otherwise the textbook unit she is on
+  let focus = null;
+  if (!season) {
+    if (ex.phase === 'after' && (!Number.isFinite(curRank) || curRank <= hi)) focus = hi + 1;
+    else if (Number.isFinite(curRank) && isDay(progress.nextFrom) && day >= addDays(String(progress.nextFrom).slice(0, 10), -AHEAD_DAYS)) focus = curRank + 1;
+    else if (Number.isFinite(curRank)) focus = curRank;
+  }
+  const reach = card => !!card.foundation || rank(card) <= curRank || (focus !== null && rank(card) === focus)
+    || (!!card.ahead && !season && rank(card) === curRank + 1);
+  // the exam: the unit cards in its range and the cards they lean on
+  const inRange = card => !card.foundation && rank(card) >= lo && rank(card) <= hi && reach(card);
+  const leansOn = list => new Set(list.flatMap(x => x.foundations || []));
+  const examNeeds = leansOn(ct.cards.filter(inRange));
+  const examCard = card => inRange(card) || (card.points || []).some(p => examNeeds.has(p));
+  // the unit in focus: its cards and the cards they lean on
+  const focusCards = focus === null ? [] : ct.cards.filter(card => !card.foundation && rank(card) === focus && reach(card));
+  const focusNeeds = leansOn(focusCards);
+  const inFocus = card => focusCards.includes(card) || (card.points || []).some(p => focusNeeds.has(p));
+  const focusReason = Number.isFinite(curRank) && focus > curRank ? 'ahead' : 'unit';
+
+  const hits = misconceptionHits(state, now, { content: ct });
+  const focusPoints = new Set(Array.isArray(state && state.grammarFocus) ? state.grammarFocus : []);
+  const list = [];
+  for (const card of ct.cards) {
+    if (!reach(card) || (season && !examCard(card))) continue;
+    const s = states.get(card.id);
+    const p1 = s.parts['1'] || {}, p2 = s.parts['2'] || {};
+    const part = !p1.done ? 1 : !p2.done && p1.done < day ? 2 : 0;
+    if (!part) continue;
+    const p = part === 1 ? p1 : p2;
+    const started = !!(p.started || (Array.isArray(p.answered) && p.answered.length));
+    const tags = card.foundation ? (card.fixes || []).filter(t => hits[t]).sort((a, b) => hits[b] - hits[a]) : [];
+    const n = tags.reduce((a, t) => a + hits[t], 0) + ((card.points || []).some(x => focusPoints.has(x)) ? FIX_MIN : 0);
+    let tier, reason;
+    if (started) { tier = 0; reason = 'continue'; }
+    else if (card.foundation && n >= FIX_MIN) { tier = 1; reason = 'fix'; }
+    else if (!season && inFocus(card)) { tier = 2; reason = focusReason; }
+    else { tier = 3; reason = season ? 'exam' : 'order'; }
+    list.push({ card, part, tier, reason, n, tags, lead: focusCards.includes(card) });
+  }
+  // the season goes wide (the first day of every card before any second day); otherwise one card's two days, then the next
+  list.sort((a, b) => a.tier - b.tier || (a.tier === 1 ? b.n - a.n : 0) || (season ? a.part - b.part : 0)
+    || byOrder(a.card, b.card) || a.part - b.part);
+  const best = list[0];
+  if (!best) return null;
+  return { cardId: best.card.id, part: best.part, reason: best.reason, why: whyOf(best.card, best.reason, best.lead),
+    ...(best.reason === 'fix' && best.tags.length ? { tags: best.tags } : {}) };
+}
+
+// app.js asks for today's card this way: grammarState(kv) carries kv 'progress', upTo is the textbook unit
+export function todayCard(gstate, now = new Date(), { content: c = null, upTo = null } = {}) {
+  return nextCard(gstate, now, { content: c, upTo });
 }
 
 // ---------------------------------------------------------------- new sentences for reviews and the warm-up
@@ -433,9 +570,12 @@ export function grammarWarmItems(state, now = new Date(), { content: c = null, m
   if (!room) return [];
   const due = [];
   for (const [card, s] of states) for (const r of s.reviews) if (r.due && r.due <= day) due.push([card, s, r]);
-  due.sort((a, b) => String(a[2].due).localeCompare(String(b[2].due)) || a[0].index - b[0].index);
+  due.sort((a, b) => String(a[2].due).localeCompare(String(b[2].due)) || byOrder(a[0], b[0]));
+  // the card practised longest ago in the warm-up first, so with many cards in practice each one gets its turn
+  const lastWarm = s => (s.warm && s.warm.day) || '';
   const practicing = states.filter(([, s]) => cardStatus(s, now) === 'practicing'
-    && !Object.values(s.parts).some(p => p && p.done === day));   // she did this card's five questions today already
+    && !Object.values(s.parts).some(p => p && p.done === day))   // she did this card's five questions today already
+    .sort((a, b) => String(lastWarm(a[1])).localeCompare(String(lastWarm(b[1]))) || byOrder(a[0], b[0]));
   const want = Math.min(room, due.length + practicing.length >= 2 ? 2 : due.length + practicing.length);
   const out = [];
   const taken = new Map();   // cardId -> qids already chosen today
@@ -464,7 +604,7 @@ export function grammarWarmItems(state, now = new Date(), { content: c = null, m
 export function summary(gstate, now = new Date(), { content: c = cached, tags = null } = {}) {
   if (!c) return [];
   const day = dayOf(now);
-  return c.cards.map(card => {
+  return c.cards.slice().sort(byOrder).map(card => {   // in teaching order: the foundations first
     const s = stateOf(gstate, card.id);
     const vals = Object.entries(s.items);
     const count = { right: 0, fuzzy: 0, failed: 0 };
@@ -474,7 +614,7 @@ export function summary(gstate, now = new Date(), { content: c = cached, tags = 
       for (const t of it.tags || []) tagN[t] = (tagN[t] || 0) + 1;
     }
     return {
-      id: card.id, title: card.title, unit: card.unit, status: cardStatus(s, now),
+      id: card.id, title: card.title, unit: card.unit, label: card.label || '', foundation: !!card.foundation, status: cardStatus(s, now),
       parts: { 1: !!(s.parts['1'] && s.parts['1'].done), 2: !!(s.parts['2'] && s.parts['2'].done) },
       answered: vals.length, ...count,
       reviewsDue: s.reviews.filter(r => r.due <= day).length, reviewsPending: s.reviews.length,
