@@ -331,7 +331,7 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
       picker = h('select', { className: 'select', 'aria-label': '千问音色' });
       for (const [name, cn] of TTS_VOICES) picker.append(h('option', { value: name, text: `${name} · ${cn}` }));
       picker.value = TTS_VOICES.some(v => v[0] === s.qwenVoice) ? s.qwenVoice : TTS_VOICES[0][0];
-      picker.addEventListener('change', () => { app.voice.stop(); app.saveSettings({ qwenVoice: picker.value }); });
+      picker.addEventListener('change', () => { app.voice.stop(); app.saveSettings({ qwenVoice: picker.value, voiceChosen: true }); });
     } else {
       const voices = app.speech.list();
       picker = h('select', { className: 'select', 'aria-label': '系统语音' });

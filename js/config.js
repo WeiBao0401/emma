@@ -1,5 +1,5 @@
 // Keep VERSION identical to VERSION in sw.js; bump both on every release (tests/run.mjs checks).
-export const VERSION = '0.1.5';
+export const VERSION = '0.1.6';
 
 export const API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
 
@@ -78,7 +78,8 @@ export const DEFAULT_SETTINGS = {
   newPerDay: NEW_PER_DAY,
   voice: '',          // system voice name ('' = best installed English voice)
   voiceMode: '',      // 'qwen' | 'system'; '' = Qwen when an API key is set, else system (see voiceMode() in tts.js)
-  qwenVoice: 'Jennifer',
+  qwenVoice: 'Ava_v3.1',   // Wei 10-24 picked Ava (tts-samples/listen-2-Ava); follows this default until picked by hand
+  voiceChosen: false,
   dailyCapYuan: 1.5,  // in-app daily spending cap (DESIGN 10.7); budget.js reads it
 };
 
@@ -98,8 +99,10 @@ export const TTS_SPEECH_MODEL = 'qwen-audio-3.1-tts-flash';
 export const TTS_SPEECH_VOICES = ['Ava_v3.1', 'Emily_v3.1', 'Brian_v3.1'];
 export const TTS_ZH_VOICE = 'Cherry';
 export const TTS_TEACHER = '用清楚、稍慢、温和的老师语气朗读，适合初中生跟读';
-export const TTS_VOICES = [['Jennifer', '美式女声'], ['Aiden', '美式男声'], ['Cherry', '女声，中英文都自然'],
-  ['Ava_v3.1', '新 · 美式女声'], ['Ava_v3.1+teacher', '新 · 美式女声，老师语气'], ['Emily_v3.1', '新 · 英式女声'], ['Brian_v3.1', '新 · 美式男声']];
+export const TTS_VOICES = [['Ava_v3.1', '美式女声（推荐）'], ['Ava_v3.1+teacher', '美式女声，老师语气'], ['Emily_v3.1', '英式女声'],
+  ['Brian_v3.1', '美式男声'], ['Jennifer', '旧 · 美式女声'], ['Aiden', '旧 · 美式男声'], ['Cherry', '旧 · 女声，中英文都自然']];
+// the default before v0.1.6: saved settings holding it and no voiceChosen flag count as never picked (db.js loadSettings)
+export const OLD_DEFAULT_VOICE = 'Jennifer';
 export const TTS_CHUNK = 500;          // characters per request (the API takes up to 600; a Chinese character counts 2)
 export const TTS_TEXT_CAP = 3000;      // longest text read aloud in one tap (a reading passage)
 export const TTS_TIMEOUT_MS = 15000;

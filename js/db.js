@@ -1,7 +1,7 @@
 // IndexedDB "emma" v1 (words, events, kv, notebook...) and "emma-audio" v1 (Qwen voice clips) + import/export.
 // Nothing here touches indexedDB at import time, so the pure helpers (merge, export format, gzip) can be tested in Node.
 // Store layout and the kv key names: js/CONTRACTS.md.
-import { DB_NAME, DB_VERSION, AUDIO_DB_NAME, AUDIO_DB_VERSION, DB_TIMEOUT_MS, LOG_CAP, DEFAULT_SETTINGS, DEFAULT_MODELS, OLD_DEFAULT_MODEL, POE_DEFAULT_MODELS, POE_ENABLED } from './config.js';
+import { DB_NAME, DB_VERSION, AUDIO_DB_NAME, AUDIO_DB_VERSION, DB_TIMEOUT_MS, LOG_CAP, DEFAULT_SETTINGS, DEFAULT_MODELS, OLD_DEFAULT_MODEL, OLD_DEFAULT_VOICE, POE_DEFAULT_MODELS, POE_ENABLED } from './config.js';
 import { fromSM2, newCard } from './fsrs.js';
 import { CORE_KEYS } from './prompts.js';
 
@@ -215,7 +215,13 @@ export function loadSettings(saved) {
   for (const k of keys) if (typeof poeSaved[k] === 'string' && poeSaved[k].trim()) poeModels[k] = poeSaved[k].trim();
   // v0 runs on Bailian only (config POE_ENABLED): a saved 'poe' is read as Bailian until the switch is turned on
   const provider = POE_ENABLED && saved.provider === 'poe' ? 'poe' : 'bailian';
-  return { settings: { ...base, ...saved, modelsChosen: chosen, models, poeModels, provider }, migrated };
+  // voice (v0.1.6): a voice never picked by hand follows DEFAULT_SETTINGS.qwenVoice (Ava since 10-24); the old default
+  // Jennifer saved before voiceChosen existed counts as never picked, any other saved voice as picked
+  const vHas = typeof saved.voiceChosen === 'boolean';
+  const vChosen = vHas ? saved.voiceChosen : (!!saved.qwenVoice && saved.qwenVoice !== OLD_DEFAULT_VOICE);
+  const qwenVoice = vChosen && saved.qwenVoice ? saved.qwenVoice : DEFAULT_SETTINGS.qwenVoice;
+  const voiceMoved = !vHas || saved.qwenVoice !== qwenVoice;
+  return { settings: { ...base, ...saved, modelsChosen: chosen, models, poeModels, provider, qwenVoice, voiceChosen: vChosen }, migrated: migrated || voiceMoved };
 }
 
 // ---------------------------------------------------------------- import / export (pure)
