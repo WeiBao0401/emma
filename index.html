@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https: https://dashscope.aliyuncs.com https://dashscope-result-bj.oss-cn-beijing.aliyuncs.com https://dashscope-result-sh.oss-cn-shanghai.aliyuncs.com https://dashscope-result-hz.oss-cn-hangzhou.aliyuncs.com; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#E9F4EC" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0F1D19" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FBF8F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14181F" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Emma 的英语老师">
@@ -36,11 +36,11 @@
 @font-face{font-family:"zh";src:local("PingFangSC-Semibold");font-weight:550 1000;unicode-range:U+2018-2019,U+201C-201D,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF}
 
 :root{
-  --paper:#E9F4EC; --ink:#16302A; --muted:#5B7268; --faint:#93A89E;
-  --rule:rgba(22,48,42,.10); --rule-strong:rgba(22,48,42,.55);
-  --marker:#FFE14D; --marker-ink:#16302A; --accent:#1E7A55; --tag-bg:#DCEBE1;
-  --danger:#B23A32; --good:#1E7A55;
-  --btn-bg:var(--ink); --btn-ink:var(--paper);
+  --paper:#FBF8F1; --ink:#1E2633; --muted:#586273; --faint:#8A929E;
+  --rule:rgba(30,38,51,.10); --rule-strong:rgba(30,38,51,.55);
+  --marker:#F3D978; --marker-ink:#1E2633; --accent:#2F4A7A; --tag-bg:#FBEFC4;
+  --danger:#B4472F; --good:#2F4A7A;
+  --btn-bg:var(--accent); --btn-ink:#FFFFFF;
   --sk:color-mix(in srgb,var(--ink) 11%,var(--paper));
   --serif:"zh",ui-serif,"New York",Georgia,"PingFang SC",serif;
   --sans:"zh",-apple-system,BlinkMacSystemFont,"PingFang SC",system-ui,sans-serif;
@@ -56,17 +56,17 @@
 :lang(en){--serif:ui-serif,"New York",Georgia,serif;--sans:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}
 @media (prefers-color-scheme: dark){
   :root{
-    --paper:#0F1D19; --ink:#E4F1EA; --muted:#9DB5AA; --faint:#6A8277;
-    --rule:rgba(228,241,234,.10); --rule-strong:rgba(228,241,234,.55);
-    --marker:#6E6014; --marker-ink:#F3EFD2; --accent:#5FC79A; --tag-bg:#1D3129;
-    --danger:#F08A82; --good:#5FC79A;
+    --paper:#14181F; --ink:#E9ECF2; --muted:#A3ACBA; --faint:#6F7887;
+    --rule:rgba(233,236,242,.10); --rule-strong:rgba(233,236,242,.55);
+    --marker:#6B5A1C; --marker-ink:#F6EBC4; --accent:#8FA9DA; --tag-bg:#2E2A1B;
+    --danger:#F08A82; --good:#8FA9DA;
     --btn-bg:color-mix(in srgb,var(--accent) 42%,var(--paper)); --btn-ink:var(--ink);
     --sk:color-mix(in srgb,var(--ink) 12%,var(--paper));
     color-scheme:dark;
   }
 }
 
-/* theme color picked on the first open (ui-onboard.js, kv 'profile'.theme); green is the default above */
+/* theme color picked on the first open (ui-onboard.js, kv 'profile'.theme); navy is the default above (v0.1.1, from the approved home prototype) */
 :root[data-accent="blue"]{--accent:#2B63B5;--tag-bg:#DCE6F3}
 :root[data-accent="rose"]{--accent:#B5446B;--tag-bg:#F3DFE6}
 :root[data-accent="violet"]{--accent:#6A4FB0;--tag-bg:#E6E0F3}

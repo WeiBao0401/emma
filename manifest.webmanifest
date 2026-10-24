@@ -6,8 +6,8 @@
   "start_url": "/emma/",
   "scope": "/emma/",
   "display": "standalone",
-  "background_color": "#E9F4EC",
-  "theme_color": "#E9F4EC",
+  "background_color": "#FBF8F1",
+  "theme_color": "#FBF8F1",
   "lang": "zh-CN",
   "icons": [
     {
