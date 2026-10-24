@@ -1,11 +1,11 @@
-// 家长区里的“拍课本”页（DESIGN 6.2，v1）：拍之前的提示、拍照或从相册选、识别中、确认页（逐行核对：可改、可删、
+// 家长区里的“拍课本”页（DESIGN 6.2，v1）：拍照或从相册选、识别中、确认页（逐行核对：可改、可删、
 // 看不清的标出来、可以补一行）、存好了。识别和写入在 capture.js。照片只在这一页的内存里，存好、重拍、离开都丢掉。
 // 负责：拍课本 agent（capture.js、ui-capture.js、css/capture.css、tests/capture.test.mjs）。
 //
 // 导出
 //   createCaptureView(ctx, { root }) -> { show(params), hide(), onChange(), holding(), inSession() }
 //     路由 'capture'（从家长区“拍课本”那一行 go('capture') 进来，整页，藏标签栏），画进 #tab-capture（root 不给时）。
-//     左上角“家长区”回去（家长区离开时已经上锁，要再输一次数字码）。确认页改过还没存时，第一次点返回只提醒。
+//     左上角“家长区”回去。确认页改过还没存时，第一次点返回只提醒。
 //     hide()：离开这一页（app.js 换路由时调）：丢掉照片和识别结果。holding() / inSession()：手上有照片或没存的结果时为真，
 //     自动更新会等；同时 ctx.busy(+1)，结果存好或丢掉时 ctx.busy(-1)。
 //   纯函数（Node 测试用）：rowsFrom(result)、unitChoices(curriculum, extra)、summaryText(rows)、savedText(counts, plan, dryRun)、
@@ -17,7 +17,6 @@ import { h, icon } from './ui-dom.js';
 import { recognize, imageToJpeg, planVocab, planToc, saveCapture, keptRows, tierText, unitTitleOf, unitIdOf, PAGE_LABEL } from './capture.js';
 import { normWord, defaultUnitOrder } from './curriculum.js';
 
-const TIP = '别拍到封面上的名字和班级。';
 const BOOK_UNITS = ['S', 'U1', 'U2', 'U3', 'U4', 'U5', 'U6'];
 
 // ---------------------------------------------------------------- pure helpers
@@ -214,7 +213,7 @@ export function createCaptureView(ctx, { root = null } = {}) {
   const photoEl = () => (photo && photo.dataUrl
     ? h('figure', { className: 'cap-photo' },
       h('img', { src: photo.dataUrl, alt: '刚拍的这一页', on: { click: ev => ev.currentTarget.closest('.cap-photo').classList.toggle('big') } }),
-      h('figcaption', { className: 'small', text: '点照片放大。核对完照片就丢掉，不存。' }))
+      h('figcaption', { className: 'small', text: '点照片放大，对着它核对。' }))
     : null);
 
   function introView() {
@@ -225,7 +224,6 @@ export function createCaptureView(ctx, { root = null } = {}) {
       head(''),
       h('h1', { className: 'cap-title', text: '拍一页课本' }),
       h('p', { className: 'cap-lede', text: '拍目录页，或者一个单元的词汇表页。一次一页，拍平、拍全，光线亮一点。' }),
-      h('p', { className: 'cap-tip', role: 'note' }, icon('alert'), h('span', { text: TIP })),
       h('div', { className: 'cap-actions' },
         btn('拍一张', pickCam, 'btn cap-main'),
         btn('从相册选', pickAlbum, 'text-btn accent'),
@@ -235,7 +233,7 @@ export function createCaptureView(ctx, { root = null } = {}) {
       h('p', { className: 'small cap-foot', text: units.length
         ? `现在的课本：${units.map(u => u.title || u.id).join('、')}，共 ${n} 个词。${photoStatus(tb)}。`
         : '还没有课本数据。先拍目录页，再一个单元一个单元拍词汇表。' }),
-      h('p', { className: 'small cap-foot', text: '一张约 1 分钱。认出来的词你核对过才存，照片不留。' }),
+      h('p', { className: 'small cap-foot', text: '一张约 1 分钱。认出来的词你核对过才存。' }),
     ];
   }
 
@@ -255,7 +253,7 @@ export function createCaptureView(ctx, { root = null } = {}) {
       h('h1', { className: 'cap-title', text: '这次没认出来' }),
       h('p', { className: 'cap-lede', text: errMsg }),
       photoEl(),
-      h('p', { className: 'cap-tip', role: 'note' }, icon('alert'), h('span', { text: TIP })),
+      h('p', { className: 'small', text: '拍平、拍全，光线亮一点。' }),
       h('div', { className: 'cap-actions' }, btn('再拍一张', pickCam, 'btn cap-main'), btn('从相册选', pickAlbum, 'text-btn accent'), btn('回家长区', () => leave(), 'text-btn')),
     ];
   }
@@ -376,7 +374,6 @@ export function createCaptureView(ctx, { root = null } = {}) {
       head(''),
       h('h1', { className: 'cap-title', text: dry ? '模拟存了一遍' : '存好了' }),
       h('p', { className: 'cap-lede', text: savedText(counts, plan, dry) }),
-      h('p', { className: 'small', text: '照片已经丢掉，没有存。' }),
       plan && plan.kind === 'vocab' && counts && counts.skippedUnclear ? h('p', { className: 'small', text: `${counts.skippedUnclear} 个看不清的没存，可以再拍一次这一页补上。` }) : null,
       h('div', { className: 'cap-actions' }, btn('再拍一页', () => { retake(); }, 'btn cap-main'), btn('完成', () => leave(true), 'text-btn accent')),
     ];

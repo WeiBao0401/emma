@@ -1,6 +1,8 @@
-// Boot and wiring (CONTRACTS.md): settings and kv, data, the shared ctx every view gets, routes (three tabs:
-// 今天 / 查词 / 单词; lesson, dictation and 这周小结 pushed from 今天, 家长区 pushed from 单词 and 拍课本 from 家长区,
+// Boot and wiring (CONTRACTS.md): settings and kv, data, the shared ctx every view gets, routes (four tabs:
+// 今天 / 问老师 / 查词 / 单词; lesson, dictation and 这周小结 pushed from 今天, 家长区 pushed from 单词 and 拍课本 from 家长区,
 // the first open), the status line, badge, sheet, service worker.
+// 0.3.0: 问老师 (ui-chat.js: free questions, streamed answers, a photo of a problem) and its hold-to-talk voice input
+// (voice-input.js through ctx.voiceInput: Bailian or 豆包 speech recognition).
 // v1 (0.2.0): the grammar cards are loaded at boot (grammar.js) and their progress goes into the plan's state with the
 // parent's form (intake.js: busy days, recent mistakes) and the review outline (kv 'outline'); the spelling, listening,
 // grammar and phonics parts of a lesson are loaded by ui-lesson.js itself (import()).
@@ -36,6 +38,8 @@ import { catchUp as weeklyCatchUp } from './weekly.js';
 import { createCaptureView } from './ui-capture.js';
 import * as G from './grammar.js';
 import { intakeDefaults, isBusyDay } from './intake.js';
+import { createChatTab } from './ui-chat.js';
+import { createVoiceInput } from './voice-input.js';
 
 const params = new URLSearchParams(location.search);
 // ?mock=offline: mock mode where every model call fails like a dropped connection (tests the dictionary fallback)
@@ -127,7 +131,7 @@ function v1State(now, progress) {
   return out;
 }
 
-let look, lib, home, lesson, dictation, parent, onboard, weekly, capture;
+let look, lib, home, lesson, dictation, parent, onboard, weekly, capture, chat;
 let sheetView = null;
 
 // The ctx every view gets (CONTRACTS.md "ctx"). Called `app` inside the dictionary's views.
@@ -142,7 +146,7 @@ const app = {
   // the parent's form as defaults for every module (intake.js), worked out on each call so a new answer or an import shows
   intake: () => intakeDefaults(kv, { entries: words.all(), curriculum, lemma: q => dict.lemma(q) }),
   // after the textbook import writes kv 'textbook' (CONTRACTS.md "课本导入")
-  async reloadCurriculum() { curriculum = await curriculumNow(); for (const v of [home, lib]) if (v && v.onChange) v.onChange(); return curriculum; },
+  async reloadCurriculum() { curriculum = await curriculumNow(); for (const v of [home, lib, chat]) if (v && v.onChange) v.onChange(); return curriculum; },
   say: (text, button, opts) => voice.say(text, button, opts),
   // settings
   settings: () => settings,
@@ -153,6 +157,7 @@ const app = {
     if (patch.routing || settings.routing) settings.routing = { ...(settings.routing || {}), ...(patch.routing || {}) };
     if ('newPerDay' in patch) updateBadge();
     await kv.set('settings', settings);
+    if (chat && ['chatProvider', 'chatModelBailian', 'chatModelPoe', 'poeUrl', 'poeKey', 'apiKey', 'asrProvider', 'doubaoToken'].some(k => k in patch)) chat.onChange();
   },
   mockForced: () => mockForced,
   // today's lesson (plan.js): state assembled here from words, curriculum and kv
@@ -234,6 +239,9 @@ const app = {
   applyTheme: name => { if (name) document.documentElement.dataset.accent = name; else delete document.documentElement.dataset.accent; },
 };
 
+// 语音输入 for 问老师 (ui-chat.js reads ctx.voiceInput: available / start / stop -> text / cancel)
+app.voiceInput = createVoiceInput(app);
+
 // ---------------------------------------------------------------- routes and the tab bar
 const tabbar = document.getElementById('tabbar');
 const tabButtons = {};
@@ -249,14 +257,15 @@ function buildTabbar() {
     tabbar.append(b);
   }
 }
-const viewOf = name => ({ home, lesson, dictation, look, lib, parent, onboard, weekly, capture })[name];
+const viewOf = name => ({ home, chat, lesson, dictation, look, lib, parent, onboard, weekly, capture })[name];
 function showRoute(name, { force = false, params: p = null } = {}) {
   const r = resolveRoute(name);
   if (r.name === route && !force && !p) return;
   voice.stop();
   scrollPos[route] = window.scrollY;
   if (route === 'lib' && lib && r.name !== 'lib') lib.hide();
-  if (route === 'parent' && parent && r.name !== 'parent') parent.hide();   // the parent area locks again (ui-parent.js)
+  if (route === 'parent' && parent && r.name !== 'parent') parent.hide();   // drops the relay's model list (ui-parent.js)
+  if (route === 'chat' && chat && r.name !== 'chat') chat.hide();         // closes the word card, drops a recording not finished
   if (route === 'capture' && capture && r.name !== 'capture') capture.hide(); // leaving 拍课本 drops the photo
   const from = route;
   route = r.name;
@@ -295,7 +304,7 @@ words.onChange(({ type, slug }) => {
   }
   clearTimeout(changeTimer);
   changeTimer = setTimeout(() => {
-    for (const v of [look, lib, home, lesson, dictation, parent, weekly, capture]) if (v && v.onChange) v.onChange();
+    for (const v of [look, lib, home, lesson, dictation, parent, weekly, capture, chat]) if (v && v.onChange) v.onChange();
     updateBadge();
   }, 50);
 });
@@ -367,7 +376,8 @@ function isIdle() {
   const typing = a && /INPUT|TEXTAREA/.test(a.tagName) && a.value;
   return !busyCount && !(look && look.isBusy()) && !(lesson && lesson.inSession()) && !(dictation && dictation.inSession()) &&
     !sheetView && !typing && !words.enriching() && !(parent && parent.holding()) &&
-    !(weekly && weekly.holding()) && !(capture && capture.holding());   // a share sheet open, a photo not saved yet
+    !(weekly && weekly.holding()) && !(capture && capture.holding()) &&   // a share sheet open, a photo not saved yet
+    !(chat && (chat.inSession() || chat.holding()));                       // the teacher answering, a recording, a question not sent
 }
 // Stricter, for a reload while the app is in use: nothing being read either.
 const isQuiet = () => isIdle() && !(look && look.hasResult()) && !(lib && lib.inDetail());
@@ -440,6 +450,7 @@ async function boot() {
   capture = createCaptureView(app);
   onboard = createOnboardView(app);
   weekly = createWeeklyView(app);
+  chat = createChatTab(app);
   renderStatus();
   updateBadge();
   showRoute(onboard.needed() ? 'onboard' : 'home', { force: true });

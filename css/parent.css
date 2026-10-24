@@ -1,33 +1,8 @@
 /* 家长区（ui-parent.js, ui-me.js）. Owner: 家长区 UI agent. New class names start with parent-; ui-me.js keeps the
    dictionary's .me-page / .sgroup / .srow classes (inline in index.html). */
 .parent-settings{min-height:100vh}
-.parent-settings[hidden],.parent-gate-box[hidden]{display:none}
+.parent-settings[hidden]{display:none}
 .parent-intro{margin-top:6px}
-
-/* ---------- the 4-digit gate ---------- */
-.parent-gate-inner{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:8px}
-.parent-gate-inner .page-title{align-self:flex-start;margin-top:8px}
-.parent-gate-title{margin-top:40px;font:400 24px/1.35 var(--serif);color:var(--ink)}
-.parent-gate-inner>.small{margin-top:8px;max-width:30em}
-.parent-dots{display:flex;gap:20px;justify-content:center;margin:32px 0 6px}
-.parent-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--ink);transition:background-color .15s var(--ease)}
-.parent-dot.on{background:var(--ink)}
-.parent-msg{min-height:22px;margin-top:6px}
-.parent-keypad{display:grid;grid-template-columns:repeat(3,72px);gap:16px 32px;justify-content:center;margin-top:18px}
-.parent-key{width:72px;height:72px;display:grid;place-items:center;border:1px solid var(--rule-strong);border-radius:50%;background:transparent;
-  color:var(--ink);font:400 28px/1 var(--serif);font-variant-numeric:tabular-nums;transition:background-color .15s var(--ease)}
-.parent-key:active{background:var(--tag-bg)}
-.parent-key:disabled{opacity:.35}
-.parent-key.fn{border-color:transparent;font:15px var(--sans);color:var(--muted)}
-.parent-key.fn .icon{width:24px;height:24px}
-.parent-gate-inner.waiting .parent-dots{opacity:.4}
-.parent-last4{max-width:200px;text-align:center;letter-spacing:.2em;margin-top:20px}
-.parent-center{justify-content:center}
-@media (prefers-reduced-motion: no-preference){
-  .parent-dots.shake{animation:parent-shake .36s var(--ease)}
-  @keyframes parent-shake{0%,100%{transform:none}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
-}
-@media (max-width:360px){.parent-keypad{grid-template-columns:repeat(3,64px);gap:12px 24px}.parent-key{width:64px;height:64px}}
 
 /* ---------- rows ---------- */
 .srow.parent-off .srow-head{opacity:.45}

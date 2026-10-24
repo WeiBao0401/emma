@@ -1,8 +1,9 @@
 // 第一次打开（DESIGN 2.1、8.6）：看“老师和你的约定”，给老师起名字、挑主题色，定每周目标 4-6 天，写一句
 // “每天＿＿我就打开它”。做完直接进第一节课（ctx.go('lesson', { first: true })，第一节课的内容由 ui-lesson.js 定）。
 // 拍课本、填 Key、体检页、家长开机问卷都由 Wei 事先做完：家长还没在装机清单里点“都好了，交给 Emma”
-// （kv 'onboard'.handed）时，这一页先请家长去家长区准备（没设数字码的话那边先设码）。中途关了 App 再打开，
-// 还是先到这一页，家长不会被关在 Emma 的流程里。
+// （kv 'onboard'.handed）时，这一页先请家长去家长区准备。中途关了 App 再打开，还是先到这一页，家长不会被关在
+// Emma 的流程里。家长数字码 10-24 删了（kv 'parent.pin' 老数据留着，不再读）。
+// 约定只留学习上的几条（Wei 10-24：照片、录音、隐私、上报家长这些不写）。
 // 负责：家长区 UI agent（ui-parent.js、ui-onboard.js、ui-me.js、css/parent.css、css/onboard.css）。
 //
 // 导出
@@ -25,10 +26,9 @@ export const DEFAULT_PARENT_NAME = '家长';
 
 export const PROMISES = [
   '我不会直接告诉你答案，但会一步步帮你，最多四步一定讲清楚。',
-  '我只当英语老师。别的作业和心事，去找家人。',
-  '你拍的照片会发到阿里云识别，识别完不保留。你的录音只存在这台 iPad 上。',
-  '家长能看到每周小结、花了多少钱和老师的笔记。笔记里会举几个你做错的例子，帮老师想办法；不会把每道题的对错发给家长，也听不到你的录音。“发给家长”会附上一份备份，存在家长手机里。',
-  '老师会记下你做题的样子，每周想想怎么帮你，想的时候会把去掉名字的学习记录发给 AI。“老师记得的你”你都能看到，不对就点“这不对”。写到让人担心的事，老师会告诉家长。',
+  '做错了没关系。错过的题，过几天我换个句子再考你，直到你真的会。',
+  '英语上哪里不懂，课本、作业、单词、语法、怎么读，都可以来“问老师”问我。',
+  '我会记下你做题的样子，每周想想怎么帮你。“老师记得的你”你都能看到，不对就点“这不对”。',
 ];
 // “家长” becomes what the parent area set (妈妈, 爸爸...)
 export const promisesFor = (parentName = DEFAULT_PARENT_NAME) => PROMISES.map(t => t.replace(/家长/g, parentName || DEFAULT_PARENT_NAME));
@@ -93,14 +93,13 @@ export function createOnboardView(ctx) {
 
   // before the parent has set things up: this screen is for the parent, not for Emma
   function parentStep() {
-    const started = !!ctx.kv.peek('parent.pin', null);
     return page(
       h('h1', { className: 'page-title', text: '先交给家长' }),
       h('p', { className: 'lede onboard-lede', text: '第一次打开，先请家长准备十几分钟。' }),
-      h('ol', { className: 'onboard-list' }, ['设家长数字码', '填 Key，测一下连接', '导入课本，选课本进度和期中', '填开机问卷']
+      h('ol', { className: 'onboard-list' }, ['填 Key，测一下连接', '导入课本，选课本进度和期中', '填开机问卷']
         .map((t, i) => h('li', {}, h('span', { className: 'num', text: String(i + 1) }), h('p', { text: t })))),
       h('p', { className: 'small', text: '弄好以后，在家长区点“都好了，交给 Emma”。' }),
-      h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: started ? '家长继续准备' : '家长开始准备', on: { click: () => ctx.go('parent', { setup: true }) } })));
+      h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: '家长开始准备', on: { click: () => ctx.go('parent', { setup: true }) } })));
   }
 
   function promiseStep() {
@@ -165,7 +164,7 @@ export function createOnboardView(ctx) {
     needed,
     show() {
       const ob = ctx.kv.peek('onboard', {}) || {};
-      if (!ob.done && !(ob.handed && ctx.kv.peek('parent.pin', null))) step = 'parent';
+      if (!ob.done && !ob.handed) step = 'parent';
       else if (!needed()) { setTimeout(() => ctx.go('home'), 0); return; }
       else if (step === 'parent') { startFresh(); step = 'promise'; }
       if (step === 'promise') startFresh();

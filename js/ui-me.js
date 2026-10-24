@@ -1,5 +1,5 @@
 // 家长区里的“设置与数据”（从词典的“我”页改来）：Key、模型、发音、每天新词、备份和恢复。ui-parent.js 把它放在
-// 家长区里（4 位数字码之后）；这个文件不再自己占一个页面。
+// 家长区里；这个文件不再自己占一个页面。
 // 负责：家长区 UI agent（ui-parent.js、ui-onboard.js、ui-me.js、css/parent.css、css/onboard.css）。
 // 状态：从词典照搬后删掉了 Wei 专用的东西（有道和 Mac 导入、搬到新图标、图标角标）；Poe 中转站的几行在
 // config POE_ENABLED 为 false 时不显示，只留一行灰着的“以后开”。家长区自己的几组（进度、期中、花费、问卷、称呼、
@@ -9,7 +9,8 @@
 //   root：要画进去的元素（默认 #tab-parent 里 ui-parent 给的容器）；back：{ label, onClick }，左上角的返回
 //   layout(kit) -> 元素数组：整页按什么顺序画（不给就是下面 render 里的默认顺序）。kit 里有 group、row、toggle、
 //     render、open、openRows，和这里的几组：ai（服务商、Key、测一下连接）、poe、study、data、advanced（模型、测速、
-//     模拟模式）、about
+//     模拟模式）、about；还有 relayPanel（Poe 中转站地址，行 key 'relay'）、keyPanel('poe' | 'bailian')（行 key 'poekey' / 'key'），
+//     ui-parent 的“问老师”一组用它们填 Poe 中转站和 Key
 //   hooks：exportExtra() -> { kv, events }，并进备份；previewExtra(data) -> 文字数组，导入前多说几句；
 //     afterImport(data) -> 文字数组，words.importData 之后写 kv（课本、进度……），返回导入完成后多说的几句
 //   opts.open：打开就展开的那一行（'key'、'import'、'backup'…）
@@ -179,7 +180,7 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
     const poe = s.provider === 'poe';
     return [
       row({ label: '服务商', sub: poe ? '查词走 Poe，发音还用百炼' : '查词、讲解、朗读都走百炼', value: poe ? 'Poe' : '百炼' }),
-      POE_ENABLED ? null : row({ label: 'Poe 中转站', sub: '中转站搭好了再开', value: '以后开', cls: 'parent-off' }),
+      POE_ENABLED ? null : row({ label: '查词用 Poe', sub: '查词先只用百炼。问老师用 Poe，在下面“问老师”里填中转站和 Key', value: '以后开', cls: 'parent-off' }),
       row({ key: 'key', label: 'Key', sub: poe ? '查词现在走 Poe，这个 Key 还用来发音' : '', value: s.apiKey ? '····' + s.apiKey.slice(-4) : '还没填', panel: keyPanelFor('bailian') }),
       connRow(),
     ];
@@ -427,7 +428,7 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
   const backupPanel = () => {
     const le = app.lastExport();
     return [h('p', { className: 'small', text: le ? `上次备份：${ago(le.at)}（${le.count} 个收藏）` : '上次备份：还没有' }),
-      h('p', { className: 'small', text: hooks.exportExtra ? '单词、课本、进度、问卷和学习记录打包成一个文件（不含 Key 和家长数字码），存到“文件”里。'
+      h('p', { className: 'small', text: hooks.exportExtra ? '单词、课本、进度、问卷和学习记录打包成一个文件（不含 Key），存到“文件”里。'
         : '单词和记录打包成一个文件（不含 Key），存到“文件”里。' }), exportBox('backup')];
   };
   const importPanel = () => [
@@ -570,7 +571,7 @@ export function createMeTab(app, { root = document.getElementById('tab-parent'),
     render();
     requestAnimationFrame(() => { const r = root.querySelector(`[data-row="${key}"]`); if (r) r.scrollIntoView({ block: 'center' }); });
   }
-  const kit = { group, row, toggle, render: () => render(), open, openRows,
+  const kit = { group, row, toggle, render: () => render(), open, openRows, relayPanel, keyPanel: keyPanelFor,
     ai: aiGroup, poe: () => (POE_ENABLED ? poeGroup() : null), study: studyGroup, data: dataGroup, advanced: advancedGroup, about: aboutGroup };
 
   function render() {

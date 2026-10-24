@@ -3,14 +3,14 @@
 //
 // 导出
 //   KINDS                                  花费类别：'lookup' 查词、'tts' 朗读、'hint' 提示讲解、'story' 写故事、
-//                                          'reflect' 每周反思、'photo' 拍照识别、'other'
+//                                          'reflect' 每周反思、'photo' 拍照识别、'chat' 问老师、'asr' 语音输入（0.3.0）、'other'
 //   USD_CNY                                Poe 的美元价换成元用的汇率
 //   PRICES                                 { model: [输入元/百万 token, 输出元/百万 token] }，从 config.js 的 MODEL_CHOICES、
 //                                          POE_MODEL_CHOICES 的 note 读出来；TTS 是 { 'qwen3-tts-flash': 元/万字符 }
 //   FALLBACK_PRICE                         不认识的模型按这个算（往贵了算，宁可早停）
 //   budgetKindOf(aiKind) -> kind           ai.js 的任务名（core / lexicon / practice / zh / story / hint / tts ...）到花费类别
 //   costOf(usage, kind, model) -> 元       纯函数。usage 是接口返回的 usage：chat 用 {prompt_tokens, completion_tokens}
-//                                          （或 input_tokens / output_tokens），TTS 用 {characters}；认不出的返回 0
+//                                          （或 input_tokens / output_tokens），TTS 用 {characters}，语音识别用 {seconds}；认不出的返回 0
 //   isBudgetExhausted(status, data) -> bool   纯函数：百炼“预算管理达到即停”返回的 429（中英文两句固定文案，research 05 F1）
 //   BUDGET_ERROR                           那个 429 在 App 里的固定错误码 'budget'（ai.js 抛 AIError('budget')）
 //   createBudget({ kv, now, getCap, getKindCaps }) -> {
@@ -31,7 +31,7 @@
 // 依赖：kv 是 app.js 传来的 { get(key), set(key, value) }（异步）；config.js 的单价和 TTS 设置。
 import { TTS_URL, TTS_MODEL, TTS_SPEECH_URL, TTS_SPEECH_MODEL, MODEL_CHOICES, POE_MODEL_CHOICES } from './config.js';
 
-export const KINDS = ['lookup', 'tts', 'hint', 'story', 'reflect', 'photo', 'other'];
+export const KINDS = ['lookup', 'tts', 'hint', 'story', 'reflect', 'photo', 'chat', 'asr', 'other'];
 export const BUDGET_ERROR = 'budget';
 export const USD_CNY = 7.2;
 
@@ -44,17 +44,23 @@ function priceOfNote(note) {
 }
 const fromChoices = list => Object.fromEntries((list || []).map(c => [c.id, priceOfNote(c.note)]).filter(([, p]) => p));
 
+// 语音输入 (voice-input.js): Bailian's sync speech recognition, priced by the second
+export const ASR_MODEL = 'qwen-audio-3.0-asr-flash';
+export const ASR_PER_SEC = 0.00022;
+
 // CNY. Bailian Beijing list prices of 2026-10-24 (DESIGN 10.6), read from config.js; Poe in USD converted.
 export const PRICES = {
   ...fromChoices(POE_MODEL_CHOICES),
   ...fromChoices(MODEL_CHOICES),
   [TTS_MODEL]: 0.8,   // per 10,000 characters
   [TTS_SPEECH_MODEL]: [1.5, 12],   // per 1M tokens, input / output (research/08; about 0.13 元 per 10,000 characters)
+  [ASR_MODEL]: ASR_PER_SEC,        // per second of audio (research/05 B: qwen-audio-3.0-asr-flash)
 };
 export const FALLBACK_PRICE = [12, 36];
 
+
 const AI_KIND = { core: 'lookup', lexicon: 'lookup', practice: 'lookup', zh: 'lookup', story: 'story', hint: 'hint',
-  reflect: 'reflect', photo: 'photo', tts: 'tts' };
+  reflect: 'reflect', photo: 'photo', tts: 'tts', chat: 'chat', asr: 'asr' };
 export const budgetKindOf = aiKind => AI_KIND[aiKind] || (KINDS.includes(aiKind) ? aiKind : 'other');
 
 export function costOf(usage, kind, model = '') {
@@ -62,6 +68,10 @@ export function costOf(usage, kind, model = '') {
   if (model === TTS_SPEECH_MODEL && (usage.input_tokens != null || usage.output_tokens != null)) {
     const p = PRICES[TTS_SPEECH_MODEL];
     return (Math.max(0, Number(usage.input_tokens) || 0) * p[0] + Math.max(0, Number(usage.output_tokens) || 0) * p[1]) / 1e6;
+  }
+  if (kind === 'asr' || usage.seconds != null) {
+    const per = typeof PRICES[model] === 'number' ? PRICES[model] : ASR_PER_SEC;
+    return Math.max(0, Number(usage.seconds) || 0) * per;
   }
   if (kind === 'tts' || usage.characters != null) {
     const per = typeof PRICES[TTS_MODEL] === 'number' ? PRICES[TTS_MODEL] : 0.8;

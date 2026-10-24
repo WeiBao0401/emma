@@ -1,6 +1,6 @@
 // 今天（首页，DESIGN 2.0 的草图）：书眉“Emma 的英语老师”，右上是当前阶段（“期中季 · S 到 U3”，没设就不显示）；
 // 老师的英文招呼一行（千问读，中文字幕按 lines.shouldShowZh，点“看中文”展开）；“今天约 12 分钟”和一句为什么；
-// 一个主按钮“开始今天的课”，下面文字入口“轻松版 8 分钟”；底部一行：明天有听写？、查词、这周 3 / 5 天。
+// 一个主按钮“开始今天的课”，下面文字入口“轻松版 8 分钟”；底部一行：明天有听写？、问老师（0.3.0）、查词、这周 3 / 5 天。
 // 听写提醒（“再写一次错的”“出门前看一眼”，dictation.js homeReminders）放在招呼上面一行。轻松版由 plan.js 定
 // （21:00 以后、有听写的晚上、考前一天、漏了一天回来）；回归日可以改点“标准版”。
 // v1（期中季，DESIGN 2.2、6.4、9）只往这个样子里加内容：
@@ -376,6 +376,7 @@ export function createHomeTab(ctx) {
     };
     return h('nav', { className: 'home-links', 'aria-label': '其他入口' },
       h('button', { type: 'button', className: 'text-btn home-link', text: '明天有听写？', on: { click: () => ctx.go('dictation') } }),
+      ROUTES.chat ? h('button', { type: 'button', className: 'text-btn home-link', text: '问老师', on: { click: () => ctx.go('chat') } }) : null,
       h('button', { type: 'button', className: 'text-btn home-link', text: '查词', on: { click: () => ctx.go('look') } }),
       h('button', { type: 'button', className: 'text-btn home-week', on: { click: tapWeek } }, h('span', { text: week })));
   }

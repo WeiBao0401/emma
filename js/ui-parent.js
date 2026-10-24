@@ -1,40 +1,45 @@
-// 家长区（DESIGN 9）：从“单词”页右上角“家长”进来，先输 4 位数字码（防误操作，不是保密）。里面放：装机清单（第一次
-// 打开前）、课本进度和期中日期范围、今日和本月估算花费、每天费用上限、百炼 Key 和“测一下连接”、家长称呼、开机问卷，
-// 然后是 ui-me.js 的几组（查词与复习、数据：导入单元包或备份、导出备份；高级：模型和测速；关于：版本号、体检页）。
+// 家长区（DESIGN 9）：从“单词”页右上角“家长”直接进来（4 位数字码 10-24 删了）。里面放：装机清单（第一次打开前）、
+// 课本进度和期中日期范围、今日和本月估算花费、每天费用上限、百炼 Key 和“测一下连接”、问老师（用哪个模型、Poe 中转站、
+// Poe 模型）、语音输入（百炼或豆包）、家长称呼、开机问卷，然后是 ui-me.js 的几组（查词与复习、数据：导入单元包或备份、
+// 导出备份；高级：模型和测速；关于：版本号、体检页）。
 // 负责：家长区 UI agent（ui-parent.js、ui-onboard.js、ui-me.js、css/parent.css、css/onboard.css）。
 //
 // 导出
 //   createParentView(ctx) -> { show(params), hide(), onChange(), holding() }
-//     渲染进 #tab-parent。params.open：解锁后直接展开的一行（'key'、'import'、'unit'、'exam'、'outline'、'intake'、'cap'…）。
+//     渲染进 #tab-parent。params.open：打开就展开的一行（'key'、'import'、'unit'、'exam'、'outline'、'intake'、'cap'、
+//       'chat'、'chatbl'、'poeurl'、'poekey2'、'poemodel'、'asr'、'dbappid'、'dbtoken'、'dbcluster'…）。
 //     holding()：这一页有没导完的备份或导入，自动更新会等它。
-//     hide()：离开家长区（app.js 换路由时调用）就重新上锁。
-//   纯函数（Node 测试用）：weakPin、makePin、checkPin、mergeTextbook、mergeProgress、exportKv、planKvImport、eventKey、newEvents、
+//     hide()：离开家长区（app.js 换路由时调用）。原来用来上锁，现在只丢掉读到的模型列表；留着是因为 app.js 还在调。
+//   纯函数（Node 测试用）：mergeTextbook、mergeProgress、exportKv、planKvImport、eventKey、newEvents、
 //     intakeItems、visibleItems、answerOf、intakeFilled、pickMulti、intakeSideEffects、yuan、parentNameOf、
-//     outlineIndex、splitOutline、matchOutline、outlineRecord、outlineSlugs（复习提纲，v1）
+//     outlineIndex、splitOutline、matchOutline、outlineRecord、outlineSlugs（复习提纲，v1）、
+//     chatRouteOf、asrRouteOf、gptModels、listPoeModels、cleanSecret（问老师和语音输入的设置，见下面）
 //
 // 用到的 ctx：kv.peek / set / keys、budget.today / month、settings / saveSettings、curriculum.units / unitOrder /
-//   hasTextbook、reloadCurriculum、events.query / count / log、applyTheme、go、toast。
-// kv 'parent.pin'：{ salt, hash }（4 位码加盐的 SHA-256，不存明文）。家长一离开就重新上锁：换到别的页、App 退到后台、
-//   点“交给 Emma”、5 分钟没操作。忘了码：输百炼 Key 的最后 4 位就能重设（Emma 不知道 Key）；还没填 Key 时，
-//   交给 Emma 之前可以直接重设，交给她以后不行（只提示先填 Key）。
+//   hasTextbook、reloadCurriculum、events.query / log、applyTheme、go、toast、mockForced。
+// kv 'parent.pin'：老版本的数字码，10-24 起不再读、不再写；有的话留着（备份照样跳过它）。
+// 问老师（自由对话）和语音输入的设置都存在 settings 里（ctx.saveSettings），缺省值在 config.js DEFAULT_SETTINGS
+// （没有的话这里按同样的值兜底，老数据照常读）：
+//   chatProvider 'auto' | 'bailian' | 'poe'：auto = 填了中转站地址和 Poe Key 就用 Poe，否则百炼（chatRouteOf）
+//   chatModelBailian（默认 'qwen3.8-max'）、chatModelPoe（默认 'gpt-5.4'）、poeUrl、poeKey（和查词的 Poe 共用）
+//   asrProvider 'auto' | 'bailian' | 'doubao'：auto = 填了豆包的 Access Token（新版控制台是 API Key）就用豆包，否则百炼（asrRouteOf）
+//   doubaoAppId（旧版控制台的 APP ID，新版空着）、doubaoToken、doubaoCluster（当资源 ID 用，默认 volc.bigasr.auc_turbo）
+//   “从中转站读模型列表”：GET <poeUrl>/models（带 Poe Key），只留名字里带 gpt 的，版本号高的在前（gptModels）。
 // 开机问卷：题目在公开的 curriculum/intake.json（另一个 agent 写的，形状见文件里的 rules），回答存 kv 'parent.intake'
 //   { version: 1, at, updated, answers: { 题 id: 值 } }，写一项存一项，可以分几次填。题的 to 指向 progress.* 和
 //   profile.parentCall 的，填的时候顺手写进 kv 'progress' 和 'profile'；问卷里这几题显示的也是 progress 里现在的值。
 // kv 'profile'.parentCall：Emma 看到的“家长”二字换成这个（默认“家长”，和 intake.json 的 parent_call 一致）。
 // 备份（CONTRACTS 5.1）：kv 里除 settings 和 parent.pin 以外的键，加全部 events。恢复（5.2）：textbook 按单元合并，
 //   progress 新的赢，其余 kv 只补本机没有的键（budget 不恢复），events 按 eventKey 合并（本机已有的那条不重复导入）。
-// 需要留意：查词时碰到让人担心的话题，查词页只记一条 events { type: 'flag', reason: 'care' }（不存她写了什么），
-//   这里列出最近 30 天的次数。
 // v1（期中季，DESIGN 6.2、6.4、9）：
 //   复习提纲重点词：从已导入的课本单元里点选，或粘贴一串词自动匹配（matchOutline：逗号、顿号、换行隔开，夹着的中文
 //     不管，短语整串认，词形按 curriculum.baseOf 还原），存 kv 'outline'（OUTLINE_KEY，形状见 outlineRecord）。
 //     读它的是 plan.js（期中前这些词排在前面、练拼写）。
 //   拍课本：一行入口，go('capture')（ui-capture.js 的页面）；这周小结：一行入口，go('weekly')（ui-weekly.js）。
-//     两个页面是别的 agent 写的；nav.js 里还没有这个路由时，这一行灰着写“下一版”。离开家长区照样上锁。
+//     两个页面是别的 agent 写的；nav.js 里还没有这个路由时，这一行灰着写“下一版”。
 //   开机问卷“听写怎么考”下面写明“明天有听写”现在的默认考法（ui-dictation.js intakeMethod，有 intake.js 时按它的）。
 import { h, icon, toast, dateCn } from './ui-dom.js';
 import { createMeTab } from './ui-me.js';
-import { pageShell } from './ui-entry.js';
 import { accentOf, cleanName, DEFAULT_PARENT_NAME } from './ui-onboard.js';
 import { ROUTES } from './nav.js';
 import { slugify } from './words.js';
@@ -42,15 +47,14 @@ import { normWord } from './curriculum.js';
 import { METHOD_LABEL } from './dictation.js';
 import { intakeMethod } from './ui-dictation.js';
 import { optionalModule } from './ui-home.js';
+import { chatRoute, CHAT_DEFAULTS } from './chat.js';
+import { asrRoute, ASR_DEFAULTS, DOUBAO_RESOURCE } from './voice-input.js';
+import { normalizePoeUrl } from './ai.js';
 
-export const PIN_LEN = 4;
 export const PARENT_NAMES = ['妈妈', '爸爸', '家长'];
-const MAX_WRONG = 5;
-const WAIT_MS = 30000;
-const IDLE_MS = 5 * 60 * 1000;   // the unlocked area locks again after 5 minutes without a tap
-const FLAG_DAYS = 30;
-export const KIND_LABEL = { lookup: '查词', tts: '朗读', hint: '提示讲解', story: '故事', reflect: '每周反思', photo: '拍照识别', other: '其他' };
-export const EXPORT_SKIP = ['settings', 'parent.pin'];            // never leave the iPad in a backup
+export const KIND_LABEL = { lookup: '查词', tts: '朗读', hint: '提示讲解', story: '故事', reflect: '每周反思', photo: '拍照识别',
+  chat: '问老师', asr: '语音输入', other: '其他' };
+export const EXPORT_SKIP = ['settings', 'parent.pin'];            // never in a backup (parent.pin: an old code, no longer read)
 const RESTORE_SKIP = new Set(['settings', 'parent.pin', 'budget']);
 const KV_LABEL = { profile: '名字和主题色', onboard: '第一次打开', 'parent.intake': '开机问卷', 'lines.seen': '英语小对话' };
 const kvLabel = k => KV_LABEL[k] || (k.startsWith('day:') ? '每天的课' : k.startsWith('dictation:') ? '听写' : k);
@@ -58,44 +62,6 @@ const kvLabel = k => KV_LABEL[k] || (k.startsWith('day:') ? '每天的课' : k.s
 export const INTAKE_FILE = 'curriculum/intake.json';
 
 // ---------------------------------------------------------------- pure helpers
-
-const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
-function fnv1a(s) {
-  let x = 0x811c9dc5;
-  for (const c of new TextEncoder().encode(s)) { x ^= c; x = Math.imul(x, 0x01000193) >>> 0; }
-  return x.toString(16).padStart(8, '0');
-}
-export const validPin = code => new RegExp(`^\\d{${PIN_LEN}}$`).test(String(code));
-// 0000, 1234, 9876: the first codes anyone tries
-export function weakPin(code) {
-  const d = String(code).split('').map(Number);
-  if (d.every(x => x === d[0])) return true;
-  const steps = d.slice(1).map((x, i) => x - d[i]);
-  return steps.every(s => s === 1) || steps.every(s => s === -1);
-}
-async function hashWith(fnv, code, salt) {
-  const text = `emma-parent-pin:${salt}:${code}`;
-  const subtle = !fnv && globalThis.crypto && globalThis.crypto.subtle;
-  if (subtle) return hex(await subtle.digest('SHA-256', new TextEncoder().encode(text)));
-  return 'fnv1a:' + fnv1a(text);
-}
-export function newSalt() {
-  const a = new Uint8Array(8);
-  if (globalThis.crypto && globalThis.crypto.getRandomValues) globalThis.crypto.getRandomValues(a);
-  else for (let i = 0; i < a.length; i++) a[i] = Math.floor(Math.random() * 256);
-  return hex(a);
-}
-// { salt, hash }; SHA-256 where the browser has it (https, localhost), a plain hash otherwise (still no clear text)
-export async function makePin(code, salt = newSalt()) {
-  const fnv = !(globalThis.crypto && globalThis.crypto.subtle);
-  return { salt, hash: await hashWith(fnv, code, salt) };
-}
-export async function checkPin(rec, code) {
-  if (!rec || !rec.salt || !rec.hash || !validPin(code)) return false;
-  const fnv = String(rec.hash).startsWith('fnv1a:');
-  if (!fnv && !(globalThis.crypto && globalThis.crypto.subtle)) return false;
-  return (await hashWith(fnv, code, rec.salt)) === rec.hash;
-}
 
 // A later unit pack may carry only the new unit: units merge by id, the incoming one wins.
 export function mergeTextbook(local, incoming, now = new Date()) {
@@ -292,19 +258,68 @@ export function outlineRecord(prev, slugs, idx, now = new Date()) {
     at: (prev && prev.at) || t, updated: t };
 }
 
+// ---------------------------------------------------------------- 问老师 and 语音输入 settings (pure)
+export const CHAT_PROVIDERS = [['auto', '自动'], ['bailian', '百炼'], ['poe', 'Poe']];
+export const ASR_PROVIDERS = [['auto', '自动'], ['bailian', '百炼'], ['doubao', '豆包']];
+export const CHAT_BAILIAN_CHOICES = [['qwen3.8-max', '最强 · 推荐'], ['qwen3.7-plus', '均衡 · 便宜一些']];
+const withDefaults = s => ({ ...CHAT_DEFAULTS, ...ASR_DEFAULTS, ...(s || {}) });
+// who answers 问老师 now, as one line for the parent
+export function chatRouteOf(s) {
+  const st = withDefaults(s);
+  const r = chatRoute(st);
+  const want = CHAT_PROVIDERS.find(([k]) => k === st.chatProvider) ? st.chatProvider : 'auto';
+  const ready = !!(r.url && r.key);
+  const text = `${want === 'auto' ? '自动 · ' : ''}${r.name}（${r.model}）${ready ? '' : r.provider === 'poe' ? '，中转站或 Key 还没填' : '，百炼 Key 还没填'}`;
+  return { ...r, want, ready, text };
+}
+export function asrRouteOf(s) {
+  const st = withDefaults(s);
+  const r = asrRoute(st);
+  const want = ASR_PROVIDERS.find(([k]) => k === st.asrProvider) ? st.asrProvider : 'auto';
+  const text = `${want === 'auto' ? '自动 · ' : ''}${r.name}${r.ready ? '' : r.provider === 'doubao' ? '，豆包的 Token 还没填' : '，百炼 Key 还没填'}`;
+  return { ...r, want, text };
+}
+// pasted secrets: no spaces or invisible characters, no leading “Bearer ”
+export const cleanSecret = v => String(v == null ? '' : v).replace(/^\s*Bearer\s+/i, '').replace(/[\s\u200b-\u200d\u2060\ufeff]/g, '');
+// the relay's /models list: only names with “gpt”, the newest version first; at one version pro, then the plain one, mini, nano
+const SUFFIX_RANK = s => (/(^|-)pro($|-)/.test(s) ? 0 : !s ? 1 : /mini/.test(s) ? 3 : /nano/.test(s) ? 4 : 2);
+export function gptModels(list) {
+  const raw = Array.isArray(list) ? list : (list && Array.isArray(list.data) ? list.data : []);
+  const ids = [...new Set(raw.map(x => (typeof x === 'string' ? x : x && x.id)).filter(x => typeof x === 'string' && /gpt/i.test(x)))];
+  const ver = id => { const m = id.toLowerCase().match(/gpt-?(\d+)(?:\.(\d+))?(?:\.(\d+))?(.*)$/); return m ? [Number(m[1]), Number(m[2] || 0), Number(m[3] || 0), m[4].replace(/^-/, '')] : [0, 0, 0, id]; };
+  return ids.sort((a, b) => {
+    const x = ver(a), y = ver(b);
+    for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return y[i] - x[i];
+    const r = SUFFIX_RANK(x[3]) - SUFFIX_RANK(y[3]);
+    return r || a.localeCompare(b);
+  });
+}
+export const MOCK_POE_MODELS = ['gpt-5.4', 'gpt-5.4-pro', 'gpt-5.4-mini', 'gpt-5.3', 'gpt-4o', 'claude-sonnet-5.5'];
+// GET <relay>/models with the Poe Key
+export async function listPoeModels(s, fetchImpl = (...a) => fetch(...a), { mock = false } = {}) {
+  if (mock) return { ids: gptModels(MOCK_POE_MODELS), mock: true };
+  const base = normalizePoeUrl(s && s.poeUrl);
+  const key = cleanSecret(s && s.poeKey);
+  if (!base || !key) throw new Error('先填 Poe 中转站地址和 Key');
+  let res;
+  try { res = await fetchImpl(base + '/models', { headers: { Authorization: 'Bearer ' + key } }); } catch (e) { throw new Error('连不上中转站：' + ((e && e.message) || e)); }
+  if (!res.ok) throw new Error(`中转站返回 ${res.status}`);
+  const ids = gptModels(await res.json());
+  if (!ids.length) throw new Error('列表里没有 GPT 模型');
+  return { ids };
+}
+
 // ---------------------------------------------------------------- the view
 
 export function createParentView(ctx) {
   const root = document.getElementById('tab-parent');
   root.replaceChildren();
-  const gateBox = h('div', { className: 'parent-gate-box' });
-  const settingsBox = h('div', { className: 'parent-settings', hidden: true });
-  root.append(gateBox, settingsBox);
+  const settingsBox = h('div', { className: 'parent-settings' });
+  root.append(settingsBox);
   const back = { label: '单词', onClick: () => ctx.go('lib') };
 
-  let unlocked = false;
-  let pending = {};
   let me = null;
+  let poeList = null;            // “从中转站读模型列表”: { busy } | { ids, mock } | { error }
   let outlineUnit = '';          // the unit shown in the outline panel
   let outlineNote = '';          // what the last paste matched
   let intakeMod = null;          // intake.js, once loaded (written in parallel; optional)
@@ -321,7 +336,7 @@ export function createParentView(ctx) {
   let schema = null;
   let schemaError = '';
   fetch(INTAKE_FILE).then(r => { if (!r.ok) throw new Error(`${INTAKE_FILE} ${r.status}`); return r.json(); })
-    .then(d => { schema = d; if (me && unlocked) me.render(); }, e => { schemaError = (e && e.message) || String(e); console.warn('intake:', schemaError); });
+    .then(d => { schema = d; if (me) me.render(); }, e => { schemaError = (e && e.message) || String(e); console.warn('intake:', schemaError); });
   const intakeCount = () => intakeFilled(schema, intake().answers || {}, { progress: progress(), profile: profile() });
   const saveProgress = patch => ctx.kv.set('progress', { ...progress(), ...patch, updated: new Date().toISOString() });
   const saveProfile = patch => ctx.kv.set('profile', { ...profile(), ...patch });
@@ -330,166 +345,10 @@ export function createParentView(ctx) {
   const order = id => { try { return ctx.curriculum.unitOrder(id); } catch (e) { return 0; } };
   const save = (p, msg) => p.then(() => { if (msg) toast(msg); }, e => toast('没存上：' + ((e && e.message) || e), 3500));
 
-  // ---------------------------------------------------------------- gate: set the code, enter it, reset it
-  const gate = pageShell(ctx, { back });
-  gate.barEl.hidden = true;
-  gate.el.classList.add('no-bar', 'me-page', 'parent-gate');
-  gate.setTitle('家长区', false, 'zh-CN');
-  gateBox.append(gate.el);
-  let mode = 'enter';   // 'set1' | 'set2' | 'enter' | 'reset'
-  let digits = '';
-  let first = '';
-  let msg = '';
-  let wrong = 0;
-  let waitUntil = 0;
-  let checking = false;
-  let shake = false;
-
-  function press(d) {
-    if (checking || Date.now() < waitUntil || digits.length >= PIN_LEN) return;
-    digits += d;
-    msg = '';
-    renderGate();
-    if (digits.length === PIN_LEN) setTimeout(submit, 120);   // let the fourth dot show
-  }
-  function del() { if (checking) return; digits = digits.slice(0, -1); renderGate(); }
-  function fail(text) { msg = text; digits = ''; shake = true; renderGate(); shake = false; }
-
-  async function submit() {
-    const code = digits;
-    if (mode === 'set1') {
-      if (weakPin(code)) { fail('太好猜了，换一个。别用 1234、0000 这种。'); return; }
-      first = code; digits = ''; mode = 'set2'; renderGate(); return;
-    }
-    if (mode === 'set2') {
-      if (code !== first) { mode = 'set1'; first = ''; fail('两次不一样，重新设一次。'); return; }
-      checking = true;
-      try {
-        await ctx.kv.set('parent.pin', await makePin(code));
-        toast('数字码设好了');
-        unlock();
-      } catch (e) { mode = 'set1'; fail('没存上：' + ((e && e.message) || e)); }
-      finally { checking = false; }
-      return;
-    }
-    checking = true;
-    const ok = await checkPin(peek('parent.pin', null), code).catch(() => false);
-    checking = false;
-    if (ok) { wrong = 0; unlock(); return; }
-    wrong++;
-    if (wrong >= MAX_WRONG) {
-      wrong = 0;
-      waitUntil = Date.now() + WAIT_MS;
-      setTimeout(() => { msg = ''; renderGate(); }, WAIT_MS + 50);
-      fail('错了 5 次，30 秒后再试。');
-      return;
-    }
-    fail('不对，再试一次。');
-  }
-
-  function unlock() {
-    unlocked = true;
-    digits = ''; first = ''; msg = '';
-    openSettings(pending);
-    touch();
-    window.scrollTo(0, 0);
-  }
-
-  // locked again whenever the parent leaves: another page, the app in the background, “交给 Emma”, 5 minutes idle
-  let idleTimer = 0;
-  function lock() {
-    clearTimeout(idleTimer);
-    if (!unlocked) return;
-    unlocked = false;
-    pending = {};
-    showGate();
-  }
-  function touch() {
-    clearTimeout(idleTimer);
-    if (unlocked) idleTimer = setTimeout(lock, IDLE_MS);
-  }
-  for (const t of ['pointerdown', 'keydown', 'input', 'wheel']) root.addEventListener(t, touch, { capture: true, passive: true });
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') lock(); });
-
-  function resetPanel() {
-    const key = ctx.settings().apiKey || '';
-    const doReset = async () => {
-      await ctx.kv.delete('parent.pin').catch(() => {});
-      mode = 'set1'; digits = ''; msg = '';
-      toast('数字码清掉了，设一个新的');
-      renderGate();
-    };
-    const cancel = h('button', { type: 'button', className: 'text-btn', text: '取消', on: { click: () => { mode = 'enter'; renderGate(); } } });
-    // once Emma has the iPad, a reset without the Key would let her in: only the Key's last 4 digits reset the code
-    if (!key && (peek('onboard', {}) || {}).handed) {
-      return [h('p', { className: 'small', text: '请家长先填 Key 再重设。' }),
-        h('p', { className: 'small', text: '已经交给 Emma 了，没有百炼 Key 就不能在这里重设数字码。' }),
-        h('div', { className: 'btn-row parent-center' }, cancel)];
-    }
-    if (!key) {
-      return [h('p', { className: 'small', text: '还没填百炼 Key，可以直接重设。' }),
-        h('div', { className: 'btn-row parent-center' },
-          h('button', { type: 'button', className: 'btn', text: '重设数字码', on: { click: doReset } }),
-          h('button', { type: 'button', className: 'text-btn', text: '取消', on: { click: () => { mode = 'enter'; renderGate(); } } }))];
-    }
-    const input = h('input', { type: 'text', className: 'field parent-last4', maxLength: 4, autocomplete: 'off', autocapitalize: 'off',
-      autocorrect: 'off', spellcheck: 'false', placeholder: '最后 4 位', 'aria-label': '百炼 Key 的最后 4 位' });
-    requestAnimationFrame(() => input.focus());
-    return [
-      h('p', { className: 'small', text: '输入百炼 Key 的最后 4 位，就能重设数字码。Key 在百炼控制台的“API Key”页能看到。' }),
-      input,
-      h('div', { className: 'btn-row parent-center' },
-        h('button', { type: 'button', className: 'btn', text: '重设', on: { click: () => {
-          if (input.value.trim() === key.slice(-4)) doReset();
-          else { input.value = ''; toast('不对，再看一下 Key 的最后 4 位'); }
-        } } }),
-        h('button', { type: 'button', className: 'text-btn', text: '取消', on: { click: () => { mode = 'enter'; renderGate(); } } }))];
-  }
-
-  function renderGate() {
-    const waiting = Date.now() < waitUntil;
-    const title = { set1: '设一个 4 位数字码', set2: '再输一次', enter: '输入家长数字码', reset: '忘了数字码' }[mode];
-    const sub = mode === 'set1' ? '防止 Emma 误点进来改设置。不是密码，别用银行卡密码。'
-      : mode === 'set2' ? '确认一下刚才的 4 位。' : mode === 'enter' ? '这一页给家长用。' : '';
-    const kids = [h('h1', { className: 'page-title', text: '家长区' }), h('p', { className: 'parent-gate-title serif', text: title }),
-      sub ? h('p', { className: 'small', text: sub }) : null];
-    if (mode === 'reset') kids.push(...resetPanel());
-    else {
-      kids.push(
-        h('div', { className: 'parent-dots' + (shake ? ' shake' : ''), 'aria-label': `已输入 ${digits.length} 位`, role: 'img' },
-          Array.from({ length: PIN_LEN }, (_, i) => h('span', { className: 'parent-dot' + (i < digits.length ? ' on' : '') }))),
-        h('p', { className: 'small parent-msg' + (msg ? ' danger' : ''), role: msg ? 'alert' : null, text: msg || '' }),
-        h('div', { className: 'parent-keypad', role: 'group', 'aria-label': '数字键' },
-          ...['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(d => key(d)),
-          mode === 'enter' ? h('button', { type: 'button', className: 'parent-key fn', text: '忘了', on: { click: () => { mode = 'reset'; digits = ''; msg = ''; renderGate(); } } })
-            : mode === 'set2' ? h('button', { type: 'button', className: 'parent-key fn', text: '重来', on: { click: () => { mode = 'set1'; first = ''; digits = ''; renderGate(); } } })
-              : h('span'),
-          key('0'),
-          h('button', { type: 'button', className: 'parent-key fn', 'aria-label': '删掉一位', on: { click: del } }, icon('back'))));
-    }
-    gate.body.replaceChildren(h('div', { className: 'parent-gate-inner' + (waiting ? ' waiting' : '') }, ...kids.filter(Boolean)));
-    function key(d) { return h('button', { type: 'button', className: 'parent-key num', text: d, disabled: waiting, on: { click: () => press(d) } }); }
-  }
-
-  document.addEventListener('keydown', ev => {
-    if (unlocked || mode === 'reset' || gateBox.hidden || ctx.currentRoute() !== 'parent') return;
-    if (/^\d$/.test(ev.key)) { ev.preventDefault(); press(ev.key); }
-    else if (ev.key === 'Backspace') { ev.preventDefault(); del(); }
-  });
-
-  function showGate() {
-    gateBox.hidden = false;
-    settingsBox.hidden = true;
-    mode = peek('parent.pin', null) ? 'enter' : 'set1';
-    digits = ''; first = ''; msg = '';
-    renderGate();
-  }
-
   // ---------------------------------------------------------------- 装机清单 (until Emma's first open is done)
   // kv 'onboard'.handed: the first open now goes to Emma's part (ui-onboard.js); until then it asks for the parent
   async function handOver() {
     await ctx.kv.set('onboard', { ...peek('onboard', {}), handed: new Date().toISOString() }).catch(() => {});
-    lock();
     ctx.go('onboard');
   }
   function setupGroup(kit) {
@@ -499,7 +358,6 @@ export function createParentView(ctx) {
     const n = intakeCount();
     const hasBook = (() => { try { return ctx.curriculum.hasTextbook(); } catch (e) { return false; } })();
     const items = [
-      ['家长数字码', true, '设好了', ''],
       ['百炼 Key', !!s.apiKey, s.apiKey ? '····' + s.apiKey.slice(-4) : '还没填', 'key'],
       ['课本（单元包）', hasBook, hasBook ? `${units().length} 个单元` : '还没导入', 'import'],
       ['课本进度', !!p.unit, p.unit ? unitTitle(p.unit) : '还没设', 'unit'],
@@ -511,7 +369,7 @@ export function createParentView(ctx) {
       h(target ? 'button' : 'div', { type: target ? 'button' : null, className: 'srow-head', on: target ? { click: () => kit.open(target) } : null },
         h('span', { className: 'parent-tick' + (done ? ' on' : '') }, done ? icon('check') : null),
         h('span', { className: 'k' }, h('b', { text: label })), h('span', { className: 'v', text: value }), icon('chev', 'chev' + (target ? '' : ' none')))));
-    const missing = [!s.apiKey ? 'Key 还没填，查词先只用离线词典；交给她以后忘了数字码也没法重设' : '', !hasBook ? '课本还没导入，复习里只有她查过的词' : ''].filter(Boolean);
+    const missing = [!s.apiKey ? 'Key 还没填，查词先只用离线词典，问老师也用不了' : '', !hasBook ? '课本还没导入，复习里只有她查过的词' : ''].filter(Boolean);
     return h('section', { className: 'sgroup parent-setup' },
       h('h2', { className: 'sec-h', text: '装机清单' }),
       h('p', { className: 'small', text: '这些在 Emma 第一次打开前由家长弄好。点一行就到那一项。' }),
@@ -648,7 +506,7 @@ export function createParentView(ctx) {
   }
 
   // ---------------------------------------------------------------- pages other agents draw (v1): 拍课本, 这周小结
-  // Leaving for them locks this area like any other page; their back goes to 家长区 again.
+  // Their back goes to 家长区 again.
   function pageRow(kit, route, label, sub, btn, value = null) {
     if (!ROUTES[route]) return kit.row({ label, sub, value: '下一版', cls: 'parent-off' });
     return kit.row({ label, sub, value, right: h('button', { type: 'button', className: 'text-btn accent', text: btn, on: { click: () => ctx.go(route) } }) });
@@ -661,7 +519,7 @@ export function createParentView(ctx) {
       kit.row({ key: 'unit', label: '课本进度', sub: '从已导入的单元里选', value: p.unit ? unitTitle(p.unit) : '还没设', panel: unitPanel(kit) }),
       kit.row({ key: 'exam', label: '期中', sub: '日期和范围', value: examValue(), panel: examPanel(kit) }),
       kit.row({ key: 'outline', label: '复习提纲重点词', sub: '从课本单元里点选，或粘贴一串词', value: outlineValue(), panel: outlinePanel(kit) }),
-      pageRow(kit, 'capture', '拍课本', '拍一页词汇表，识别出来核对后再存。别拍到封面上的名字和班级。', '去拍', photoValue()),
+      pageRow(kit, 'capture', '拍课本', '拍一页词汇表，识别出来核对后再存。', '去拍', photoValue()),
     ]);
   }
 
@@ -822,25 +680,6 @@ export function createParentView(ctx) {
     ], '问卷是老师认识她的起点。家长的说法先当“待确认”，老师会用她做题的记录慢慢核对。');
   }
 
-  // ---------------------------------------------------------------- 需要留意: lookups that touched a worrying topic
-  // ui-look.js logs { type: 'flag', reason: 'care' } and nothing about what she typed; read each time the area opens
-  let flags = [];
-  function loadFlags() {
-    const since = new Date(Date.now() - FLAG_DAYS * 864e5);
-    Promise.resolve().then(() => ctx.events.query({ type: 'flag', since, limit: 1e6 })).then(list => {
-      flags = (list || []).filter(e => e && e.reason === 'care');
-      if (me && unlocked) me.render();
-    }, () => {});
-  }
-  function careGroup(kit) {
-    if (!flags.length) return null;
-    const last = String(flags[flags.length - 1].at || '').slice(0, 10);
-    return kit.group('需要留意', [
-      kit.row({ label: `最近 ${FLAG_DAYS} 天 ${flags.length} 次`, sub: '她查词时写到了让人担心的话题（伤害自己、暴力、性、毒品或很难过）。老师没有讲，只请她去找家人聊聊。',
-        value: last ? '最近 ' + dateCn(last) : '', cls: 'parent-care' }),
-    ], '她写了什么没有存下来。找个轻松的时候问问她。');
-  }
-
   // ---------------------------------------------------------------- backup and import hooks (ui-me.js calls these)
   const localKv = () => { const o = {}; for (const k of ctx.kv.keys('')) o[k] = ctx.kv.peek(k); return o; };
   const localEvents = () => ctx.events.query({ limit: 1e6 }).catch(() => []);
@@ -886,17 +725,119 @@ export function createParentView(ctx) {
     },
   };
 
+  // ---------------------------------------------------------------- 问老师 and 语音输入
+  const pillRow = (list, cur, onPick, label) => h('div', { className: 'parent-pills', role: 'radiogroup', 'aria-label': label },
+    ...list.map(([k, t]) => h('button', { type: 'button', className: 'parent-pill' + (cur === k ? ' on' : ''), role: 'radio', 'aria-checked': String(cur === k), text: t,
+      on: { click: () => onPick(k) } })));
+  // a one-line setting: text or a secret (shown as its last 4)
+  function fieldPanel(kit, { key, field, note, placeholder = '', secret = false, fallback = '' }) {
+    return () => {
+      const cur = String(ctx.settings()[field] || '');
+      const input = h('input', { type: secret ? 'password' : 'text', className: 'field', placeholder, autocomplete: 'off', autocapitalize: 'off',
+        autocorrect: 'off', spellcheck: 'false', 'aria-label': placeholder || field, value: secret ? '' : cur });
+      const done = msg => { kit.openRows.delete(key); toast(msg); kit.render(); };
+      return [h('p', { className: 'small', text: note }), input,
+        h('div', { className: 'btn-row' },
+          h('button', { type: 'button', className: 'btn', text: '保存', on: { click: async () => {
+            const v = cleanSecret(input.value);
+            if (!v) { toast('先粘贴进来'); return; }
+            await ctx.saveSettings({ [field]: v });
+            done('存好了');
+          } } }),
+          h('button', { type: 'button', className: 'text-btn', text: '取消', on: { click: () => { kit.openRows.delete(key); kit.render(); } } }),
+          cur ? h('button', { type: 'button', className: 'text-btn danger', text: fallback ? '恢复默认' : '清除', on: { click: async () => { await ctx.saveSettings({ [field]: '' }); done(fallback ? '恢复默认了' : '已清除'); } } }) : null)];
+    };
+  }
+  const secretValue = v => (v ? '····' + String(v).slice(-4) : '还没填');
+
+  function chatProviderPanel(kit) {
+    return () => [
+      h('p', { className: 'small', text: '自动：填好 Poe 中转站和 Key 就用 Poe 上的 GPT，没填就用百炼。带照片的问题，百炼会换成能看图的模型。' }),
+      pillRow(CHAT_PROVIDERS, chatRouteOf(ctx.settings()).want, k => save(ctx.saveSettings({ chatProvider: k }), '存好了').then(() => kit.render()), '问老师用哪个'),
+    ];
+  }
+  function chatBailianPanel(kit) {
+    return () => {
+      const cur = ctx.settings().chatModelBailian || CHAT_DEFAULTS.chatModelBailian;
+      const input = h('input', { type: 'text', className: 'field', placeholder: '模型名，比如 qwen3.8-max', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', 'aria-label': '自定义百炼模型名' });
+      const pick = v => save(ctx.saveSettings({ chatModelBailian: v }), '问老师的百炼模型：' + v).then(() => { kit.openRows.delete('chatbl'); kit.render(); });
+      return [h('p', { className: 'small', text: '没填 Poe 时问老师用它。讲题要讲对，默认用最强的。' }),
+        pillRow(CHAT_BAILIAN_CHOICES.map(([id, t]) => [id, `${id} · ${t}`]), cur, pick, '百炼模型'),
+        input,
+        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'text-btn accent', text: '用这个', on: { click: () => { const v = cleanSecret(input.value); if (v) pick(v); else toast('先写模型名'); } } }))];
+    };
+  }
+  function poeModelPanel(kit) {
+    return () => {
+      const s = ctx.settings();
+      const cur = s.chatModelPoe || CHAT_DEFAULTS.chatModelPoe;
+      const pick = v => save(ctx.saveSettings({ chatModelPoe: v }), '问老师的 Poe 模型：' + v).then(() => { kit.openRows.delete('poemodel'); kit.render(); });
+      const load = async () => {
+        poeList = { busy: true };
+        kit.render();
+        try { poeList = await listPoeModels(ctx.settings(), undefined, { mock: !!(ctx.mockForced && ctx.mockForced()) || !!ctx.settings().mock }); }
+        catch (e) { poeList = { error: (e && e.message) || String(e) }; }
+        kit.render();
+      };
+      const input = h('input', { type: 'text', className: 'field', placeholder: '模型名，比如 gpt-5.4', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', 'aria-label': '自定义 Poe 模型名' });
+      const listEl = !poeList ? null
+        : poeList.busy ? h('p', { className: 'small dots', text: '正在读中转站的模型列表' })
+          : poeList.error ? h('p', { className: 'small danger', role: 'alert', text: poeList.error })
+            : pillRow(poeList.ids.map(id => [id, id]), cur, pick, 'Poe 上的 GPT 模型');
+      return [h('p', { className: 'small', text: '问老师走 Poe 时用的模型。默认 gpt-5.4；点“读模型列表”看中转站上有哪些 GPT，版本新的在前。' }),
+        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'text-btn accent', text: '从中转站读模型列表', disabled: !!(poeList && poeList.busy), on: { click: load } })),
+        listEl,
+        poeList && poeList.mock ? h('p', { className: 'small', text: '模拟模式：这是一份假的列表。' }) : null,
+        input,
+        h('div', { className: 'btn-row' },
+          h('button', { type: 'button', className: 'text-btn accent', text: '用这个', on: { click: () => { const v = cleanSecret(input.value); if (v) pick(v); else toast('先写模型名'); } } }),
+          s.chatModelPoe && s.chatModelPoe !== CHAT_DEFAULTS.chatModelPoe ? h('button', { type: 'button', className: 'text-btn', text: '恢复 gpt-5.4', on: { click: () => pick(CHAT_DEFAULTS.chatModelPoe) } }) : null)].filter(Boolean);
+    };
+  }
+  function chatGroup(kit) {
+    const s = ctx.settings();
+    const r = chatRouteOf(s);
+    return kit.group('问老师', [
+      kit.row({ key: 'chat', label: '用哪个老师', sub: r.text, value: CHAT_PROVIDERS.find(([k]) => k === r.want)[1], panel: chatProviderPanel(kit) }),
+      kit.row({ key: 'chatbl', label: '百炼模型', sub: '没填 Poe 时用', value: s.chatModelBailian || CHAT_DEFAULTS.chatModelBailian, panel: chatBailianPanel(kit) }),
+      kit.row({ key: 'relay', label: 'Poe 中转站地址', value: s.poeUrl ? (normalizePoeUrl(s.poeUrl) ? new URL(normalizePoeUrl(s.poeUrl)).host : '地址不对') : '还没填', panel: kit.relayPanel }),
+      kit.row({ key: 'poekey', label: 'Poe Key', value: secretValue(s.poeKey), panel: kit.keyPanel('poe') }),
+      kit.row({ key: 'poemodel', label: 'Poe 模型', sub: '可以从中转站的列表里选', value: s.chatModelPoe || CHAT_DEFAULTS.chatModelPoe, panel: poeModelPanel(kit) }),
+    ], '“问老师”是她自由提问的地方：课本、作业、单词、语法、读不懂的句子都能问。花费记在“问老师”下面，也受每天上限管。');
+  }
+
+  function asrProviderPanel(kit) {
+    return () => [
+      h('p', { className: 'small', text: '自动：填了豆包的 Token 就用豆包，没填就用百炼（用上面的百炼 Key，约 1 分钱一分钟）。' }),
+      pillRow(ASR_PROVIDERS, asrRouteOf(ctx.settings()).want, k => save(ctx.saveSettings({ asrProvider: k }), '存好了').then(() => kit.render()), '语音输入用哪个'),
+    ];
+  }
+  function voiceGroup(kit) {
+    const s = ctx.settings();
+    const r = asrRouteOf(s);
+    return kit.group('语音输入', [
+      kit.row({ key: 'asr', label: '用哪个识别', sub: r.text, value: ASR_PROVIDERS.find(([k]) => k === r.want)[1], panel: asrProviderPanel(kit) }),
+      kit.row({ key: 'dbappid', label: '豆包 App ID', sub: '旧版控制台才有，新版空着', value: s.doubaoAppId || '还没填',
+        panel: fieldPanel(kit, { key: 'dbappid', field: 'doubaoAppId', placeholder: 'App ID', note: '火山引擎“豆包语音”控制台的 APP ID（旧版控制台）。新版控制台只有一个 API Key 的话，这里空着。' }) }),
+      kit.row({ key: 'dbtoken', label: '豆包 Access Token', sub: '新版控制台的 API Key 也填这里', value: secretValue(s.doubaoToken),
+        panel: fieldPanel(kit, { key: 'dbtoken', field: 'doubaoToken', secret: true, placeholder: 'Access Token 或 API Key', note: '旧版控制台：应用的 Access Token。新版控制台：API Key。只存在这台 iPad 里，不进备份文件。要先开通“录音文件识别大模型（极速版）”。' }) }),
+      kit.row({ key: 'dbcluster', label: '豆包资源 ID', sub: '一般不用改', value: s.doubaoCluster || DOUBAO_RESOURCE,
+        panel: fieldPanel(kit, { key: 'dbcluster', field: 'doubaoCluster', placeholder: DOUBAO_RESOURCE, fallback: DOUBAO_RESOURCE, note: `默认 ${DOUBAO_RESOURCE}（录音文件极速版）。控制台给的资源 ID 不一样时才改。` }) }),
+    ], '她在“问老师”里按住说话，松开后整段识别成文字，放进输入框，她看一眼再发。');
+  }
+
   // ---------------------------------------------------------------- the page
   const layout = kit => {
     const name = parentNameOf(profile());
     return [
       h('h1', { className: 'page-title', text: '家长区' }),
-      h('p', { className: 'small parent-intro', text: name === DEFAULT_PARENT_NAME ? '这一页给家长用，进来要输数字码。' : `这一页给家长用。Emma 看到的“家长”会写成“${name}”。` }),
+      h('p', { className: 'small parent-intro', text: name === DEFAULT_PARENT_NAME ? '这一页给家长用。' : `这一页给家长用。Emma 看到的“家长”会写成“${name}”。` }),
       setupGroup(kit),
-      careGroup(kit),
       planGroup(kit),
       moneyGroup(kit),
       kit.ai(),
+      chatGroup(kit),
+      voiceGroup(kit),
       kit.poe(),
       emmaGroup(kit),
       kit.study(),
@@ -906,23 +847,13 @@ export function createParentView(ctx) {
     ];
   };
 
-  function openSettings(params = {}) {
-    gateBox.hidden = true;
-    settingsBox.hidden = false;
-    if (!me) me = createMeTab(ctx, { root: settingsBox, back, layout, hooks });
-    me.show(params || {});
-    loadFlags();
-  }
-
   return {
     show(params = {}) {
-      pending = params || {};
-      if (!unlocked) { showGate(); return; }
-      openSettings(pending);
-      touch();
+      if (!me) me = createMeTab(ctx, { root: settingsBox, back, layout, hooks });
+      me.show(params || {});
     },
-    hide: lock,
-    onChange() { if (me && unlocked) me.onChange(); },
+    hide() { poeList = null; },
+    onChange() { if (me) me.onChange(); },
     holding: () => !!(me && me.holding()),
   };
 }

@@ -1,15 +1,18 @@
-// Where things live (CONTRACTS.md "路由"): three tabs, 今天 / 查词 / 单词. Lesson and dictation are full-screen pages
-// pushed from 今天, and so is 这周小结 (with the tab bar); 家长区 is a page pushed from 单词 (its 4-digit code is
-// ui-parent.js's job), 拍课本 a full-screen page pushed from it; the first open is its own full-screen page. Pure data and functions, no DOM, so Node tests can check the routing.
+// Where things live (CONTRACTS.md "路由"): four tabs, 今天 / 问老师 / 查词 / 单词. Lesson and dictation are full-screen
+// pages pushed from 今天, and so is 这周小结 (with the tab bar); 问老师 (ui-chat.js, v0.3.0) is a tab of its own;
+// 家长区 is a page pushed from 单词, 拍课本 a full-screen page pushed from it; the first open is its own full-screen page.
+// Pure data and functions, no DOM, so Node tests can check the routing.
 // Owner: 接线 (app.js wiring). Other agents ask for changes through their `needs`.
 
 // [route, label, icon]
-export const TABS = [['home', '今天', 'sun'], ['look', '查词', 'search'], ['lib', '单词', 'book']];
+export const TABS = [['home', '今天', 'sun'], ['chat', '问老师', 'chat'], ['look', '查词', 'search'], ['lib', '单词', 'book']];
 
 // route -> the section shown (#tab-<section> in index.html), the tab lit in the tab bar, and for a pushed page its
 // parent route and back label. immersive: the tab bar steps aside (a lesson, dictation, the first open).
 export const ROUTES = {
   home: { section: 'home', tab: 'home' },
+  // 0.3.0: 问老师, free questions to the teacher (params { ask?, send?, image? }: another page can bring a question in)
+  chat: { section: 'chat', tab: 'chat' },
   lesson: { section: 'lesson', tab: 'home', parent: 'home', back: '今天', immersive: true },
   dictation: { section: 'dictation', tab: 'home', parent: 'home', back: '今天', immersive: true },
   look: { section: 'look', tab: 'look' },

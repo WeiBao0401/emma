@@ -1,6 +1,6 @@
-# 模块接口约定（v1，0.2.0）
+# 模块接口约定（v1，0.3.0）
 
-给并行开发的 agent 看。v1（0.2.0，期中季）各模块已接通，下面的表是现在代码的样子。先读这一页，再读自己负责的文件顶部注释（那里有参数和返回值的细节）。设计在 `../../DESIGN.md`，老师笔记本在 `../../design/teacher-memory.md`。
+给并行开发的 agent 看。v1（0.2.0，期中季）各模块已接通；0.3.0 加了第 4 个标签“问老师”和语音输入，删了家长数字码和安全话题拦截（Wei 10-24）。下面的表是现在代码的样子。先读这一页，再读自己负责的文件顶部注释（那里有参数和返回值的细节）。设计在 `../../DESIGN.md`，老师笔记本在 `../../design/teacher-memory.md`。
 
 **三条规矩**
 1. 只改分配给自己的文件（见第 1 节）。需要别人文件里的改动，写进返回值的 `needs`，由接线 agent 合并。
@@ -23,7 +23,9 @@
 | 周小结（v1） | `weekly.js`、`ui-weekly.js`、`../css/weekly.css`、`tests/weekly.test.mjs` | 一周的小结、课后算账、“老师记得的你”、“这不对”、发给家长 |
 | 拍课本（v1） | `capture.js`、`ui-capture.js`、`../css/capture.css`、`tests/capture.test.mjs` | 拍词汇表 / 目录页，识别、逐行核对、写进单元包 |
 | 今天标签 UI | `ui-home.js`、`ui-lesson.js`、`ui-dictation.js`、`ui-review.js`（旧闪卡，可复用）、`../css/home.css`、`lesson.css`、`dictation.css` | 首页草图（DESIGN 2.0）、上课四格、听写两张草图（5.3） |
-| 家长区 UI | `ui-parent.js`、`ui-onboard.js`、`ui-me.js`、`../css/parent.css`、`onboard.css` | 4 位数字码、Key、日限额、花费、进度和期中日期、开机问卷、导入课本、备份；第一次打开 |
+| 家长区 UI | `ui-parent.js`、`ui-onboard.js`、`ui-me.js`、`../css/parent.css`、`onboard.css` | Key、日限额、花费、进度和期中日期、开机问卷、导入课本、备份；0.3.0 问老师（模型、Poe 中转站和 Key、从中转站读 GPT 列表）和语音输入（百炼 / 豆包）的设置；第一次打开。4 位数字码 10-24 删了，直接进 |
+| 问老师（0.3.0） | `chat.js`、`chat-prompt.js`、`ui-chat.js`、`../css/chat.css`、`tests/chat.test.mjs` | 自由对话：老师先给结论、一次讲一个点、只用她学过的词举例、最后问一道小题；可以拍题；流式；对话存 kv `chat:日期` |
+| 语音输入（0.3.0） | `voice-input.js`、`tests/voice-input.test.mjs`、`../../research/09-voice-input.md` | 按住说话：录音转 16 kHz WAV，百炼 `qwen-audio-3.0-asr-flash` 或豆包录音文件极速版识别成文字 |
 | 孩子版报错与查词 | `kid-errors.js`、`prompts.js` | 孩子看到的报错；初一版查词提示词（课本义项在前，1-2 个义项，例句只用她认识的词） |
 | 体检页 | `../check/`、`../../tests/check-page.test.mjs` | DESIGN 10.2 的七项；`check/` 独立能打开，永远不建 `emma` 库 |
 | 接线 | `app.js`、`nav.js`、`config.js`、`db.js`、`ai.js`、`words.js`、`banners.js`、`ui-look.js`、`ui-lib.js`、`ui-entry.js`、`ui-dom.js`、`../index.html`、`../sw.js`、`../manifest.webmanifest`、本文件、`tests/run.mjs`、`scaffold.test.mjs`、`wiring.test.mjs`、`all.mjs`、`lib.mjs` | 合并 needs |
@@ -38,6 +40,7 @@
 | 路由 | 页面 | 亮哪个标签 | 返回到 | 全屏（藏标签栏） | 谁画 |
 |---|---|---|---|---|---|
 | `home` | 今天 | 今天 | | | `ui-home.js` → `#tab-home` |
+| `chat` | 问老师（0.3.0，第 2 个标签） | 问老师 | | | `ui-chat.js` → `#tab-chat`；params `{ ask?, send?, image? }` |
 | `lesson` | 上课 | 今天 | `home` | 是 | `ui-lesson.js` → `#tab-lesson` |
 | `dictation` | 明天有听写 | 今天 | `home` | 是 | `ui-dictation.js` → `#tab-dictation` |
 | `look` | 查词 | 查词 | | | `ui-look.js` → `#tab-look` |
@@ -47,10 +50,12 @@
 | `weekly` | 这周小结（v1） | 今天 | `home` | | `ui-weekly.js` → `#tab-weekly` |
 | `capture` | 拍课本（v1） | 单词 | `parent` | 是 | `ui-capture.js` → `#tab-capture` |
 
+- 标签栏四个：今天 / 问老师 / 查词 / 单词（`nav.js` `TABS`）。
 - 旧名字还能用：`review` → `home`，`me` → `parent`。不认识的名字回到 `home`。
 - 跳转：`ctx.go(route, params)`。`params` 原样传给那个 view 的 `show(params, { from })`；`from` 是从哪个路由来的。
 - 启动时 `onboard.needed()` 为真先进 `onboard`，否则进 `home`。
-- 进 `weekly`：首页“这周小结出来了”一行（`weekly.hasNewWeekly`）、首页底部“这周 N / M 天”、家长区“这周小结”。进 `capture`：家长区“拍课本”。离开 `capture` 时 app.js 调它的 `hide()`（丢掉照片）；家长区去这两页时照样上锁。
+- 进 `weekly`：首页“这周小结出来了”一行（`weekly.hasNewWeekly`）、首页底部“这周 N / M 天”、家长区“这周小结”。进 `capture`：家长区“拍课本”。离开 `capture` 时 app.js 调它的 `hide()`（丢掉照片）。
+- 进 `chat`：标签栏、首页底部“问老师”。别的页可以把问题带进来：`ctx.go('chat', { ask: '这句话什么意思：…', send: true })`（比如阅读里“这句还是不懂”）。离开 `chat` 时 app.js 调它的 `hide()`（收起查词卡、丢掉没说完的录音）。
 
 ---
 
@@ -75,6 +80,7 @@
 | `reloadCurriculum()` | 课本导入写完 kv `textbook` 后调用，重新加载。导入词条（`words.importData`）以后 app.js 自己调 `curriculum.refresh()` 重建单元索引 |
 | `lines` | `lines.js` 实例（9.2），启动时已加载 |
 | `fetchJSON(path)` | 同源 JSON（`curriculum/…`）；`ui-grammar.js`、`ui-phonics.js` 用它读卡片 |
+| `voiceInput` | 0.3.0：`voice-input.js` 的 `createVoiceInput(app)`：`{ available(), supported(), start({ lang, onPartial }), stop() -> Promise<文字>, cancel(), state() }`。`ui-chat.js` 的“按住说话”用：按下 `start`，松开 `stop`，误触（不到 0.35 秒）或离开 `cancel`。出错时 `err.kid` 是给她看的一句，`err.name === 'NotAllowedError'` 是麦克风被拒绝。模拟模式不录音，`stop()` 回一句假问题 |
 | `intake()` | 家长问卷变成的默认值（`intake.js` 的 `intakeDefaults(kv, { entries: words.all(), curriculum, lemma })`），每次调用现算 |
 
 **今天的课**
@@ -88,7 +94,7 @@
 
 | 名字 | 是什么 |
 |---|---|
-| `settings()` | 当前设置（`config.js` 的 `DEFAULT_SETTINGS` 加 kv `settings`） |
+| `settings()` | 当前设置（`config.js` 的 `DEFAULT_SETTINGS` 加 kv `settings`）。0.3.0 新键：`chatProvider`（`'auto'` 填了中转站地址和 Poe Key 就用 Poe，否则百炼 \| `'bailian'` \| `'poe'`）、`chatModelBailian`（`'qwen3.8-max'`）、`chatModelPoe`（`'gpt-5.4'`）、`asrProvider`（`'auto'` 填了 `doubaoToken` 就用豆包，否则百炼 \| `'bailian'` \| `'doubao'`）、`doubaoAppId`、`doubaoToken`、`doubaoCluster`（当资源 ID 用，空 = `volc.bigasr.auc_turbo`）。Poe 沿用 `poeUrl`、`poeKey`；问老师不看 `POE_ENABLED`（它只管查词） |
 | `saveSettings(patch)` | 合并并写 kv `settings` |
 | `mockForced()` | 地址里有 `?mock=1` |
 
@@ -109,7 +115,7 @@
 | `busy(+1 / -1)` | 有不能被自动更新打断的事在做 |
 | `lookup(q)`、`toggleFav(slug, on)`、`openMe(opts)`、`closeMe()`、`showTab(name)` | 词典原来的接口，查词和单词页在用 |
 
-**每个 view 返回的对象**：`show(params, { from })` 必须有；`onChange()` 词或设置变了以后调用（节流过）；`inSession()` 为真时 App 不自动更新；`holding()` 同理（家长区有没导完的备份、周小结的分享面板开着、拍课本手上有没存的照片）。
+**每个 view 返回的对象**：`show(params, { from })` 必须有；`onChange()` 词或设置变了以后调用（节流过）；`inSession()` 为真时 App 不自动更新；`holding()` 同理（家长区有没导完的备份、周小结的分享面板开着、拍课本手上有没存的照片、问老师输入框里有没发的字或照片）。问老师的 `inSession()` 是老师正在答或正在录音。
 
 **启动时**（v1）：`grammar.loadGrammar({ fetchJSON })`（读不到就算了，plan 用兜底题）；首屏 3 秒后 `weekly.catchUp(ctx)` 补算没结账的课。
 
@@ -165,9 +171,9 @@
 | 键 | 值 | 谁写 / 谁读 |
 |---|---|---|
 | `settings` | 设置（Key 在这里，**永远不进备份和导出**） | app.js / 家长区 |
-| `onboard` | `{ done, at, version, handed }`；`handed` 是家长在装机清单点了“都好了，交给 Emma”（有它和 `parent.pin` 才进 Emma 的流程） | 家长区 / 第一次打开 |
+| `onboard` | `{ done, at, version, handed }`；`handed` 是家长在装机清单点了“都好了，交给 Emma”（有它才进 Emma 的流程；0.3.0 起不再看 `parent.pin`） | 家长区 / 第一次打开 |
 | `profile` | `{ name, teacherName, theme, weeklyGoal, pledge, pledgeWhen, parentCall }`；`parentCall` 家长称呼（家长区写，默认“家长”） | 第一次打开 / 家长区 / 首页、上课 |
-| `parent.pin` | `{ salt, hash }`（4 位码的 SHA-256，不存明文） | 家长区 |
+| `parent.pin` | 老版本的 4 位码 `{ salt, hash }`。0.3.0 起不读不写，有的话留着，备份照样跳过 | 无 |
 | `parent.intake` | 开机问卷的回答 `{ version: 1, at, updated, answers: { 题 id: 值 } }`（题目在 `curriculum/intake.json`） | 家长区 |
 | `ask.answers` | 第一周按钮问题的回答 `{ qid: { answer, skipped, at, day, n, who: 'emma' } }` | 上课收尾 |
 | `progress` | `{ unit, examFrom, examTo, examDate, updated }` | 家长区 / 今天的课、听写 |
@@ -181,12 +187,14 @@
 | `phonics.state`（v1） | `{ weeks: { 'YYYY-MM-DD'（周一）: ruleId }, done: { ruleId: { at, right, total, n } }, flagged: { ruleId: 次数 }, updated }` | 语音小卡；拼错时 `phonics.recordMiss` |
 | `weekly.tally`（v1） | 课后算账 `{ version: 1, updated, sessions: { sid: SessionStat }, weeks: { 周一: WeekStat }, written: { slug: 'YYYY-MM-DD' } }`，课留 90 天、周汇总留 30 周 | ui-lesson 收尾（`settleLesson`）、周小结（`catchUp`） |
 | `weekly.seen`（v1） | `{ week: 周一, at }` 看过哪一周的小结 | 周小结 |
+| `chat:YYYY-MM-DD`（0.3.0） | 问老师那天的对话 `{ version: 1, date, messages: [{ id, role: 'user' \| 'assistant', text, at, thread, send?, quick?, image?: true, reply_to?, meta?: { kind, point, words, check }, model?, provider?, error?, stopped?, flagged? }] }`，留 30 天，坏数据读成空；照片本身不存（`image: true` 只说发过） | 问老师（`chat.js`） |
+| `teacher.stuck`（0.3.0，可选） | 有的话原样拼进问老师的提示词（“她最近卡在哪”），现在还没有模块写 | 以后的“老师每周想一次” / `chat-prompt.js` |
 | `weekly.disputes`（v1） | `{ line_id: { choice: 'wrong' \| 'changed' \| 'forget', sig, section, at } }` | 周小结“这不对” |
 
 新键：用 `模块.名字` 或 `名字:日期`，写进这张表（needs 给接线）。v1 的新键都随备份导出（备份只跳过 `settings`、`parent.pin`）。
 
 ### 5.1 备份（家长区“导出备份”）
-格式 `emma-export` 版本 1：`{ format, version, source: 'ipad', exported_at, entries, zh, kv, events }`。`kv` 是除 `settings`、`parent.pin` 以外的全部键（Key 和数字码永远不进备份）；`events` 全带（家长区定的）。
+格式 `emma-export` 版本 1：`{ format, version, source: 'ipad', exported_at, entries, zh, kv, events }`。`kv` 是除 `settings`、`parent.pin` 以外的全部键（Key 永远不进备份；`chat:` 对话随备份走，照片本来就不存）；`events` 全带（家长区定的）。
 恢复：`textbook` 按单元 id 合并，`progress` 新的那份生效，其他 kv 只补本机没有的键（`budget` 不恢复）；`events` 按 `${at}|${type}|${sid}|${item || slug}` 去重合并（`ui-parent.js` 的 `newEvents`），本机已有的那条不重复写。Wei 的 `wordcoach-export` 文件故意不认，两个 App 的数据不串。
 
 ### 5.2 课本导入
@@ -209,7 +217,7 @@ v1 拍课本另加：`units[i].words[j]` 可带 `pos`、`source: 'photo'`、`cn_
 | `type` | `EVENT_TYPES` 之一：`session_start`、`session_end`、`answer`、`skip`、`exit`、`feel`、`flag`、`review`、`dictation`、`lookup`、`ask`、`parent_note`、`predict`、`hint`、`spell`、`line`、`onboard`、`dispute`（v1） |
 | `at` | 本地时间带时区，`2026-11-03T19:42:11+08:00`（`log` 自动补） |
 | `sid` | 这节课的编号，`ctx.events.sessionId()` 返回 `YYYY-MM-DD-HHMMSS` |
-| `step` | `warmup` / `read` / `write` / `wrap` / `dictation` / `onboard` / `look`；v1 加 `grammar`（语法卡单独打开时）、`weekly` |
+| `step` | `warmup` / `read` / `write` / `wrap` / `dictation` / `onboard` / `look`；v1 加 `grammar`（语法卡单独打开时）、`weekly`；0.3.0 加 `chat`（问老师） |
 | `item` | `w:<slug>`、`g:<语法点>:<题>`、`ep:<集>:<题>`、`line:<句子 id>`；v1：语法卡 `g:<cardId>:<qid>`（变式题 qid 加 `v`），语音小卡 `ph:<规律>:<第几题>` |
 | `slug` | 单词 |
 | `unit` | 课本单元（不知道就不写） |
@@ -232,6 +240,12 @@ v1 拍课本另加：`units[i].words[j]` 可带 `pos`、`source: 'photo'`、`cn_
 - 语法卡和语音小卡的 `predict` 由 ui-lesson 在每题第一次作答前补记（item 是 `g:…` / `ph:…`，`p_base` 0.63 或 0.5）。
 - `dispute`：`line_id`、`choice`（`wrong` / `changed` / `forget`）、`about`（`steady` / `likes` / `rhythm`），step `weekly`。
 
+**0.3.0 加的字段**（问老师）
+- `ask`（每个问题一条，老师答完再记）：`step: 'chat'`、`qid: 'chat'`、`who: 'emma'`、`item: 'chat:<消息 id>'`、`about: 'chat:<kind>'`、`kind`（`word` / `grammar` / `sentence` / `homework` / `pronounce` / `method` / `other`）、`point`（`'g:<语法点>'` 或 `''`）、`words`、`topic`、`check`（她答老师小题：`right` / `wrong` / `none`）、`followup`（快捷按钮 id 或 `''`）、`image`、`unit`、`q`（问题前 60 个字）、`ok`、`code`、`model`、`provider`、`retry`。
+- `flag`：`reason: 'chat'`（她点了“和学校讲的不一样”），`step: 'chat'`、`item: 'chat:<老师消息 id>'`、`kind`、`point`。查词的 `reason: 'care'` 10-24 起不再记（安全拦截删了），老数据里有的照常留着。
+- `lookup`：`from: 'chat'`（问老师里点了一个词），`step: 'chat'`、`query`、`source: 'chat'`。
+- 语音输入不记事件，只在百炼识别时按秒记账（budget 类别 `'asr'`）。
+
 `log(event)` 写失败不抛错，返回 `null`：作答不能因为记录失败卡住。
 
 ---
@@ -246,7 +260,7 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 ## 8. CSS
 
 - 共用的颜色、字号、间距（`--ink`、`--paper`、`--accent`、`--rule`、`--serif`、`--gutter`、`--col` 等）和词典原来的样式都在 `../index.html` 里，别重新定义。
-- 每个 UI agent 只写自己的文件，`index.html` 已经引用：`css/home.css`（类名 `home-`）、`lesson.css`（`lesson-`）、`dictation.css`（`dict-`）、`choice.css`（`mc4-`）、`parent.css`（`parent-`）、`onboard.css`（`onboard-`）；v1：`spell.css`（`spell-`、`listen-`）、`grammar.css`（`gram-`）、`phonics.css`（`ph-`）、`weekly.css`（`weekly-`）、`capture.css`（`cap-`）。
+- 每个 UI agent 只写自己的文件，`index.html` 已经引用：`css/home.css`（类名 `home-`）、`lesson.css`（`lesson-`）、`dictation.css`（`dict-`）、`choice.css`（`mc4-`）、`parent.css`（`parent-`）、`onboard.css`（`onboard-`）；v1：`spell.css`（`spell-`、`listen-`）、`grammar.css`（`gram-`）、`phonics.css`（`ph-`）、`weekly.css`（`weekly-`）、`capture.css`（`cap-`）；0.3.0：`chat.css`（`chat-`）。
 - 现成可用的类：`.btn`（一屏一个实心按钮）、`.text-btn`、`.text-btn.accent`、`.lede`（大号衬线句子）、`.small`、`.runhead`、`.say`（朗读小按钮）、`.serif`、`.num`。
 - iPad 竖屏一栏，最宽 `--col`（720px），横屏居中。主题色由 `:root[data-accent]` 换 `--accent` 和 `--tag-bg`。
 - 风格：词典的安静干净（衬线词头、细线、留白），不要卡通吉祥物。文案中文为主，弯引号“ ”，不用破折号，句子短。
@@ -295,7 +309,7 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 - `createBudget({ kv, now, getCap, getKindCaps? }) -> { load, record(usage, kind, model), canSpend(kind), blockReason(kind), today(), month(), markExhausted(), clearExhausted(), exhausted(), reset() }`
 - `blockReason` 返回 `''` / `'day'` / `'kind'` / `'month'`；app.js 传 `getKindCaps: () => settings.kindCapsYuan || {}`
 - 纯函数：`isBudgetExhausted(status, data)`、`costOf(usage, kind, model)`、`budgetKindOf(aiKind)`；给 tts 用的 `wrapFetch(fetchImpl, budget)`。`PRICES`、`FALLBACK_PRICE` 从 `config.js` 的模型表读
-- 类别：`lookup`、`tts`、`hint`、`story`、`reflect`、`photo`、`other`
+- 类别：`lookup`、`tts`、`hint`、`story`、`reflect`、`photo`、`chat`（0.3.0 问老师，按 token）、`asr`（0.3.0 语音输入，`usage.seconds` × `ASR_PER_SEC` 0.00022 元）、`other`
 - 家长区：`exhausted()` 为真时显示“百炼说这个 Key 的预算用完了”和“再试”（`clearExhausted()`）
 
 ### 9.6 `modes/choice.js`
@@ -312,7 +326,7 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 - DictationRecord（kv `dictation:<日期>`）：`{ date, method, unit, rounds: [{ sid, kind, unit, method, ... }], info / items, done, wrong, remindAt, eveningDone, morningDone, write, writeOpened }`；写错的词经 `words.patch` 开“写得出”线。短语考法读中文、写英文短语。
 
 ### 9.8 `kid-errors.js`
-- `KID_COPY`、`WHERE_COPY`、`BANNED`、`kidMessage(err, { where, dict })`、`needsParent(err)`、`parentDetail(err)`
+- `KID_COPY`、`WHERE_COPY`（0.3.0 加 `chat`）、`BANNED`、`kidMessage(err, { where, dict })`、`needsParent(err)`、`parentDetail(err)`。安全话题拦截（`CARE_LINE`、`isCareText` 等）10-24 删了
 - `dict` 为真（查词页下面有离线词典的意思）时句子带“先看看词典里的意思吧”。孩子看到的话里不出现 Key、API、欠费、预算、模型、百炼、Poe、qwen、千问、429（测试检查）。
 
 ### 9.9 `ai.js`（接线）和 `prompts.js`
@@ -356,6 +370,15 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 - `CAPTURE_MODEL`、`fitSize`、`imageToJpeg`、`recognize({ dataUrl, settings, budget, … })`（自己发百炼请求，花费类别 `'photo'`，自己查 `blockReason`、记 `record`、预算用完调 `markExhausted`；`ai.recent()` 看不到这次调用）、`normalizeResult`、`mockResult`、`planVocab`、`planToc`、`saveCapture(ctx, plan, { dryRun })`（走 `words.importData`、写 kv `textbook`、`ctx.reloadCurriculum()`，和导入单元包同一条路）
 - 照片只在内存里，不进任何存储；模拟模式给假结果、“存”只算一遍不写
 
+### 9.15 `chat.js`、`chat-prompt.js`、`ui-chat.js`（0.3.0，问老师）
+- 细节在三个文件顶部注释。`createChatTab(ctx)` -> `{ show(params), onChange(), hide(), inSession(), holding() }`，画进 `#tab-chat`。
+- `chat.js`：`chatRoute(settings, { image })`（auto / 百炼 / Poe；百炼这一轮带图时换 `BAILIAN_VISION_MODEL` qwen3.8-flash）、`requestBody`、`buildMessages`（只发最新一张照片，历史只带这个问题线最近 12 条）、`streamChat`（SSE 流式，不支持流就改非流式；出字前的网络错、429、5xx 重试一次）、`gatherContext(app)`、`createChat(app)`；`CHAT_DEFAULTS` 和 config.js 的缺省值一致（`tests/wiring.test.mjs` 查）。记账前查 `budget.blockReason('chat')`，回来 `budget.record(usage, 'chat', model)`，没有 usage 就估算。
+- `chat-prompt.js`：`buildSystemPrompt(ctx)` 纯函数。讲法：先一句加粗结论，用简单中文一次讲一个点，1 到 2 个只用她学过的词的例句（附中文），最后一道只有一个空的小题；作业题先带她想再讲；讲之前自己再做一遍；拿不准就说拿不准。程序拼进她的情况：单元、期中、认识的词、最近 3 周常错的点、语法卡、家长问卷、最近问的 3 个问题、kv `teacher.stuck`。模型每次回答最后一行写 `<<<META {kind, point, words, check}>>>`，程序去掉（流式时半截也藏住）。
+
+### 9.16 `voice-input.js`（0.3.0，语音输入）
+- `createVoiceInput(ctx, deps?)`（见第 3 节 `voiceInput`）；纯函数 `asrRoute`、`pickMime`、`formatOf`、`resampleMono`、`encodeWav`、`contextText`、`bailianBody`、`parseBailian`、`doubaoRequest`、`parseDoubao`、`voiceError`。
+- 百炼：`BAILIAN_ASR_URL`（DashScope 同步接口）+ `qwen-audio-3.0-asr-flash`，上下文一条 `input_text`（她学到当前单元的课本词，400 字以内），音频一条 `input_audio`（WAV data URL）。豆包：`DOUBAO_URL` 录音文件极速版，旧版控制台 `X-Api-App-Key` + `X-Api-Access-Key` 头，新版 API Key 走网址参数 `api_key`（`X-Api-Key` 头过不了跨域）；状态码在 `X-Api-Status-Code` 响应头。两边都先在本机转 16 kHz 单声道 WAV。研究和探测记录在 `../../research/09-voice-input.md`。
+
 ---
 
 ## 10. 测试
@@ -381,5 +404,6 @@ await run();
 - 已定：备份带 `events`（见 5.1）。
 - iPad 上没有用户点击时自动播放声音可能被拦。题目和听写里的自动朗读，拦了就等她点“再听一遍”。
 - 开机问卷的回答由 `intake.js` 读（v1）：`mistakes` 的课本词先进复习（plan `boost`，21 天内）、`dictation_way` 当默认考法、`on_praise` 影响夸她的句式（`praise.tone`）、`busy_days` 那几天默认轻松版、`phonics` 决定语音小卡先不先显示音标。`free_time` 还没用。
+- 第 2 批（v0.4.0 接）：`reader.js`、`ui-reader.js`、`css/reader.css`、`curriculum/stories.json` 已写好，还没引用、不在 SHELL（`tests/run.mjs` 的 `NOT_WIRED_YET`）；grammar-more 的 8 张卡在工作区的 `grammar.js` / `grammar.json` 里，没进 v0.3.0 的提交。
 - v1 还没做（v2）：读一段（故事）、“会写了”第 7、21 天复查、“这不对”之后下节课出题核对、家长区完整笔记本、键盘拼写（`spellMode: 'keys'` 要等体检页确认键盘安全）、grammar.js 出小卷题（`grammarQuizItems`，现在小卷用 sprint.js 的兜底题）、tags.json 合并三个语法新标签。
 - 导入的课本词中文取自第三方词表（`cn_source: 'book-list'`，网页抓取可能缺字），没有的留空等 AI 补（`needs_core`）；整份包要等 Wei 拍课本核对后再给 Emma 用。

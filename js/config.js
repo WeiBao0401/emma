@@ -1,5 +1,5 @@
 // Keep VERSION identical to VERSION in sw.js; bump both on every release (tests/run.mjs checks).
-export const VERSION = '0.2.0';
+export const VERSION = '0.3.0';
 
 export const API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
 
@@ -81,6 +81,18 @@ export const DEFAULT_SETTINGS = {
   qwenVoice: 'Ava_v3.1',   // Wei 10-24 picked Ava (tts-samples/listen-2-Ava); follows this default until picked by hand
   voiceChosen: false,
   dailyCapYuan: 1.5,  // in-app daily spending cap (DESIGN 10.7); budget.js reads it
+  // 问老师 (v0.3.0, chat.js chatRoute): 'auto' = Poe when the relay address and the Poe Key are both filled, else Bailian.
+  // Poe uses poeUrl / poeKey above (POE_ENABLED only gates lookups, not 问老师).
+  chatProvider: 'auto',
+  chatModelBailian: 'qwen3.8-max',
+  chatModelPoe: 'gpt-5.4',
+  // 语音输入 (v0.3.0, voice-input.js asrRoute): 'auto' = 豆包 when doubaoToken is filled, else Bailian (apiKey).
+  // 豆包 old console: doubaoAppId + doubaoToken (Access Token); new console: the API Key in doubaoToken, no App ID.
+  // doubaoCluster is read as the resource id ('' = volc.bigasr.auc_turbo).
+  asrProvider: 'auto',
+  doubaoAppId: '',
+  doubaoToken: '',
+  doubaoCluster: '',
 };
 
 // Qwen TTS (SPEC 5.1): same Bailian key and host as the chat calls. The audio comes back as a 24 h link

@@ -1,0 +1,397 @@
+// 语音输入（问老师的“按住说话”，PLAN-tonight 第 3 项）：按住录音，松开后整段送去识别，回来一句文字放进输入框。
+// 她可能中文夹英文地说（“there be 是什么意思”），所以识别时带上她在学的英文词当上下文。
+// 负责：语音输入（voice-input.js、tests/voice-input.test.mjs、research/09-voice-input.md）。10-24 夜语音 agent 断线没写成，
+// 由第 1 批接线 agent 按它查到的接口写的。
+//
+// 两条线（settings.asrProvider：'auto' | 'bailian' | 'doubao'；auto = 填了豆包的 Access Token 或新版 API Key 就用豆包，否则百炼）
+//   百炼：DashScope 同步识别 qwen-audio-3.0-asr-flash（BAILIAN_ASR_URL，CORS 对 weibao0401.github.io 放行，Key 用 settings.apiKey），
+//     收 wav / mp4 / webm，0.00022 元/秒，记进 budget 的 'asr'。上下文放一条 input_text（400 字以内），音频放最后一条。
+//   豆包（火山引擎“大模型录音文件极速版”）：POST DOUBAO_URL，一次请求直接回结果。CORS 是 *，放行的请求头有
+//     X-Api-App-Key、X-Api-Access-Key、X-Api-Resource-Id、X-Api-Request-Id、X-Api-Sequence，所以浏览器能直连：
+//     旧版控制台：doubaoAppId（APP ID）+ doubaoToken（Access Token）放这两个头；
+//     新版控制台只有一个 API Key：放进 doubaoToken、App ID 空着，Key 走网址参数 api_key（X-Api-Key 头不在放行表里，实测
+//     网址参数认得）。doubaoCluster 现在当资源 ID 用（默认 volc.bigasr.auc_turbo，一般不用填）。
+//     只收 WAV / MP3 / OGG OPUS，所以录好的音频先在本机转成 16 kHz 单声道 WAV（百炼也发 WAV，两边一样）。
+//     豆包的费用在火山引擎那边算，App 里不记。
+//
+// 导出
+//   createVoiceInput(ctx, deps?) -> { available(), supported(), start({ lang, onPartial }), stop() -> Promise<string>, cancel(), state() }
+//     ui-chat.js 通过 ctx.voiceInput 用：按下 start（要麦克风权限，第一次会弹框），松开 stop（返回整句文字，没听到返回 ''），
+//     误触或离开页面 cancel。最长录 MAX_MS，到了自动停，松开时照样识别已录的。模拟模式不录音，stop() 回一句假问题。
+//     出错时 err.kid 是给她看的一句（VOICE_COPY，“家长”换成家长区设的称呼）；麦克风被拒绝时 err.name 'NotAllowedError'。
+//   纯函数（Node 测试用）：asrRoute(settings)、pickMime(isTypeSupported)、formatOf(mime)、resampleMono(channels, from, to)、
+//     encodeWav(samples, rate)、contextText({ kv, progress })、bailianBody(route, dataUrl, format, context)、parseBailian(json)、
+//     doubaoRequest(route, base64, format, requestId)、parseDoubao(status, headers, json)、voiceError(code, parentName)
+//   常量：ASR_DEFAULTS、BAILIAN_ASR_URL、BAILIAN_ASR_MODEL、ASR_PRICE_PER_SEC、DOUBAO_URL、DOUBAO_RESOURCE、MAX_MS、MIN_MS、VOICE_COPY
+// 依赖：ai.js（AIError）。ctx 用到：settings()、mockForced()、budget（blockReason / record）、kv（peek）、parentName()。
+
+import { AIError } from './ai.js';
+
+export const ASR_DEFAULTS = { asrProvider: 'auto', doubaoAppId: '', doubaoToken: '', doubaoCluster: '' };
+export const BAILIAN_ASR_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation';
+export const BAILIAN_ASR_MODEL = 'qwen-audio-3.0-asr-flash';
+export const ASR_PRICE_PER_SEC = 0.00022;
+export const DOUBAO_URL = 'https://openspeech.bytedance.com/api/v3/auc/bigmodel/recognize/flash';
+export const DOUBAO_RESOURCE = 'volc.bigasr.auc_turbo';
+export const MAX_MS = 60000;
+export const MIN_MS = 400;
+export const TIMEOUT_MS = 30000;
+export const BUDGET_KIND = 'asr';
+const RATE = 16000;
+const CONTEXT_CAP = 380;
+
+// what she sees; “家长” becomes the name the parent area set
+export const VOICE_COPY = {
+  notready: '语音输入还没准备好，告诉家长。先打字问吧。',
+  nodevice: '这台 iPad 现在录不了音，先打字问吧。',
+  'budget-day': '今天的老师额度用完了，先打字问吧。',
+  budget: '这个月的老师额度用完了，告诉家长。先打字问吧。',
+  network: '语音这会儿连不上，先打字问吧。',
+  offline: '现在没连网，先打字问吧。',
+  timeout: '网有点慢，没听完，再说一次或者打字问吧。',
+  ratelimit: '语音这会儿有点忙，等一下再说。',
+  server: '语音这会儿有点忙，等一下再说。',
+  badkey: '语音输入出了点问题，告诉家长。先打字问吧。',
+  forbidden: '语音输入出了点问题，告诉家长。先打字问吧。',
+  model: '语音输入出了点问题，告诉家长。先打字问吧。',
+  format: '这段声音没认出来，再按住说一次。',
+  http: '没听清，再按住说一次。',
+};
+export const MOCK_LINES = ['there be 和 have 有什么区别？', 'seldom 是什么意思？', '怎么记住 Unit 3 的单词？'];
+
+const clean = v => String(v == null ? '' : v).replace(/[\s\u200b-\u200d\u2060\ufeff]/g, '');
+
+// ---------------------------------------------------------------- pure helpers
+
+export function asrRoute(s = {}) {
+  s = s || {};
+  const want = s.asrProvider === 'bailian' || s.asrProvider === 'doubao' ? s.asrProvider : 'auto';
+  const token = clean(s.doubaoToken);
+  const appId = clean(s.doubaoAppId);
+  const provider = want === 'auto' ? (token ? 'doubao' : 'bailian') : want;
+  if (provider === 'doubao') {
+    return { provider, name: '豆包', url: DOUBAO_URL, ready: !!token, appId, token, mode: appId ? 'app' : 'apikey',
+      resource: clean(s.doubaoCluster) || DOUBAO_RESOURCE, model: 'doubao-bigasr-flash' };
+  }
+  const key = clean(s.apiKey);
+  return { provider: 'bailian', name: '百炼', url: BAILIAN_ASR_URL, ready: !!key, key, model: BAILIAN_ASR_MODEL };
+}
+
+// iPad Safari records audio/mp4 (AAC); Chrome webm/opus. Either is decoded to WAV before sending.
+export function pickMime(isTypeSupported = () => false) {
+  for (const m of ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus']) {
+    try { if (isTypeSupported(m)) return m; } catch (e) { /* next */ }
+  }
+  return '';
+}
+export function formatOf(mime) {
+  const m = String(mime || '').toLowerCase();
+  if (m.includes('wav')) return 'wav';
+  if (m.includes('webm')) return 'webm';
+  if (m.includes('ogg')) return 'ogg';
+  if (m.includes('mpeg') || m.includes('mp3')) return 'mp3';
+  if (m.includes('aac')) return 'aac';
+  return m.includes('mp4') || m.includes('m4a') ? 'mp4' : 'wav';
+}
+
+// several channels -> one, then linear interpolation to the target rate
+export function resampleMono(channels = [], from = RATE, to = RATE) {
+  const list = (channels || []).filter(c => c && c.length);
+  if (!list.length) return new Float32Array(0);
+  const len = list[0].length;
+  const mono = new Float32Array(len);
+  for (const c of list) for (let i = 0; i < len; i++) mono[i] += (c[i] || 0) / list.length;
+  if (!from || from === to) return mono;
+  const outLen = Math.max(1, Math.floor(len * to / from));
+  const out = new Float32Array(outLen);
+  const step = from / to;
+  for (let i = 0; i < outLen; i++) {
+    const x = i * step;
+    const j = Math.floor(x);
+    const f = x - j;
+    const a = mono[Math.min(j, len - 1)], b = mono[Math.min(j + 1, len - 1)];
+    out[i] = a + (b - a) * f;
+  }
+  return out;
+}
+
+// PCM 16-bit mono WAV
+export function encodeWav(samples, rate = RATE) {
+  const n = samples.length;
+  const buf = new ArrayBuffer(44 + n * 2);
+  const v = new DataView(buf);
+  const str = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  str(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); str(8, 'WAVE');
+  str(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  str(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) {
+    const x = Math.max(-1, Math.min(1, samples[i] || 0));
+    v.setInt16(44 + i * 2, x < 0 ? x * 0x8000 : x * 0x7fff, true);
+  }
+  return buf;
+}
+
+// The English words she is learning (textbook units up to the current one, newest first) so the recognizer writes
+// “seldom” instead of a Chinese homophone. At most CONTEXT_CAP characters (the API keeps 400).
+export function contextText({ kv = null, progress = null } = {}) {
+  const head = '初一学生在问英语老师问题，中文里会夹英文单词和句子，比如 there be、am、is、are、have、has、Unit 3。';
+  let words = [];
+  try {
+    const tb = kv && kv.peek ? kv.peek('textbook', null) : null;
+    const units = ((tb && tb.units) || []).filter(u => u && Array.isArray(u.words)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const cur = (progress && progress.unit) || '';
+    const upto = cur && units.some(u => u.id === cur) ? units.slice(0, units.findIndex(u => u.id === cur) + 1) : units;
+    for (const u of upto.reverse()) for (const w of u.words) { const t = String((w && w.w) || '').trim(); if (t && /^[A-Za-z][A-Za-z' .-]*$/.test(t)) words.push(t); }
+  } catch (e) { words = []; }
+  let text = head;
+  const seen = new Set();
+  for (const w of words) {
+    const k = w.toLowerCase();
+    if (seen.has(k)) continue;
+    seen.add(k);
+    const next = text + (seen.size === 1 ? '可能说到的词：' : '、') + w;
+    if (next.length > CONTEXT_CAP) break;
+    text = next;
+  }
+  return text;
+}
+
+export function bailianBody(route, dataUrl, format = 'wav', context = '') {
+  const messages = [];
+  if (context) messages.push({ role: 'user', content: [{ type: 'input_text', text: String(context).slice(0, 400) }] });
+  messages.push({ role: 'user', content: [{ type: 'input_audio', input_audio: { data: dataUrl } }] });
+  const parameters = { format, language_hints: ['zh', 'en'] };
+  if (format === 'wav') parameters.sample_rate = RATE;
+  return { model: route.model || BAILIAN_ASR_MODEL, input: { messages }, parameters };
+}
+// output.text (the documented place); a choices-shaped answer is read too
+export function parseBailian(j) {
+  const o = (j && j.output) || {};
+  if (typeof o.text === 'string') return o.text.trim();
+  if (o.sentence && typeof o.sentence.text === 'string') return o.sentence.text.trim();
+  const c = o.choices && o.choices[0] && o.choices[0].message && o.choices[0].message.content;
+  if (typeof c === 'string') return c.trim();
+  if (Array.isArray(c)) return c.map(x => (x && x.text) || '').join('').trim();
+  return '';
+}
+
+export function doubaoRequest(route, base64, format = 'wav', requestId = '') {
+  const headers = { 'Content-Type': 'application/json', 'X-Api-Resource-Id': route.resource || DOUBAO_RESOURCE,
+    'X-Api-Request-Id': requestId || uuid(), 'X-Api-Sequence': '-1' };
+  let url = route.url || DOUBAO_URL;
+  if (route.mode === 'app') { headers['X-Api-App-Key'] = route.appId; headers['X-Api-Access-Key'] = route.token; }
+  else url += (url.includes('?') ? '&' : '?') + 'api_key=' + encodeURIComponent(route.token) + '&api_resource_id=' + encodeURIComponent(route.resource || DOUBAO_RESOURCE);
+  const audio = { data: base64 };
+  if (format === 'wav' || format === 'mp3' || format === 'ogg') audio.format = format;
+  const body = { user: { uid: route.appId || 'emma' }, audio, request: { model_name: 'bigmodel', enable_itn: true, enable_punc: true } };
+  return { url, headers, body };
+}
+// The status code is the X-Api-Status-Code header (20000000 ok, 20000003 silence); errors also come as { header: { code } }.
+export function parseDoubao(status, headers = {}, j = null) {
+  const get = k => (headers && typeof headers.get === 'function' ? headers.get(k) : headers && (headers[k] || headers[k.toLowerCase()])) || '';
+  let code = Number(get('X-Api-Status-Code') || (j && j.header && j.header.code) || 0);
+  if (!code && Number(status) === 200) code = 20000000;
+  if (code === 20000000) return { text: String((j && j.result && j.result.text) || '').trim(), seconds: Number((j && j.audio_info && j.audio_info.duration) || 0) / 1000 };
+  if (code === 20000003 || code === 45000002) return { text: '', silent: true };
+  const msg = String(get('X-Api-Message') || (j && j.header && j.header.message) || '');
+  let err = 'http';
+  if (code === 45000151) err = 'format';
+  else if (code >= 45000000 && code < 46000000 && /key|token|grant|auth|resource|access|permission/i.test(msg)) err = 'badkey';
+  else if (Number(status) === 401 || Number(status) === 403) err = 'badkey';
+  else if (Number(status) === 429) err = 'ratelimit';
+  else if (code >= 55000000 || Number(status) >= 500) err = 'server';
+  return { error: err, code, message: msg || `豆包语音 ${status} ${code || ''}`.trim() };
+}
+
+export function voiceError(code, parentName = '家长') {
+  const kid = (VOICE_COPY[code] || VOICE_COPY.http).replace(/家长/g, parentName || '家长');
+  return kid;
+}
+
+function uuid() {
+  try { if (globalThis.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) { /* below */ }
+  const h = () => Math.floor(Math.random() * 0x10000).toString(16).padStart(4, '0');
+  return `${h()}${h()}-${h()}-4${h().slice(1)}-${h()}-${h()}${h()}${h()}`;
+}
+
+// ---------------------------------------------------------------- browser glue (replaceable in tests)
+
+const sleepMs = ms => new Promise(r => setTimeout(r, ms));
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result || ''));
+    fr.onerror = () => reject(fr.error || new Error('read'));
+    fr.readAsDataURL(blob);
+  });
+}
+
+// decode what MediaRecorder gave (mp4 / webm) and re-encode as 16 kHz mono WAV
+async function toWav(blob) {
+  const AC = globalThis.AudioContext || globalThis.webkitAudioContext;
+  if (!AC) throw new Error('no AudioContext');
+  const buf = await blob.arrayBuffer();
+  const ac = new AC();
+  try {
+    const ab = await new Promise((resolve, reject) => {
+      const p = ac.decodeAudioData(buf, resolve, reject);
+      if (p && typeof p.then === 'function') p.then(resolve, reject);
+    });
+    const ch = [];
+    for (let i = 0; i < ab.numberOfChannels; i++) ch.push(ab.getChannelData(i));
+    const mono = resampleMono(ch, ab.sampleRate, RATE);
+    return { blob: new Blob([encodeWav(mono, RATE)], { type: 'audio/wav' }), seconds: ab.duration };
+  } finally { try { if (ac.close) ac.close(); } catch (e) { /* fine */ } }
+}
+
+function kidErr(code, ctx, cause = null) {
+  const parent = (() => { try { return ctx && ctx.parentName ? ctx.parentName() : '家长'; } catch (e) { return '家长'; } })();
+  const e = cause instanceof AIError ? cause : new AIError((cause && cause.message) || code, code);
+  e.code = code;
+  e.kid = voiceError(code, parent);
+  return e;
+}
+
+export function createVoiceInput(ctx = {}, deps = {}) {
+  const nav = globalThis.navigator || {};
+  const getUserMedia = deps.getUserMedia || (nav.mediaDevices && nav.mediaDevices.getUserMedia ? c => nav.mediaDevices.getUserMedia(c) : null);
+  const Recorder = deps.MediaRecorder || globalThis.MediaRecorder || null;
+  const fetchImpl = deps.fetchImpl || ((...a) => globalThis.fetch(...a));
+  const wav = deps.toWav || toWav;
+  const toDataUrl = deps.blobToDataUrl || blobToDataUrl;
+  const now = deps.now || (() => Date.now());
+  const sleep = deps.sleep || sleepMs;
+  const settings = () => { try { return (ctx.settings && ctx.settings()) || {}; } catch (e) { return {}; } };
+  const mock = () => { const s = settings(); try { return !!s.mock || !!(ctx.mockForced && ctx.mockForced()); } catch (e) { return !!s.mock; } };
+  let rec = null;        // { mock, t0, stream, recorder, chunks, done, mime, route, timer }
+  let mockN = 0;
+  let state = 'idle';    // 'idle' | 'recording' | 'recognizing'
+
+  const supported = () => mock() || !!(getUserMedia && Recorder);
+
+  function release(r) {
+    if (!r) return;
+    clearTimeout(r.timer);
+    try { if (r.recorder && r.recorder.state !== 'inactive') r.recorder.stop(); } catch (e) { /* stopped */ }
+    try { for (const t of (r.stream && r.stream.getTracks ? r.stream.getTracks() : [])) t.stop(); } catch (e) { /* gone */ }
+  }
+
+  async function start() {
+    if (rec) cancel();
+    if (mock()) { rec = { mock: true, t0: now() }; state = 'recording'; return; }
+    if (!getUserMedia || !Recorder) throw kidErr('nodevice', ctx);
+    const route = asrRoute(settings());
+    if (!route.ready) throw kidErr('notready', ctx);
+    if (route.provider === 'bailian' && ctx.budget && ctx.budget.blockReason) {
+      const why = ctx.budget.blockReason(BUDGET_KIND);
+      if (why) throw kidErr(why === 'month' ? 'budget' : 'budget-day', ctx);
+    }
+    const r = { mock: false, t0: now(), route, chunks: [], stream: null, recorder: null };
+    rec = r;
+    let stream;
+    try {
+      stream = await getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true } });
+    } catch (e) {
+      if (rec === r) rec = null;
+      state = 'idle';
+      if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) { const x = new Error('mic'); x.name = 'NotAllowedError'; throw x; }
+      throw kidErr('nodevice', ctx, e);
+    }
+    if (rec !== r) { try { for (const t of stream.getTracks()) t.stop(); } catch (e) { /* gone */ } return; }   // cancelled meanwhile
+    r.stream = stream;
+    const mime = pickMime(m => (Recorder.isTypeSupported ? Recorder.isTypeSupported(m) : false));
+    try { r.recorder = mime ? new Recorder(stream, { mimeType: mime }) : new Recorder(stream); } catch (e) { r.recorder = new Recorder(stream); }
+    r.mime = r.recorder.mimeType || mime || '';
+    r.done = new Promise(resolve => {
+      r.recorder.ondataavailable = ev => { if (ev && ev.data && ev.data.size) r.chunks.push(ev.data); };
+      r.recorder.onstop = () => resolve();
+      r.recorder.onerror = () => resolve();
+    });
+    r.recorder.start();
+    state = 'recording';
+    r.timer = setTimeout(() => { try { if (r.recorder.state === 'recording') r.recorder.stop(); } catch (e) { /* fine */ } }, MAX_MS);
+  }
+
+  async function stop() {
+    const r = rec;
+    rec = null;
+    if (!r) { state = 'idle'; return ''; }
+    if (r.mock) {
+      state = 'recognizing';
+      await sleep(350);
+      state = 'idle';
+      return now() - r.t0 < MIN_MS ? '' : MOCK_LINES[mockN++ % MOCK_LINES.length];
+    }
+    const ms = now() - r.t0;
+    clearTimeout(r.timer);
+    try { if (r.recorder && r.recorder.state !== 'inactive') r.recorder.stop(); } catch (e) { /* stopped */ }
+    await Promise.race([r.done, sleep(3000)]);
+    release(r);
+    if (ms < MIN_MS || !r.chunks.length) { state = 'idle'; return ''; }
+    state = 'recognizing';
+    try {
+      return await recognize(new Blob(r.chunks, { type: r.mime || 'audio/mp4' }), r.route, Math.min(ms, MAX_MS) / 1000);
+    } finally { state = 'idle'; }
+  }
+
+  function cancel() {
+    const r = rec;
+    rec = null;
+    state = 'idle';
+    release(r);
+  }
+
+  async function post(url, init) {
+    const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    const t = ctrl ? setTimeout(() => ctrl.abort(), TIMEOUT_MS) : 0;
+    try {
+      return await fetchImpl(url, { ...init, signal: ctrl ? ctrl.signal : undefined });
+    } catch (e) {
+      if (ctrl && ctrl.signal.aborted) throw kidErr('timeout', ctx, e);
+      throw kidErr(nav.onLine === false ? 'offline' : 'network', ctx, e);
+    } finally { clearTimeout(t); }
+  }
+
+  async function recognize(raw, route, seconds) {
+    let audio = raw, format = formatOf(raw.type);
+    try { const w = await wav(raw); if (w && w.blob) { audio = w.blob; format = 'wav'; if (w.seconds) seconds = w.seconds; } } catch (e) { console.warn('voice: wav', (e && e.message) || e); }
+    const dataUrl = await toDataUrl(audio);
+    if (route.provider === 'doubao') {
+      const { url, headers, body } = doubaoRequest(route, dataUrl.slice(dataUrl.indexOf(',') + 1), format);
+      const res = await post(url, { method: 'POST', headers, body: JSON.stringify(body) });
+      let j = null;
+      try { j = await res.json(); } catch (e) { j = null; }
+      const out = parseDoubao(res.status, res.headers, j);
+      if (out.error) throw kidErr(out.error, ctx, new Error(out.message));
+      return out.text;
+    }
+    const progress = ctx.kv && ctx.kv.peek ? ctx.kv.peek('progress', null) : null;
+    const body = bailianBody(route, dataUrl, format, contextText({ kv: ctx.kv, progress }));
+    const res = await post(route.url, { method: 'POST', headers: { Authorization: 'Bearer ' + route.key, 'Content-Type': 'application/json', 'X-DashScope-SSE': 'disable' },
+      body: JSON.stringify(body) });
+    let j = null;
+    try { j = await res.json(); } catch (e) { j = null; }
+    if (!res.ok) {
+      const msg = String((j && (j.message || j.code)) || res.status);
+      let code = res.status === 401 ? 'badkey' : res.status === 403 ? 'forbidden' : res.status === 429 ? 'ratelimit' : res.status >= 500 ? 'server' : 'http';
+      if (res.status === 400 && /format|audio|decode/i.test(msg)) code = 'format';
+      if (res.status === 400 && /model/i.test(msg) && /not|exist|access/i.test(msg)) code = 'model';
+      if (res.status === 429 && /预算|budget/i.test(msg)) { code = 'budget'; try { if (ctx.budget && ctx.budget.markExhausted) ctx.budget.markExhausted(); } catch (e) { /* fine */ } }
+      throw kidErr(code, ctx, new Error(`百炼语音识别 ${res.status} ${msg}`));
+    }
+    const secs = Number((j && j.usage && (j.usage.duration || j.usage.seconds)) || seconds || 0);
+    try { if (ctx.budget && ctx.budget.record) ctx.budget.record({ seconds: secs }, BUDGET_KIND, route.model); } catch (e) { /* never blocks */ }
+    return parseBailian(j);
+  }
+
+  return {
+    available: supported,
+    supported,
+    start,
+    stop,
+    cancel,
+    state: () => state,
+  };
+}

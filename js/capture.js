@@ -124,7 +124,6 @@ export const SYSTEM_PROMPT = `你帮家长把一页初一英语课本（外研�
 - pos 照书上的缩写抄（n. v. adj. adv. prep. pron. conj. num. art. interj.）；书上没写就给空字符串。
 - cn 照书上的中文原样抄，几个意思之间的分号也照抄。不要自己翻译，不要补书上没有的意思。
 - 看不清、拍糊、被挡住、被切掉一半的那一项：能看到多少写多少，unclear 写 true。没把握的字母不要猜。
-- 页面上如果有手写的名字、班级、学校，一个字也不要抄进任何字段。
 - 不要输出 JSON 以外的任何文字。`;
 
 export function userPrompt({ units = [] } = {}) {

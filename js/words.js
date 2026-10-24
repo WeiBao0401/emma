@@ -3,7 +3,6 @@
 import { userMsg, zhUserMsg, LEXICON_KEYS, PRACTICE_KEYS, CORE_KEYS } from './prompts.js';
 import * as F from './fsrs.js';
 import { planImport, buildExport } from './db.js';
-import { isCareText } from './kid-errors.js';
 
 // ---------------------------------------------------------------- pure helpers
 
@@ -249,8 +248,6 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
     const at = localIso(now());
     const err = prefilter(q);
     if (err) { log({ at, query: q, result: 'rejected-local', reason: err }); return { ok: false, message: err }; }
-    // a worrying topic (DESIGN 8.5): no model call, nothing stored, not even the query in the log
-    if (isCareText(q) || isCareText(context)) { log({ at, result: 'care' }); return { ok: true, found: false, status: 'care' }; }
     if (isChinese(q)) return lookupZh(q, context, force, signal);
 
     let cached = force ? null : findEntry(q);
@@ -274,7 +271,6 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
       core = await ai.askJSON('core', userMsg(q, context, from_cn, hints(q)), { signal });
     } catch (e) { extras.abort(); throw e; }
     const status = core.status || 'ok';
-    if (status === 'care') { extras.abort(); log({ at: localIso(now()), result: 'care' }); return { ok: true, found: false, status: 'care' }; }
     if (status !== 'ok') {
       extras.abort();
       const suggestions = Array.isArray(core.suggestions) ? core.suggestions.filter(s => typeof s === 'string' && s.trim()) : [];
@@ -302,7 +298,6 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
       if (hit) { log({ at, query: q, result: 'zh-cached' }); return { ok: true, mode: 'zh', cached: true, result: hit }; }
     }
     const data = await ai.askJSON('zh', zhUserMsg(q, context, { known: hints(q).known }), { signal });
-    if (data && data.status === 'care') { log({ at, result: 'care' }); return { ok: true, mode: 'zh', found: false, status: 'care' }; }
     const options = Array.isArray(data.options) ? data.options.filter(o => o && typeof o.en === 'string' && o.en.trim()) : [];
     if (data.status === 'invalid' || !options.length) {
       log({ at, query: q, result: 'zh-invalid' });
@@ -359,7 +354,7 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
       tasks.push(coreJob.then(async r => {
         if (r.error) { errors.core = errMsg(r.error); causes.push(r.error); return; }
         const parts = {};
-        if ((r.data.status || 'ok') === 'ok') {   // 'care' (or invalid): nothing copied in
+        if ((r.data.status || 'ok') === 'ok') {   // invalid: nothing copied in
           for (const k of CORE_KEYS) if (k in r.data) parts[k] = r.data[k];
           const lv = levelOf(rec.headword, parts.level);
           if (lv !== undefined) parts.level = lv;
@@ -371,7 +366,7 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
     for (const [name, keys] of [['lexicon', LEXICON_KEYS], ['practice', PRACTICE_KEYS]]) {
       tasks.push(job[name].then(async r => {
         if (r.error) { errors[name] = errMsg(r.error); causes.push(r.error); return; }
-        if (!r.data || r.data.invalid || r.data.status === 'care') { invalid++; return; }
+        if (!r.data || r.data.invalid) { invalid++; return; }
         const parts = {};
         for (const k of keys) parts[k] = r.data[k] ?? null;
         gotParts = true;

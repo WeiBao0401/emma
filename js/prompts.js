@@ -24,9 +24,7 @@
 //     hints：{ level: 程序定的等级, textbookCn: 课本上的中文意思, known: [她学过的课本词] }，都可以没有
 //     单元词上 cn_source 为 'ecdict' 的中文（离线词典凑的占位）不当课本意思传
 //
-// 隐私：提示词和消息里不放她的名字、学校、住址；不让模型问个人情况（DESIGN 8.5）。
-// 安全（DESIGN 8.5）：COMMON 的 care 规则，输入涉及伤害自己、暴力、性、毒品或强烈情绪时只回 {"status":"care"}，
-// 不翻译、不举例、不出阅读和题；words.js 照样不存，ui-look.js 显示 kid-errors.js 的 CARE_LINE。
+// 10-24 Wei 定：不做安全话题拦截（原来的 care 规则删了），die、kill、hunt 这类课本里会出现的词照常讲。
 // 依赖：无（curriculum 由调用方传入，用 curriculum.js 的 Curriculum 接口）。
 
 export const COMMON = [
@@ -35,15 +33,14 @@ export const COMMON = [
   'Return ONLY one JSON object, no markdown fences, no extra text.',
   'Chinese: short and plain, like a kind teacher talking to a 12-year-old. No grammar jargon beyond 名词、动词、形容词、单数、复数、过去式. Use curly quotes “ ” in Chinese, never 「」. Do not use em dashes.',
   'English examples: 4-10 words, simple present tense unless the word needs another tense, and ONLY words she knows plus the target word. Topics: school, classmates, family, home, food, animals, sports, hobbies, weather, holidays. Never work, office, meetings, emails, business or technology.',
-  'Never ask about or mention her name, school, address or other personal details.',
-  'Care rule, before anything else: if the input (or the context sentence) is about self-harm or suicide, violence against someone, sex, drugs, or shows strong feelings such as wanting to die, being hurt, bullied or very sad, or is a vulgar or sexual word, return exactly {"status":"care"} and nothing else: no translation, meanings, examples, reading or quiz. Ordinary school words such as die, dead, kill, hunt, fight, sad, cry, hate and alone are not care: explain them normally with gentle, everyday examples.',
+  'Every real English word gets a normal explanation, including words like die, dead, kill, hunt, fight, sad, cry and hate that appear in school texts: use plain, everyday examples.',
 ].join('\n');
 
 export const CORE_SYSTEM = COMMON + `
 She typed an English word or phrase. First check it, then explain it simply.
 Schema:
 {
-  "status": "ok" | "typo" | "invalid" | "care",
+  "status": "ok" | "typo" | "invalid",
   "headword": "dictionary form (lemma); for phrases keep the phrase; lowercase unless proper",
   "suggestions": ["likely intended words if typo, else []"],
   "kind": "word" | "phrase" | "idiom" | "phrasal_verb" | "abbreviation" | "proper_noun",
@@ -87,7 +84,7 @@ export const ZH_SYSTEM = COMMON + `
 She typed Chinese and wants to know how to say it in English. Give the simplest English a Grade 7 student would use at school or at home.
 Schema:
 {
-  "status": "ok" | "invalid" | "care",
+  "status": "ok" | "invalid",
   "query": "the Chinese input",
   "translation": "if the input is a sentence or a long phrase: one simple English translation; otherwise empty string",
   "explain": "一句中文：英文里一般怎么说，选哪个",

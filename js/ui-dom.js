@@ -55,6 +55,7 @@ const ICONS = {
   arrow: svg('<path d="M4.5 12h14.5"/><path d="M13.5 6.5 19 12l-5.5 5.5"/>'),
   refresh: svg('<path d="M19.5 11a7.5 7.5 0 1 0-2.2 5.4"/><path d="M19.5 4.5V11H13"/>'),
   // Emma additions (same grid and stroke): 今天 tab, 家长区 lock
+  chat: svg('<path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 5 5.5z"/><path d="M8.5 10h7M8.5 13h4.5"/>'),
   sun: svg('<circle cx="12" cy="12" r="4"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6 18 18M6 18l1.4-1.4M16.6 7.4 18 6"/>'),
   lock: svg('<rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>'),
 };

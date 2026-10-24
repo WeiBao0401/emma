@@ -28,6 +28,7 @@
 <link rel="stylesheet" href="css/phonics.css">
 <link rel="stylesheet" href="css/weekly.css">
 <link rel="stylesheet" href="css/capture.css">
+<link rel="stylesheet" href="css/chat.css">
 <style>
 /* Emma 的英语老师 · the dictionary's design v2.1 kept as the base: one page of a dictionary. Paper grain, rules
    instead of cards, one solid button per screen, the highlighter stroke only for a saved word and the target word.
@@ -612,6 +613,7 @@ body.sheet-open{overflow:hidden}
 <main id="main">
   <!-- one section per nav.js SECTIONS; each view renders into its own (CONTRACTS.md "路由") -->
   <section id="tab-home" class="tab"><p class="boot-msg">正在打开…</p></section>
+  <section id="tab-chat" class="tab" hidden></section>
   <section id="tab-lesson" class="tab" hidden></section>
   <section id="tab-dictation" class="tab" hidden></section>
   <section id="tab-look" class="tab" hidden></section>
