@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "source": "误解标签表（teacher-memory 2.2）。标签只增不改名。单词题干扰项用 form / category / meaning / sound。",
+  "tags": {
+    "form": { "zh": "形近", "kind": "word" },
+    "category": { "zh": "同类", "kind": "word" },
+    "meaning": { "zh": "意思近", "kind": "word" },
+    "sound": { "zh": "读音近", "kind": "word" },
+    "he_she": { "zh": "he 和 she 混用", "kind": "grammar" },
+    "subj_obj": { "zh": "主格和宾格（I / me）", "kind": "grammar" },
+    "poss_adj_vs_pron": { "zh": "形容词性和名词性物主代词（my / mine）", "kind": "grammar" },
+    "obj_vs_poss": { "zh": "宾格和物主代词（me / my）", "kind": "grammar" },
+    "there_have": { "zh": "there be 和 have 混用", "kind": "grammar" },
+    "there_be_agree": { "zh": "there be 的单复数", "kind": "grammar" },
+    "poss_s_missing": { "zh": "漏了名词所有格的 's", "kind": "grammar" },
+    "poss_of_overuse": { "zh": "该用 's 的地方用了 of", "kind": "grammar" },
+    "be_missing": { "zh": "漏了 be 动词", "kind": "grammar" },
+    "be_plus_verb": { "zh": "be 动词后面直接跟动词原形", "kind": "grammar" },
+    "plural_missing": { "zh": "漏了名词复数", "kind": "grammar" },
+    "uncountable_plural": { "zh": "不可数名词加了复数", "kind": "grammar" },
+    "third_s_missing": { "zh": "漏了三单 -s", "kind": "grammar" },
+    "do_does": { "zh": "do 和 does 混用", "kind": "grammar" }
+  }
+}

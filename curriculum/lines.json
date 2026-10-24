@@ -1,0 +1,33 @@
+{
+  "version": 0,
+  "source": "英语小对话双语句库（DESIGN 2.5）。一句不超过 8 个词，只用她认识的词。占位：只有两句，由英语小对话 agent 写全，Wei 过目。",
+  "lines": [
+    {
+      "id": "open-001",
+      "scene": "open",
+      "en": "Hi {name}! Ready to start?",
+      "zh": "嗨 {name}！准备好开始了吗？",
+      "words": [
+        "hi",
+        "ready",
+        "to",
+        "start"
+      ],
+      "slots": [
+        "name"
+      ]
+    },
+    {
+      "id": "close-001",
+      "scene": "close",
+      "en": "See you tomorrow!",
+      "zh": "明天见！",
+      "words": [
+        "see",
+        "you",
+        "tomorrow"
+      ]
+    }
+  ],
+  "questions": []
+}

@@ -1,0 +1,9 @@
+/* 明天有听写（ui-dictation.js）. Owner: 今天标签 UI agent. Class names start with dict-. */
+.dict{min-height:100vh;min-height:100dvh;padding:var(--top) var(--gutter) 32px;display:flex;flex-direction:column}
+.dict .runhead.session>.text-btn{margin-left:-10px}
+.dict-setup,.dict-run,.dict-check,.dict-done{padding-top:28px;display:flex;flex-direction:column;gap:12px}
+.dict-list{border-top:1px solid var(--rule)}
+.dict-item{display:grid;grid-template-columns:1fr auto auto auto;align-items:baseline;gap:4px 18px;min-height:52px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.dict-item .serif{font:500 20px/1.3 var(--serif)}
+.dict-item.ok .serif{color:var(--good)}
+.dict-item.bad .serif{color:var(--danger)}

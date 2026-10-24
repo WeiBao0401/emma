@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emma 的英语老师</title>
+<style>
+:root { --paper: #E9F4EC; --ink: #16302A; --accent: #1E7A55; }
+@media (prefers-color-scheme: dark) { :root { --paper: #0E1B15; --ink: #E3F0E8; --accent: #6FD3A0; } }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--paper); color: var(--ink);
+  font: 17px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; padding: 16px; text-align: center; }
+a { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <p>这个地址不对，正在打开 Emma 的英语老师</p>
+  <p><a href="/emma/">打开 Emma 的英语老师</a></p>
+</main>
+<script>
+// Any mistyped address under /emma/ (capital letter, punctuation pasted after the link) goes back to the app.
+location.replace('/emma/');
+</script>
+</body>
+</html>

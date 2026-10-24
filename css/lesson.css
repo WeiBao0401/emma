@@ -1,0 +1,4 @@
+/* 上课（ui-lesson.js）. Owner: 今天标签 UI agent. Class names start with lesson-. */
+.lesson{min-height:100vh;min-height:100dvh;padding:var(--top) var(--gutter) 32px;display:flex;flex-direction:column}
+.lesson .runhead.session>.text-btn{margin-left:-10px}
+.lesson-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;padding-bottom:64px}

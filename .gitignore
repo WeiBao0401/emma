@@ -1,0 +1,8 @@
+.DS_Store
+# never in this public repo (CLAUDE.md): keys, textbook files, student data
+.env
+*.key
+private/
+textbook*
+*-import*.json
+*-backup-*.json*

@@ -1,0 +1,13 @@
+/* 今天（ui-home.js）. Owner: 今天标签 UI agent. Class names start with home-. Tokens (--ink, --accent, --rule...) come from
+   index.html :root; do not redefine them here. Placeholder styles until the home sketch (DESIGN 2.0) is built. */
+.home{min-height:100vh;min-height:100dvh;padding:var(--top) var(--gutter) calc(var(--tabbar) + 32px);display:flex;flex-direction:column}
+.home-body{flex:1;display:flex;flex-direction:column;gap:32px;padding-top:28px}
+.home-en{font:500 26px/1.35 var(--serif)}
+.home-zh{margin-top:4px;font-size:15px;color:var(--muted)}
+.home-plan .small{margin-top:8px}
+.home-cells{margin-top:18px;border-top:1px solid var(--rule)}
+.home-cell{display:flex;justify-content:space-between;align-items:baseline;min-height:44px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.home-cell.soon,.home-cell.skip{color:var(--muted)}
+.home-cell.done span:first-child{text-decoration:line-through;text-decoration-color:var(--rule-strong)}
+.home-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:28px}
+.home-links{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:auto;padding-left:10px}

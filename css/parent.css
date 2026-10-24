@@ -1,0 +1,3 @@
+/* 家长区（ui-parent.js, ui-me.js）. Owner: 家长区 UI agent. New class names start with parent-; ui-me.js keeps the
+   dictionary's .me-page / .sgroup / .srow classes (inline in index.html). */
+.parent-settings{min-height:100vh}

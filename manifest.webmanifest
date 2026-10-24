@@ -1,0 +1,30 @@
+{
+  "name": "Emma 的英语老师",
+  "short_name": "Emma 的英语老师",
+  "description": "跟着课本走的私人英语老师：热身复习、明天有听写、查词",
+  "id": "/emma/",
+  "start_url": "/emma/",
+  "scope": "/emma/",
+  "display": "standalone",
+  "background_color": "#E9F4EC",
+  "theme_color": "#E9F4EC",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

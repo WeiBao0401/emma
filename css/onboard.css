@@ -1,0 +1,6 @@
+/* 第一次打开（ui-onboard.js）. Owner: 家长区 UI agent. Class names start with onboard-. */
+.onboard{min-height:100vh;min-height:100dvh;padding:calc(var(--top) + 40px) var(--gutter) 40px;display:flex;flex-direction:column;gap:24px}
+.onboard-list{display:grid;gap:18px}
+.onboard-list li{display:grid;grid-template-columns:28px minmax(0,1fr);align-items:baseline}
+.onboard-list .num{color:var(--muted)}
+.onboard-list p{font:16px/1.7 var(--sans)}
