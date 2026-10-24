@@ -6,3 +6,5 @@ private/
 textbook*
 *-import*.json
 *-backup-*.json*
+unit-pack*
+*.json.gz

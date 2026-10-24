@@ -169,7 +169,7 @@
 
 ### 5.1 备份（家长区“导出备份”）
 格式 `emma-export` 版本 1：`{ format, version, source: 'ipad', exported_at, entries, zh, kv, events }`。`kv` 是除 `settings`、`parent.pin` 以外的全部键（Key 和数字码永远不进备份）；`events` 全带（家长区定的）。
-恢复：`textbook` 按单元 id 合并，`progress` 新的那份生效，其他 kv 只补本机没有的键（`budget` 不恢复）；`events` 只在本机一条都没有时导入。Wei 的 `wordcoach-export` 文件故意不认，两个 App 的数据不串。
+恢复：`textbook` 按单元 id 合并，`progress` 新的那份生效，其他 kv 只补本机没有的键（`budget` 不恢复）；`events` 按 `${at}|${type}|${sid}|${item || slug}` 去重合并（`ui-parent.js` 的 `newEvents`），本机已有的那条不重复写。Wei 的 `wordcoach-export` 文件故意不认，两个 App 的数据不串。
 
 ### 5.2 课本导入
 Wei 拍的课本照片由 Claude 在电脑上识别，生成导入文件放在 `../../private/`（永远不进 `web/`）。格式就是 `emma-export`：`entries` 是课本词（4.1 的字段），`kv.textbook` 是单元表。家长区的“导入文件”在 `words.importData` 之后把 `kv` 里的 `textbook`、`progress` 写进 kv，再调 `ctx.reloadCurriculum()`。
@@ -318,4 +318,4 @@ await run();
 - 已定：备份带 `events`（见 5.1）。
 - iPad 上没有用户点击时自动播放声音可能被拦。题目和听写里的自动朗读，拦了就等她点“再听一遍”。
 - 开机问卷的回答还没人读：`mistakes` 的词进待学、`dictation_way` 当默认考法、`on_praise` 影响夸她的句式、`free_time` / `busy_days` 影响课的轻重。
-- 导入的课本词中文是 ECDICT 的简短义项，短语没有中文；要等 Wei 拍课本核对，或者打开词页时 AI 补（`needs_core`）。
+- 导入的课本词中文取自第三方词表（`cn_source: 'book-list'`，网页抓取可能缺字），没有的留空等 AI 补（`needs_core`）；整份包要等 Wei 拍课本核对后再给 Emma 用。

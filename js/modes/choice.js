@@ -40,7 +40,8 @@
 //   renderChoice(container, q, { onAnswer, onDone, say, retry, autoNextMs }) -> { el, attempt, pick(i), hint(), next(), onKey(ev) }
 //     把一道题画进 container（大按钮）。onAnswer(event) 作答时调用一次；onDone({ grade, correct, event }) 她往下走时调用：
 //     答对停一下自动往下，答错显示正确答案和一句说明，点“下一个”往下
-//   fillerFor(entry, app) -> [补位的词]       从 app.curriculum（同单元课本词、standardWords()、posOf）和 app.dict 拼 extra
+//   fillerFor(entry, app) -> [补位的词]       从 app.curriculum（同单元课本词、standardWords()、posOf）和 app.dict 拼 extra；
+//                                            app.words 里已有 AI 讲解的词用它的 brief_cn
 //   sureFirst(slugs, get, now) -> [slug]     把最有把握的那张挪到第一张（今天热身用，先让她答对一个）
 //   choiceMode = { id: 'mc4', label: '四选一', render(entry, ctx) -> { el, footer, onKey, question } }
 //     和 ui-review.js 的 flashcard 同一个“mode”接口，session.js 跑队列：
@@ -391,10 +392,13 @@ export function fillerFor(entry, app = {}) {
     const withPos = x => (x && !x.pos ? { ...x, pos: curPos(x.headword) } : x);
     const hw = headOf(entry);
     const unit = (entry && entry.unit) || (cur && cur.unitOf ? cur.unitOf(hw) : null);
+    // a word whose AI core has come back (no needs_core) shows its brief_cn, not the unit list's placeholder
+    const aiCn = w => { try { const e = app.words && app.words.get ? app.words.get(slugify(w)) : null; return e && !e.needs_core && e.brief_cn ? String(e.brief_cn) : ''; } catch (err) { return ''; } };
     if (unit && cur && cur.unitWords) {
       for (const x of cur.unitWords(unit)) {
         if (!x || !x.w) continue;
-        if (x.cn) out.push(withPos({ slug: slugify(x.w), headword: x.w, cn: x.cn, phrase: !!x.phrase, unit, pos: x.pos || (dictWord(x.w, dict) || {}).pos }));
+        const cn = aiCn(x.w) || x.cn;
+        if (cn) out.push(withPos({ slug: slugify(x.w), headword: x.w, cn, phrase: !!x.phrase, unit, pos: x.pos || (dictWord(x.w, dict) || {}).pos }));
         else { const d = dictWord(x.w, dict, unit); if (d) out.push(withPos(d)); }
       }
     }

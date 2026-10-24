@@ -4,22 +4,26 @@
 // 负责：家长区 UI agent（ui-parent.js、ui-onboard.js、ui-me.js、css/parent.css、css/onboard.css）。
 //
 // 导出
-//   createParentView(ctx) -> { show(params), onChange(), holding() }
+//   createParentView(ctx) -> { show(params), hide(), onChange(), holding() }
 //     渲染进 #tab-parent。params.open：解锁后直接展开的一行（'key'、'import'、'unit'、'exam'、'intake'、'cap'…）。
 //     holding()：这一页有没导完的备份或导入，自动更新会等它。
-//   纯函数（Node 测试用）：weakPin、makePin、checkPin、mergeTextbook、mergeProgress、exportKv、planKvImport、
+//     hide()：离开家长区（app.js 换路由时调用）就重新上锁。
+//   纯函数（Node 测试用）：weakPin、makePin、checkPin、mergeTextbook、mergeProgress、exportKv、planKvImport、eventKey、newEvents、
 //     intakeItems、visibleItems、answerOf、intakeFilled、pickMulti、intakeSideEffects、yuan、parentNameOf
 //
 // 用到的 ctx：kv.peek / set / keys、budget.today / month、settings / saveSettings、curriculum.units / unitOrder /
 //   hasTextbook、reloadCurriculum、events.query / count / log、applyTheme、go、toast。
-// kv 'parent.pin'：{ salt, hash }（4 位码加盐的 SHA-256，不存明文）；一次输对，这次打开 App 期间不再问。
-//   忘了码：输百炼 Key 的最后 4 位就能重设（Emma 不知道 Key）；还没填 Key 时直接重设。
+// kv 'parent.pin'：{ salt, hash }（4 位码加盐的 SHA-256，不存明文）。家长一离开就重新上锁：换到别的页、App 退到后台、
+//   点“交给 Emma”、5 分钟没操作。忘了码：输百炼 Key 的最后 4 位就能重设（Emma 不知道 Key）；还没填 Key 时，
+//   交给 Emma 之前可以直接重设，交给她以后不行（只提示先填 Key）。
 // 开机问卷：题目在公开的 curriculum/intake.json（另一个 agent 写的，形状见文件里的 rules），回答存 kv 'parent.intake'
 //   { version: 1, at, updated, answers: { 题 id: 值 } }，写一项存一项，可以分几次填。题的 to 指向 progress.* 和
 //   profile.parentCall 的，填的时候顺手写进 kv 'progress' 和 'profile'；问卷里这几题显示的也是 progress 里现在的值。
 // kv 'profile'.parentCall：Emma 看到的“家长”二字换成这个（默认“家长”，和 intake.json 的 parent_call 一致）。
 // 备份（CONTRACTS 5.1）：kv 里除 settings 和 parent.pin 以外的键，加全部 events。恢复（5.2）：textbook 按单元合并，
-//   progress 新的赢，其余 kv 只补本机没有的键（budget 不恢复），events 只在本机一条都没有时导入。
+//   progress 新的赢，其余 kv 只补本机没有的键（budget 不恢复），events 按 eventKey 合并（本机已有的那条不重复导入）。
+// 需要留意：查词时碰到让人担心的话题，查词页只记一条 events { type: 'flag', reason: 'care' }（不存她写了什么），
+//   这里列出最近 30 天的次数。
 import { h, icon, toast, dateCn } from './ui-dom.js';
 import { createMeTab } from './ui-me.js';
 import { pageShell } from './ui-entry.js';
@@ -29,6 +33,8 @@ export const PIN_LEN = 4;
 export const PARENT_NAMES = ['妈妈', '爸爸', '家长'];
 const MAX_WRONG = 5;
 const WAIT_MS = 30000;
+const IDLE_MS = 5 * 60 * 1000;   // the unlocked area locks again after 5 minutes without a tap
+const FLAG_DAYS = 30;
 export const KIND_LABEL = { lookup: '查词', tts: '朗读', hint: '提示讲解', story: '故事', reflect: '每周反思', photo: '拍照识别', other: '其他' };
 export const EXPORT_SKIP = ['settings', 'parent.pin'];            // never leave the iPad in a backup
 const RESTORE_SKIP = new Set(['settings', 'parent.pin', 'budget']);
@@ -178,6 +184,21 @@ export function intakeSideEffects(item, value) {
   if (to === 'profile.parentCall') return { profile: { parentCall: cleanName(value, 10) } };
   return {};
 }
+// Restoring a backup merges the learning records: an event already on this iPad (same time, type, lesson and item)
+// is not written twice, so the teacher's notebook and the weekly reflection keep both sides.
+export const eventKey = ev => `${ev.at}|${ev.type}|${ev.sid || ''}|${ev.item || ev.slug || ''}`;
+export function newEvents(local, incoming) {
+  const seen = new Set((Array.isArray(local) ? local : []).filter(Boolean).map(eventKey));
+  const out = [];
+  for (const ev of Array.isArray(incoming) ? incoming : []) {
+    if (!ev || typeof ev !== 'object' || !ev.type) continue;
+    const k = eventKey(ev);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(ev);
+  }
+  return out;
+}
 export function yuan(x) {
   const v = Number(x) || 0;
   if (v <= 0) return '0 元';
@@ -280,8 +301,25 @@ export function createParentView(ctx) {
     unlocked = true;
     digits = ''; first = ''; msg = '';
     openSettings(pending);
+    touch();
     window.scrollTo(0, 0);
   }
+
+  // locked again whenever the parent leaves: another page, the app in the background, “交给 Emma”, 5 minutes idle
+  let idleTimer = 0;
+  function lock() {
+    clearTimeout(idleTimer);
+    if (!unlocked) return;
+    unlocked = false;
+    pending = {};
+    showGate();
+  }
+  function touch() {
+    clearTimeout(idleTimer);
+    if (unlocked) idleTimer = setTimeout(lock, IDLE_MS);
+  }
+  for (const t of ['pointerdown', 'keydown', 'input', 'wheel']) root.addEventListener(t, touch, { capture: true, passive: true });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') lock(); });
 
   function resetPanel() {
     const key = ctx.settings().apiKey || '';
@@ -291,6 +329,13 @@ export function createParentView(ctx) {
       toast('数字码清掉了，设一个新的');
       renderGate();
     };
+    const cancel = h('button', { type: 'button', className: 'text-btn', text: '取消', on: { click: () => { mode = 'enter'; renderGate(); } } });
+    // once Emma has the iPad, a reset without the Key would let her in: only the Key's last 4 digits reset the code
+    if (!key && (peek('onboard', {}) || {}).handed) {
+      return [h('p', { className: 'small', text: '请家长先填 Key 再重设。' }),
+        h('p', { className: 'small', text: '已经交给 Emma 了，没有百炼 Key 就不能在这里重设数字码。' }),
+        h('div', { className: 'btn-row parent-center' }, cancel)];
+    }
     if (!key) {
       return [h('p', { className: 'small', text: '还没填百炼 Key，可以直接重设。' }),
         h('div', { className: 'btn-row parent-center' },
@@ -354,6 +399,7 @@ export function createParentView(ctx) {
   // kv 'onboard'.handed: the first open now goes to Emma's part (ui-onboard.js); until then it asks for the parent
   async function handOver() {
     await ctx.kv.set('onboard', { ...peek('onboard', {}), handed: new Date().toISOString() }).catch(() => {});
+    lock();
     ctx.go('onboard');
   }
   function setupGroup(kit) {
@@ -375,7 +421,7 @@ export function createParentView(ctx) {
       h(target ? 'button' : 'div', { type: target ? 'button' : null, className: 'srow-head', on: target ? { click: () => kit.open(target) } : null },
         h('span', { className: 'parent-tick' + (done ? ' on' : '') }, done ? icon('check') : null),
         h('span', { className: 'k' }, h('b', { text: label })), h('span', { className: 'v', text: value }), icon('chev', 'chev' + (target ? '' : ' none')))));
-    const missing = [!s.apiKey ? 'Key 还没填，查词先只用离线词典' : '', !hasBook ? '课本还没导入，复习里只有她查过的词' : ''].filter(Boolean);
+    const missing = [!s.apiKey ? 'Key 还没填，查词先只用离线词典；交给她以后忘了数字码也没法重设' : '', !hasBook ? '课本还没导入，复习里只有她查过的词' : ''].filter(Boolean);
     return h('section', { className: 'sgroup parent-setup' },
       h('h2', { className: 'sec-h', text: '装机清单' }),
       h('p', { className: 'small', text: '这些在 Emma 第一次打开前由家长弄好。点一行就到那一项。' }),
@@ -579,8 +625,28 @@ export function createParentView(ctx) {
     ], '问卷是老师认识她的起点。家长的说法先当“待确认”，老师会用她做题的记录慢慢核对。');
   }
 
+  // ---------------------------------------------------------------- 需要留意: lookups that touched a worrying topic
+  // ui-look.js logs { type: 'flag', reason: 'care' } and nothing about what she typed; read each time the area opens
+  let flags = [];
+  function loadFlags() {
+    const since = new Date(Date.now() - FLAG_DAYS * 864e5);
+    Promise.resolve().then(() => ctx.events.query({ type: 'flag', since, limit: 1e6 })).then(list => {
+      flags = (list || []).filter(e => e && e.reason === 'care');
+      if (me && unlocked) me.render();
+    }, () => {});
+  }
+  function careGroup(kit) {
+    if (!flags.length) return null;
+    const last = String(flags[flags.length - 1].at || '').slice(0, 10);
+    return kit.group('需要留意', [
+      kit.row({ label: `最近 ${FLAG_DAYS} 天 ${flags.length} 次`, sub: '她查词时写到了让人担心的话题（伤害自己、暴力、性、毒品或很难过）。老师没有讲，只请她去找家人聊聊。',
+        value: last ? '最近 ' + dateCn(last) : '', cls: 'parent-care' }),
+    ], '她写了什么没有存下来。找个轻松的时候问问她。');
+  }
+
   // ---------------------------------------------------------------- backup and import hooks (ui-me.js calls these)
   const localKv = () => { const o = {}; for (const k of ctx.kv.keys('')) o[k] = ctx.kv.peek(k); return o; };
+  const localEvents = () => ctx.events.query({ limit: 1e6 }).catch(() => []);
   const hooks = {
     async exportExtra() {
       const kv = exportKv(ctx.kv.keys('').map(k => [k, ctx.kv.peek(k)]));
@@ -590,13 +656,15 @@ export function createParentView(ctx) {
     },
     async previewExtra(data) {
       const out = [];
+      // the builder's unit packs from a third-party list (source 'textbook-draft'): not for Emma until checked
+      if (data && data.source === 'textbook-draft') out.push('这是从第三方资料整理的课本词表草稿，中文还没和课本核对。核对过课本以前，先别给 Emma 用。');
       const plan = planKvImport(localKv(), (data && data.kv) || {});
       if (plan.notes.length) out.push('还会写进：' + plan.notes.join('；') + '。');
       if (plan.kept) out.push('这台 iPad 上已经有的设置保留不动。');
-      const evs = Array.isArray(data && data.events) ? data.events.length : 0;
-      if (evs) {
-        const n = await ctx.events.count().catch(() => 1);
-        out.push(n ? `备份里有 ${evs} 条学习记录；这台 iPad 已经有记录，不导入。` : `学习记录 ${evs} 条，一起导入。`);
+      const evs = Array.isArray(data && data.events) ? data.events : [];
+      if (evs.length) {
+        const fresh = newEvents(await localEvents(), evs);
+        out.push(`学习记录 ${evs.length} 条，合并 ${fresh.length} 条新的。`);
       }
       return out;
     },
@@ -609,10 +677,10 @@ export function createParentView(ctx) {
         if (plan.writes.textbook) await ctx.reloadCurriculum();
         if (plan.writes.profile) ctx.applyTheme(accentOf(plan.writes.profile.theme));
         const evs = Array.isArray(data && data.events) ? data.events : [];
-        if (evs.length && !(await ctx.events.count().catch(() => 1))) {
+        if (evs.length) {
           let c = 0;
-          for (const ev of evs) if (await ctx.events.log(ev)) c++;
-          out.push(`学习记录导入了 ${c} 条。`);
+          for (const ev of newEvents(await localEvents(), evs)) if (await ctx.events.log(ev)) c++;
+          out.push(`学习记录合并了 ${c} 条新的。`);
         }
       } catch (e) {
         out.push('单词导进去了，课本和设置没写全：' + ((e && e.message) || e));
@@ -628,6 +696,7 @@ export function createParentView(ctx) {
       h('h1', { className: 'page-title', text: '家长区' }),
       h('p', { className: 'small parent-intro', text: name === DEFAULT_PARENT_NAME ? '这一页给家长用，进来要输数字码。' : `这一页给家长用。Emma 看到的“家长”会写成“${name}”。` }),
       setupGroup(kit),
+      careGroup(kit),
       planGroup(kit),
       moneyGroup(kit),
       kit.ai(),
@@ -645,6 +714,7 @@ export function createParentView(ctx) {
     settingsBox.hidden = false;
     if (!me) me = createMeTab(ctx, { root: settingsBox, back, layout, hooks });
     me.show(params || {});
+    loadFlags();
   }
 
   return {
@@ -652,7 +722,9 @@ export function createParentView(ctx) {
       pending = params || {};
       if (!unlocked) { showGate(); return; }
       openSettings(pending);
+      touch();
     },
+    hide: lock,
     onChange() { if (me && unlocked) me.onChange(); },
     holding: () => !!(me && me.holding()),
   };

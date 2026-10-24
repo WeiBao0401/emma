@@ -10,7 +10,8 @@
 //       { unit? }              直接选好这个单元
 //       { retry: true }        首页“再写一次错的”：今天写错过的词再写一次（dictation.js tonightDictation）
 //       { glance: true }       首页“出门前看一眼”：只看昨晚错的词，看完记 morningDone
-//   wordsForUnit(curriculum, unit, method) -> [{ slug, w, cn, required, on }]   这个单元可以听写的词（buildDictation 的 candidates）
+//   wordsForUnit(curriculum, unit, method, entryOf?) -> [{ slug, w, cn, required, on }]   这个单元可以听写的词（buildDictation 的 candidates）
+//     entryOf(slug) -> 词条：有 AI 讲解的词读它的 brief_cn
 //
 // 用到的 ctx：curriculum.units / unitWords / isRequired、kv.peek('progress') / get / set、words（saveDictation 打开
 // “写得出”线要 words.patch）、say、events.log / sessionId、go('home')、busy。
@@ -21,9 +22,10 @@ import * as D from './dictation.js';
 import { meaningOf } from './modes/choice.js';
 import { dayOf } from './plan.js';
 
-export function wordsForUnit(curriculum, unit, method = 'zh2en') {
+export function wordsForUnit(curriculum, unit, method = 'zh2en', entryOf = null) {
   if (!curriculum || !unit) return [];
-  const plan = D.buildDictation({ unit, words: curriculum.unitWords(unit) || [], method, isRequired: w => !!(curriculum.isRequired && curriculum.isRequired(w)) });
+  const plan = D.buildDictation({ unit, words: curriculum.unitWords(unit) || [], method, entryOf,
+    isRequired: w => !!(curriculum.isRequired && curriculum.isRequired(w)) });
   return plan.candidates.map(c => ({ slug: c.slug, w: c.w, cn: c.cn || '', required: !!c.required, on: !!c.on }));
 }
 
@@ -64,7 +66,7 @@ export function createDictationView(ctx) {
         const p = (ctx.kv.peek('progress', {}) || {}).unit;
         unit = us.some(u => u.id === p) ? p : us[us.length - 1].id;
       }
-      list = wordsForUnit(ctx.curriculum, unit, method);
+      list = wordsForUnit(ctx.curriculum, unit, method, s => (ctx.words && ctx.words.get ? ctx.words.get(s) : null));
       picked = new Set(list.filter(x => x.on).map(x => x.slug));
     } else {
       unit = '';

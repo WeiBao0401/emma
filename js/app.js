@@ -218,6 +218,7 @@ function showRoute(name, { force = false, params: p = null } = {}) {
   voice.stop();
   scrollPos[route] = window.scrollY;
   if (route === 'lib' && lib && r.name !== 'lib') lib.hide();
+  if (route === 'parent' && parent && r.name !== 'parent') parent.hide();   // the parent area locks again (ui-parent.js)
   const from = route;
   route = r.name;
   for (const s of SECTIONS) { const el = document.getElementById('tab-' + s); if (el) el.hidden = s !== r.section; }

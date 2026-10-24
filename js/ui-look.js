@@ -6,6 +6,7 @@ import { h, icon, toast, skBars } from './ui-dom.js';
 import { createEntryView, renderZh, dictHead, pageShell, headwordNode, skSenses } from './ui-entry.js';
 import { classifyPaste, isChinese, normalizeQuery, hasExtras } from './words.js';
 import { marked } from './ui-dom.js';
+import { CARE_LINE, isCareText, isCareGloss, careFreeGloss } from './kid-errors.js';
 
 const CTX_HINT_EN = '粘贴你看到它的原句，解释会贴着这句话讲';
 const CTX_HINT_ZH = '使用场景，比如“工作邮件里”“跟老板汇报”';
@@ -181,9 +182,20 @@ export function createLookTab(app) {
 
   // Tier 1: the dictionary meaning while the model works. Not for a word that comes straight back from the
   // library, and never the meaning of a favorited word while “先猜再看” is on.
+  // the offline dictionary is the adult one: a word whose meaning is adult content is never shown (isCareGloss)
+  // an ordinary word loses the adult items ECDICT lists among its meanings (warm: 色情的)
+  const dictFind = q => { const d = app.dict.find(q); return d && !isCareGloss(d.cn) ? { ...d, cn: careFreeGloss(d.cn) } : null; };
+  // DESIGN 8.5: a worrying topic gets one fixed line, no lesson. Nothing is stored; the parent area sees a count.
+  function care() {
+    pop();
+    clearCtx();
+    setMsg(CARE_LINE, 'warn');
+    try { app.events.log({ type: 'flag', reason: 'care', step: 'look' }); } catch (e) { /* never blocks */ }
+  }
+
   function tier1(q, opts) {
     if (isChinese(q) || opts.force || app.words.resolve(q)) return null;
-    const d = app.dict.find(q);
+    const d = dictFind(q);
     if (!d) return null;
     const known = app.words.resolve(d.word);
     return known && known.favorited && app.settings().guessFirst ? null : d;
@@ -244,6 +256,9 @@ export function createLookTab(app) {
     fit();
     const context = opts.context !== undefined ? String(opts.context) : ctxEl.value.trim();
     if (!opts.keepCands) clearCands();
+    if (isCareText(q) || isCareText(context) || (!isChinese(q) && app.dict.loaded() && isCareGloss((app.dict.find(q) || {}).cn))) {
+      ++seq; if (ctrl) ctrl.abort(); clearCands(); qEl.blur(); ctxEl.blur(); care(); return;
+    }
     const my = ++seq;
     if (ctrl) ctrl.abort();
     ctrl = new AbortController();
@@ -265,12 +280,13 @@ export function createLookTab(app) {
       if (my !== seq) return;
       busy = false;
       const retry = () => run(q, { ...opts, context });
-      failPage(q, isChinese(q) ? null : app.dict.find(q), err, retry);
+      failPage(q, isChinese(q) ? null : dictFind(q), err, retry);
       return;
     }
     if (my !== seq) return;
     busy = false;
     if (!r.ok) { pop({ keep: true }); setMsg(r.message, 'bad'); return; }
+    if (r.status === 'care') { care(); return; }
     if (r.mode === 'zh') {
       if (r.found === false) { pop({ keep: true }); setMsg(r.message, 'warn'); return; }
       zhLast = r.result;
@@ -413,7 +429,8 @@ export function createLookTab(app) {
   }
   function renderSugs() {
     const v = qEl.value.replace(/^\s+/, '');
-    const list = document.activeElement === qEl && v.length >= 2 && v.length <= 40 && SUG_RE.test(v) ? app.dict.suggest(v, 8) : [];
+    const list = (document.activeElement === qEl && v.length >= 2 && v.length <= 40 && SUG_RE.test(v) ? app.dict.suggest(v, 8) : [])
+      .filter(x => x && !isCareGloss(x.cn)).map(x => ({ ...x, cn: careFreeGloss(x.cn) }));
     if (!list.length) { hideSugs(); return; }
     // with “先猜再看” on, a favorited word's meaning would give the answer away before the guess
     const guess = app.settings().guessFirst;

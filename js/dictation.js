@@ -10,8 +10,9 @@
 //     word = { slug, w(英文), cn(中文) }；say 是要朗读的文字，show 是屏幕上显示的提示
 //     zh2en 读中文、显示中文、写英文；en2en 读英文、不显示、写英文；phrase 读短语的中文、写英文短语（没有中文就读英文）；
 //     en2zh 读英文、不显示、写中文。没有中文的词，zh2en 退回读英文
-//   buildDictation({ unit, words, method, exclude, include, isRequired, shuffle, rng }) -> Plan   纯函数
+//   buildDictation({ unit, words, method, exclude, include, isRequired, shuffle, rng, entryOf }) -> Plan   纯函数
 //     words：这个单元的词（curriculum.unitWords 的 { w, cn, phrase? }，或带 slug / tier 的词条都行）
+//     entryOf(slug) -> 词条：AI 讲解回来以后（没有 needs_core）用词条的 brief_cn，不用单元表上的中文
 //     默认选当前单元的必会词（tier 是 required / primary，或 isRequired(w) 为真）；课标表还没有数据时全选。
 //     phrase 只出短语，其余三种只出单词。exclude 去掉（老师没划的），include 加回认读词
 //     Plan = { unit, method, label, candidates: [{ slug, w, cn, phrase, required, on }], items: [Item], order: [slug],
@@ -93,11 +94,25 @@ function item(x) {
 // about 4 seconds plus a little per letter (Chinese characters take longer to write)
 const pauseFor = (answer, method) => Math.min(15000, 4000 + [...String(answer)].length * (method === 'en2zh' ? 1200 : 450));
 
-export function buildDictation({ unit = '', words = [], method = 'zh2en', exclude = [], include = [], isRequired, shuffle = false, rng = Math.random } = {}) {
+// the meaning to read out: once the AI core has come back for this word (entry without needs_core), its brief_cn
+// wins over the unit list's, which may be a placeholder
+function aiMeaning(entryOf, slug) {
+  if (typeof entryOf !== 'function') return '';
+  try { const e = entryOf(slug); return e && !e.needs_core && e.brief_cn ? String(e.brief_cn).trim() : ''; } catch (err) { return ''; }
+}
+
+export function buildDictation({ unit = '', words = [], method = 'zh2en', exclude = [], include = [], isRequired, shuffle = false, rng = Math.random, entryOf } = {}) {
   if (!METHOD_LABEL[method]) method = 'zh2en';
   const seen = new Set();
   const all = [];
-  for (const x of words || []) { const it = item(x); if (it && !seen.has(it.slug)) { seen.add(it.slug); all.push(it); } }
+  for (const x of words || []) {
+    const it = item(x);
+    if (!it || seen.has(it.slug)) continue;
+    seen.add(it.slug);
+    const ai = aiMeaning(entryOf, it.slug);
+    if (ai) it.cn = ai;
+    all.push(it);
+  }
   const kind = all.filter(x => (method === 'phrase' ? x.phrase : !x.phrase));
   const reqOf = x => (method === 'phrase' ? true : x.tier ? x.tier === 'required' || x.tier === 'primary' : typeof isRequired === 'function' ? !!isRequired(x.w) : true);
   // the curriculum list may still be empty: then nothing counts as required and the whole unit is on
