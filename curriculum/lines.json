@@ -4,14 +4,15 @@
   "scenes": {
     "open": "打开 App，首页的招呼",
     "ask": "收尾时引出按钮问题",
-    "praise": "夸她，{word} 是今天做对的一个词",
+    "praise": "夸她，{word} 是今天做对的一个词；tone 是语气：specific 说出做对了什么、self 和她自己以前比、short 一句短的、fact 只说事实不加夸词（家长问卷 on_praise 定默认，intake.js）",
     "close": "收尾说再见",
     "back": "漏了一天回来（回归日）",
     "late": "21:00 以后，只推轻松版",
-    "easy": "轻松版",
-    "dictation": "明天有听写，听写前后（when.phase：before / after）"
+    "easy": "轻松版；when.reason 按 plan.lightReason（late / exam / dictation / comeback / chosen），作业多的日子是 busy（家长问卷 busy_days）",
+    "dictation": "明天有听写；when.phase：before 开始前、during 一个个读、after 对完答案（wrong 有错 / perfect 全对）、retry 马上再写错的、tonight 睡前那次、morning 出门前看一眼",
+    "exam": "期中季（DESIGN 6.4）；when.exam：season 离考试 4-14 天、quiz 考前 2-3 天小卷、eve 考前一天（早点睡）、day 考试当天、done 考完 1-3 天。不放倒计时，不提分数（lines.examPhase）"
   },
-  "when": "可选条件：hour [起, 止) 按 ctx.hour（默认当前小时）；其他键要 ctx 里同名的值相等，true 表示有值且不为 0",
+  "when": "可选条件：hour [起, 止) 按 ctx.hour（默认当前小时）；其他键要 ctx 里同名的值相等，true 表示有值且不为 0，false 表示没有",
   "lines": [
     {
       "id": "open-001",
@@ -341,6 +342,9 @@
       ],
       "slots": [
         "word"
+      ],
+      "tone": [
+        "specific"
       ]
     },
     {
@@ -355,6 +359,9 @@
       ],
       "slots": [
         "word"
+      ],
+      "tone": [
+        "short"
       ]
     },
     {
@@ -370,6 +377,10 @@
       ],
       "slots": [
         "word"
+      ],
+      "tone": [
+        "self",
+        "short"
       ]
     },
     {
@@ -385,6 +396,9 @@
       ],
       "slots": [
         "word"
+      ],
+      "tone": [
+        "specific"
       ]
     },
     {
@@ -402,6 +416,9 @@
       ],
       "slots": [
         "word"
+      ],
+      "tone": [
+        "self"
       ]
     },
     {
@@ -417,6 +434,9 @@
       ],
       "slots": [
         "word"
+      ],
+      "tone": [
+        "short"
       ]
     },
     {
@@ -431,6 +451,9 @@
       ],
       "slots": [
         "word"
+      ],
+      "tone": [
+        "short"
       ]
     },
     {
@@ -447,6 +470,9 @@
       ],
       "slots": [
         "word"
+      ],
+      "tone": [
+        "self"
       ]
     },
     {
@@ -464,7 +490,10 @@
       ],
       "when": {
         "spelled": true
-      }
+      },
+      "tone": [
+        "specific"
+      ]
     },
     {
       "id": "praise-010",
@@ -483,7 +512,11 @@
       ],
       "when": {
         "hard": true
-      }
+      },
+      "tone": [
+        "specific",
+        "self"
+      ]
     },
     {
       "id": "praise-011",
@@ -497,6 +530,9 @@
       ],
       "slots": [
         "name"
+      ],
+      "tone": [
+        "short"
       ]
     },
     {
@@ -509,6 +545,237 @@
         "work",
         "hard",
         "today"
+      ],
+      "tone": [
+        "short"
+      ]
+    },
+    {
+      "id": "praise-013",
+      "scene": "praise",
+      "en": "You wrote {word} right!",
+      "zh": "{word} 你写对了！",
+      "words": [
+        "you",
+        "write",
+        "right"
+      ],
+      "slots": [
+        "word"
+      ],
+      "tone": [
+        "specific",
+        "short"
+      ],
+      "when": {
+        "wrote": true
+      }
+    },
+    {
+      "id": "praise-014",
+      "scene": "praise",
+      "en": "{word} was wrong before. Now it is right.",
+      "zh": "{word} 之前错过，现在对了。",
+      "words": [
+        "be",
+        "wrong",
+        "before",
+        "now",
+        "it",
+        "right"
+      ],
+      "slots": [
+        "word"
+      ],
+      "tone": [
+        "self",
+        "fact"
+      ],
+      "when": {
+        "again": true
+      }
+    },
+    {
+      "id": "praise-015",
+      "scene": "praise",
+      "en": "You heard {word} and got it.",
+      "zh": "听到 {word}，你就选对了。",
+      "words": [
+        "you",
+        "hear",
+        "and",
+        "get",
+        "it"
+      ],
+      "slots": [
+        "word"
+      ],
+      "tone": [
+        "specific"
+      ],
+      "when": {
+        "heard": true
+      }
+    },
+    {
+      "id": "praise-016",
+      "scene": "praise",
+      "en": "{word}: right on the first try.",
+      "zh": "{word}，第一次就对了。",
+      "words": [
+        "right",
+        "on",
+        "the",
+        "first",
+        "try"
+      ],
+      "slots": [
+        "word"
+      ],
+      "tone": [
+        "fact",
+        "specific"
+      ],
+      "when": {
+        "firstTry": true
+      }
+    },
+    {
+      "id": "praise-017",
+      "scene": "praise",
+      "en": "You got {word} right.",
+      "zh": "{word} 你答对了。",
+      "words": [
+        "you",
+        "get",
+        "right"
+      ],
+      "slots": [
+        "word"
+      ],
+      "tone": [
+        "fact",
+        "short"
+      ]
+    },
+    {
+      "id": "praise-018",
+      "scene": "praise",
+      "en": "This time {word} is right.",
+      "zh": "这次 {word} 对了。",
+      "words": [
+        "this",
+        "time",
+        "be",
+        "right"
+      ],
+      "slots": [
+        "word"
+      ],
+      "tone": [
+        "fact",
+        "self"
+      ],
+      "when": {
+        "again": true
+      }
+    },
+    {
+      "id": "praise-019",
+      "scene": "praise",
+      "en": "{word} was hard last week. Not today!",
+      "zh": "上周 {word} 还很难，今天不难了！",
+      "words": [
+        "be",
+        "hard",
+        "last",
+        "week",
+        "not",
+        "today"
+      ],
+      "slots": [
+        "word"
+      ],
+      "tone": [
+        "self"
+      ],
+      "when": {
+        "lastWeek": true
+      }
+    },
+    {
+      "id": "praise-020",
+      "scene": "praise",
+      "en": "You spelled {word} with no help.",
+      "zh": "{word} 你自己拼出来了。",
+      "words": [
+        "you",
+        "spell",
+        "with",
+        "no",
+        "help"
+      ],
+      "slots": [
+        "word"
+      ],
+      "tone": [
+        "specific",
+        "fact"
+      ],
+      "when": {
+        "spelled": true
+      }
+    },
+    {
+      "id": "praise-021",
+      "scene": "praise",
+      "en": "You know {word} well now.",
+      "zh": "{word} 你现在很熟了。",
+      "words": [
+        "you",
+        "know",
+        "well",
+        "now"
+      ],
+      "slots": [
+        "word"
+      ],
+      "tone": [
+        "self"
+      ]
+    },
+    {
+      "id": "praise-022",
+      "scene": "praise",
+      "en": "You finished today's lesson.",
+      "zh": "今天的课你做完了。",
+      "words": [
+        "you",
+        "finish",
+        "today",
+        "lesson"
+      ],
+      "tone": [
+        "fact",
+        "short"
+      ]
+    },
+    {
+      "id": "praise-023",
+      "scene": "praise",
+      "en": "{word} is right today.",
+      "zh": "今天 {word} 对了。",
+      "words": [
+        "be",
+        "right",
+        "today"
+      ],
+      "slots": [
+        "word"
+      ],
+      "tone": [
+        "fact",
+        "short"
       ]
     },
     {
@@ -978,6 +1245,143 @@
       ]
     },
     {
+      "id": "easy-009",
+      "scene": "easy",
+      "en": "You wrote a lot. Short one tonight.",
+      "zh": "你今晚写了不少，现在来一节短的。",
+      "words": [
+        "you",
+        "write",
+        "a",
+        "lot",
+        "short",
+        "one",
+        "tonight"
+      ],
+      "when": {
+        "reason": "dictation"
+      }
+    },
+    {
+      "id": "easy-010",
+      "scene": "easy",
+      "en": "Lots of homework today? Short and easy.",
+      "zh": "今天作业多吗？短一点，轻松一点。",
+      "words": [
+        "lot",
+        "of",
+        "homework",
+        "today",
+        "short",
+        "and",
+        "easy"
+      ],
+      "when": {
+        "reason": "busy"
+      }
+    },
+    {
+      "id": "easy-011",
+      "scene": "easy",
+      "en": "Busy day. A short lesson is fine.",
+      "zh": "今天忙，短短一节就好。",
+      "words": [
+        "busy",
+        "day",
+        "a",
+        "short",
+        "lesson",
+        "be",
+        "fine"
+      ],
+      "when": {
+        "reason": "busy"
+      }
+    },
+    {
+      "id": "easy-012",
+      "scene": "easy",
+      "en": "Easy one today. Big day tomorrow!",
+      "zh": "今天轻松一点，明天是大日子！",
+      "words": [
+        "easy",
+        "one",
+        "today",
+        "big",
+        "day",
+        "tomorrow"
+      ],
+      "when": {
+        "reason": "exam"
+      }
+    },
+    {
+      "id": "easy-013",
+      "scene": "easy",
+      "en": "Welcome back! Let's start with an easy one.",
+      "zh": "欢迎回来！我们从轻松的开始。",
+      "words": [
+        "welcome",
+        "back",
+        "let",
+        "us",
+        "start",
+        "with",
+        "an",
+        "easy",
+        "one"
+      ],
+      "when": {
+        "reason": "comeback"
+      }
+    },
+    {
+      "id": "easy-014",
+      "scene": "easy",
+      "en": "Easy today? Sure. Let's go!",
+      "zh": "今天做轻松版？好，开始吧！",
+      "words": [
+        "easy",
+        "today",
+        "sure",
+        "let",
+        "us",
+        "go"
+      ],
+      "when": {
+        "reason": "chosen"
+      }
+    },
+    {
+      "id": "easy-015",
+      "scene": "easy",
+      "en": "{minutes} minutes today. Let's go!",
+      "zh": "今天 {minutes} 分钟，开始吧！",
+      "words": [
+        "minute",
+        "today",
+        "let",
+        "us",
+        "go"
+      ],
+      "slots": [
+        "minutes"
+      ]
+    },
+    {
+      "id": "easy-016",
+      "scene": "easy",
+      "en": "A short lesson is still a lesson.",
+      "zh": "短课也是一节课。",
+      "words": [
+        "a",
+        "short",
+        "lesson",
+        "be",
+        "still"
+      ]
+    },
+    {
       "id": "dict-001",
       "scene": "dictation",
       "en": "Get your pen and paper.",
@@ -1053,7 +1457,10 @@
         "one",
         "more",
         "time"
-      ]
+      ],
+      "when": {
+        "phase": "during"
+      }
     },
     {
       "id": "dict-006",
@@ -1064,7 +1471,10 @@
         "take",
         "your",
         "time"
-      ]
+      ],
+      "when": {
+        "phase": "during"
+      }
     },
     {
       "id": "dict-007",
@@ -1170,7 +1580,810 @@
         "phase": "after",
         "perfect": true
       }
+    },
+    {
+      "id": "dict-013",
+      "scene": "dictation",
+      "en": "One word at a time. Ready?",
+      "zh": "一次一个词。准备好了吗？",
+      "words": [
+        "one",
+        "word",
+        "at",
+        "a",
+        "time",
+        "ready"
+      ],
+      "when": {
+        "phase": "before"
+      }
+    },
+    {
+      "id": "dict-014",
+      "scene": "dictation",
+      "en": "I read each word two times.",
+      "zh": "每个词我读两遍。",
+      "words": [
+        "i",
+        "read",
+        "each",
+        "word",
+        "two",
+        "time"
+      ],
+      "when": {
+        "phase": "before"
+      }
+    },
+    {
+      "id": "dict-015",
+      "scene": "dictation",
+      "en": "Write what you hear. Let's start.",
+      "zh": "听到什么就写什么。开始吧。",
+      "words": [
+        "write",
+        "what",
+        "you",
+        "hear",
+        "let",
+        "us",
+        "start"
+      ],
+      "when": {
+        "phase": "before"
+      }
+    },
+    {
+      "id": "dict-016",
+      "scene": "dictation",
+      "en": "Don't worry. We have time.",
+      "zh": "别担心，我们有时间。",
+      "words": [
+        "do",
+        "not",
+        "worry",
+        "we",
+        "have",
+        "time"
+      ],
+      "when": {
+        "phase": "before"
+      }
+    },
+    {
+      "id": "dict-017",
+      "scene": "dictation",
+      "en": "Next one. You can do it.",
+      "zh": "下一个，你能行。",
+      "words": [
+        "next",
+        "one",
+        "you",
+        "can",
+        "do",
+        "it"
+      ],
+      "when": {
+        "phase": "during"
+      }
+    },
+    {
+      "id": "dict-018",
+      "scene": "dictation",
+      "en": "Good. Here is the next word.",
+      "zh": "好，下一个词来了。",
+      "words": [
+        "good",
+        "here",
+        "be",
+        "the",
+        "next",
+        "word"
+      ],
+      "when": {
+        "phase": "during"
+      }
+    },
+    {
+      "id": "dict-019",
+      "scene": "dictation",
+      "en": "Not sure? Write what you think.",
+      "zh": "拿不准？按你想的写。",
+      "words": [
+        "not",
+        "sure",
+        "write",
+        "what",
+        "you",
+        "think"
+      ],
+      "when": {
+        "phase": "during"
+      }
+    },
+    {
+      "id": "dict-020",
+      "scene": "dictation",
+      "en": "Done! Now let's check together.",
+      "zh": "写完啦！我们一起来对答案。",
+      "words": [
+        "do",
+        "now",
+        "let",
+        "us",
+        "check",
+        "together"
+      ],
+      "when": {
+        "phase": "after"
+      }
+    },
+    {
+      "id": "dict-021",
+      "scene": "dictation",
+      "en": "Look at each word. Right or wrong?",
+      "zh": "一个一个看：对，还是错？",
+      "words": [
+        "look",
+        "at",
+        "each",
+        "word",
+        "right",
+        "or",
+        "wrong"
+      ],
+      "when": {
+        "phase": "after"
+      }
+    },
+    {
+      "id": "dict-022",
+      "scene": "dictation",
+      "en": "It's OK to be wrong. Try again.",
+      "zh": "错了没关系，再试一次。",
+      "words": [
+        "it",
+        "be",
+        "ok",
+        "to",
+        "wrong",
+        "try",
+        "again"
+      ],
+      "when": {
+        "phase": "after",
+        "wrong": true
+      }
+    },
+    {
+      "id": "dict-023",
+      "scene": "dictation",
+      "en": "These words will come back tomorrow.",
+      "zh": "这几个词明天还会出现。",
+      "words": [
+        "these",
+        "word",
+        "will",
+        "come",
+        "back",
+        "tomorrow"
+      ],
+      "when": {
+        "phase": "after",
+        "wrong": true
+      }
+    },
+    {
+      "id": "dict-024",
+      "scene": "dictation",
+      "en": "Every word is right. Great work!",
+      "zh": "每个词都对了，真棒！",
+      "words": [
+        "every",
+        "word",
+        "be",
+        "right",
+        "great",
+        "work"
+      ],
+      "when": {
+        "phase": "after",
+        "perfect": true
+      }
+    },
+    {
+      "id": "dict-025",
+      "scene": "dictation",
+      "en": "No wrong words today. Well done!",
+      "zh": "今天一个都没错，做得好！",
+      "words": [
+        "no",
+        "wrong",
+        "word",
+        "today",
+        "well",
+        "do"
+      ],
+      "when": {
+        "phase": "after",
+        "perfect": true
+      }
+    },
+    {
+      "id": "dict-026",
+      "scene": "dictation",
+      "en": "You are ready for tomorrow.",
+      "zh": "明天的听写你准备好了。",
+      "words": [
+        "you",
+        "be",
+        "ready",
+        "for",
+        "tomorrow"
+      ],
+      "when": {
+        "phase": "after",
+        "perfect": true
+      }
+    },
+    {
+      "id": "dict-027",
+      "scene": "dictation",
+      "en": "Just these words again. On paper.",
+      "zh": "只写这几个，还是写在纸上。",
+      "words": [
+        "just",
+        "these",
+        "word",
+        "again",
+        "on",
+        "paper"
+      ],
+      "when": {
+        "phase": "retry"
+      }
+    },
+    {
+      "id": "dict-028",
+      "scene": "dictation",
+      "en": "Again! Listen and write.",
+      "zh": "再来一遍！听一个写一个。",
+      "words": [
+        "again",
+        "listen",
+        "and",
+        "write"
+      ],
+      "when": {
+        "phase": "retry"
+      }
+    },
+    {
+      "id": "dict-029",
+      "scene": "dictation",
+      "en": "These again. Take your time.",
+      "zh": "再写这几个，慢慢来。",
+      "words": [
+        "these",
+        "again",
+        "take",
+        "your",
+        "time"
+      ],
+      "when": {
+        "phase": "retry"
+      }
+    },
+    {
+      "id": "dict-030",
+      "scene": "dictation",
+      "en": "Write them one more time.",
+      "zh": "再写一遍。",
+      "words": [
+        "write",
+        "them",
+        "one",
+        "more",
+        "time"
+      ],
+      "when": {
+        "phase": "retry"
+      }
+    },
+    {
+      "id": "dict-031",
+      "scene": "dictation",
+      "en": "One more time before bed.",
+      "zh": "睡前再写一次。",
+      "words": [
+        "one",
+        "more",
+        "time",
+        "before",
+        "bed"
+      ],
+      "when": {
+        "phase": "tonight"
+      }
+    },
+    {
+      "id": "dict-032",
+      "scene": "dictation",
+      "en": "Just one minute. Write these again.",
+      "zh": "只要一分钟，再写这几个。",
+      "words": [
+        "just",
+        "one",
+        "minute",
+        "write",
+        "these",
+        "again"
+      ],
+      "when": {
+        "phase": "tonight"
+      }
+    },
+    {
+      "id": "dict-033",
+      "scene": "dictation",
+      "en": "Do you still know them?",
+      "zh": "它们你还记得吗？",
+      "words": [
+        "do",
+        "you",
+        "still",
+        "know",
+        "them"
+      ],
+      "when": {
+        "phase": "tonight"
+      }
+    },
+    {
+      "id": "dict-034",
+      "scene": "dictation",
+      "en": "Last time tonight. Then rest.",
+      "zh": "今晚最后一次，然后休息。",
+      "words": [
+        "last",
+        "time",
+        "tonight",
+        "then",
+        "rest"
+      ],
+      "when": {
+        "phase": "tonight"
+      }
+    },
+    {
+      "id": "dict-035",
+      "scene": "dictation",
+      "en": "Good morning! Look at these first.",
+      "zh": "早上好！先看看这几个。",
+      "words": [
+        "good",
+        "morning",
+        "look",
+        "at",
+        "these",
+        "first"
+      ],
+      "when": {
+        "phase": "morning"
+      }
+    },
+    {
+      "id": "dict-036",
+      "scene": "dictation",
+      "en": "Two minutes, then go to school.",
+      "zh": "看两分钟，然后去上学。",
+      "words": [
+        "two",
+        "minute",
+        "then",
+        "go",
+        "to",
+        "school"
+      ],
+      "when": {
+        "phase": "morning"
+      }
+    },
+    {
+      "id": "dict-037",
+      "scene": "dictation",
+      "en": "The words from last night. Look again.",
+      "zh": "昨晚的那几个词，再看一眼。",
+      "words": [
+        "the",
+        "word",
+        "from",
+        "last",
+        "night",
+        "look",
+        "again"
+      ],
+      "when": {
+        "phase": "morning"
+      }
+    },
+    {
+      "id": "dict-038",
+      "scene": "dictation",
+      "en": "Read them one time. You are ready.",
+      "zh": "读一遍，你准备好了。",
+      "words": [
+        "read",
+        "them",
+        "one",
+        "time",
+        "you",
+        "be",
+        "ready"
+      ],
+      "when": {
+        "phase": "morning"
+      }
+    },
+    {
+      "id": "dict-039",
+      "scene": "dictation",
+      "en": "Have a good day at school!",
+      "zh": "在学校过得开心！",
+      "words": [
+        "have",
+        "a",
+        "good",
+        "day",
+        "at",
+        "school"
+      ],
+      "when": {
+        "phase": "morning"
+      }
+    },
+    {
+      "id": "exam-001",
+      "scene": "exam",
+      "en": "Hi {name}! Let's review the old words.",
+      "zh": "嗨 {name}！我们复习学过的词。",
+      "words": [
+        "hi",
+        "let",
+        "us",
+        "review",
+        "the",
+        "old",
+        "word"
+      ],
+      "slots": [
+        "name"
+      ],
+      "when": {
+        "exam": "season"
+      }
+    },
+    {
+      "id": "exam-002",
+      "scene": "exam",
+      "en": "Old words today. You know many!",
+      "zh": "今天复习旧词，你已经认识很多了！",
+      "words": [
+        "old",
+        "word",
+        "today",
+        "you",
+        "know",
+        "many"
+      ],
+      "when": {
+        "exam": "season"
+      }
+    },
+    {
+      "id": "exam-003",
+      "scene": "exam",
+      "en": "A little review every day helps.",
+      "zh": "每天复习一点，很有用。",
+      "words": [
+        "a",
+        "little",
+        "review",
+        "every",
+        "day",
+        "help"
+      ],
+      "when": {
+        "exam": "season"
+      }
+    },
+    {
+      "id": "exam-004",
+      "scene": "exam",
+      "en": "Review time! Ready, {name}?",
+      "zh": "复习时间到！准备好了吗，{name}？",
+      "words": [
+        "review",
+        "time",
+        "ready"
+      ],
+      "slots": [
+        "name"
+      ],
+      "when": {
+        "exam": "season"
+      }
+    },
+    {
+      "id": "exam-005",
+      "scene": "exam",
+      "en": "Today we look at words you learned.",
+      "zh": "今天我们看看你学过的词。",
+      "words": [
+        "today",
+        "we",
+        "look",
+        "at",
+        "word",
+        "you",
+        "learn"
+      ],
+      "when": {
+        "exam": "season"
+      }
+    },
+    {
+      "id": "exam-006",
+      "scene": "exam",
+      "en": "A small test today. Ready?",
+      "zh": "今天做一份小卷子，准备好了吗？",
+      "words": [
+        "a",
+        "small",
+        "test",
+        "today",
+        "ready"
+      ],
+      "when": {
+        "exam": "quiz"
+      }
+    },
+    {
+      "id": "exam-007",
+      "scene": "exam",
+      "en": "It is short. You can do it.",
+      "zh": "卷子很短，你能行。",
+      "words": [
+        "it",
+        "be",
+        "short",
+        "you",
+        "can",
+        "do"
+      ],
+      "when": {
+        "exam": "quiz"
+      }
+    },
+    {
+      "id": "exam-008",
+      "scene": "exam",
+      "en": "No hurry. Just do your best.",
+      "zh": "不着急，尽力就好。",
+      "words": [
+        "no",
+        "hurry",
+        "just",
+        "do",
+        "your",
+        "good"
+      ],
+      "when": {
+        "exam": "quiz"
+      }
+    },
+    {
+      "id": "exam-009",
+      "scene": "exam",
+      "en": "Take your time with each one.",
+      "zh": "每一题都慢慢来。",
+      "words": [
+        "take",
+        "your",
+        "time",
+        "with",
+        "each",
+        "one"
+      ],
+      "when": {
+        "exam": "quiz"
+      }
+    },
+    {
+      "id": "exam-010",
+      "scene": "exam",
+      "en": "Big day tomorrow. Go to bed early!",
+      "zh": "明天是大日子，今天早点睡！",
+      "words": [
+        "big",
+        "day",
+        "tomorrow",
+        "go",
+        "to",
+        "bed",
+        "early"
+      ],
+      "when": {
+        "exam": "eve"
+      }
+    },
+    {
+      "id": "exam-011",
+      "scene": "exam",
+      "en": "Just a short one. Then sleep early.",
+      "zh": "只做一节短的，然后早点睡。",
+      "words": [
+        "just",
+        "a",
+        "short",
+        "one",
+        "then",
+        "sleep",
+        "early"
+      ],
+      "when": {
+        "exam": "eve"
+      }
+    },
+    {
+      "id": "exam-012",
+      "scene": "exam",
+      "en": "You are ready. Sleep well tonight.",
+      "zh": "你准备好了。今晚好好睡。",
+      "words": [
+        "you",
+        "be",
+        "ready",
+        "sleep",
+        "well",
+        "tonight"
+      ],
+      "when": {
+        "exam": "eve"
+      }
+    },
+    {
+      "id": "exam-013",
+      "scene": "exam",
+      "en": "Early to bed tonight, {name}.",
+      "zh": "今晚早点睡，{name}。",
+      "words": [
+        "early",
+        "to",
+        "bed",
+        "tonight"
+      ],
+      "slots": [
+        "name"
+      ],
+      "when": {
+        "exam": "eve"
+      }
+    },
+    {
+      "id": "exam-014",
+      "scene": "exam",
+      "en": "Easy one tonight. Rest well.",
+      "zh": "今晚轻松一点，好好休息。",
+      "words": [
+        "easy",
+        "one",
+        "tonight",
+        "rest",
+        "well"
+      ],
+      "when": {
+        "exam": "eve"
+      }
+    },
+    {
+      "id": "exam-015",
+      "scene": "exam",
+      "en": "You can do it today, {name}!",
+      "zh": "今天你能行，{name}！",
+      "words": [
+        "you",
+        "can",
+        "do",
+        "it",
+        "today"
+      ],
+      "slots": [
+        "name"
+      ],
+      "when": {
+        "exam": "day",
+        "hour": [
+          5,
+          15
+        ]
+      }
+    },
+    {
+      "id": "exam-016",
+      "scene": "exam",
+      "en": "Today was a big day. Rest well.",
+      "zh": "今天是个大日子，好好休息。",
+      "words": [
+        "today",
+        "be",
+        "a",
+        "big",
+        "day",
+        "rest",
+        "well"
+      ],
+      "when": {
+        "exam": "day",
+        "hour": [
+          15,
+          24
+        ]
+      }
+    },
+    {
+      "id": "exam-017",
+      "scene": "exam",
+      "en": "The test is over. You worked hard!",
+      "zh": "考完了，你一直很用功！",
+      "words": [
+        "the",
+        "test",
+        "be",
+        "over",
+        "you",
+        "work",
+        "hard"
+      ],
+      "when": {
+        "exam": "done"
+      }
+    },
+    {
+      "id": "exam-018",
+      "scene": "exam",
+      "en": "No more tests. Back to our lessons!",
+      "zh": "考完啦，我们回到平常的课！",
+      "words": [
+        "no",
+        "more",
+        "test",
+        "back",
+        "to",
+        "our",
+        "lesson"
+      ],
+      "when": {
+        "exam": "done"
+      }
+    },
+    {
+      "id": "exam-019",
+      "scene": "exam",
+      "en": "Time for new words again!",
+      "zh": "又可以学新词啦！",
+      "words": [
+        "time",
+        "for",
+        "new",
+        "word",
+        "again"
+      ],
+      "when": {
+        "exam": "done"
+      }
     }
   ],
-  "questions": []
+  "questions": [],
+  "tone": "可选，只在 praise 里用：ctx.tone 给了时优先挑带这个 tone 的句子，没有就照常挑"
 }

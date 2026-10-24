@@ -1,0 +1,974 @@
+{
+  "version": 1,
+  "source": "语法卡（DESIGN 5.4、5.5）：v1 的三张卡，Claude 原创预写，Wei 过目。例句和题目只用小学 505 词和七上 Starter 到 Unit 3 的词，不含课文。be 动词和名词复数两块地基并在三张卡的例句和干扰项里。每题：answer 是正确选项，wrong 是干扰项和它的误解标签；hints 是四级提示（1 点出考点、2 给一个像的例子、3 给第一步、4 讲清楚）；variant 是第 4 级之后马上出的变式题；spares 是备用题，错过的题 1、3、7 天后从这里挑同类的新句子，热身里每天混 1-2 道也从这里出。kind：fill 填空（stem 里的 ____ 是空，cue 是括号里的提示），pick 选出正确的一项（ask 是题目要求）。",
+  "tags": {
+    "subj_vs_poss": { "zh": "主格和物主代词（I / my）", "kind": "grammar" },
+    "be_agree": { "zh": "be 动词和主语不一致（I is / they is）", "kind": "grammar" },
+    "poss_plural": { "zh": "复数名词的所有格（students' / students's）", "kind": "grammar" }
+  },
+  "cards": [
+    {
+      "id": "pronoun",
+      "unit": "U1",
+      "title": "人称代词和物主代词",
+      "points": ["g:personal_pronoun", "g:possessive_pronoun"],
+      "foundations": ["g:be", "g:subject_pronoun", "g:plural"],
+      "rule": [
+        "句子开头当主语，用主格：I、you、he、she、it、we、they。",
+        "放在动词或 with、for、to 这类小词后面，用宾格：me、you、him、her、it、us、them。",
+        "说“谁的”用物主代词：后面跟名词，用形容词性物主代词（my book）；后面不跟名词，用名词性物主代词（The book is mine.）。",
+        "be 动词跟着主语走：I 用 am，he、she、it 用 is，we、you、they 用 are。"
+      ],
+      "table": {
+        "head": ["", "主格", "宾格", "形容词性物主代词", "名词性物主代词"],
+        "rows": [
+          ["我", "I", "me", "my", "mine"],
+          ["你（们）", "you", "you", "your", "yours"],
+          ["他", "he", "him", "his", "his"],
+          ["她", "she", "her", "her", "hers"],
+          ["它", "it", "it", "its", "its"],
+          ["我们", "we", "us", "our", "ours"],
+          ["他们", "they", "them", "their", "theirs"]
+        ]
+      },
+      "examples": [
+        { "en": "I am a student. This is my bag.", "zh": "我是学生。这是我的书包。", "mark": ["I", "my"] },
+        { "en": "He is my brother. I like him.", "zh": "他是我哥哥。我喜欢他。", "mark": ["He", "him"] },
+        { "en": "She is our teacher. We love her.", "zh": "她是我们的老师。我们爱她。", "mark": ["She", "our", "her"] },
+        { "en": "This pen is mine. That pen is yours.", "zh": "这支笔是我的。那支笔是你的。", "mark": ["mine", "yours"] },
+        { "en": "Lucy and Lily are my friends. Their classroom is big.", "zh": "露西和莉莉是我的朋友。她们的教室很大。", "mark": ["are", "Their"] },
+        { "en": "Is this your book? No, it's hers.", "zh": "这是你的书吗？不，是她的。", "mark": ["your", "hers"] },
+        { "en": "Please come and play with us.", "zh": "请来和我们一起玩。", "mark": ["us"] }
+      ],
+      "families": {
+        "subj": { "name": "主格", "point": "g:personal_pronoun" },
+        "obj": { "name": "宾格", "point": "g:personal_pronoun" },
+        "adj": { "name": "形容词性物主代词", "point": "g:possessive_pronoun" },
+        "pron": { "name": "名词性物主代词", "point": "g:possessive_pronoun" },
+        "gender": { "name": "his 和 her", "point": "g:possessive_pronoun" },
+        "be": { "name": "be 动词", "point": "g:be" },
+        "plural": { "name": "名词复数", "point": "g:plural" }
+      },
+      "questions": [
+        {
+          "id": "q01", "part": 1, "family": "adj", "kind": "fill",
+          "stem": "This is ____ book.", "cue": "I",
+          "answer": "my", "wrong": { "I": "subj_vs_poss", "me": "obj_vs_poss", "mine": "poss_adj_vs_pron" },
+          "zh": "这是我的书。",
+          "hints": [
+            "这里要说“谁的”书，后面还跟着 book。",
+            "像这样：That is your pen. your 后面跟着 pen。",
+            "“我的”有两个：my 和 mine。后面跟名词的是哪一个？",
+            "答案是 my。my 后面要跟名词（my book）；mine 单独用（The book is mine.）。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "Is this ____ bag?", "cue": "she",
+            "answer": "her", "wrong": { "she": "subj_vs_poss", "hers": "poss_adj_vs_pron", "his": "he_she" },
+            "zh": "这是她的书包吗？", "explain": "her 后面跟名词 bag，是“她的书包”。"
+          }
+        },
+        {
+          "id": "q02", "part": 1, "family": "subj", "kind": "fill",
+          "stem": "____ is my sister.", "cue": "她",
+          "answer": "She", "wrong": { "Her": "subj_obj", "Hers": "subj_vs_poss", "He": "he_she" },
+          "zh": "她是我姐姐。",
+          "hints": [
+            "空在句子开头，说的是“谁是我姐姐”。开头当主语，用主格。",
+            "像这样：He is my brother. 开头用主格 he。",
+            "“她”有 she 和 her 两个。哪一个放在句子开头？",
+            "答案是 She。句子开头当主语用主格 she；her 放在动词后面，或者表示“她的”。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "____ are my friends.", "cue": "他们",
+            "answer": "They", "wrong": { "Them": "subj_obj", "Their": "subj_vs_poss", "Theirs": "subj_vs_poss" },
+            "zh": "他们是我的朋友。", "explain": "句子开头当主语用主格 They；them 放在动词后面。"
+          }
+        },
+        {
+          "id": "q03", "part": 1, "family": "obj", "kind": "fill",
+          "stem": "Can you help ____?", "cue": "I",
+          "answer": "me", "wrong": { "I": "subj_obj", "my": "obj_vs_poss" },
+          "zh": "你能帮帮我吗？",
+          "hints": [
+            "空在 help 后面，说的是“帮谁”。动词后面用宾格。",
+            "像这样：I like him. him 在动词 like 后面。",
+            "“我”有 I 和 me 两个。哪一个放在动词后面？",
+            "答案是 me。help 是动词，动词后面用宾格 me；I 只放在句子开头。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "I like ____ very much.", "cue": "she",
+            "answer": "her", "wrong": { "she": "subj_obj", "him": "he_she" },
+            "zh": "我非常喜欢她。", "explain": "like 是动词，后面用宾格 her。"
+          }
+        },
+        {
+          "id": "q04", "part": 1, "family": "be", "kind": "fill",
+          "stem": "I ____ a new student.",
+          "answer": "am", "wrong": { "is": "be_agree", "are": "be_agree", "be": "be_agree" },
+          "zh": "我是新同学。",
+          "hints": [
+            "先看主语是谁：I。be 动词要跟着主语变。",
+            "像这样：She is my friend. 主语是 she，用 is。",
+            "am、is、are 里，哪一个只跟 I 一起用？",
+            "答案是 am。I 用 am，he、she、it 用 is，we、you、they 用 are。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "My friends ____ in the classroom.",
+            "answer": "are", "wrong": { "is": "be_agree", "am": "be_agree", "be": "be_agree" },
+            "zh": "我的朋友们在教室里。", "explain": "friends 是好几个人，用 are。"
+          }
+        },
+        {
+          "id": "q05", "part": 1, "family": "pron", "kind": "fill",
+          "stem": "This pen is not yours. It's ____.", "cue": "我的",
+          "answer": "mine", "wrong": { "my": "poss_adj_vs_pron", "me": "obj_vs_poss", "I": "subj_vs_poss" },
+          "zh": "这支笔不是你的，是我的。",
+          "hints": [
+            "空后面没有名词了，句子到这里就完了。",
+            "像这样：Is this bag yours? yours 后面不跟名词。",
+            "“我的”有 my 和 mine。后面不跟名词，用哪一个？",
+            "答案是 mine。mine 单独用，意思是“我的笔”；my 后面一定要跟名词。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "That bag is ____.", "cue": "她的",
+            "answer": "hers", "wrong": { "her": "poss_adj_vs_pron", "she": "subj_vs_poss", "his": "he_she" },
+            "zh": "那个包是她的。", "explain": "后面不跟名词，用 hers。"
+          }
+        },
+        {
+          "id": "q06", "part": 2, "family": "gender", "kind": "fill",
+          "stem": "Mike is my friend. ____ mother is a doctor.",
+          "answer": "His", "wrong": { "Her": "he_she", "He": "subj_vs_poss", "Him": "obj_vs_poss" },
+          "zh": "迈克是我的朋友。他的妈妈是医生。",
+          "hints": [
+            "这里要说“谁的”妈妈。Mike 是男孩还是女孩？",
+            "像这样：Lucy is my sister. Her bag is red. Lucy 是女孩，用 her。",
+            "男孩的“他的”，是 his 还是 her？",
+            "答案是 His。Mike 是男孩，“他的”用 his；her 是“她的”，说女孩。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "Lily is in my class. ____ English is very good.",
+            "answer": "Her", "wrong": { "His": "he_she", "She": "subj_vs_poss", "Hers": "poss_adj_vs_pron" },
+            "zh": "莉莉在我们班。她的英语很好。", "explain": "Lily 是女孩，后面跟名词 English，用 Her。"
+          }
+        },
+        {
+          "id": "q07", "part": 2, "family": "obj", "kind": "fill",
+          "stem": "Come and play with ____.", "cue": "we",
+          "answer": "us", "wrong": { "we": "subj_obj", "our": "obj_vs_poss" },
+          "zh": "来和我们一起玩吧。",
+          "hints": [
+            "空在 with 后面。with、for、to 这类小词后面用宾格。",
+            "像这样：Can you go with me? me 在 with 后面。",
+            "“我们”有 we 和 us 两个。哪一个放在 with 后面？",
+            "答案是 us。with 后面用宾格 us；we 只放在句子开头。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "This gift is for ____.", "cue": "they",
+            "answer": "them", "wrong": { "they": "subj_obj", "their": "obj_vs_poss" },
+            "zh": "这份礼物是给他们的。", "explain": "for 后面用宾格 them。"
+          }
+        },
+        {
+          "id": "q08", "part": 2, "family": "be", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "She is my friend.", "wrong": { "She my friend.": "be_missing", "Her is my friend.": "subj_obj", "She are my friend.": "be_agree" },
+          "zh": "她是我的朋友。",
+          "hints": [
+            "看两处：开头用的是不是主格？有没有 be 动词？",
+            "像这样：He is my brother. 开头用 he，后面跟着 is。",
+            "先去掉开头用错的那句，再看 be 动词对不对。",
+            "答案是 She is my friend. 开头用主格 she，后面要有 be 动词，she 用 is。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "They are my classmates.", "wrong": { "They my classmates.": "be_missing", "Them are my classmates.": "subj_obj", "They is my classmates.": "be_agree" },
+            "zh": "他们是我的同学。", "explain": "开头用主格 they，后面要有 be 动词，they 用 are。"
+          }
+        },
+        {
+          "id": "q09", "part": 2, "family": "plural", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "These are my books.", "wrong": { "These are my book.": "plural_missing", "These is my books.": "be_agree", "These are mine books.": "poss_adj_vs_pron" },
+          "zh": "这些是我的书。",
+          "hints": [
+            "看三处：be 动词、book 要不要加 s、my 还是 mine。",
+            "像这样：Those are your pens. those 配 are，pens 加了 s。",
+            "these 是“这些”，后面的书是一本还是好几本？",
+            "答案是 These are my books. these 用 are；“这些书”是 books；名词前面用 my。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "Those are her pencils.", "wrong": { "Those are her pencil.": "plural_missing", "Those is her pencils.": "be_agree", "Those are hers pencils.": "poss_adj_vs_pron" },
+            "zh": "那些是她的铅笔。", "explain": "those 用 are，pencils 加 s，名词前面用 her。"
+          }
+        },
+        {
+          "id": "q10", "part": 2, "family": "pron", "kind": "fill",
+          "stem": "Is this your schoolbag? No, it isn't. ____ is blue.", "cue": "我的",
+          "answer": "Mine", "wrong": { "My": "poss_adj_vs_pron", "Me": "obj_vs_poss", "I": "subj_vs_poss" },
+          "zh": "这是你的书包吗？不是。我的是蓝色的。",
+          "hints": [
+            "这里的意思是“我的（书包）是蓝色的”，后面没有再说 schoolbag。",
+            "像这样：Your bag is red. Mine is green. Mine 就是 my bag。",
+            "后面没有名词，用 My 还是 Mine？",
+            "答案是 Mine。Mine 等于 my schoolbag，可以单独用；My 后面要跟名词。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "Our classroom is big. ____ is small.", "cue": "他们的",
+            "answer": "Theirs", "wrong": { "Their": "poss_adj_vs_pron", "Them": "obj_vs_poss", "They": "subj_vs_poss" },
+            "zh": "我们的教室很大，他们的很小。", "explain": "后面没有名词，用 Theirs，意思是“他们的教室”。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01", "family": "adj", "kind": "fill",
+          "stem": "____ name is Tom.", "cue": "I",
+          "answer": "My", "wrong": { "I": "subj_vs_poss", "Me": "obj_vs_poss", "Mine": "poss_adj_vs_pron" },
+          "zh": "我的名字是汤姆。",
+          "hints": ["这里要说“我的”名字，后面跟着 name。", "像这样：Her name is Lucy. Her 后面跟着 name。", "后面有名词 name，用 My 还是 Mine？", "答案是 My。My 后面跟名词 name；Mine 单独用。"]
+        },
+        {
+          "id": "s02", "family": "adj", "kind": "fill",
+          "stem": "We love ____ school.", "cue": "we",
+          "answer": "our", "wrong": { "we": "subj_vs_poss", "us": "obj_vs_poss", "ours": "poss_adj_vs_pron" },
+          "zh": "我们爱我们的学校。",
+          "hints": ["这里要说“我们的”学校，后面跟着 school。", "像这样：They love their teacher. their 后面跟着 teacher。", "后面有名词 school，用 our 还是 ours？", "答案是 our。our 后面跟名词：our school；ours 单独用。"]
+        },
+        {
+          "id": "s03", "family": "adj", "kind": "fill",
+          "stem": "Is that ____ cat?", "cue": "they",
+          "answer": "their", "wrong": { "they": "subj_vs_poss", "them": "obj_vs_poss", "theirs": "poss_adj_vs_pron" },
+          "zh": "那是他们的猫吗？",
+          "hints": ["这里要说“他们的”猫，后面跟着 cat。", "像这样：Is this your dog? your 后面跟着 dog。", "后面有名词 cat，用 their 还是 theirs？", "答案是 their。their 后面跟名词 cat；theirs 单独用。"]
+        },
+        {
+          "id": "s04", "family": "subj", "kind": "fill",
+          "stem": "____ is a doctor.", "cue": "他",
+          "answer": "He", "wrong": { "Him": "subj_obj", "His": "subj_vs_poss", "She": "he_she" },
+          "zh": "他是一名医生。",
+          "hints": ["空在句子开头，说的是“谁是医生”。开头用主格。", "像这样：She is a teacher. 开头用 she。", "“他”有 he 和 him 两个。哪一个放在句子开头？", "答案是 He。句子开头当主语用主格 he；him 放在动词后面。"]
+        },
+        {
+          "id": "s05", "family": "subj", "kind": "fill",
+          "stem": "____ are in the park.", "cue": "我们",
+          "answer": "We", "wrong": { "Us": "subj_obj", "Our": "subj_vs_poss", "Ours": "subj_vs_poss" },
+          "zh": "我们在公园里。",
+          "hints": ["空在句子开头，说的是“谁在公园里”。", "像这样：They are at school. 开头用 they。", "“我们”有 we 和 us 两个。哪一个放在句子开头？", "答案是 We。开头当主语用主格 we；us 放在动词或 with 这类小词后面。"]
+        },
+        {
+          "id": "s06", "family": "obj", "kind": "fill",
+          "stem": "Please tell ____ your name.", "cue": "I",
+          "answer": "me", "wrong": { "I": "subj_obj", "my": "obj_vs_poss", "mine": "obj_vs_poss" },
+          "zh": "请告诉我你的名字。",
+          "hints": ["空在 tell 后面，说的是“告诉谁”。动词后面用宾格。", "像这样：Please help him. him 在 help 后面。", "“我”有 I 和 me 两个。哪一个放在动词后面？", "答案是 me。tell 是动词，后面用宾格 me。"]
+        },
+        {
+          "id": "s07", "family": "obj", "kind": "fill",
+          "stem": "Where is Tom? I can't see ____.", "cue": "he",
+          "answer": "him", "wrong": { "he": "subj_obj", "her": "he_she" },
+          "zh": "汤姆在哪儿？我看不见他。",
+          "hints": ["空在 see 后面，说的是“看不见谁”。", "像这样：I like her. her 在 like 后面。", "“他”有 he 和 him 两个。哪一个放在动词后面？", "答案是 him。see 是动词，后面用宾格 him。"]
+        },
+        {
+          "id": "s08", "family": "obj", "kind": "fill",
+          "stem": "Our teacher is very kind to ____.", "cue": "we",
+          "answer": "us", "wrong": { "we": "subj_obj", "our": "obj_vs_poss" },
+          "zh": "我们的老师对我们很好。",
+          "hints": ["空在 to 后面，说的是“对谁好”。", "像这样：This gift is for me. me 在 for 后面。", "“我们”放在 to 后面，用 we 还是 us？", "答案是 us。to 后面用宾格 us。"]
+        },
+        {
+          "id": "s09", "family": "pron", "kind": "fill",
+          "stem": "Is this bike his? No, it's ____.", "cue": "她的",
+          "answer": "hers", "wrong": { "her": "poss_adj_vs_pron", "she": "subj_vs_poss", "him": "he_she" },
+          "zh": "这辆自行车是他的吗？不，是她的。",
+          "hints": ["空后面没有名词，句子到这里就完了。", "像这样：This pen is mine. mine 后面不跟名词。", "“她的”有 her 和 hers。后面不跟名词，用哪一个？", "答案是 hers。hers 单独用，意思是“她的自行车”；her 后面要跟名词。"]
+        },
+        {
+          "id": "s10", "family": "pron", "kind": "fill",
+          "stem": "My pencil is short. ____ is long.", "cue": "你的",
+          "answer": "Yours", "wrong": { "Your": "poss_adj_vs_pron", "You": "subj_vs_poss" },
+          "zh": "我的铅笔很短，你的很长。",
+          "hints": ["这里说的是“你的（铅笔）很长”，后面没有再说 pencil。", "像这样：Your bag is red. Mine is green. Mine 就是 my bag。", "后面没有名词，用 Your 还是 Yours？", "答案是 Yours。Yours 等于 your pencil，可以单独用；Your 后面要跟名词。"]
+        },
+        {
+          "id": "s11", "family": "gender", "kind": "fill",
+          "stem": "Lucy is my cousin. I like ____ very much.",
+          "answer": "her", "wrong": { "him": "he_she", "she": "subj_obj" },
+          "zh": "露西是我的表姐。我非常喜欢她。",
+          "hints": ["空在 like 后面，Lucy 是女孩。", "像这样：Tom is my friend. I like him. Tom 是男孩，用 him。", "女孩放在动词后面，用 her 还是 him？", "答案是 her。Lucy 是女孩，放在 like 后面用宾格 her。"]
+        },
+        {
+          "id": "s12", "family": "gender", "kind": "fill",
+          "stem": "My uncle is a farmer. ____ farm is big.",
+          "answer": "His", "wrong": { "Her": "he_she", "He": "subj_vs_poss", "Him": "obj_vs_poss" },
+          "zh": "我叔叔是农民。他的农场很大。",
+          "hints": ["这里要说“谁的”农场。uncle 是男的还是女的？", "像这样：My aunt is a nurse. Her home is near the park. aunt 是女的，用 her。", "男的“他的”，是 his 还是 her？", "答案是 His。uncle 是男的，“他的”用 his，后面跟名词 farm。"]
+        },
+        {
+          "id": "s13", "family": "be", "kind": "fill",
+          "stem": "He ____ my good friend.",
+          "answer": "is", "wrong": { "am": "be_agree", "are": "be_agree", "be": "be_agree" },
+          "zh": "他是我的好朋友。",
+          "hints": ["先看主语是谁：He。", "像这样：She is a teacher. she 用 is。", "he、she、it 用 am、is 还是 are？", "答案是 is。he、she、it 用 is；I 用 am；we、you、they 用 are。"]
+        },
+        {
+          "id": "s14", "family": "be", "kind": "fill",
+          "stem": "We ____ in Class 3.",
+          "answer": "are", "wrong": { "am": "be_agree", "is": "be_agree", "be": "be_agree" },
+          "zh": "我们在三班。",
+          "hints": ["先看主语是谁：We。", "像这样：They are my friends. they 用 are。", "we 是好几个人，用 is 还是 are？", "答案是 are。we、you、they 用 are。"]
+        },
+        {
+          "id": "s15", "family": "be", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "I am twelve.", "wrong": { "I twelve.": "be_missing", "I is twelve.": "be_agree", "Me am twelve.": "subj_obj" },
+          "zh": "我十二岁。",
+          "hints": ["看两处：有没有 be 动词？开头用的是不是主格？", "像这样：He is ten. 后面跟着 is。", "先去掉没有 be 动词的那句。I 后面用哪个 be 动词？", "答案是 I am twelve. 说年龄也要有 be 动词，I 用 am。"]
+        },
+        {
+          "id": "s16", "family": "plural", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "They are my friends.", "wrong": { "They are my friend.": "plural_missing", "They is my friends.": "be_agree", "They are mine friends.": "poss_adj_vs_pron" },
+          "zh": "他们是我的朋友。",
+          "hints": ["看三处：be 动词、friend 要不要加 s、my 还是 mine。", "像这样：These are my books. books 加了 s。", "they 是好几个人，friend 要不要变成复数？", "答案是 They are my friends. they 用 are；好几个朋友是 friends；名词前面用 my。"]
+        },
+        {
+          "id": "s17", "family": "plural", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "These are her shoes.", "wrong": { "These are her shoe.": "plural_missing", "This are her shoes.": "be_agree", "These are hers shoes.": "poss_adj_vs_pron" },
+          "zh": "这些是她的鞋。",
+          "hints": ["看三处：these 还是 this、shoe 加不加 s、her 还是 hers。", "像这样：Those are her pencils. those 配 are，pencils 加了 s。", "鞋是一双，用 these 和 shoes。名词前面用 her 还是 hers？", "答案是 These are her shoes. 好几个东西用 these 和 are，shoe 加 s，名词前面用 her。"]
+        }
+      ]
+    },
+    {
+      "id": "there_be",
+      "unit": "U2",
+      "title": "there be",
+      "points": ["g:there_be", "g:how_many_much"],
+      "foundations": ["g:be_agree", "g:plural", "g:countable"],
+      "rule": [
+        "说“某个地方有什么”，用 there be：There is / There are + 东西 + 地方。",
+        "一个东西，或者不能数的东西（water、milk、bread），用 There is；两个以上的东西用 There are，名词要加 s。",
+        "“某人有”用 have（I have a cat.）；“某地有”用 there be，不说 there have、there has。",
+        "问“有没有”，把 is 或 are 放到 there 前面：Is there a pen? 问“有多少”：How many + 复数名词 + are there?"
+      ],
+      "examples": [
+        { "en": "There is a cat under the table.", "zh": "桌子下面有一只猫。", "mark": ["There is"] },
+        { "en": "There are two birds in the tree.", "zh": "树上有两只鸟。", "mark": ["There are", "birds"] },
+        { "en": "There is some water in the cup.", "zh": "杯子里有一些水。", "mark": ["There is", "water"] },
+        { "en": "There are many books in our library.", "zh": "我们的图书馆里有很多书。", "mark": ["There are", "books"] },
+        { "en": "I have a dog. There is a dog in my house.", "zh": "我有一只狗。我家里有一只狗。", "mark": ["have", "There is"] },
+        { "en": "Is there a pen in your bag? Yes, there is.", "zh": "你的包里有钢笔吗？有。", "mark": ["Is there"] },
+        { "en": "How many students are there in your class?", "zh": "你们班有多少学生？", "mark": ["How many", "students", "are there"] }
+      ],
+      "families": {
+        "is": { "name": "There is", "point": "g:there_be" },
+        "are": { "name": "There are", "point": "g:there_be" },
+        "plural": { "name": "名词复数", "point": "g:plural" },
+        "uncount": { "name": "不可数名词", "point": "g:countable" },
+        "have": { "name": "there be 和 have", "point": "g:there_be" },
+        "q": { "name": "there be 问句", "point": "g:there_be" },
+        "howmany": { "name": "How many", "point": "g:how_many_much" }
+      },
+      "questions": [
+        {
+          "id": "q01", "part": 1, "family": "is", "kind": "fill",
+          "stem": "There ____ a book on the desk.",
+          "answer": "is", "wrong": { "are": "there_be_agree", "has": "there_have", "have": "there_have" },
+          "zh": "书桌上有一本书。",
+          "hints": [
+            "这句说“书桌上有一本书”，是“某地有”。",
+            "像这样：There is a cat under the table. 一只猫，用 is。",
+            "a book 是一本，用 is 还是 are？",
+            "答案是 is。“某地有”用 there be；a book 是一个，用 There is。has 是“某人有”。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "There ____ a clock on the wall.",
+            "answer": "is", "wrong": { "are": "there_be_agree", "has": "there_have", "have": "there_have" },
+            "zh": "墙上有一个钟。", "explain": "a clock 是一个，用 There is。"
+          }
+        },
+        {
+          "id": "q02", "part": 1, "family": "are", "kind": "fill",
+          "stem": "There ____ three apples in the box.",
+          "answer": "are", "wrong": { "is": "there_be_agree", "has": "there_have", "have": "there_have" },
+          "zh": "盒子里有三个苹果。",
+          "hints": [
+            "看 be 后面的东西：three apples 是几个？",
+            "像这样：There are two birds in the tree. 两只鸟，用 are。",
+            "三个苹果是两个以上，用 is 还是 are？",
+            "答案是 are。两个以上的东西用 There are，名词也加了 s：apples。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "There ____ four chairs in the room.",
+            "answer": "are", "wrong": { "is": "there_be_agree", "has": "there_have", "have": "there_have" },
+            "zh": "房间里有四把椅子。", "explain": "four chairs 是四把，用 There are。"
+          }
+        },
+        {
+          "id": "q03", "part": 1, "family": "plural", "kind": "fill",
+          "stem": "There are two ____ on the bed.",
+          "answer": "dolls", "wrong": { "doll": "plural_missing", "a doll": "plural_missing" },
+          "zh": "床上有两个娃娃。",
+          "hints": [
+            "前面有 two，后面的名词要变成复数。",
+            "像这样：There are three apples in the box. apple 变成了 apples。",
+            "doll 变成复数，后面要加什么？",
+            "答案是 dolls。two 是两个，名词加 s：two dolls。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "There are many ____ in the park.",
+            "answer": "flowers", "wrong": { "flower": "plural_missing", "a flower": "plural_missing" },
+            "zh": "公园里有很多花。", "explain": "many 后面跟复数名词，flower 加 s。"
+          }
+        },
+        {
+          "id": "q04", "part": 1, "family": "uncount", "kind": "fill",
+          "stem": "There ____ some milk in the cup.",
+          "answer": "is", "wrong": { "are": "there_be_agree", "has": "there_have", "have": "there_have" },
+          "zh": "杯子里有一些牛奶。",
+          "hints": [
+            "milk 是牛奶。牛奶能一个一个数吗？",
+            "像这样：There is some water in the cup. water 不能数，用 is。",
+            "不能数的东西，用 is 还是 are？",
+            "答案是 is。milk、water、bread 这类不能数的东西用 There is，前面有 some 也一样。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "There ____ some bread on the table.",
+            "answer": "is", "wrong": { "are": "there_be_agree", "has": "there_have", "have": "there_have" },
+            "zh": "桌子上有一些面包。", "explain": "bread 不能数，用 There is。"
+          }
+        },
+        {
+          "id": "q05", "part": 1, "family": "have", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "There are two cats in my house.", "wrong": { "There have two cats in my house.": "there_have", "There is two cats in my house.": "there_be_agree", "There are two cat in my house.": "plural_missing" },
+          "zh": "我家里有两只猫。",
+          "hints": [
+            "看三处：there 后面跟什么，is 还是 are，cat 要不要加 s。",
+            "像这样：There are three apples in the box. there 后面是 are，apples 加了 s。",
+            "“某地有”不用 have。先去掉 have 那句，再看剩下的。",
+            "答案是 There are two cats in my house. “某地有”用 there be；两只猫用 are，cat 加 s。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "There is a dog in the garden.", "wrong": { "There has a dog in the garden.": "there_have", "There are a dog in the garden.": "there_be_agree" },
+            "zh": "花园里有一只狗。", "explain": "“某地有”用 there be；a dog 是一只，用 There is。"
+          }
+        },
+        {
+          "id": "q06", "part": 2, "family": "q", "kind": "fill",
+          "stem": "____ there a computer in your room? Yes, there is.",
+          "answer": "Is", "wrong": { "Are": "there_be_agree", "Has": "there_have", "Have": "there_have" },
+          "zh": "你房间里有电脑吗？有。",
+          "hints": [
+            "这是在问“有没有”，是 there be 的问句。",
+            "像这样：Is there a pen in your bag? 把 is 放到 there 前面。",
+            "a computer 是一台，问句开头用 Is 还是 Are？",
+            "答案是 Is。there be 的问句把 be 放到前面；a computer 是一台，用 Is there。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "____ there any students in the classroom? No, there aren't.",
+            "answer": "Are", "wrong": { "Is": "there_be_agree", "Has": "there_have", "Have": "there_have" },
+            "zh": "教室里有学生吗？没有。", "explain": "students 是好几个，用 Are there。"
+          }
+        },
+        {
+          "id": "q07", "part": 2, "family": "howmany", "kind": "fill",
+          "stem": "How many ____ are there in your schoolbag?",
+          "answer": "books", "wrong": { "book": "plural_missing", "a book": "plural_missing" },
+          "zh": "你的书包里有多少本书？",
+          "hints": [
+            "How many 是问“有多少个”，后面的名词要用复数。",
+            "像这样：How many apples are there? apple 变成了 apples。",
+            "book 变成复数，后面要加什么？",
+            "答案是 books。How many 后面跟复数名词：How many books。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "How many ____ are there on the farm?",
+            "answer": "cows", "wrong": { "cow": "plural_missing", "a cow": "plural_missing" },
+            "zh": "农场上有多少头牛？", "explain": "How many 后面跟复数名词，cow 加 s。"
+          }
+        },
+        {
+          "id": "q08", "part": 2, "family": "uncount", "kind": "fill",
+          "stem": "There is some ____ in the glass.",
+          "answer": "water", "wrong": { "waters": "uncountable_plural", "a water": "uncountable_plural" },
+          "zh": "玻璃杯里有一些水。",
+          "hints": [
+            "water 是水。水能一个一个数吗？",
+            "像这样：There is some milk in the cup. milk 后面不加 s。",
+            "不能数的东西，后面加不加 s？前面能不能放 a？",
+            "答案是 water。water、milk、bread 这类不可数名词不加 s，也不说 a water。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "There is some ____ in the box.",
+            "answer": "rice", "wrong": { "rices": "uncountable_plural", "a rice": "uncountable_plural" },
+            "zh": "盒子里有一些米。", "explain": "rice 不可数，不加 s，也不说 a rice。"
+          }
+        },
+        {
+          "id": "q09", "part": 2, "family": "have", "kind": "fill",
+          "stem": "I ____ two good friends in my class.",
+          "answer": "have", "wrong": { "there are": "there_have", "there is": "there_have" },
+          "zh": "我在班里有两个好朋友。",
+          "hints": [
+            "这句说“我有两个好朋友”，是“某人有”。",
+            "像这样：I have a dog. “我有一只狗”用 have。",
+            "“某人有”用 have，“某地有”用 there be。这句是哪一种？",
+            "答案是 have。主语是 I，“我有”用 have；there is、there are 说“某地有”，前面不放人。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "We ____ a new teacher this year.",
+            "answer": "have", "wrong": { "there are": "there_have", "there is": "there_have" },
+            "zh": "我们今年有一位新老师。", "explain": "“我们有”是“某人有”，用 have。"
+          }
+        },
+        {
+          "id": "q10", "part": 2, "family": "q", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Is there any juice in the cup?", "wrong": { "Are there any juice in the cup?": "there_be_agree", "Is there any juices in the cup?": "uncountable_plural", "Has there any juice in the cup?": "there_have" },
+          "zh": "杯子里有果汁吗？",
+          "hints": [
+            "看两处：juice 能不能数，问句开头用 Is 还是 Are。",
+            "像这样：Is there any water in the glass? water 不能数，用 Is，不加 s。",
+            "juice 不能数。问句开头用 Is 还是 Are？",
+            "答案是 Is there any juice in the cup? juice 不可数，用 Is there，juice 不加 s。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "There is some food in the kitchen.", "wrong": { "There are some food in the kitchen.": "there_be_agree", "There is some foods in the kitchen.": "uncountable_plural", "There has some food in the kitchen.": "there_have" },
+            "zh": "厨房里有一些食物。", "explain": "food 在这里不能数，用 There is，不加 s。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01", "family": "is", "kind": "fill",
+          "stem": "There ____ a bike behind the door.",
+          "answer": "is", "wrong": { "are": "there_be_agree", "has": "there_have", "have": "there_have" },
+          "zh": "门后面有一辆自行车。",
+          "hints": ["这句说“门后面有一辆自行车”，是“某地有”。", "像这样：There is a clock on the wall. 一个钟，用 is。", "a bike 是一辆，用 is 还是 are？", "答案是 is。“某地有”用 there be；a bike 是一辆，用 There is。"]
+        },
+        {
+          "id": "s02", "family": "is", "kind": "fill",
+          "stem": "There ____ an orange in my bag.",
+          "answer": "is", "wrong": { "are": "there_be_agree", "has": "there_have", "have": "there_have" },
+          "zh": "我的包里有一个橙子。",
+          "hints": ["这句说“包里有一个橙子”，是“某地有”。", "像这样：There is a book on the desk. 一本书，用 is。", "an orange 是一个，用 is 还是 are？", "答案是 is。an orange 是一个，用 There is。"]
+        },
+        {
+          "id": "s03", "family": "are", "kind": "fill",
+          "stem": "There ____ two pandas in the zoo.",
+          "answer": "are", "wrong": { "is": "there_be_agree", "has": "there_have", "have": "there_have" },
+          "zh": "动物园里有两只熊猫。",
+          "hints": ["看 be 后面的东西：two pandas 是几只？", "像这样：There are four chairs in the room. 四把椅子，用 are。", "两只是两个以上，用 is 还是 are？", "答案是 are。两个以上的东西用 There are。"]
+        },
+        {
+          "id": "s04", "family": "are", "kind": "fill",
+          "stem": "There ____ many trees near the river.",
+          "answer": "are", "wrong": { "is": "there_be_agree", "has": "there_have", "have": "there_have" },
+          "zh": "河边有很多树。",
+          "hints": ["many trees 是很多棵树。", "像这样：There are many books in our library. 很多书，用 are。", "很多棵树，用 is 还是 are？", "答案是 are。many 后面跟复数，用 There are。"]
+        },
+        {
+          "id": "s05", "family": "plural", "kind": "fill",
+          "stem": "There are three ____ on the farm.",
+          "answer": "horses", "wrong": { "horse": "plural_missing", "a horse": "plural_missing" },
+          "zh": "农场上有三匹马。",
+          "hints": ["前面有 three，后面的名词要变成复数。", "像这样：There are two dolls on the bed. doll 变成了 dolls。", "horse 变成复数，后面要加什么？", "答案是 horses。three 是三个，名词加 s：three horses。"]
+        },
+        {
+          "id": "s06", "family": "plural", "kind": "fill",
+          "stem": "There are four ____ in our classroom.",
+          "answer": "windows", "wrong": { "window": "plural_missing", "a window": "plural_missing" },
+          "zh": "我们教室里有四扇窗户。",
+          "hints": ["前面有 four，后面的名词要用复数。", "像这样：There are three apples in the box. apple 变成了 apples。", "window 变成复数，后面要加什么？", "答案是 windows。four 后面是好几个，window 加 s。"]
+        },
+        {
+          "id": "s07", "family": "uncount", "kind": "fill",
+          "stem": "There ____ some juice in the glass.",
+          "answer": "is", "wrong": { "are": "there_be_agree", "has": "there_have", "have": "there_have" },
+          "zh": "玻璃杯里有一些果汁。",
+          "hints": ["juice 是果汁。果汁能一个一个数吗？", "像这样：There is some milk in the cup. milk 不能数，用 is。", "不能数的东西，用 is 还是 are？", "答案是 is。juice 不能数，用 There is，前面有 some 也一样。"]
+        },
+        {
+          "id": "s08", "family": "uncount", "kind": "fill",
+          "stem": "There is some ____ in my bag.",
+          "answer": "money", "wrong": { "moneys": "uncountable_plural", "a money": "uncountable_plural" },
+          "zh": "我的包里有一些钱。",
+          "hints": ["money 是钱。钱在英语里能一个一个数吗？", "像这样：There is some water in the glass. water 不加 s。", "不能数的东西，加不加 s？能不能说 a money？", "答案是 money。money 不可数，不加 s，也不说 a money。"]
+        },
+        {
+          "id": "s09", "family": "have", "kind": "fill",
+          "stem": "I ____ a red kite.",
+          "answer": "have", "wrong": { "there is": "there_have", "there are": "there_have" },
+          "zh": "我有一只红色的风筝。",
+          "hints": ["这句说“我有一只风筝”，是“某人有”。", "像这样：We have a new teacher. “我们有”用 have。", "“某人有”用 have 还是 there be？", "答案是 have。“我有”用 have；there be 说“某地有”。"]
+        },
+        {
+          "id": "s10", "family": "have", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "There is a hospital near my home.", "wrong": { "There has a hospital near my home.": "there_have", "Near my home has a hospital.": "there_have", "There are a hospital near my home.": "there_be_agree" },
+          "zh": "我家附近有一家医院。",
+          "hints": ["这句说“我家附近有一家医院”，是“某地有”。", "像这样：There is a park near our school. 某地有，用 there be。", "“某地有”不用 has。去掉带 has 的两句，再看 is 和 are。", "答案是 There is a hospital near my home. “某地有”用 there be；a hospital 是一家，用 is。"]
+        },
+        {
+          "id": "s11", "family": "q", "kind": "fill",
+          "stem": "____ there a shop near your school? Yes, there is.",
+          "answer": "Is", "wrong": { "Are": "there_be_agree", "Has": "there_have", "Have": "there_have" },
+          "zh": "你们学校附近有商店吗？有。",
+          "hints": ["这是在问“有没有”，是 there be 的问句。", "像这样：Is there a computer in your room? 把 is 放到 there 前面。", "a shop 是一家，开头用 Is 还是 Are？", "答案是 Is。a shop 是一家，问句用 Is there。"]
+        },
+        {
+          "id": "s12", "family": "q", "kind": "fill",
+          "stem": "____ there any pens in your bag? Yes, there are.",
+          "answer": "Are", "wrong": { "Is": "there_be_agree", "Has": "there_have", "Have": "there_have" },
+          "zh": "你的包里有钢笔吗？有。",
+          "hints": ["这是在问“有没有”，后面是 pens。", "像这样：Are there any students in the classroom? students 是好几个，用 Are。", "pens 是好几支，开头用 Is 还是 Are？", "答案是 Are。pens 是复数，问句用 Are there。"]
+        },
+        {
+          "id": "s13", "family": "howmany", "kind": "fill",
+          "stem": "How many ____ are there in the box?",
+          "answer": "eggs", "wrong": { "egg": "plural_missing", "an egg": "plural_missing" },
+          "zh": "盒子里有多少个鸡蛋？",
+          "hints": ["How many 问“有多少个”，后面的名词要用复数。", "像这样：How many cows are there on the farm? cow 变成了 cows。", "egg 变成复数，后面要加什么？", "答案是 eggs。How many 后面跟复数名词：How many eggs。"]
+        },
+        {
+          "id": "s14", "family": "howmany", "kind": "fill",
+          "stem": "How many boys ____ there in your class?",
+          "answer": "are", "wrong": { "is": "there_be_agree", "has": "there_have", "have": "there_have" },
+          "zh": "你们班有多少个男孩？",
+          "hints": ["这是 How many 的问句，问班里有多少个男孩。", "像这样：How many books are there in your schoolbag? 用 are there。", "boys 是好几个，用 is 还是 are？", "答案是 are。How many 后面是复数名词，用 are there。"]
+        },
+        {
+          "id": "s15", "family": "q", "kind": "fill",
+          "stem": "Is there a cat under the bed? No, there ____.",
+          "answer": "isn't", "wrong": { "aren't": "there_be_agree", "hasn't": "there_have" },
+          "zh": "床下有猫吗？没有。",
+          "hints": ["这是在回答 Is there 的问句。", "像这样：Is there a pen in your bag? Yes, there is. 问句用 is，回答也用 is。", "问句用 Is，说“没有”用 isn't 还是 aren't？", "答案是 isn't。问句是 Is there，回答就用 there is 或 there isn't。"]
+        },
+        {
+          "id": "s16", "family": "are", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "There are some flowers in the garden.", "wrong": { "There is some flowers in the garden.": "there_be_agree", "There are some flower in the garden.": "plural_missing", "There have some flowers in the garden.": "there_have" },
+          "zh": "花园里有一些花。",
+          "hints": ["看三处：there 后面跟什么，is 还是 are，flower 加不加 s。", "像这样：There are many books in our library. 很多书，用 are，books 加 s。", "some flowers 是好几朵。先去掉 have 那句，再看 is 和 are。", "答案是 There are some flowers in the garden. 好几朵花用 There are，flower 加 s。"]
+        }
+      ]
+    },
+    {
+      "id": "possessive_s",
+      "unit": "U3",
+      "title": "名词所有格 's",
+      "points": ["g:possessive_s"],
+      "foundations": ["g:plural", "g:possessive_pronoun", "g:be"],
+      "rule": [
+        "说“某人的”，在人名或表示人的名词后面加 's：Tom's bag（汤姆的书包），my mother's bike（我妈妈的自行车）。",
+        "以 s 结尾的复数名词只加 '：the students' classroom（学生们的教室）；不以 s 结尾的复数加 's：Children's Day（儿童节）。",
+        "中文的“的”不能都换成 of：说人的东西用 's（Lily's cat），不说 the cat of Lily。",
+        "前面说过是什么东西，后面可以省掉：This bag is Tom's.（= Tom's bag）"
+      ],
+      "examples": [
+        { "en": "This is Tom's bag.", "zh": "这是汤姆的书包。", "mark": ["Tom's"] },
+        { "en": "My mother's bike is blue.", "zh": "我妈妈的自行车是蓝色的。", "mark": ["mother's"] },
+        { "en": "Lily's cat is very cute.", "zh": "莉莉的猫很可爱。", "mark": ["Lily's"] },
+        { "en": "The students' classroom is big.", "zh": "学生们的教室很大。", "mark": ["students'"] },
+        { "en": "Today is Children's Day.", "zh": "今天是儿童节。", "mark": ["Children's"] },
+        { "en": "Is this your pen? No, it's Lucy's.", "zh": "这是你的钢笔吗？不，是露西的。", "mark": ["Lucy's"] },
+        { "en": "I am Mike's friend.", "zh": "我是迈克的朋友。", "mark": ["Mike's"] }
+      ],
+      "families": {
+        "s": { "name": "名词所有格 's", "point": "g:possessive_s" },
+        "plural": { "name": "复数的所有格", "point": "g:possessive_s" },
+        "irr": { "name": "children's 这一类", "point": "g:possessive_s" },
+        "of": { "name": "'s 和 of", "point": "g:possessive_s" },
+        "pron": { "name": "'s 和物主代词", "point": "g:possessive_pronoun" },
+        "omit": { "name": "省掉后面的名词", "point": "g:possessive_s" },
+        "be": { "name": "be 动词", "point": "g:be" }
+      },
+      "questions": [
+        {
+          "id": "q01", "part": 1, "family": "s", "kind": "fill",
+          "stem": "This is ____ ruler.", "cue": "Tom",
+          "answer": "Tom's", "wrong": { "Tom": "poss_s_missing", "Toms": "poss_s_missing", "Toms'": "poss_plural" },
+          "zh": "这是汤姆的尺子。",
+          "hints": [
+            "这里要说“汤姆的”尺子。",
+            "像这样：Lily's cat is very cute. Lily 后面加了 's。",
+            "“某人的”要在名字后面加什么？",
+            "答案是 Tom's。说“某人的”，在名字后面加 's：Tom's ruler。少了 's，就只是“汤姆”。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "That is ____ kite.", "cue": "Amy",
+            "answer": "Amy's", "wrong": { "Amy": "poss_s_missing", "Amys": "poss_s_missing", "Amys'": "poss_plural" },
+            "zh": "那是埃米的风筝。", "explain": "“埃米的”在名字后面加 's：Amy's kite。"
+          }
+        },
+        {
+          "id": "q02", "part": 1, "family": "s", "kind": "fill",
+          "stem": "____ car is black.", "cue": "my father",
+          "answer": "My father's", "wrong": { "My father": "poss_s_missing", "My fathers": "poss_s_missing" },
+          "zh": "我爸爸的车是黑色的。",
+          "hints": [
+            "这里要说“我爸爸的”车。",
+            "像这样：My mother's bike is blue. mother 后面加了 's。",
+            "father 后面要加什么，才是“爸爸的”？",
+            "答案是 My father's。表示人的名词后面加 's：my father's car。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "____ room is very clean.", "cue": "my sister",
+            "answer": "My sister's", "wrong": { "My sister": "poss_s_missing", "My sisters": "poss_s_missing" },
+            "zh": "我姐姐的房间很干净。", "explain": "sister 后面加 's，是“姐姐的”。"
+          }
+        },
+        {
+          "id": "q03", "part": 1, "family": "of", "kind": "pick",
+          "ask": "“莉莉的狗”英语怎么说？",
+          "answer": "Lily's dog", "wrong": { "the dog of Lily": "poss_of_overuse", "Lily dog": "poss_s_missing", "Lilys dog": "poss_s_missing" },
+          "zh": "莉莉的狗",
+          "hints": [
+            "“莉莉的”说的是人的东西。",
+            "像这样：Tom's bag 是“汤姆的书包”，人名后面加 's。",
+            "说人的东西，用 's 还是 of？",
+            "答案是 Lily's dog。说人的东西用 's；不说 the dog of Lily。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "“迈克的妈妈”英语怎么说？",
+            "answer": "Mike's mother", "wrong": { "the mother of Mike": "poss_of_overuse", "Mike mother": "poss_s_missing", "Mikes mother": "poss_s_missing" },
+            "zh": "迈克的妈妈", "explain": "说人的东西用 's：Mike's mother。"
+          }
+        },
+        {
+          "id": "q04", "part": 1, "family": "pron", "kind": "fill",
+          "stem": "This is Lucy's room. ____ room is very tidy.",
+          "answer": "Her", "wrong": { "His": "he_she", "She": "subj_vs_poss", "Hers": "poss_adj_vs_pron" },
+          "zh": "这是露西的房间。她的房间很整洁。",
+          "hints": [
+            "Lucy's room 换个说法，就是“她的”房间。",
+            "像这样：This is Tom's pen. His pen is red. Tom 是男孩，用 his。",
+            "Lucy 是女孩，后面还跟着 room，用哪个词？",
+            "答案是 Her。Lucy's 可以换成 her，后面跟名词 room；hers 单独用。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "That is Mike's coat. ____ coat is blue.",
+            "answer": "His", "wrong": { "Her": "he_she", "He": "subj_vs_poss", "Him": "obj_vs_poss" },
+            "zh": "那是迈克的外套。他的外套是蓝色的。", "explain": "Mike 是男孩，Mike's 可以换成 His。"
+          }
+        },
+        {
+          "id": "q05", "part": 1, "family": "omit", "kind": "fill",
+          "stem": "Is this your eraser? No, it's ____.", "cue": "Lily",
+          "answer": "Lily's", "wrong": { "Lily": "poss_s_missing", "Lilys": "poss_s_missing" },
+          "zh": "这是你的橡皮吗？不，是莉莉的。",
+          "hints": [
+            "这里说的是“是莉莉的（橡皮）”，后面的 eraser 省掉了。",
+            "像这样：This bag is Tom's. Tom's 后面省掉了 bag。",
+            "名字后面加什么，才是“莉莉的”？",
+            "答案是 Lily's。前面说过是橡皮，后面可以省掉：it's Lily's = it's Lily's eraser。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "This book is not mine. It's ____.", "cue": "my brother",
+            "answer": "my brother's", "wrong": { "my brother": "poss_s_missing", "my brothers": "poss_s_missing" },
+            "zh": "这本书不是我的，是我哥哥的。", "explain": "brother 后面加 's，后面省掉了 book。"
+          }
+        },
+        {
+          "id": "q06", "part": 2, "family": "plural", "kind": "fill",
+          "stem": "These are the ____ desks.", "cue": "学生们的",
+          "answer": "students'", "wrong": { "student's": "plural_missing", "students's": "poss_plural", "students": "poss_s_missing" },
+          "zh": "这些是学生们的课桌。",
+          "hints": [
+            "这里是“学生们的”，学生是好几个。",
+            "像这样：the teachers' room。teachers 已经有 s，只加 '。",
+            "students 已经以 s 结尾，还要再加 's 吗？",
+            "答案是 students'。以 s 结尾的复数名词只加 '：students'；student's 是“一个学生的”。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "These are the ____ bikes.", "cue": "女孩们的",
+            "answer": "girls'", "wrong": { "girl's": "plural_missing", "girls's": "poss_plural", "girls": "poss_s_missing" },
+            "zh": "这些是女孩们的自行车。", "explain": "girls 以 s 结尾，只加 '：girls'。"
+          }
+        },
+        {
+          "id": "q07", "part": 2, "family": "irr", "kind": "fill",
+          "stem": "____ Day is in summer.", "cue": "儿童节",
+          "answer": "Children's", "wrong": { "Childrens'": "poss_plural", "Children": "poss_s_missing", "Child's": "plural_missing" },
+          "zh": "儿童节在夏天。",
+          "hints": [
+            "“儿童”是 child，好几个儿童是 children。children 不是以 s 结尾的。",
+            "像这样：Women's Day 妇女节。women 不以 s 结尾，加 's。",
+            "children 不以 s 结尾，后面加 's 还是只加 '？",
+            "答案是 Children's。不以 s 结尾的复数加 's：Children's Day。只有以 s 结尾的复数才只加 '。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "These are the ____ books.", "cue": "孩子们的",
+            "answer": "children's", "wrong": { "childrens'": "poss_plural", "children": "poss_s_missing", "child's": "plural_missing" },
+            "zh": "这些是孩子们的书。", "explain": "children 不以 s 结尾，加 's：children's。"
+          }
+        },
+        {
+          "id": "q08", "part": 2, "family": "of", "kind": "pick",
+          "ask": "“我妈妈的生日”英语怎么说？",
+          "answer": "my mother's birthday", "wrong": { "the birthday of my mother": "poss_of_overuse", "my mother birthday": "poss_s_missing", "my mothers birthday": "poss_s_missing" },
+          "zh": "我妈妈的生日",
+          "hints": [
+            "“妈妈的”说的是人的东西。",
+            "像这样：my father's car 是“我爸爸的车”，father 后面加 's。",
+            "说人的东西，用 's 还是 of？'s 加在谁后面？",
+            "答案是 my mother's birthday。说人的东西用 's，加在 mother 后面。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "“我朋友的名字”英语怎么说？",
+            "answer": "my friend's name", "wrong": { "the name of my friend": "poss_of_overuse", "my friend name": "poss_s_missing", "my friends name": "poss_s_missing" },
+            "zh": "我朋友的名字", "explain": "说人的东西用 's，加在 friend 后面。"
+          }
+        },
+        {
+          "id": "q09", "part": 2, "family": "be", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Tom's shoes are under the bed.", "wrong": { "Tom's shoes is under the bed.": "be_agree", "Tom shoes are under the bed.": "poss_s_missing", "Tom's shoe are under the bed.": "plural_missing" },
+          "zh": "汤姆的鞋在床底下。",
+          "hints": [
+            "看三处：Tom 后面有没有 's，shoes 是几只，be 动词用 is 还是 are。",
+            "像这样：Lily's books are on the desk. books 是复数，用 are。",
+            "shoes 是一双，用 is 还是 are？",
+            "答案是 Tom's shoes are under the bed. “汤姆的”是 Tom's；shoes 是复数，用 are。"
+          ],
+          "variant": {
+            "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "My sister's eyes are big.", "wrong": { "My sister's eyes is big.": "be_agree", "My sister eyes are big.": "poss_s_missing", "My sisters eyes are big.": "poss_s_missing" },
+            "zh": "我姐姐的眼睛很大。", "explain": "sister 后面加 's；eyes 是复数，用 are。"
+          }
+        },
+        {
+          "id": "q10", "part": 2, "family": "s", "kind": "fill",
+          "stem": "There are two cats in ____ home.", "cue": "my aunt",
+          "answer": "my aunt's", "wrong": { "my aunt": "poss_s_missing", "my aunts": "poss_s_missing", "my aunts'": "poss_plural" },
+          "zh": "我阿姨家里有两只猫。",
+          "hints": [
+            "这里要说“我阿姨的”家。",
+            "像这样：I am in my uncle's room. uncle 后面加了 's。",
+            "只有一个阿姨，aunt 后面加 's 还是只加 '？",
+            "答案是 my aunt's。一个人的东西加 's：my aunt's home；aunts' 是“好几个阿姨的”。"
+          ],
+          "variant": {
+            "kind": "fill", "stem": "There is a big tree in ____ garden.", "cue": "my grandfather",
+            "answer": "my grandfather's", "wrong": { "my grandfather": "poss_s_missing", "my grandfathers": "poss_s_missing" },
+            "zh": "我爷爷的花园里有一棵大树。", "explain": "grandfather 后面加 's，是“爷爷的”。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01", "family": "s", "kind": "fill",
+          "stem": "This is ____ pencil.", "cue": "Sam",
+          "answer": "Sam's", "wrong": { "Sam": "poss_s_missing", "Sams": "poss_s_missing" },
+          "zh": "这是萨姆的铅笔。",
+          "hints": ["这里要说“萨姆的”铅笔。", "像这样：This is Tom's ruler. Tom 后面加了 's。", "名字后面加什么，才是“萨姆的”？", "答案是 Sam's。说“某人的”，在名字后面加 's。"]
+        },
+        {
+          "id": "s02", "family": "s", "kind": "fill",
+          "stem": "____ hair is long.", "cue": "my cousin",
+          "answer": "My cousin's", "wrong": { "My cousin": "poss_s_missing", "My cousins": "poss_s_missing" },
+          "zh": "我表姐的头发很长。",
+          "hints": ["这里要说“我表姐的”头发。", "像这样：My father's car is black. father 后面加了 's。", "cousin 后面加什么，才是“表姐的”？", "答案是 My cousin's。表示人的名词后面加 's。"]
+        },
+        {
+          "id": "s03", "family": "s", "kind": "fill",
+          "stem": "I like ____ dog.", "cue": "my uncle",
+          "answer": "my uncle's", "wrong": { "my uncle": "poss_s_missing", "my uncles": "poss_s_missing" },
+          "zh": "我喜欢我叔叔的狗。",
+          "hints": ["这里要说“我叔叔的”狗。", "像这样：There are two cats in my aunt's home. aunt 后面加了 's。", "uncle 后面要加什么？", "答案是 my uncle's。表示人的名词后面加 's：my uncle's dog。"]
+        },
+        {
+          "id": "s04", "family": "of", "kind": "pick",
+          "ask": "“汤姆的妹妹”英语怎么说？",
+          "answer": "Tom's sister", "wrong": { "the sister of Tom": "poss_of_overuse", "Tom sister": "poss_s_missing", "Toms sister": "poss_s_missing" },
+          "zh": "汤姆的妹妹",
+          "hints": ["“汤姆的”说的是人。", "像这样：Lily's dog 是“莉莉的狗”。", "说人的，用 's 还是 of？", "答案是 Tom's sister。说人的用 's：Tom's sister。"]
+        },
+        {
+          "id": "s05", "family": "of", "kind": "pick",
+          "ask": "“老师的书”英语怎么说？",
+          "answer": "the teacher's book", "wrong": { "the book of the teacher": "poss_of_overuse", "the teacher book": "poss_s_missing", "the teachers book": "poss_s_missing" },
+          "zh": "老师的书",
+          "hints": ["“老师的”说的是人的东西。", "像这样：my mother's birthday 是“我妈妈的生日”。", "说人的东西，用 's 还是 of？", "答案是 the teacher's book。teacher 后面加 's。"]
+        },
+        {
+          "id": "s06", "family": "plural", "kind": "fill",
+          "stem": "This is the ____ playground.", "cue": "男孩们的",
+          "answer": "boys'", "wrong": { "boy's": "plural_missing", "boys's": "poss_plural", "boys": "poss_s_missing" },
+          "zh": "这是男孩们的操场。",
+          "hints": ["这里是“男孩们的”，男孩是好几个。", "像这样：the girls' bikes。girls 已经有 s，只加 '。", "boys 以 s 结尾，还要再加 's 吗？", "答案是 boys'。以 s 结尾的复数只加 '：boys'。"]
+        },
+        {
+          "id": "s07", "family": "plural", "kind": "fill",
+          "stem": "The ____ room is big.", "cue": "老师们的",
+          "answer": "teachers'", "wrong": { "teacher's": "plural_missing", "teachers's": "poss_plural", "teachers": "poss_s_missing" },
+          "zh": "老师们的房间很大。",
+          "hints": ["这里是“老师们的”，老师是好几个。", "像这样：the students' desks。students 已经有 s，只加 '。", "teachers 以 s 结尾，后面加什么？", "答案是 teachers'。以 s 结尾的复数只加 '；teacher's 是“一个老师的”。"]
+        },
+        {
+          "id": "s08", "family": "irr", "kind": "fill",
+          "stem": "This is a ____ park.", "cue": "儿童的",
+          "answer": "children's", "wrong": { "childrens'": "poss_plural", "children": "poss_s_missing", "child's": "plural_missing" },
+          "zh": "这是一个儿童公园。",
+          "hints": ["“儿童”的复数是 children，不是以 s 结尾的。", "像这样：Children's Day 儿童节。", "children 后面加 's 还是只加 '？", "答案是 children's。不以 s 结尾的复数加 's。"]
+        },
+        {
+          "id": "s09", "family": "irr", "kind": "fill",
+          "stem": "Today is ____ Day.", "cue": "妇女节",
+          "answer": "Women's", "wrong": { "Womens'": "poss_plural", "Women": "poss_s_missing", "Woman's": "plural_missing" },
+          "zh": "今天是妇女节。",
+          "hints": ["“妇女”是 woman，好几个是 women，不是以 s 结尾的。", "像这样：Children's Day 儿童节，children 后面加 's。", "women 后面加 's 还是只加 '？", "答案是 Women's。不以 s 结尾的复数加 's：Women's Day。"]
+        },
+        {
+          "id": "s10", "family": "pron", "kind": "fill",
+          "stem": "This is Tom's bike. It's ____ bike.",
+          "answer": "his", "wrong": { "her": "he_she", "he": "subj_vs_poss", "him": "obj_vs_poss" },
+          "zh": "这是汤姆的自行车。是他的自行车。",
+          "hints": ["Tom's bike 换个说法，就是“他的”自行车。", "像这样：This is Lucy's room. Her room is tidy. Lucy 是女孩，用 her。", "Tom 是男孩，后面跟着 bike，用 his 还是 her？", "答案是 his。Tom's 可以换成 his，后面跟名词 bike。"]
+        },
+        {
+          "id": "s11", "family": "pron", "kind": "fill",
+          "stem": "Is this Lily's coat? Yes, it's ____.", "cue": "她的",
+          "answer": "hers", "wrong": { "her": "poss_adj_vs_pron", "she": "subj_vs_poss", "his": "he_she" },
+          "zh": "这是莉莉的外套吗？是，是她的。",
+          "hints": ["空后面没有名词，句子到这里就完了。", "像这样：This pen is mine. mine 后面不跟名词。", "“她的”后面不跟名词，用 her 还是 hers？", "答案是 hers。hers 单独用，意思是“她的外套”。"]
+        },
+        {
+          "id": "s12", "family": "omit", "kind": "fill",
+          "stem": "This pen isn't Tom's. It's ____.", "cue": "Mike",
+          "answer": "Mike's", "wrong": { "Mike": "poss_s_missing", "Mikes": "poss_s_missing" },
+          "zh": "这支笔不是汤姆的，是迈克的。",
+          "hints": ["这里说的是“是迈克的（笔）”，后面的 pen 省掉了。", "像这样：No, it's Lily's. Lily's 后面省掉了东西。", "名字后面加什么，才是“迈克的”？", "答案是 Mike's。说过是笔了，后面省掉：Mike's = Mike's pen。"]
+        },
+        {
+          "id": "s13", "family": "omit", "kind": "fill",
+          "stem": "Whose kite is this? It's ____.", "cue": "my sister",
+          "answer": "my sister's", "wrong": { "my sister": "poss_s_missing", "my sisters": "poss_s_missing" },
+          "zh": "这是谁的风筝？是我姐姐的。",
+          "hints": ["Whose 问“谁的”，回答要说“我姐姐的”。", "像这样：It's Lily's. 名字后面加 's。", "sister 后面加什么？", "答案是 my sister's。sister 后面加 's，后面省掉了 kite。"]
+        },
+        {
+          "id": "s14", "family": "be", "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Lucy's eyes are blue.", "wrong": { "Lucy's eyes is blue.": "be_agree", "Lucy eyes are blue.": "poss_s_missing", "Lucys eyes are blue.": "poss_s_missing" },
+          "zh": "露西的眼睛是蓝色的。",
+          "hints": ["看两处：Lucy 后面有没有 's，eyes 用 is 还是 are。", "像这样：Tom's shoes are under the bed. shoes 是复数，用 are。", "先找有 's 的句子，再看 eyes 用 is 还是 are。", "答案是 Lucy's eyes are blue. “露西的”是 Lucy's；eyes 是复数，用 are。"]
+        },
+        {
+          "id": "s15", "family": "be", "kind": "fill",
+          "stem": "My brother's room ____ very tidy.",
+          "answer": "is", "wrong": { "are": "be_agree", "am": "be_agree" },
+          "zh": "我哥哥的房间很整洁。",
+          "hints": ["主语是 My brother's room，说的是一个房间。", "像这样：Lily's cat is very cute. 一只猫，用 is。", "一个房间，用 is 还是 are？别被 's 骗了。", "答案是 is。brother's 是“哥哥的”，不是复数；room 是一个，用 is。"]
+        }
+      ]
+    }
+  ]
+}

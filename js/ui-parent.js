@@ -5,11 +5,12 @@
 //
 // 导出
 //   createParentView(ctx) -> { show(params), hide(), onChange(), holding() }
-//     渲染进 #tab-parent。params.open：解锁后直接展开的一行（'key'、'import'、'unit'、'exam'、'intake'、'cap'…）。
+//     渲染进 #tab-parent。params.open：解锁后直接展开的一行（'key'、'import'、'unit'、'exam'、'outline'、'intake'、'cap'…）。
 //     holding()：这一页有没导完的备份或导入，自动更新会等它。
 //     hide()：离开家长区（app.js 换路由时调用）就重新上锁。
 //   纯函数（Node 测试用）：weakPin、makePin、checkPin、mergeTextbook、mergeProgress、exportKv、planKvImport、eventKey、newEvents、
-//     intakeItems、visibleItems、answerOf、intakeFilled、pickMulti、intakeSideEffects、yuan、parentNameOf
+//     intakeItems、visibleItems、answerOf、intakeFilled、pickMulti、intakeSideEffects、yuan、parentNameOf、
+//     outlineIndex、splitOutline、matchOutline、outlineRecord、outlineSlugs（复习提纲，v1）
 //
 // 用到的 ctx：kv.peek / set / keys、budget.today / month、settings / saveSettings、curriculum.units / unitOrder /
 //   hasTextbook、reloadCurriculum、events.query / count / log、applyTheme、go、toast。
@@ -24,10 +25,23 @@
 //   progress 新的赢，其余 kv 只补本机没有的键（budget 不恢复），events 按 eventKey 合并（本机已有的那条不重复导入）。
 // 需要留意：查词时碰到让人担心的话题，查词页只记一条 events { type: 'flag', reason: 'care' }（不存她写了什么），
 //   这里列出最近 30 天的次数。
+// v1（期中季，DESIGN 6.2、6.4、9）：
+//   复习提纲重点词：从已导入的课本单元里点选，或粘贴一串词自动匹配（matchOutline：逗号、顿号、换行隔开，夹着的中文
+//     不管，短语整串认，词形按 curriculum.baseOf 还原），存 kv 'outline'（OUTLINE_KEY，形状见 outlineRecord）。
+//     读它的是 plan.js（期中前这些词排在前面、练拼写）。
+//   拍课本：一行入口，go('capture')（ui-capture.js 的页面）；这周小结：一行入口，go('weekly')（ui-weekly.js）。
+//     两个页面是别的 agent 写的；nav.js 里还没有这个路由时，这一行灰着写“下一版”。离开家长区照样上锁。
+//   开机问卷“听写怎么考”下面写明“明天有听写”现在的默认考法（ui-dictation.js intakeMethod，有 intake.js 时按它的）。
 import { h, icon, toast, dateCn } from './ui-dom.js';
 import { createMeTab } from './ui-me.js';
 import { pageShell } from './ui-entry.js';
 import { accentOf, cleanName, DEFAULT_PARENT_NAME } from './ui-onboard.js';
+import { ROUTES } from './nav.js';
+import { slugify } from './words.js';
+import { normWord } from './curriculum.js';
+import { METHOD_LABEL } from './dictation.js';
+import { intakeMethod } from './ui-dictation.js';
+import { optionalModule } from './ui-home.js';
 
 export const PIN_LEN = 4;
 export const PARENT_NAMES = ['妈妈', '爸爸', '家长'];
@@ -208,6 +222,76 @@ export function yuan(x) {
 const capText = c => String(Math.round((Number(c) || 0) * 10) / 10);
 export const parentNameOf = profile => cleanName((profile && profile.parentCall) || '', 10) || DEFAULT_PARENT_NAME;
 
+// ---- 复习提纲重点词 (v1, DESIGN 6.4): kv 'outline'
+// { version: 1, slugs: [slug], words: [{ slug, w, unit }], at, updated }. slugs follow the textbook order; words keeps
+// the spelling and the unit for whoever reads it. Only words of imported textbook units are kept.
+export const OUTLINE_KEY = 'outline';
+// every textbook word once: normWord(w) -> { slug, w, cn, unit, order, uorder, required }; the first unit it is in wins
+export function outlineIndex(curriculum) {
+  const idx = new Map();
+  let us = [];
+  try { us = (curriculum && curriculum.units && curriculum.units()) || []; } catch (e) { us = []; }
+  for (const u of us) {
+    let ws = [];
+    try { ws = curriculum.unitWords(u.id) || []; } catch (e) { ws = []; }
+    ws.forEach((x, i) => {
+      const w = String((x && x.w) || '').trim();
+      const k = normWord(w);
+      if (!w || idx.has(k)) return;
+      let required = false;
+      try { required = !!(curriculum.isRequired && curriculum.isRequired(w)); } catch (e) { required = false; }
+      idx.set(k, { slug: slugify(w), w, cn: String(x.cn || ''), unit: u.id, order: i, uorder: u.order ?? 0, required });
+    });
+  }
+  return idx;
+}
+// pasted text -> English runs: split on lines, commas and Chinese punctuation; the Chinese in between is dropped
+export function splitOutline(text) {
+  const out = [];
+  for (const chunk of String(text || '').split(/[\n\r,，、;；/|]+/)) {
+    for (const m of chunk.matchAll(/[A-Za-z][A-Za-z'’ .-]*/g)) {
+      const t = m[0].replace(/[\s.-]+$/, '').trim();
+      if (t) out.push(t);
+    }
+  }
+  return out;
+}
+// a run is a word or a phrase as a whole, else the longest phrases first, else single words; forms go back to the base
+export function matchOutline(text, idx, baseOf = null) {
+  const found = new Map();
+  const missing = [];
+  const look = t => {
+    const k = normWord(t);
+    if (idx.has(k)) return idx.get(k);
+    if (typeof baseOf === 'function') {
+      try { const b = baseOf(k); if (b && idx.has(normWord(b))) return idx.get(normWord(b)); } catch (e) { /* no base */ }
+    }
+    return null;
+  };
+  for (const run of splitOutline(text)) {
+    const whole = look(run);
+    if (whole) { found.set(whole.slug, whole); continue; }
+    const parts = normWord(run).split(' ').filter(Boolean);
+    let i = 0;
+    while (i < parts.length) {
+      let n = Math.min(4, parts.length - i);
+      let hit = null;
+      for (; n >= 1; n--) { hit = look(parts.slice(i, i + n).join(' ')); if (hit) break; }
+      if (hit) { found.set(hit.slug, hit); i += n; } else { missing.push(parts[i]); i++; }
+    }
+  }
+  return { matched: [...found.values()], unmatched: [...new Set(missing)] };
+}
+export const outlineSlugs = rec => (rec && Array.isArray(rec.slugs) ? rec.slugs.filter(s => typeof s === 'string' && s) : []);
+export function outlineRecord(prev, slugs, idx, now = new Date()) {
+  const bySlug = new Map([...idx.values()].map(x => [x.slug, x]));
+  const list = [...new Set(slugs)].map(s => bySlug.get(s)).filter(Boolean)
+    .sort((a, b) => a.uorder - b.uorder || a.order - b.order);
+  const t = now.toISOString();
+  return { version: 1, slugs: list.map(x => x.slug), words: list.map(x => ({ slug: x.slug, w: x.w, unit: x.unit })),
+    at: (prev && prev.at) || t, updated: t };
+}
+
 // ---------------------------------------------------------------- the view
 
 export function createParentView(ctx) {
@@ -221,6 +305,12 @@ export function createParentView(ctx) {
   let unlocked = false;
   let pending = {};
   let me = null;
+  let outlineUnit = '';          // the unit shown in the outline panel
+  let outlineNote = '';          // what the last paste matched
+  let intakeMod = null;          // intake.js, once loaded (written in parallel; optional)
+  let captureMod = null;         // ui-capture.js: photoStatus for the 拍课本 row
+  optionalModule('./intake.js').then(m => { intakeMod = m; });
+  optionalModule('./ui-capture.js').then(m => { captureMod = m; });
 
   // ---------------------------------------------------------------- kv
   const peek = (k, d) => { const v = ctx.kv.peek(k, d); return v === undefined || v === null ? d : v; };
@@ -482,11 +572,96 @@ export function createParentView(ctx) {
     const range = p.examFrom && p.examTo ? (p.examFrom === p.examTo ? unitTitle(p.examFrom) : `${unitTitle(p.examFrom)} 到 ${unitTitle(p.examTo)}`) : '';
     return [p.examDate ? dateCn(p.examDate) : '', range].filter(Boolean).join(' · ');
   }
+  // ---------------------------------------------------------------- 复习提纲重点词 (v1)
+  const outline = () => peek(OUTLINE_KEY, null);
+  const outlineValue = () => { const n = outlineSlugs(outline()).length; return n ? `${n} 个` : '还没选'; };
+  function outlinePanel(kit) {
+    return () => {
+      const list = units();
+      if (!list.length) return [h('p', { className: 'small', text: '还没导入课本。先在下面“数据 → 导入文件”里导入单元包。' }),
+        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'text-btn accent', text: '去导入', on: { click: () => kit.open('import') } }))];
+      const idx = outlineIndex(ctx.curriculum);
+      const chosen = new Set(outlineSlugs(outline()));
+      const p = progress();
+      if (!list.some(u => u.id === outlineUnit)) outlineUnit = [p.examTo, p.unit].find(id => list.some(u => u.id === id)) || list[list.length - 1].id;
+      const inUnit = [...idx.values()].filter(x => x.unit === outlineUnit).sort((a, b) => a.order - b.order);
+      const summary = () => {
+        if (!chosen.size) return '还没选。';
+        const per = list.map(u => [u, [...idx.values()].filter(x => x.unit === u.id && chosen.has(x.slug)).length]).filter(([, n]) => n);
+        return `选了 ${chosen.size} 个：` + per.map(([u, n]) => `${u.title || u.id} ${n}`).join(' · ');
+      };
+      const sumEl = h('p', { className: 'small parent-outline-sum', text: summary() });
+      const store = () => save(ctx.kv.set(OUTLINE_KEY, outlineRecord(outline(), [...chosen], idx))).then(() => {
+        sumEl.textContent = summary();
+        const v = root.querySelector('[data-row="outline"] .v');
+        if (v) v.textContent = outlineValue();
+      });
+      const wordBtn = x => {
+        const b = h('button', { type: 'button', className: 'parent-ow' + (x.required ? ' req' : ''), 'aria-pressed': String(chosen.has(x.slug)) },
+          h('span', { className: 'w', lang: 'en', text: x.w }), x.cn ? h('span', { className: 'cn', text: x.cn }) : null);
+        b.addEventListener('click', () => {
+          if (chosen.has(x.slug)) chosen.delete(x.slug); else chosen.add(x.slug);
+          b.setAttribute('aria-pressed', String(chosen.has(x.slug)));
+          store();
+        });
+        return b;
+      };
+      const grid = h('div', { className: 'parent-ow-grid', role: 'group', 'aria-label': '这个单元的词' }, ...inUnit.map(wordBtn));
+      const bulk = on => () => {
+        for (const x of inUnit) if (!on) chosen.delete(x.slug); else if (x.required) chosen.add(x.slug);
+        store().then(() => kit.render());
+      };
+      const area = h('textarea', { className: 'parent-area', rows: 3, maxLength: 4000, placeholder: '例如：strict, carry, seldom, look after',
+        'aria-label': '粘贴复习提纲上的词', autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false' });
+      const doMatch = () => {
+        const text = area.value.trim();
+        if (!text) { toast('先粘贴提纲上的词'); return; }
+        const r = matchOutline(text, idx, w => { try { return ctx.curriculum.baseOf(w); } catch (e) { return null; } });
+        for (const x of r.matched) chosen.add(x.slug);
+        outlineNote = `匹配上 ${r.matched.length} 个。` + (r.unmatched.length ? `没找到：${r.unmatched.slice(0, 20).join('、')}${r.unmatched.length > 20 ? ' 等' : ''}（不在已导入的单元里）。` : '');
+        store().then(() => kit.render());
+      };
+      return [
+        h('p', { className: 'small', text: '老师的复习提纲或听写本上的重点词。期中前，这些词复习时排在前面，还要练拼写。没选的话，用期中范围最后一个单元的必会词。' }),
+        sumEl,
+        h('label', { className: 'parent-label', text: '粘贴一串词' }),
+        area,
+        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'text-btn accent', text: '自动匹配', on: { click: doMatch } })),
+        outlineNote ? h('p', { className: 'small parent-outline-note', role: 'status', text: outlineNote }) : null,
+        h('label', { className: 'parent-label', text: '或者从单元里点选' }),
+        h('div', { className: 'parent-pills', role: 'radiogroup', 'aria-label': '单元' }, ...list.map(u => h('button', { type: 'button',
+          className: 'parent-pill' + (u.id === outlineUnit ? ' on' : ''), role: 'radio', 'aria-checked': String(u.id === outlineUnit), text: u.title || u.id,
+          on: { click: () => { outlineUnit = u.id; outlineNote = ''; kit.render(); } } }))),
+        h('div', { className: 'btn-row parent-ow-bulk' },
+          h('button', { type: 'button', className: 'text-btn accent', text: '选上这个单元的必会词', on: { click: bulk(true) } }),
+          h('button', { type: 'button', className: 'text-btn', text: '这个单元都不选', on: { click: bulk(false) } })),
+        inUnit.length ? grid : h('p', { className: 'small', text: '这个单元还没有词。' }),
+        h('p', { className: 'small parent-q-foot', text: '加粗的是必会词。点一下选上，再点一下去掉，改了马上存。' }),
+        chosen.size ? h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'text-btn danger', text: '全部清掉', on: { click: () => {
+          if (typeof confirm === 'function' && !confirm('清掉选好的全部重点词？')) return;
+          chosen.clear();
+          outlineNote = '';
+          store().then(() => kit.render());
+        } } })) : null,
+      ].filter(Boolean);
+    };
+  }
+
+  // ---------------------------------------------------------------- pages other agents draw (v1): 拍课本, 这周小结
+  // Leaving for them locks this area like any other page; their back goes to 家长区 again.
+  function pageRow(kit, route, label, sub, btn, value = null) {
+    if (!ROUTES[route]) return kit.row({ label, sub, value: '下一版', cls: 'parent-off' });
+    return kit.row({ label, sub, value, right: h('button', { type: 'button', className: 'text-btn accent', text: btn, on: { click: () => ctx.go(route) } }) });
+  }
+  const photoValue = () => { try { return captureMod && captureMod.photoStatus ? captureMod.photoStatus(peek('textbook', null)) : null; } catch (e) { return null; } };
+
   function planGroup(kit) {
     const p = progress();
     return kit.group('学到哪', [
       kit.row({ key: 'unit', label: '课本进度', sub: '从已导入的单元里选', value: p.unit ? unitTitle(p.unit) : '还没设', panel: unitPanel(kit) }),
       kit.row({ key: 'exam', label: '期中', sub: '日期和范围', value: examValue(), panel: examPanel(kit) }),
+      kit.row({ key: 'outline', label: '复习提纲重点词', sub: '从课本单元里点选，或粘贴一串词', value: outlineValue(), panel: outlinePanel(kit) }),
+      pageRow(kit, 'capture', '拍课本', '拍一页词汇表，识别出来核对后再存。别拍到封面上的名字和班级。', '去拍', photoValue()),
     ]);
   }
 
@@ -597,8 +772,14 @@ export function createParentView(ctx) {
           ctl = h('input', { type: 'text', className: 'field', maxLength: it.max || 60, value: String(cur || ''), placeholder: it.placeholder || '', 'aria-label': it.label,
             on: { change: ev => store(it, ev.target.value.trim()) } });
         }
+        // what the answer does today: the dictation page's default way (ui-dictation.js reads the same rule)
+        let effect = null;
+        if (it.to === 'dictation.method' || it.id === 'dictation_way') {
+          const m = intakeMethod({ ...rec, answers }, intakeMod);
+          effect = h('p', { className: 'small parent-q-effect', text: m ? `“明天有听写”默认用：${METHOD_LABEL[m]}。` : '没选的话，“明天有听写”默认读中文写英文。' });
+        } else if (it.id === 'mistakes') effect = reviewEffect();
         return h('div', { className: 'parent-q', dataset: { q: it.id } },
-          h('p', { className: 'parent-q-label', text: it.label }), it.help ? h('p', { className: 'small', text: it.help }) : null, ctl);
+          h('p', { className: 'parent-q-label', text: it.label }), it.help ? h('p', { className: 'small', text: it.help }) : null, ctl, effect);
       }
       const shown = visibleItems(schema, answers);
       const blocks = [];
@@ -616,9 +797,25 @@ export function createParentView(ctx) {
     };
   }
 
+  // the mistakes answer as intake.js reads it: which words go first into the review, which are not in the textbook
+  function reviewEffect() {
+    if (!intakeMod || typeof intakeMod.intakeDefaults !== 'function') return null;
+    let r = null;
+    try {
+      const entries = ctx.words && ctx.words.all ? ctx.words.all() : undefined;
+      r = (intakeMod.intakeDefaults(ctx.kv, { entries, curriculum: ctx.curriculum }) || {}).review || null;
+    } catch (e) { r = null; }
+    if (!r) return null;
+    const list = (a, n) => a.slice(0, n).join('、') + (a.length > n ? ` 等 ${a.length} 个` : '');
+    const words = (r.words || []).filter(x => x && x.from === 'mistakes').map(x => x.w);
+    const parts = [words.length ? `先复习：${list(words, 12)}。` : '', (r.outside || []).length ? `不在已导入的课本里：${list(r.outside, 8)}（不进复习）。` : ''].filter(Boolean);
+    return parts.length ? h('p', { className: 'small parent-q-effect', text: parts.join('') }) : null;
+  }
+
   function emmaGroup(kit) {
     const n = intakeCount();
     return kit.group('关于 Emma', [
+      pageRow(kit, 'weekly', '这周小结', '每周日晚上出：她这周练了什么，可以和她聊什么', '打开'),
       kit.row({ key: 'pname', label: '家长称呼', sub: 'Emma 看到的“家长”二字', value: parentNameOf(profile()), panel: namePanel(kit) }),
       kit.row({ key: 'intake', label: '开机问卷', sub: `约 ${(schema && schema.minutes) || 10} 分钟：她喜欢什么、最近的分数、学校怎么考`,
         value: !schema ? '' : n.filled ? `填了 ${n.filled} / ${n.total}` : '还没填', panel: intakePanel(kit) }),

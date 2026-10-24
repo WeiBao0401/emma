@@ -1,0 +1,89 @@
+/* 语法卡（ui-grammar.js）. Owner: 语法卡 agent. Class names start with gram-. Colors come from index.html :root
+   (--paper, --ink, --accent, --tag-bg, --rule ...); one column up to --col, big buttons for the iPad. */
+.gram-shell{flex:1;display:flex;flex-direction:column;max-width:var(--col);width:100%;margin:0 auto}
+.gram{display:flex;flex-direction:column;gap:18px;padding:24px 0 48px}
+.gram-wait{padding:40px 0}
+
+/* the small yellow tag on top, like the home page running head */
+.gram-chip{display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-size:14px;color:var(--muted)}
+.gram-tag{display:inline-block;padding:3px 10px;border-radius:4px;background:var(--tag-bg);color:var(--ink);font-size:13px;font-weight:550;letter-spacing:.01em}
+.gram-title{font:600 34px/1.25 var(--serif);letter-spacing:-.01em;color:var(--ink)}
+.gram-sub{margin-top:6px;font:600 15px/1.3 var(--sans);color:var(--muted)}
+
+/* the rule: 3-4 numbered sentences */
+.gram-rule{display:flex;flex-direction:column;gap:12px;padding-left:1.4em;list-style:decimal;font:400 19px/1.6 var(--sans);color:var(--ink)}
+.gram-rule li{display:list-item}
+.gram-rule li::marker{color:var(--accent);font-weight:650}
+
+/* the pronoun table */
+.gram-table{width:100%;border-collapse:collapse;font-size:16px;line-height:1.35}
+.gram-table th,.gram-table td{padding:7px 6px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+.gram-table thead th{font-size:12px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--rule-strong)}
+.gram-table tbody th{font-weight:500;color:var(--muted);white-space:nowrap}
+.gram-table td{font:500 19px/1.3 var(--serif);color:var(--ink)}
+
+/* examples */
+.gram-examples{list-style:none;padding:0;display:flex;flex-direction:column;gap:14px}
+.gram-en{font:400 22px/1.45 var(--serif);color:var(--ink);text-wrap:pretty}
+.gram-en .say{width:32px;height:32px;margin-left:6px;vertical-align:-5px}
+.gram-en .say .icon{width:18px;height:18px}
+.gram-zh{font-size:16px;line-height:1.5;color:var(--muted)}
+.gram-mark{font-weight:650;color:var(--accent);background:linear-gradient(transparent 62%,var(--tag-bg) 62%)}
+
+.gram-actions{display:flex;justify-content:flex-end;align-items:center;gap:16px;margin-top:8px}
+.gram-actions .btn{min-width:180px}
+@media (max-width:599px){.gram-actions .btn{width:100%}}
+
+/* a question */
+.gram-top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;border-bottom:1px solid var(--rule)}
+.gram-pos{font:600 15px/1.3 var(--serif);color:var(--ink)}
+.gram-pos .sub{font-weight:400;color:var(--muted)}
+.text-btn.gram-flag{font-size:14px;color:var(--faint);margin-right:-10px}
+.gram-ask{font-size:15px;color:var(--muted)}
+.gram-ask.big{font:500 22px/1.45 var(--sans);color:var(--ink)}
+.gram-stem{font:500 30px/1.45 var(--serif);letter-spacing:-.01em;color:var(--ink);text-wrap:pretty}
+.gram-blank{display:inline-block;width:3.6em;margin:0 .18em;border-bottom:2px solid var(--ink);vertical-align:-.12em;height:1em}
+.gram-cue{margin-left:.3em;font:400 22px/1.4 var(--sans);color:var(--muted)}
+.gram-cue:lang(en){font-family:var(--serif)}
+
+.gram-options{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:600px){.gram-options{grid-template-columns:1fr 1fr;gap:14px}.gram-options.one-col{grid-template-columns:1fr}}
+.gram-opt{display:flex;align-items:center;gap:14px;min-height:68px;padding:12px 18px;text-align:left;
+  border:1px solid var(--rule-strong);border-radius:12px;background:var(--paper);color:var(--ink);
+  transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease)}
+.gram-letter{flex:none;width:26px;font:600 15px/1 var(--sans);color:var(--faint)}
+.gram-text{font:500 23px/1.3 var(--serif)}
+.gram-options.one-col .gram-text{font-size:21px}
+.gram-opt:active:not(:disabled){background:var(--tag-bg)}
+.gram-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.gram-opt:disabled{cursor:default;opacity:.55}
+.gram-opt.right,.gram-opt.is-answer{opacity:1;border-color:var(--good);color:var(--good);box-shadow:inset 0 0 0 1px var(--good)}
+.gram-opt.right{background:var(--tag-bg)}
+.gram-opt.right .gram-letter,.gram-opt.is-answer .gram-letter{color:var(--good)}
+.gram-opt.wrong{opacity:1;border-color:var(--danger);color:var(--danger)}
+.gram-opt.wrong .gram-text{text-decoration:line-through;text-decoration-thickness:1px}
+
+/* the hint ladder: numbered, a quiet accent line on the left */
+.gram-hints{list-style:none;padding:2px 0 2px 16px;border-left:2px solid var(--accent);display:flex;flex-direction:column;gap:10px}
+.gram-hint{display:flex;gap:12px;font:18px/1.55 var(--sans);color:var(--ink)}
+.gram-hint.full{font-weight:500}
+.gram-n{flex:none;width:22px;height:22px;margin-top:3px;border-radius:50%;background:var(--tag-bg);color:var(--ink);font:600 13px/22px var(--sans);text-align:center}
+.text-btn.gram-more{align-self:flex-end;font-size:16px}
+
+/* 现在你来：the variant right after the fourth hint */
+.gram-variant{display:flex;flex-direction:column;gap:14px;padding-top:18px;border-top:1px solid var(--rule)}
+.gram-now{font:600 17px/1.3 var(--sans);color:var(--accent)}
+.gram-variant .gram-stem{font-size:26px}
+
+.gram-feedback{font:600 19px/1.5 var(--sans);color:var(--ink)}
+.gram-feedback.ok{color:var(--good)}
+.gram-full{display:flex;flex-direction:column;gap:4px;padding:14px 0 4px;border-top:1px solid var(--rule)}
+
+.gram-end .lede{font-size:30px}
+
+@media (min-width:700px){
+  .gram-title{font-size:38px}
+  .gram-stem{font-size:34px}
+  .gram-table{font-size:17px}
+}
+@media (prefers-reduced-motion:reduce){.gram-opt{transition:none}}

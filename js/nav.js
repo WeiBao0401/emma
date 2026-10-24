@@ -1,6 +1,6 @@
 // Where things live (CONTRACTS.md "路由"): three tabs, 今天 / 查词 / 单词. Lesson and dictation are full-screen pages
-// pushed from 今天; 家长区 is a page pushed from 单词 (its 4-digit code is ui-parent.js's job); the first open is its
-// own full-screen page. Pure data and functions, no DOM, so Node tests can check the routing.
+// pushed from 今天, and so is 这周小结 (with the tab bar); 家长区 is a page pushed from 单词 (its 4-digit code is
+// ui-parent.js's job), 拍课本 a full-screen page pushed from it; the first open is its own full-screen page. Pure data and functions, no DOM, so Node tests can check the routing.
 // Owner: 接线 (app.js wiring). Other agents ask for changes through their `needs`.
 
 // [route, label, icon]
@@ -16,6 +16,9 @@ export const ROUTES = {
   lib: { section: 'lib', tab: 'lib' },
   parent: { section: 'parent', tab: 'lib', parent: 'lib', back: '单词' },
   onboard: { section: 'onboard', tab: null, immersive: true },
+  // v1: 这周小结 (ui-weekly.js) from 今天, the tab bar stays; 拍课本 (ui-capture.js) from 家长区, full screen
+  weekly: { section: 'weekly', tab: 'home', parent: 'home', back: '今天' },
+  capture: { section: 'capture', tab: 'lib', parent: 'parent', back: '家长区', immersive: true },
 };
 export const SECTIONS = [...new Set(Object.values(ROUTES).map(r => r.section))];
 

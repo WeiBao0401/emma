@@ -1,6 +1,6 @@
-# 模块接口约定（v0.1）
+# 模块接口约定（v1，0.2.0）
 
-给并行开发的 agent 看。v0.1（0.1.2）各模块已接通，下面的表是现在代码的样子。先读这一页，再读自己负责的文件顶部注释（那里有参数和返回值的细节）。设计在 `../../DESIGN.md`，老师笔记本在 `../../design/teacher-memory.md`。
+给并行开发的 agent 看。v1（0.2.0，期中季）各模块已接通，下面的表是现在代码的样子。先读这一页，再读自己负责的文件顶部注释（那里有参数和返回值的细节）。设计在 `../../DESIGN.md`，老师笔记本在 `../../design/teacher-memory.md`。
 
 **三条规矩**
 1. 只改分配给自己的文件（见第 1 节）。需要别人文件里的改动，写进返回值的 `needs`，由接线 agent 合并。
@@ -14,10 +14,14 @@
 | 负责 | 文件 | v0 要做到 |
 |---|---|---|
 | 课标数据 | `curriculum.js`、`../curriculum/standard-words.json`、`kebiao.json`、`prereq.json`、`tags.json`、`../../tools/build_curriculum.mjs`、`pdf_text.swift` | 课标 505 和 1600 词表做成数据；课本单元词的导入格式（私有，见 5.3） |
-| 英语小对话 | `lines.js`、`../curriculum/lines.json`、`questions.json`、`intake.json` | 打招呼、收尾、第一周 5 个按钮问题、夸她的句子；字幕按次数收起；家长开机问卷的题目 |
-| 今天的课 | `plan.js` | 复习容量、优先级、新词数、轻松版、21:00 以后、有听写的晚上 |
+| 英语小对话 | `lines.js`、`intake.js`、`../curriculum/lines.json`、`questions.json`、`intake.json` | 打招呼、收尾、第一周 5 个按钮问题、夸她的句子；字幕按次数收起；家长开机问卷的题目 |
+| 今天的课 | `plan.js`、`sprint.js` | 复习容量、优先级、新词数、轻松版、21:00 以后、有听写的晚上；v1 期中季（重点词、题型、写几个词轮换、考前小卷、这周增量） |
 | 记录与花费 | `events.js`、`budget.js` | 事件日志、180 天清理；花费估算、每天封顶、预算用完的 429 |
-| 题型 | `modes/choice.js`、`dictation.js`、`../css/choice.css` | 四选一（干扰项带标签、第一张放最有把握的）；纸笔听写的逻辑 |
+| 题型 | `modes/choice.js`、`modes/spell.js`、`modes/listen.js`、`dictation.js`、`../css/choice.css`、`spell.css` | 四选一（干扰项带标签、第一张放最有把握的）；纸笔听写的逻辑；v1 字母块拼写、听音选词 |
+| 语法卡（v1） | `grammar.js`、`ui-grammar.js`、`../css/grammar.css`、`../curriculum/grammar.json`、`tests/grammar.test.mjs` | 三张卡（代词、there be、名词所有格），提示阶梯、变式题、1/3/7 天复习、热身语法题 |
+| 语音小卡（v1） | `phonics.js`、`ui-phonics.js`、`../css/phonics.css`、`../curriculum/phonics.json`、`tests/phonics.test.mjs` | 11 周的规律、音节切分、拼错时的规律提示、本周规律 |
+| 周小结（v1） | `weekly.js`、`ui-weekly.js`、`../css/weekly.css`、`tests/weekly.test.mjs` | 一周的小结、课后算账、“老师记得的你”、“这不对”、发给家长 |
+| 拍课本（v1） | `capture.js`、`ui-capture.js`、`../css/capture.css`、`tests/capture.test.mjs` | 拍词汇表 / 目录页，识别、逐行核对、写进单元包 |
 | 今天标签 UI | `ui-home.js`、`ui-lesson.js`、`ui-dictation.js`、`ui-review.js`（旧闪卡，可复用）、`../css/home.css`、`lesson.css`、`dictation.css` | 首页草图（DESIGN 2.0）、上课四格、听写两张草图（5.3） |
 | 家长区 UI | `ui-parent.js`、`ui-onboard.js`、`ui-me.js`、`../css/parent.css`、`onboard.css` | 4 位数字码、Key、日限额、花费、进度和期中日期、开机问卷、导入课本、备份；第一次打开 |
 | 孩子版报错与查词 | `kid-errors.js`、`prompts.js` | 孩子看到的报错；初一版查词提示词（课本义项在前，1-2 个义项，例句只用她认识的词） |
@@ -40,10 +44,13 @@
 | `lib` | 单词 | 单词 | | | `ui-lib.js` → `#tab-lib` |
 | `parent` | 家长区 | 单词 | `lib` | | `ui-parent.js` → `#tab-parent` |
 | `onboard` | 第一次打开 | 无 | | 是 | `ui-onboard.js` → `#tab-onboard` |
+| `weekly` | 这周小结（v1） | 今天 | `home` | | `ui-weekly.js` → `#tab-weekly` |
+| `capture` | 拍课本（v1） | 单词 | `parent` | 是 | `ui-capture.js` → `#tab-capture` |
 
 - 旧名字还能用：`review` → `home`，`me` → `parent`。不认识的名字回到 `home`。
 - 跳转：`ctx.go(route, params)`。`params` 原样传给那个 view 的 `show(params, { from })`；`from` 是从哪个路由来的。
 - 启动时 `onboard.needed()` 为真先进 `onboard`，否则进 `home`。
+- 进 `weekly`：首页“这周小结出来了”一行（`weekly.hasNewWeekly`）、首页底部“这周 N / M 天”、家长区“这周小结”。进 `capture`：家长区“拍课本”。离开 `capture` 时 app.js 调它的 `hide()`（丢掉照片）；家长区去这两页时照样上锁。
 
 ---
 
@@ -67,12 +74,14 @@
 | `curriculum` | `curriculum.js` 的 Curriculum（9.1），启动时已加载 |
 | `reloadCurriculum()` | 课本导入写完 kv `textbook` 后调用，重新加载。导入词条（`words.importData`）以后 app.js 自己调 `curriculum.refresh()` 重建单元索引 |
 | `lines` | `lines.js` 实例（9.2），启动时已加载 |
+| `fetchJSON(path)` | 同源 JSON（`curriculum/…`）；`ui-grammar.js`、`ui-phonics.js` 用它读卡片 |
+| `intake()` | 家长问卷变成的默认值（`intake.js` 的 `intakeDefaults(kv, { entries: words.all(), curriculum, lemma })`），每次调用现算 |
 
 **今天的课**
 
 | 名字 | 是什么 |
 |---|---|
-| `planState(extra)` | 拼好 `plan.planToday` 要的 state（9.3），`extra` 覆盖其中字段（比如 `{ light: true }`）。现在给：`words`（`wordsForPlan(…, { now })`，带 r / last / order / source）、`newPerDay`、`newDoneToday`、`doneToday`（kv `day:`）、`dictationTonight`（今天有 kv `dictation:` 记录就算）、`progress`、`weekGoal`、`lessonDays`（`ui-home.js` 的 `lessonDays(kv)`）、`unitRanks`（`curriculum.units()` 的 order） |
+| `planState(extra)` | 拼好 `plan.planToday` 要的 state（9.3），`extra` 覆盖其中字段（比如 `{ light: true }`）。v1 另给：`outline`（kv `outline`）、`boost`（问卷里的错词 slug，填完 21 天内）、`busyDay`（问卷说今天作业多）、`grammar` / `grammarWarm` / `grammarCard`（grammar.js 内容读到了才给：`grammarState(kv)`、`grammarWarmItems(…, { max: 2 })` 的数组、`todayCard(…, { upTo: progress.unit })`；没读到就不给，plan 用 sprint.js 的兜底）。v0 起给：`words`（`wordsForPlan(…, { now })`，带 r / last / order / source）、`newPerDay`、`newDoneToday`、`doneToday`（kv `day:`）、`dictationTonight`（今天有 kv `dictation:` 记录就算）、`progress`、`weekGoal`、`lessonDays`（`ui-home.js` 的 `lessonDays(kv)`）、`unitRanks`（`curriculum.units()` 的 order） |
 | `todayPlan(extra)` | `planToday(planState(extra), new Date())` |
 
 **设置**
@@ -100,7 +109,9 @@
 | `busy(+1 / -1)` | 有不能被自动更新打断的事在做 |
 | `lookup(q)`、`toggleFav(slug, on)`、`openMe(opts)`、`closeMe()`、`showTab(name)` | 词典原来的接口，查词和单词页在用 |
 
-**每个 view 返回的对象**：`show(params, { from })` 必须有；`onChange()` 词或设置变了以后调用（节流过）；`inSession()` 为真时 App 不自动更新；`holding()` 同理（家长区有没导完的备份）。
+**每个 view 返回的对象**：`show(params, { from })` 必须有；`onChange()` 词或设置变了以后调用（节流过）；`inSession()` 为真时 App 不自动更新；`holding()` 同理（家长区有没导完的备份、周小结的分享面板开着、拍课本手上有没存的照片）。
+
+**启动时**（v1）：`grammar.loadGrammar({ fetchJSON })`（读不到就算了，plan 用兜底题）；首屏 3 秒后 `weekly.catchUp(ctx)` 补算没结账的课。
 
 ---
 
@@ -138,7 +149,8 @@
 | `derived_from` | 只是提示（sunlight ← sun），不改 tier | 课本导入 |
 | `write`、`write_at`、`write_from` | “写得出”线开着没有、什么时候、从哪来（`'dictation'`） | 听写（`words.patch`） |
 | `scope` | 在期中范围里（v0 由 `plan.js` 用 kv `progress` 现算，词条上一般不写） | `words.patch` |
-| `source` | 导入来的词：`'textbook'`；第三方抓来、等 Wei 拍课本核对的是 `'textbook-draft'`；history 里导入的那条也带 `source` | 课本导入 |
+| `source` | 导入来的词：`'textbook'`；第三方抓来、等 Wei 拍课本核对的是 `'textbook-draft'`；拍课本核对过的是 `'photo'`（v1）；history 里导入的那条也带 `source` | 课本导入 / 拍课本 |
+| `book_pos` | 书上的词性（拍课本，v1） | 拍课本 |
 | `needs_core: true` | 还没有 AI 讲解，第一次打开时补 | 课本导入 |
 | `level` | 词页上的等级标签，由程序定（`prompts.levelLabel`：“课本 Unit 3 / 小学词 / 初中词 / 课外词”），模型回的值不用 | `words.js`（`levelFor`） |
 
@@ -164,8 +176,14 @@
 | `budget` | `{ days: { 'YYYY-MM-DD': { kind: 元 } }, exhausted?: 'YYYY-MM-DD' }`，留 62 天；`exhausted` 是百炼说 Key 的预算用完的那天 | `budget.js` |
 | `day:YYYY-MM-DD` | `{ cells: { warmup: true, ... }, minutes, light }` | 上课 / 今天的课 |
 | `dictation:YYYY-MM-DD` | DictationRecord（`dictation.js` 注释） | 听写 / 首页提醒 |
+| `outline`（v1） | 复习提纲重点词 `{ version: 1, slugs: [slug], words: [{ slug, w, unit }], at, updated }`，slugs 按课本顺序；`sprint.outlineList` 也认纯数组、`{ words: [{ w }] }`。名字是任务定的，不按 `模块.名字` | 家长区写 / plan.js、sprint.js 读 |
+| `grammar:<cardId>`（v1） | 一张语法卡的进度 `{ v, card, parts: { '1' \| '2': { started, done?, answered: [qid], right, fuzzy, failed } }, items: { qid: { n, last, grade, passed, clean, hint, tags } }, seen: { qid: day }, reviews: [{ id, family, miss, step, due, served }], flagged, warm: { day, n }, streak, updated }`；缺字段的老数据读成空卡 | 语法卡、热身 |
+| `phonics.state`（v1） | `{ weeks: { 'YYYY-MM-DD'（周一）: ruleId }, done: { ruleId: { at, right, total, n } }, flagged: { ruleId: 次数 }, updated }` | 语音小卡；拼错时 `phonics.recordMiss` |
+| `weekly.tally`（v1） | 课后算账 `{ version: 1, updated, sessions: { sid: SessionStat }, weeks: { 周一: WeekStat }, written: { slug: 'YYYY-MM-DD' } }`，课留 90 天、周汇总留 30 周 | ui-lesson 收尾（`settleLesson`）、周小结（`catchUp`） |
+| `weekly.seen`（v1） | `{ week: 周一, at }` 看过哪一周的小结 | 周小结 |
+| `weekly.disputes`（v1） | `{ line_id: { choice: 'wrong' \| 'changed' \| 'forget', sig, section, at } }` | 周小结“这不对” |
 
-新键：用 `模块.名字` 或 `名字:日期`，写进这张表（needs 给接线）。
+新键：用 `模块.名字` 或 `名字:日期`，写进这张表（needs 给接线）。v1 的新键都随备份导出（备份只跳过 `settings`、`parent.pin`）。
 
 ### 5.1 备份（家长区“导出备份”）
 格式 `emma-export` 版本 1：`{ format, version, source: 'ipad', exported_at, entries, zh, kv, events }`。`kv` 是除 `settings`、`parent.pin` 以外的全部键（Key 和数字码永远不进备份）；`events` 全带（家长区定的）。
@@ -178,6 +196,7 @@ Wei 拍的课本照片由 Claude 在电脑上识别，生成导入文件放在 `
 ```
 { book: '外研版七上', units: [{ id: 'S', title: 'Starter', order: 0, words: [{ w: 'hello', cn: '你好', phrase?: true }] }], importedAt }
 ```
+v1 拍课本另加：`units[i].words[j]` 可带 `pos`、`source: 'photo'`、`cn_source: 'photo'`；`units[i]` 可带 `source: 'photo'`、`photoAt`、`pages`；`textbook` 可带 `photoAt`、`toc: [{ id, title, order }]`（拍过目录页才有）。
 
 ---
 
@@ -187,14 +206,14 @@ Wei 拍的课本照片由 Claude 在电脑上识别，生成导入文件放在 `
 
 | 字段 | 说明 |
 |---|---|
-| `type` | `EVENT_TYPES` 之一：`session_start`、`session_end`、`answer`、`skip`、`exit`、`feel`、`flag`、`review`、`dictation`、`lookup`、`ask`、`parent_note`、`predict`、`hint`、`spell`、`line`、`onboard` |
+| `type` | `EVENT_TYPES` 之一：`session_start`、`session_end`、`answer`、`skip`、`exit`、`feel`、`flag`、`review`、`dictation`、`lookup`、`ask`、`parent_note`、`predict`、`hint`、`spell`、`line`、`onboard`、`dispute`（v1） |
 | `at` | 本地时间带时区，`2026-11-03T19:42:11+08:00`（`log` 自动补） |
 | `sid` | 这节课的编号，`ctx.events.sessionId()` 返回 `YYYY-MM-DD-HHMMSS` |
-| `step` | `warmup` / `read` / `write` / `wrap` / `dictation` / `onboard` / `look` |
-| `item` | `w:<slug>`、`g:<语法点>:<题>`、`ep:<集>:<题>`、`line:<句子 id>` |
+| `step` | `warmup` / `read` / `write` / `wrap` / `dictation` / `onboard` / `look`；v1 加 `grammar`（语法卡单独打开时）、`weekly` |
+| `item` | `w:<slug>`、`g:<语法点>:<题>`、`ep:<集>:<题>`、`line:<句子 id>`；v1：语法卡 `g:<cardId>:<qid>`（变式题 qid 加 `v`），语音小卡 `ph:<规律>:<第几题>` |
 | `slug` | 单词 |
 | `unit` | 课本单元（不知道就不写） |
-| `mode` | `mc4` 四选一、`listen`、`tiles`、`keys`、`cloze`、`order`、`paper` 纸笔、`card`（热身凑不齐干扰项时退回的闪卡） |
+| `mode` | `mc4` 四选一、`listen`、`tiles`、`keys`、`cloze`、`order`、`paper` 纸笔、`card`（热身凑不齐干扰项时退回的闪卡）、`grammar`（v1 语法题） |
 | `choice` | 她选的那个（文字或 id） |
 | `correct` | 对不对 |
 | `first_try` | 是不是这题第一次作答 |
@@ -204,6 +223,15 @@ Wei 拍的课本照片由 Claude 在电脑上识别，生成导入文件放在 `
 
 各类型自己的字段（teacher-memory 2.1）：`session_start` 带 `kind`（standard / easy / dictation / weekend）、`hour`；`session_end` 带 `min`、`steps_done`、`completed`；`exit` 带 `after_item`、`wrong_streak`；`ask` 带 `qid`、`who`（emma / parent）、`answer`（选项 id，跳过是 `'skip'`）、`about`（选项的标签，`lines.answerEvent` 给）；`lookup` 带 `query`、`source`、`from`。`answer` 另有四选一给的 `direction`、`choice_slug`、`distractor`（她选的干扰项 slug）、`retry`；`predict` 带 `p_base`、`p_teacher`（v0 相同）。
 
+**v1 加的字段**（只加不改）
+- `session_start` 的 `kind` 多一个 `'sprint'`（考前小卷），另带 `season: true`（期中季）；`plan.kind` 的轻松版原因多一个 `busy`。
+- 字母块拼写（mode `tiles`）：`chunks`（`'syllable'` / `'letter'`）、`attempt`、`spell_rule`、`revealed`；一张卡每次检查记一条 `answer`，只有第一条 `first_try: true`。拼写卡的 `review` 记 `line: 'write'`。“写几个词”里的拼写只记 `predict`、`answer`，不记 `review`（FSRS 只在热身评分）。
+- 听音选词（mode `listen`）：`plays`。
+- 语法题（mode `grammar`）：`card`、`point`、`family`、`kind`（`'card'` / `'review'` / `'practice'`）、`part`、`variant`、`of`、`review_of`、`done`、`passed`、`grade`、`fixed_after`；`hint` 事件带 `level`、`auto`；语法题不进 FSRS。
+- 语音小卡：`item` 是 `ph:…`，另带 `word`，不带 `slug`（不算进写对的词），mode 用 `cloze` / `listen` / `mc4` / `tiles`。
+- 语法卡和语音小卡的 `predict` 由 ui-lesson 在每题第一次作答前补记（item 是 `g:…` / `ph:…`，`p_base` 0.63 或 0.5）。
+- `dispute`：`line_id`、`choice`（`wrong` / `changed` / `forget`）、`about`（`steady` / `likes` / `rhythm`），step `weekly`。
+
 `log(event)` 写失败不抛错，返回 `null`：作答不能因为记录失败卡住。
 
 ---
@@ -211,13 +239,14 @@ Wei 拍的课本照片由 Claude 在电脑上识别，生成导入文件放在 `
 ## 7. 首页和上课的四格
 
 `plan.planToday` 的 `cells` 永远是这四格、这个顺序：`warmup` 热身、`read` 读一段、`write` 写几个词、`wrap` 收尾。`status`：`ready` / `done` / `soon`（没上线，显示“下周开播”，不占时间）/ `skip`。v0 只有热身和收尾是 `ready`。
+v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要拼的词；小卷日另带 `quiz`）、`'grammar'`（`card: { id, part, from }`）或 `'phonics'`（`card`、`week`），按星期轮换（日、三、五拼写，一、二、六语法卡，四语音小卡）；`skip` 时 `mode: 'paper'`，`note` 写原因（“明天开始”“轻松版不做”“今天不做”）。热身格多 `cards`、`modes`、`grammar`；“读一段”还是 `soon`。
 
 ---
 
 ## 8. CSS
 
 - 共用的颜色、字号、间距（`--ink`、`--paper`、`--accent`、`--rule`、`--serif`、`--gutter`、`--col` 等）和词典原来的样式都在 `../index.html` 里，别重新定义。
-- 每个 UI agent 只写自己的文件，`index.html` 已经引用：`css/home.css`（类名 `home-`）、`lesson.css`（`lesson-`）、`dictation.css`（`dict-`）、`choice.css`（`mc4-`）、`parent.css`（`parent-`）、`onboard.css`（`onboard-`）。
+- 每个 UI agent 只写自己的文件，`index.html` 已经引用：`css/home.css`（类名 `home-`）、`lesson.css`（`lesson-`）、`dictation.css`（`dict-`）、`choice.css`（`mc4-`）、`parent.css`（`parent-`）、`onboard.css`（`onboard-`）；v1：`spell.css`（`spell-`、`listen-`）、`grammar.css`（`gram-`）、`phonics.css`（`ph-`）、`weekly.css`（`weekly-`）、`capture.css`（`cap-`）。
 - 现成可用的类：`.btn`（一屏一个实心按钮）、`.text-btn`、`.text-btn.accent`、`.lede`（大号衬线句子）、`.small`、`.runhead`、`.say`（朗读小按钮）、`.serif`、`.num`。
 - iPad 竖屏一栏，最宽 `--col`（720px），横屏居中。主题色由 `:root[data-accent]` 换 `--accent` 和 `--tag-bg`。
 - 风格：词典的安静干净（衬线词头、细线、留白），不要卡通吉祥物。文案中文为主，弯引号“ ”，不用破折号，句子短。
@@ -241,12 +270,21 @@ Wei 拍的课本照片由 Claude 在电脑上识别，生成导入文件放在 `
 - `pick` 返回 `{ id, scene, en, zh, showZh }`；ctx 认 `name`、`word`、`minutes`、`hour`、`phase`（`'before'` / `'after'`）、`wrong`、`perfect`、`spelled`、`hard`、`recent`
 - Question = `{ id, day, pool, about, to, en, zh, showZh, options: [{ id, en, zh, about, kind: 'answer' | 'none' }], skip: { id: 'skip', en: 'Not now', zh: '先跳过', kind: 'skip' } }`；跳过不在 `options` 里，界面自己摆
 - 一句不超过 8 个词（测试检查）。回答按钮问题记 `answerEvent(...)` 返回的事件。
+- v1：`SCENES` 加 `'exam'`；新导出 `FEATURES`、`TONES`、`EXAM_SEASON_DAYS`、`EXAM_PHASES`、`examGap`、`examPhase`（4-14 天 `season`、2-3 天 `quiz`、1 天 `eve`、当天 `day`、考完 1-3 天 `done`）、`weekStart`。`pick(scene 或 [scene], ctx)` 新认 `ctx.tone`、`ctx.reason`（轻松版的原因）、`ctx.exam`；夸奖认 `spelled`、`wrote`、`heard`、`again`、`firstTry`、`hard`、`lastWeek`；听写的 `phase` 六段 `before` / `during` / `after` / `retry` / `tonight` / `morning`。新函数 `question(id, { features, words, episodes })`、`weekly(opts)`、`weeklyQuestion({ asked, now, dayN, features, words, episodes })`；`words` 可以按题分开给 `{ hard_word, good_word }`。动态选项作答时 `answer` 记 `'w:<slug>'` 或 `'ep:<id>'`，`about` 记 `'<about>:<slug>'`。
+- `intake.js`（v1）：`intakeDefaults(kv, { textbook?, entries?, curriculum?, lemma? })` -> `{ filled, status: 'pending', review: { words, slugs, outside, grammar, focus, teacher }, dictation: { method, methods, known, freq }, praise: { style, tone, lines: 1, word: true, exclaim, parentTip, known }, busy: { ids, days, varies, known }, time: { slot, late }, phonics: { level, ipa, ipaTap, startFrom }, onMistake }`；`isBusyDay(d, date)`。只读 kv `parent.intake`，从不抛错，不加 kv 键。
 
 ### 9.3 `plan.js`
 - `planToday(state, now) -> Plan`（纯函数）；`wordsForPlan(entries, curriculum, opts?)`（`opts = { now }` 时多给 r、last、order、source）；`dayOf(date)`
 - state 新字段：`lessonDays`（空 = 第一节课，最后一天早于昨天 = 回归日，也用来算 `weekDays`）、`firstLesson`、`standard`（回归日点了标准版）、`unitRanks`、`introDoneToday`、`textbookPerDay`
 - Plan 新字段：`kind`（standard / easy / weekend）、`lightReason`（late / exam / dictation / comeback / chosen）、`first`、`weekend`、`dictation`、`comeback`、`cap`、`allDone`、`week: { days, goal }`、`counts.reviews / intro / newWords / deferred / cutNew`，别名 `slots` / `easy` / `reason`
+- v1 state 新字段：`outline`、`grammar`、`grammarWarm` / `grammarWarmItems`、`grammarQuiz` / `grammarQuizItems`、`grammarCard`（null = 今天没有卡）、`phonicsCard`、`spelledOk`、`spellMode`、`noGrammar`、`noPhonics`、`gains` / `history`、`busyDay`（默认轻松版，`lightReason` `'busy'`，排在回归日后面，`standard` 能改回，推翻不了 21:00、考前一天、听写夜）、`boost`（家长说的错词，同一档里排到前面，不跨档、不超封顶）
+- v1 Plan 新字段：`examSeason`、`season`（`sprintOf`：`{ on, phase: none|ahead|season|quiz|eve|day|after, label, from, to, date, daysLeft（只给家长区）, keys, keySource, spellPerDay }`）、`quiz`、`quizDay`、`sprint`（小卷日才有，是 `quiz` 的别名）、`closing`、`gains`、`counts.grammar / spell / pulled`；`CAPS.quiz = 5`，`LIMITS.weekend = 20`（周末时长封顶 20 分钟）
+- 孩子端不放倒计时：首页右上角用 `plan.season.label`（期中季 14 天以外是空的），`daysLeft` 只在家长区出现
 - 字段的细节见文件注释。`ctx.planState()` 负责拼 state；要加 state 字段写进 needs。
+
+### 9.3.1 `sprint.js`（v1，期中季）
+- 导出和形状都在文件顶部注释：`SPRINT_DAYS`、`QUIZ_DAYS`、`SPELL_PER_DAY`、`WRITE_SPELL`、`PULL_MAX`、`QUIZ_SPELL`、`QUIZ_GRAMMAR`、`DEFAULT_RANGE`、`MODE_SECONDS`、`WRITE_MINUTES`、`WRITE_ROTATION`、`UNIT_CARDS`、`GRAMMAR_FALLBACK`、`dayOf`、`unitRank`、`unitName`、`examPhase`、`outlineList`、`keyWords`、`sprintOf`、`tileable`、`assignModes`、`grammarWarm`、`grammarQuiz`、`writePlan`、`wordsOf`、`buildQuiz(state, now, { force?, sprint?, mode? })`、`weeklyGains(events, now)`
+- `GRAMMAR_FALLBACK` 的答案都在 `options` 第一个：直接用要先打乱（ui-lesson 的 `shuffleOptions`）
 
 ### 9.4 `events.js`
 - `createEvents({ store, now }) -> { log(event), query({ since, until, type, slug, unit, mode, limit }), recent(n), count(), sessionId(), trim(days), predict(entry, { mode }), logPrediction(...), stats(), predictionStats(), weekDays(), lessonDays() }`
@@ -263,7 +301,10 @@ Wei 拍的课本照片由 Claude 在电脑上识别，生成导入文件放在 `
 ### 9.6 `modes/choice.js`
 - `makeQuestion(entry, pool, { direction, rng })`、`makeChoice(...)`、`renderChoice(container, q, { onAnswer, onDone, say })`、`createAttempt(q)`、`gradeOf({ correct, firstTry, hintLevel })`、`meaningOf(entry)`、`explain`、`hintFor`、`directionFor`、`isRetry`、`fillerFor(entry, app)`、`sureFirst(items, get)`
 - `choiceMode.render(entry, ctx) -> { el, footer, onKey }`，和 `ui-review.js` 的 `flashcard` 同一个 mode 接口；`ctx` 是 `{ app, rate(g), say, position, pool, onAnswer(ev) }`；`ctx.rate` 收到 `(grade, { modeId: 'mc4' })`
-- 评分：第一次就对 3，用了“再看一次”才对 2，答错 1。上课里答对一次就收，答错的隔约 4 张再出（`session.js`）。干扰项不够时用同单元课本词和 `curriculum.standardWords()` 补。
+- 评分：第一次就对 3，用了“再看一次”才对 2，答错 1。上课里答对一次就收，答错的隔约 4 张再出（`session.js`）。干扰项不够时用同单元课本词和 `curriculum.standardWords()` 补。还没有中文的词（`brief_cn` 空）不出题，退回闪卡。
+- v1 `modes/spell.js`：`MODE_ID = 'spell'`、`EVENT_MODE = 'tiles'`、`SYL_MIN`、`MAX_TRIES`、`SPELL_CAP = 10`、`phonicsReady`、`setPhonics`、`simpleSyllables`、`syllablesOf`、`canSpell`、`chunksFor`、`decoysFor`、`makeSpell`、`ruleHint`、`spellHint`、`noteMiss`、`gradeOf`、`createSpellAttempt`、`renderSpell`、`pickMode(entry, { index, spelled, inScope, curriculum })`、`spellMode`。只给必会词出；6 个字母以上、2 个音节以上按音节分块（`phonics.syllables`）；拼错调 `phonics.recordMiss`。评分 3 / 2 / 1。
+- v1 `modes/listen.js`：`MODE_ID = 'listen'`、`HOMOPHONES`、`sameSound`、`canListen`、`nearWords`、`makeListen`、`explainListen`、`createListenAttempt`、`listenFiller`、`renderListen`、`listenMode`。评分：第一次就对 3，看了“看中文意思”2，错 1；重听不扣分。
+- 三个 mode 的 `render(entry, ctx)` 都返回 `modeId`（给 `rate`：`'spell'` / `'listen'` / `'mc4'`）和 `eventMode`（给事件：`'tiles'` / `'listen'` / `'mc4'`）；出不了题退回四选一时 `modeId` 是 `'mc4'`。
 
 ### 9.7 `dictation.js`
 - `METHODS`、`promptFor(word, method)`、`buildDictation(...)`、`createDictation({ words, method, unit, now, rounds, kind, sid, info })`、`selfCheck`、`saveDictation({ kv, d, words })`、`openWriteLine(words, slugs)`、`reminders(record, now)`、`reminderState`、`homeReminders(kv, now)`、`tonightDictation(record)`、`morningList(record)`、`markTonightDone` / `markMorningDone`、`markEvent`
@@ -285,13 +326,35 @@ Wei 拍的课本照片由 Claude 在电脑上识别，生成导入文件放在 `
 
 | 文件 | 导出 | `show(params)` 的 params |
 |---|---|---|
-| `ui-home.js` | `createHomeTab(ctx)`；纯函数 `lessonDays(kv)`、`dictationToday(kv)`、`dictationNotice(kv, now)`、`phaseText` 等 | 无 |
-| `ui-lesson.js` | `createLessonView(ctx)` | `{ light, standard?（回归日点了标准版）, again?（今天上完了再练一会儿）, first?（第一次打开直接进来） }` |
-| `ui-dictation.js` | `createDictationView(ctx)` | `{ unit?, retry?（再写一次错的）, glance?（出门前看一眼） }` |
-| `ui-parent.js` | `createParentView(ctx)` | `{ open?, setup? }`；`open` 认 `key`、`import`、`backup`、`unit`、`exam`、`intake`、`pname`、`cap` |
+| `ui-home.js` | `createHomeTab(ctx)`；纯函数 `lessonDays(kv)`、`dictationToday(kv)`、`dictationNotice(kv, now)`、`phaseText` 等；v1 `slotText`、`isQuizDay`、`startLabel`、`writtenThisWeek`、`gainText`、`optionalModule`、`WRITE_KINDS` | 无 |
+| `ui-lesson.js` | `createLessonView(ctx)`；v1 按需加载 `V1_MODULES`（listen、spell、grammar、ui-grammar、ui-phonics、sprint），收尾调 `weekly.settleLesson` | `{ light, standard?（回归日或作业多的日子点了标准版）, again?（今天上完了再练一会儿）, first?（第一次打开直接进来）, sprint?（她自己点了考前小卷） }` |
+| `ui-dictation.js` | `createDictationView(ctx)`；纯函数 `intakeMethod`、`defaultMethod`、`pickLine` | `{ unit?, retry?（再写一次错的）, glance?（出门前看一眼）, method? }` |
+| `ui-weekly.js`（v1） | `createWeeklyView(ctx)`；`buildBackup(ctx)`（发给家长附的备份，和家长区导出一样） | `{ week?: 'YYYY-MM-DD'（那周的周一） }` |
+| `ui-capture.js`（v1） | `createCaptureView(ctx)`，另有 `hide()`；纯函数 `rowsFrom`、`unitChoices`、`summaryText`、`savedText`、`photoStatus` | 无 |
+| `ui-grammar.js`（v1） | `renderGrammarCard(container, ctx, { cardId, part, sid, step, onDone })`、`renderGrammarItem(container, ctx, { items, sid, step: 'warmup', onDone })`，都返回 `{ el, onKey(ev), stop() }` | 上课的“写几个词”和热身里画 |
+| `ui-phonics.js`（v1） | `renderPhonicsCard(container, ctx, { ruleId?, onDone?, step?, sid?, ipaTap?, skipReview? })`，也认上课的叫法 `(container, ruleId \| null, { app, say, sid, onAnswer, onDone })` | 上课的“写几个词”里画 |
+| `ui-parent.js` | `createParentView(ctx)`；v1 纯函数 `outlineIndex`、`splitOutline`、`matchOutline`、`outlineRecord`、`outlineSlugs`、`OUTLINE_KEY` | `{ open?, setup? }`；`open` 认 `key`、`import`、`backup`、`unit`、`exam`、`intake`、`pname`、`cap`、`outline` |
 | `ui-onboard.js` | `createOnboardView(ctx)`，另有同步的 `needed()`；结束时 `ctx.go('lesson', { first: true })` | 无 |
 | `ui-me.js` | `createMeTab(ctx, { root, back, layout, hooks })`，由 `ui-parent.js` 调用；`hooks` 是 `exportExtra`、`previewExtra`、`afterImport` | `{ open? }` |
 | `ui-lib.js` | `createLibTab(ctx)`；导入课本后多一行单元筛选（全部单元 / 各单元 / 课外），单元里按必会、认读、小学词和课本顺序排 | 无 |
+
+### 9.11 `grammar.js`（v1，语法卡）
+- 全部导出和形状在文件顶部注释。常用的：`FILE`、`KV_PREFIX = 'grammar:'`、`MODE = 'grammar'`、`loadGrammar({ fetchJSON })`、`content()`、`grammarState(kv)`、`todayCard(gstate, now, { upTo })` -> `{ cardId, part } | null`（按 U1、U2、U3 的顺序，一天一份 5 道，第二份要等到第一份以后）、`grammarWarmItems(state, now, { max })` -> `[{ item: 'g:<card>:<id>', card, qid, kind: 'review' | 'practice', of?, family, unit, mode: 'grammar' }]`（0-2 道，同一天同样的进度结果一样；没有“在练”的卡就是 `[]`，plan 这时不混语法题）、`resolveWarmItem(item)`、`summary(gstate, now, { tags })`、`createRun(...)`
+- 卡 id：`pronoun`、`there_be`、`possessive_s`（sprint.js `UNIT_CARDS` 一样）。新误解标签 `subj_vs_poss`、`be_agree`、`poss_plural` 暂放在 grammar.json 的 `tags`，grammar.js 读得到名字
+- 不写 FSRS，进度只在 kv `grammar:<cardId>`
+
+### 9.12 `phonics.js`（v1，语音小卡）
+- `PHONICS_FILE`、`PHONICS_KEY = 'phonics.state'`、`syllables(word)`、`syllableWords(text)`、`hintFor(word, wrong)`、`missRule(word, wrong)` -> `{ rule, kind, hint } | null`、`recordMiss({ kv, word, wrong })`、`weekRule(now, progress, { state, unitOf, unitOrder, skipReview })`、`weekKey`、`weekInfo`、`assignWeek`、`markDone`、`noteMiss`、`readState(kv)`（老数据、坏数据读成空的）、`loadPhonics(fetchJSON)`、`usePhonics(data)`
+- 拼写（spell.js、以后的听写）写错时调 `recordMiss`：有规律可循的给一句提示，记进本周规律的候选；记忆型的错返回 null
+
+### 9.13 `weekly.js`（v1，周小结和课后算账）
+- 全部导出在文件顶部注释：`weekOf`、`buildWeekly`、`shareText`、`hasNewWeekly(kv, now)`（周日 18:00 起；周一、周二还没看过的话是上一周；那周至少上过一天课）、`defaultWeek`、`markSeen`、`sessionStats`、`addToTally`、`settleLesson(ctx, { sid, end })`、`catchUp(ctx)`、`memoryOf`、`hideDisputed`、`dispute`、`DISPUTE_CHOICES`
+- “会写了”：跨天 3 次客观题第一次就答对、首尾隔至少 2 天、至少一次在拼写或新句子里；数据不够时退一步写“这周拼对过两次以上”的词，不冒充“会写了”
+- 周小结页 Emma 也看：不放分数、正确率、缺口统计，也不放离考试还有几天
+
+### 9.14 `capture.js`（v1，拍课本）
+- `CAPTURE_MODEL`、`fitSize`、`imageToJpeg`、`recognize({ dataUrl, settings, budget, … })`（自己发百炼请求，花费类别 `'photo'`，自己查 `blockReason`、记 `record`、预算用完调 `markExhausted`；`ai.recent()` 看不到这次调用）、`normalizeResult`、`mockResult`、`planVocab`、`planToc`、`saveCapture(ctx, plan, { dryRun })`（走 `words.importData`、写 kv `textbook`、`ctx.reloadCurriculum()`，和导入单元包同一条路）
+- 照片只在内存里，不进任何存储；模拟模式给假结果、“存”只算一遍不写
 
 ---
 
@@ -317,5 +380,6 @@ await run();
 - 已定：FSRS 新卡答对后当天的短间隔，`plan` 按词条的 `last`（今天复习过）跳过，做完的格子按 kv `day:` 标 done。
 - 已定：备份带 `events`（见 5.1）。
 - iPad 上没有用户点击时自动播放声音可能被拦。题目和听写里的自动朗读，拦了就等她点“再听一遍”。
-- 开机问卷的回答还没人读：`mistakes` 的词进待学、`dictation_way` 当默认考法、`on_praise` 影响夸她的句式、`free_time` / `busy_days` 影响课的轻重。
+- 开机问卷的回答由 `intake.js` 读（v1）：`mistakes` 的课本词先进复习（plan `boost`，21 天内）、`dictation_way` 当默认考法、`on_praise` 影响夸她的句式（`praise.tone`）、`busy_days` 那几天默认轻松版、`phonics` 决定语音小卡先不先显示音标。`free_time` 还没用。
+- v1 还没做（v2）：读一段（故事）、“会写了”第 7、21 天复查、“这不对”之后下节课出题核对、家长区完整笔记本、键盘拼写（`spellMode: 'keys'` 要等体检页确认键盘安全）、grammar.js 出小卷题（`grammarQuizItems`，现在小卷用 sprint.js 的兜底题）、tags.json 合并三个语法新标签。
 - 导入的课本词中文取自第三方词表（`cn_source: 'book-list'`，网页抓取可能缺字），没有的留空等 AI 补（`needs_core`）；整份包要等 Wei 拍课本核对后再给 Emma 用。

@@ -242,6 +242,8 @@ export function makeQuestion(entry, pool = [], { direction = 'en2zh', rng = Math
   if (!target) return null;
   const right = textOf(target, direction);
   if (!right) return null;
+  // no Chinese yet (a word whose meaning the list lost, waiting for the AI): Chinese-to-English would show an empty prompt
+  if (!target.meaning) return null;
   const u = unit || entry.unit || null;
   const seenSlug = new Set([entry.slug]);
   const seenHead = new Set([low(target.headword)]);

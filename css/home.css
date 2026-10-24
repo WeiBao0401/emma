@@ -15,6 +15,7 @@
 .home-notice .text-btn{margin:0 -10px 0 0;font-size:16px;font-weight:600}
 .home-notice.quiet{color:var(--muted)}
 .home-notice.quiet .icon{color:var(--muted)}
+.home-notice+.home-notice{margin-top:0;border-top:0}
 
 /* the teacher's English line, Chinese under it until it fades (DESIGN 2.5) */
 .home-hello{display:flex;flex-direction:column;gap:12px;margin-top:48px}
@@ -33,6 +34,9 @@
 .home-minutes .n{font-variant-numeric:lining-nums tabular-nums}
 .home-summary{margin-top:10px;font-size:17px;line-height:1.55;color:var(--ink);text-wrap:pretty}
 .home-why{margin-top:6px;font-size:15px;line-height:1.55;color:var(--muted);text-wrap:pretty}
+/* v1: the weekly gain (“这周又能写出 9 个词。”), a plain line, no countdown, no bar (DESIGN 6.4) */
+.home-gain{margin-top:6px;font-size:16px;line-height:1.5;font-weight:500;color:var(--accent);font-variant-numeric:lining-nums tabular-nums}
+.home-plan .lede+.home-summary+.home-gain{margin-top:10px}
 
 /* the four cells: 热身 · 读一段 · 写几个词 · 收尾 */
 .home-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}
@@ -59,6 +63,7 @@
   .home-minutes{font-size:28px}
   .home-summary{font-size:18px}
   .home-why{font-size:16px}
+  .home-gain{font-size:17px}
   .home-slots{gap:14px;margin-top:28px}
   .home-actions{margin-top:52px}
   .btn.home-start{min-height:66px;font-size:21px}

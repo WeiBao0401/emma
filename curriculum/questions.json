@@ -3,8 +3,10 @@
   "source": "英语小对话的按钮问题（DESIGN 2.5、3.5；teacher-memory 7.2）。和句库是同一套，Claude 预写，家长过目。老师用英文问，按钮也是英文，每句下面带中文字幕；只给按钮，不开输入框；按哪个都算答了，不打分。",
   "rules": {
     "week1": "第一周每天收尾最多一个（day 1-5），能跳过，不叫问卷",
-    "weekly": "第 2 周起每周最多一个，由周反思从这里挑 id（ask_emma 只返回 qid）",
-    "answer": "回答记 events { type: 'ask', qid, who: 'emma', answer: 选项 id, about }；跳过记 answer: 'skip'"
+    "weekly": "第 2 周起每周最多一个（lines.weeklyQuestion 挑：这周还没问过、先挑没问过的、week. 开头的“这周”问题优先）；周反思上线后由它按 id 挑（ask_emma 只返回 qid）",
+    "answer": "回答记 events { type: 'ask', qid, who: 'emma', answer: 选项 id, about }；跳过记 answer: 'skip'",
+    "requires": "题或选项的 requires：要这些功能上线才出（story 故事、grammar 语法卡、listen 听音选词、tiles 字母块、dictation 这周写过听写）；剩下的选项不到 2 个，这题这次不问",
+    "options_from": "选项由调用方现给：source words 是这周的词 [{ slug, w, cn }]，episodes 是这周的集 [{ id, en, zh }]；选项 id 是 w:<slug> / ep:<id>，about 是 <about>:<slug>；不到 min 个就不问"
   },
   "buttons": {
     "none": {
@@ -250,7 +252,10 @@
           "id": "listen",
           "en": "Listening",
           "zh": "听",
-          "about": "part:listen"
+          "about": "part:listen",
+          "requires": [
+            "listen"
+          ]
         },
         {
           "id": "write",
@@ -262,7 +267,10 @@
           "id": "story",
           "en": "The story",
           "zh": "故事",
-          "about": "part:read"
+          "about": "part:read",
+          "requires": [
+            "story"
+          ]
         }
       ],
       "none": true,
@@ -483,7 +491,10 @@
           "id": "listen",
           "en": "Listen and choose",
           "zh": "听音选词",
-          "about": "mode:listen"
+          "about": "mode:listen",
+          "requires": [
+            "listen"
+          ]
         },
         {
           "id": "read",
@@ -495,7 +506,10 @@
           "id": "spell",
           "en": "Spell the words",
           "zh": "拼单词",
-          "about": "mode:spell"
+          "about": "mode:spell",
+          "requires": [
+            "tiles"
+          ]
         },
         {
           "id": "paper",
@@ -623,6 +637,262 @@
         "help",
         "you",
         "most"
+      ]
+    },
+    {
+      "id": "q-week-hard-word",
+      "about": "week.hard_word",
+      "to": "questions_open",
+      "en": "Which word was hardest this week?",
+      "zh": "这周哪个词最难？",
+      "options": [],
+      "options_from": {
+        "source": "words",
+        "about": "hard_word",
+        "min": 2,
+        "max": 3
+      },
+      "none": {
+        "en": "All OK",
+        "zh": "都还行",
+        "about": "hard_word:none"
+      },
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "which",
+        "word",
+        "be",
+        "hard",
+        "this",
+        "week"
+      ]
+    },
+    {
+      "id": "q-week-good-word",
+      "about": "week.good_word",
+      "to": "profile.strengths",
+      "en": "Which word do you know best now?",
+      "zh": "现在你最有把握的是哪个词？",
+      "options": [],
+      "options_from": {
+        "source": "words",
+        "about": "good_word",
+        "min": 2,
+        "max": 3
+      },
+      "none": true,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "which",
+        "word",
+        "do",
+        "you",
+        "know",
+        "good",
+        "now"
+      ]
+    },
+    {
+      "id": "q-week-fav-kind",
+      "about": "week.fav_kind",
+      "to": "profile.prefs",
+      "en": "What did you like best this week?",
+      "zh": "这周你最喜欢做哪种题？",
+      "options": [
+        {
+          "id": "cards",
+          "en": "The word cards",
+          "zh": "单词卡",
+          "about": "kind:mc4"
+        },
+        {
+          "id": "listen",
+          "en": "Listen and choose",
+          "zh": "听音选词",
+          "about": "kind:listen",
+          "requires": [
+            "listen"
+          ]
+        },
+        {
+          "id": "tiles",
+          "en": "Spell with letters",
+          "zh": "字母块拼写",
+          "about": "kind:tiles",
+          "requires": [
+            "tiles"
+          ]
+        },
+        {
+          "id": "grammar",
+          "en": "The grammar cards",
+          "zh": "语法卡",
+          "about": "kind:grammar",
+          "requires": [
+            "grammar"
+          ]
+        }
+      ],
+      "none": true,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "what",
+        "do",
+        "you",
+        "like",
+        "good",
+        "this",
+        "week"
+      ]
+    },
+    {
+      "id": "q-week-best-story",
+      "about": "week.best_story",
+      "to": "profile.interests",
+      "requires": [
+        "story"
+      ],
+      "en": "Which story was best this week?",
+      "zh": "这周哪集最好看？",
+      "options": [],
+      "options_from": {
+        "source": "episodes",
+        "about": "episode",
+        "min": 2,
+        "max": 4
+      },
+      "none": true,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "which",
+        "story",
+        "be",
+        "good",
+        "this",
+        "week"
+      ]
+    },
+    {
+      "id": "q-week-grammar",
+      "about": "week.grammar",
+      "to": "profile.rhythm",
+      "requires": [
+        "grammar"
+      ],
+      "en": "How was the grammar card this week?",
+      "zh": "这周的语法卡怎么样？",
+      "options": [
+        {
+          "id": "easy",
+          "en": "Easy",
+          "zh": "简单",
+          "about": "grammar_feel:easy"
+        },
+        {
+          "id": "ok",
+          "en": "Just right",
+          "zh": "正好",
+          "about": "grammar_feel:ok"
+        },
+        {
+          "id": "hard",
+          "en": "A bit hard",
+          "zh": "有点难",
+          "about": "grammar_feel:hard"
+        }
+      ],
+      "none": false,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "how",
+        "be",
+        "the",
+        "grammar",
+        "card",
+        "this",
+        "week"
+      ]
+    },
+    {
+      "id": "q-week-spelling",
+      "about": "week.spelling",
+      "to": "profile.rhythm",
+      "en": "Is spelling easier now?",
+      "zh": "现在拼单词容易一点了吗？",
+      "options": [
+        {
+          "id": "easier",
+          "en": "Yes, a bit easier",
+          "zh": "容易一点了",
+          "about": "spell_feel:easier"
+        },
+        {
+          "id": "same",
+          "en": "About the same",
+          "zh": "和以前一样",
+          "about": "spell_feel:same"
+        },
+        {
+          "id": "hard",
+          "en": "Still hard",
+          "zh": "还是难",
+          "about": "spell_feel:hard"
+        }
+      ],
+      "none": false,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "be",
+        "spell",
+        "easy",
+        "now"
+      ]
+    },
+    {
+      "id": "q-week-paper",
+      "about": "week.paper",
+      "to": "profile.prefs",
+      "requires": [
+        "dictation"
+      ],
+      "en": "Did writing on paper help you?",
+      "zh": "在纸上写，对你有帮助吗？",
+      "options": [
+        {
+          "id": "lot",
+          "en": "Yes, a lot",
+          "zh": "很有帮助",
+          "about": "paper_help:lot"
+        },
+        {
+          "id": "little",
+          "en": "A little",
+          "zh": "有一点",
+          "about": "paper_help:little"
+        },
+        {
+          "id": "no",
+          "en": "Not really",
+          "zh": "没什么帮助",
+          "about": "paper_help:no"
+        }
+      ],
+      "none": false,
+      "day": null,
+      "pool": "weekly",
+      "words": [
+        "do",
+        "write",
+        "on",
+        "paper",
+        "help",
+        "you"
       ]
     }
   ]

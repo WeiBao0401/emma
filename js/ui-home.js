@@ -3,12 +3,20 @@
 // 一个主按钮“开始今天的课”，下面文字入口“轻松版 8 分钟”；底部一行：明天有听写？、查词、这周 3 / 5 天。
 // 听写提醒（“再写一次错的”“出门前看一眼”，dictation.js homeReminders）放在招呼上面一行。轻松版由 plan.js 定
 // （21:00 以后、有听写的晚上、考前一天、漏了一天回来）；回归日可以改点“标准版”。
+// v1（期中季，DESIGN 2.2、6.4、9）只往这个样子里加内容：
+//   “写几个词”那格开了以后写当天是哪种：“拼几个词 / 语法卡 / 语音小卡”（plan 的 write 格 mode，见 WRITE_KINDS）；
+//   考前小卷那天（plan.quiz / plan.sprint、kind 'quiz' / 'sprint'，或写几个词格 mode 'quiz'）主按钮是“开始今天的小卷”，
+//   go('lesson', { light: false, sprint: true })（ui-lesson.js 的 params.sprint）；
+//   增量一行“这周又能写出 N 个词。”（sprint.js 的 weeklyGains(events, now).line，和 plan 同一个口径；sprint.js 没有时
+//   用这里的 writtenThisWeek），不放倒计时、不放进度条；
+//   周日晚上起“这周小结出来了”一行（weekly.js 的 hasNewWeekly(kv, now)，点了 go('weekly')，页面是 ui-weekly.js）。
+//   weekly.js 是别的 agent 同时写的，按需 import()：文件没有、函数没有、nav 里没有 weekly 路由时这一行不出现。
 // 负责：今天标签 UI agent（ui-home.js、ui-lesson.js、ui-dictation.js、css/home.css、css/lesson.css、css/dictation.css）。
 //
 // 导出
 //   createHomeTab(ctx) -> { show(params), onChange() }
 //     渲染进 #tab-home（index.html）。show 每次切到“今天”时调用；onChange 在词或设置变了以后调用（app.js 节流过）。
-//   纯函数（Node 里测，tests/ui-today.test.mjs；ui-lesson.js、ui-dictation.js 也用）：
+//   纯函数（Node 里测，tests/ui-today.test.mjs、tests/ui-home.test.mjs；ui-lesson.js、ui-dictation.js 也用）：
 //     lessonDays(kv) -> ['YYYY-MM-DD']        做过课的日子（kv 'day:' 有做完的格子），升序；给 plan 的 state.lessonDays
 //     practiceDays(kv) -> ['YYYY-MM-DD']      做过课或听写（kv 'dictation:'）的日子，升序
 //     weekCount(days, now) -> number          这周（周一起）做了几天
@@ -19,13 +27,22 @@
 //     wrongWords(rec) -> [{ slug, w, cn }]           这次听写里打过叉的词（各轮合在一起）
 //     dictationNotice(kv, now) -> null | { kind: 'tonight' | 'soon' | 'morning', key, words, minutes?, label? }
 //     dictationToday(kv, now) -> bool         今天写过听写（给 plan 的 state.dictationTonight）
+//     slotText(cell) -> { name, note }        四格里一格的名字和下面那行小字
+//     isQuizDay(plan) -> bool、startLabel(plan) -> string   主按钮
+//     writtenThisWeek(events, now) -> [slug]  这周第一次写对的词：spell 事件、纸笔听写、answer 里 mode 是拼写的，
+//                                              correct 为真；这周以前写对过的不算
+//     gainText(n) -> string                   “这周又能写出 N 个词。”，0 个时为 ''
+//     optionalModule(path) -> Promise<module | null>   按需 import()，失败返回 null（ui-dictation、ui-parent 也用）
 //
 // 用到的 ctx（CONTRACTS.md）：todayPlan({ lessonDays, standard })、lines.pick / markSeen / shouldShowZh / tapZh、say、
-// go('lesson', { light }) / go('dictation', params) / go('look')、kv.peek / keys、statusSlot(el)、curriculum、toast。
+// go('lesson', { light | sprint }) / go('dictation', params) / go('look') / go('weekly')、kv.peek / keys、
+// events.query、statusSlot(el)、curriculum、toast、currentRoute。
 // 样式写在 css/home.css，类名一律以 home- 开头。
 import { h, icon } from './ui-dom.js';
-import { dayOf } from './plan.js';
+import { dayOf, CELL_LABELS } from './plan.js';
+import { ROUTES } from './nav.js';
 import * as D from './dictation.js';
+import { examPhase as examPhaseOf } from './lines.js';
 
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -122,6 +139,63 @@ export function dictationNotice(kv, now = new Date()) {
 // A dictation tonight (written or not) makes it a dictation night: plan.js then recommends the light lesson
 export const dictationToday = (kv, now = new Date()) => !!kv.peek(D.recordKey(dayOf(now)), null);
 
+// ---- v1 additions
+
+// Modules other agents write in parallel (weekly.js, intake.js): loaded on demand, so a file that is missing, renamed
+// or broken never stops the page from drawing. Cached per path.
+const optional = new Map();
+export function optionalModule(path) {
+  if (!optional.has(path)) {
+    optional.set(path, import(path).catch(e => { console.warn('optional module', path + ':', (e && e.message) || e); return null; }));
+  }
+  return optional.get(path);
+}
+
+// The 写几个词 cell once it opens (DESIGN 2.2): what today holds. Keys are the write cell's mode from plan.js.
+export const WRITE_KINDS = { spell: '拼几个词', spelling: '拼几个词', tiles: '拼几个词', tile: '拼几个词', keys: '拼几个词',
+  grammar: '语法卡', 'grammar-card': '语法卡', card: '语法卡', phonics: '语音小卡', sound: '语音小卡', quiz: '小卷', sprint: '小卷' };
+export function slotText(c) {
+  const open = c.status === 'ready' || c.status === 'done';
+  const kind = c.id === 'write' && open ? WRITE_KINDS[c.mode] || WRITE_KINDS[c.kind] || '' : '';
+  const name = kind || c.label || CELL_LABELS[c.id] || '';
+  const items = Array.isArray(c.items) ? c.items.length : 0;
+  let note = '';
+  if (c.status === 'done') note = '做完了';
+  else if (c.status === 'soon') note = c.note || '下周开播';
+  else if (c.status === 'skip') note = c.note || (c.id === 'write' ? '下周开播' : '今天不做');
+  else if (c.id === 'warmup') note = items ? `${items} 张` : `${c.minutes} 分钟`;
+  else if (c.id === 'wrap') note = '一个小问题';
+  else if (kind === '拼几个词') note = items ? `${items} 个词` : c.note || (c.minutes ? `${c.minutes} 分钟` : '');
+  else if (kind) note = c.note || c.title || (c.minutes ? `${c.minutes} 分钟` : '');
+  else note = c.note || (c.minutes ? `${c.minutes} 分钟` : '');
+  return { name, note };
+}
+
+// 考前 3 天 the standard lesson becomes a short paper (DESIGN 2.2, 6.4); plan.js decides the day (sprint.js buildQuiz)
+const quizCell = plan => (plan.cells || []).some(c => c && c.id === 'write' && c.mode === 'quiz' && c.status === 'ready');
+export const isQuizDay = plan => !!(plan && !plan.light &&
+  (plan.kind === 'quiz' || plan.kind === 'sprint' || !!plan.quiz || !!plan.sprint || quizCell(plan)));
+export const startLabel = plan => (isQuizDay(plan) ? '开始今天的小卷' : plan && plan.light ? '开始轻松版' : '开始今天的课');
+
+// “这周又能写出 9 个词” (DESIGN 6.4): words she wrote right this week for the first time. Written = a spelling event,
+// a paper dictation she ticked, or an answer in a spelling mode; a word written right before this week does not count.
+export const WRITE_MODES = ['tiles', 'keys', 'spell', 'paper'];
+const isWritten = e => !!(e && e.correct === true && e.slug &&
+  (e.type === 'spell' || e.type === 'dictation' || (e.type === 'answer' && WRITE_MODES.includes(e.mode))));
+export function writtenThisWeek(events, now = new Date()) {
+  const lo = dayOf(weekStart(now)), hi = dayOf(now);
+  const before = new Set(), week = new Set();
+  for (const e of Array.isArray(events) ? events : []) {
+    if (!isWritten(e)) continue;
+    const d = String(e.at || '').slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > hi) continue;
+    (d < lo ? before : week).add(e.slug);
+  }
+  return [...week].filter(s => !before.has(s));
+}
+export const gainText = n => (n > 0 ? `这周又能写出 ${n} 个词。` : '');
+const GAIN_LOOKBACK_DAYS = 56;   // “before this week” looks back 8 weeks (events are kept 180 days)
+
 // ---------------------------------------------------------------- view
 
 export function createHomeTab(ctx) {
@@ -147,8 +221,11 @@ export function createHomeTab(ctx) {
     const back = plan && plan.comeback !== undefined ? !!plan.comeback : missedDays(days, now) > 0;
     // the first visit of the day can come after the lesson (the first open goes straight into it): say goodbye then
     const done = !!(plan && plan.cells && plan.cells.some(c => c.id === 'wrap' && c.status === 'done'));
-    const scene = done ? 'close' : now.getHours() >= 21 ? 'late' : back ? 'back' : 'open';
-    const c = { name, day: dayNumber(days, now), hour: now.getHours() };
+    // the exam season (lines.js examPhase): the night before it is “go to bed early”, before the 21:00 line; the
+    // other phases mix the exam lines with the everyday hellos
+    const ex = examPhaseOf(ctx.kv.peek('progress', {}) || {}, now);
+    const scene = done ? 'close' : ex === 'eve' ? 'exam' : now.getHours() >= 21 ? 'late' : back ? 'back' : ex ? ['exam', 'open'] : 'open';
+    const c = { name, day: dayNumber(days, now), hour: now.getHours(), ...(ex ? { exam: ex } : {}) };
     line = ctx.lines.pick(scene, c) || (scene !== 'open' ? ctx.lines.pick('open', c) : null);
     lineDay = dayOf(now);
     if (line) ctx.lines.markSeen(line.id);
@@ -202,14 +279,18 @@ export function createHomeTab(ctx) {
       return h('section', { className: 'home-plan' },
         h('p', { className: 'lede', text: '今天的课上完了。' }),
         h('p', { className: 'home-summary', text: '明天见。' }),
+        gainLine(),
         again ? h('div', { className: 'home-actions' },
           h('button', { type: 'button', className: 'text-btn accent', text: '再练一会儿', on: { click: () => ctx.go('lesson', { light: true, again: true }) } })) : null);
     }
     // plan.js decides the light lesson (DESIGN 2.2, 2.3): after 21:00, a dictation night, the day before the exam,
-    // coming back after a gap. Only the comeback default can be switched back to the standard lesson.
-    const start = h('button', { type: 'button', className: 'btn home-start', text: plan.light ? '开始轻松版' : '开始今天的课', on: { click: () => ctx.go('lesson', { light: !!plan.light }) } });
+    // coming back after a gap, a heavy homework day (parent's form). Only those two defaults can be switched back.
+    // 考前小卷 (plan.quiz / plan.sprint): ui-lesson.js reads the same plan; params.sprint is its own name for it
+    const quiz = isQuizDay(plan);
+    const start = h('button', { type: 'button', className: 'btn home-start', text: startLabel(plan),
+      on: { click: () => ctx.go('lesson', quiz ? { light: false, sprint: true } : { light: !!plan.light }) } });
     let alt = null;
-    if (plan.light && plan.lightReason === 'comeback') {
+    if (plan.light && (plan.lightReason === 'comeback' || plan.lightReason === 'busy')) {
       const std = ctx.todayPlan({ ...planExtra(), standard: true });
       if (!std.light && std.minutes) alt = h('button', { type: 'button', className: 'text-btn accent', text: `标准版 · ${std.minutes} 分钟`, on: { click: () => ctx.go('lesson', { standard: true }) } });
     } else if (!plan.light && plan.lightMinutes && plan.lightMinutes < plan.minutes) {
@@ -220,27 +301,67 @@ export function createHomeTab(ctx) {
       plan.minutes ? h('p', { className: 'home-minutes' }, plan.light ? '今晚约 ' : '今天约 ', n(plan.minutes), ' 分钟') : h('p', { className: 'home-minutes', text: '今天的课准备好了' }),
       plan.summary ? h('p', { className: 'home-summary', text: plan.summary }) : null,
       why ? h('p', { className: 'home-why', text: why }) : null,
+      gainLine(),
       slots(plan),
       h('div', { className: 'home-actions' }, start, alt));
   }
 
   // the four cells of the day in one row (DESIGN 2.0): a line on top, dark for what she can do today, light for what
   // has not opened yet (v0: 读一段、写几个词 “下周开播”)
+  // v1: the write cell names what today holds (拼几个词 / 语法卡 / 语音小卡), see slotText
   function slots(plan) {
-    const note = c => {
-      if (c.status === 'done') return '做完了';
-      if (c.status === 'soon') return c.note || '下周开播';
-      if (c.status === 'skip') return c.id === 'write' ? '下周开播' : (c.note || '今天不做');
-      if (c.id === 'warmup') return c.items && c.items.length ? `${c.items.length} 张` : `${c.minutes} 分钟`;
-      if (c.id === 'wrap') return '一个小问题';
-      return c.minutes ? `${c.minutes} 分钟` : '';
-    };
     const cells = (plan.cells || []).filter(c => c && c.id);
     if (!cells.length) return null;
     return h('div', { className: 'home-slots', role: 'list', 'aria-label': '今天的四格' },
-      ...cells.map(c => h('div', { className: `home-slot ${c.status}`, role: 'listitem' },
-        h('div', { className: 'home-slot-name', text: c.label }),
-        h('div', { className: 'home-slot-note', text: note(c) }))));
+      ...cells.map(c => {
+        const t = slotText(c);
+        return h('div', { className: `home-slot ${c.status}`, role: 'listitem' },
+          h('div', { className: 'home-slot-name', text: t.name }),
+          h('div', { className: 'home-slot-note', text: t.note }));
+      }));
+  }
+
+  // ---- v1: the weekly gain and the weekly summary, both found asynchronously and drawn when they arrive
+  let gain = '';
+  let gainAt = 0;
+  let weeklyOn = false;
+  const gainLine = () => (gain ? h('p', { className: 'home-gain', text: gain }) : null);
+  function weeklyRow() {
+    if (!weeklyOn) return null;
+    return h('div', { className: 'home-notice home-weekly', role: 'status' }, icon('note'),
+      h('span', { text: '这周小结出来了。' }),
+      h('button', { type: 'button', className: 'text-btn accent', text: '看看', on: { click: () => ctx.go('weekly') } }));
+  }
+  async function checkGain(now, force) {
+    if (!force && Date.now() - gainAt < 30000) return;
+    gainAt = Date.now();
+    let text = gain;
+    try {
+      const since = dayOf(addDays(weekStart(now), -GAIN_LOOKBACK_DAYS));
+      const list = await ctx.events.query({ since, type: ['spell', 'dictation', 'answer'], limit: 100000 });
+      // sprint.js weeklyGains is plan's own count (it also has “这周又认出了 N 个词”); this file's rule if it is not there
+      const S = await optionalModule('./sprint.js');
+      const g = S && typeof S.weeklyGains === 'function' ? S.weeklyGains(list, now) : null;
+      text = g ? String(g.line || '') : gainText(writtenThisWeek(list, now).length);
+      if (text && !/[。！]$/.test(text)) text += '。';
+    } catch (e) { console.warn('home: gain:', (e && e.message) || e); }
+    if (text !== gain) { gain = text; if (ctx.currentRoute() === 'home') render(); }
+  }
+  // weekly.js hasNewWeekly(kv, now): from Sunday evening until she has opened it. Only with a 'weekly' route.
+  async function checkWeekly(now) {
+    let on = false;
+    if (ROUTES.weekly) {
+      const W = await optionalModule('./weekly.js');
+      if (W && typeof W.hasNewWeekly === 'function') {
+        try { on = !!(await W.hasNewWeekly(ctx.kv, now)); } catch (e) { console.warn('home: weekly:', (e && e.message) || e); }
+      }
+    }
+    if (on !== weeklyOn) { weeklyOn = on; if (ctx.currentRoute() === 'home') render(); }
+  }
+  function refresh(force) {
+    const now = new Date();
+    checkGain(now, force);
+    checkWeekly(now);
   }
 
   function links(now, days, plan) {
@@ -248,6 +369,8 @@ export function createHomeTab(ctx) {
     const done = plan.week && typeof plan.week.days === 'number' ? plan.week.days : weekCount(days, now);
     const week = goal ? `这周 ${done} / ${goal} 天` : `这周 ${done} 天`;
     const tapWeek = () => {
+      // v1: the week line opens 这周小结 (any day of the week, not only from Sunday evening)
+      if (ROUTES.weekly) { ctx.go('weekly'); return; }
       const list = weekList(days, now).map(d => { const [y, m, dd] = d.split('-').map(Number); return WEEK[new Date(y, m - 1, dd).getDay()]; });
       ctx.toast(list.length ? `这周练了：${list.join('、')}` : (goal ? `这周的目标是 ${goal} 天` : '这周还没开始'), 2400);
     };
@@ -263,14 +386,17 @@ export function createHomeTab(ctx) {
     const plan = ctx.todayPlan(planExtra());
     if (!line || lineDay !== dayOf(now)) pickLine(now, days, plan);
     const titleOf = id => { try { const u = ctx.curriculum.units().find(x => x.id === id); return u ? u.title : id; } catch (e) { return id; } };
-    phase.textContent = phaseText(ctx.kv.peek('progress', {}) || {}, now, titleOf);
+    // v1 plans say when the season is on (plan.season.label, empty outside the 14 days before the exam); no countdown here
+    const prog = ctx.kv.peek('progress', {}) || {};
+    const season = plan && plan.season && typeof plan.season === 'object' ? plan.season : null;
+    phase.textContent = season ? (season.label || phaseText({ unit: prog.unit }, now, titleOf)) : phaseText(prog, now, titleOf);
     let notice = null;
     try { notice = dictationNotice(ctx.kv, now); } catch (e) { console.warn('home: dictation notice:', (e && e.message) || e); }
-    body.replaceChildren(...[noticeRow(notice), greeting(), planBlock(now, plan), links(now, days, plan)].filter(Boolean));
+    body.replaceChildren(...[noticeRow(notice), weeklyRow(), greeting(), planBlock(now, plan), links(now, days, plan)].filter(Boolean));
   }
 
   return {
-    show() { render(); },
-    onChange() { if (ctx.currentRoute() === 'home') render(); },
+    show() { render(); refresh(true); },
+    onChange() { if (ctx.currentRoute() === 'home') { render(); refresh(false); } },
   };
 }

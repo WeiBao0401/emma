@@ -70,9 +70,12 @@ import { retrievability, State } from './fsrs.js';
 export const EVENT_TYPES = [
   'session_start', 'session_end', 'answer', 'skip', 'exit', 'feel', 'flag', 'review', 'dictation', 'lookup', 'ask',
   'parent_note', 'predict', 'hint', 'spell', 'line', 'onboard',
+  // v1: “这不对” on the weekly page (weekly.js dispute: line_id, choice, about; step 'weekly')
+  'dispute',
 ];
 // card: the flashcard the warm-up falls back to when four choices cannot be built (ui-lesson.js)
-export const MODES = ['mc4', 'listen', 'tiles', 'keys', 'cloze', 'order', 'paper', 'card'];
+// grammar: a grammar card or warm-up grammar question (grammar.js, ui-grammar.js; v1)
+export const MODES = ['mc4', 'listen', 'tiles', 'keys', 'cloze', 'order', 'paper', 'card', 'grammar'];
 
 export const NEW_CARD_PRIOR = 0.5;                               // a card never reviewed here: met in class, not yet checked
 export const GUESS = { mc4: 0.25, listen: 0.25, cloze: 0, tiles: 0, keys: 0, order: 0, paper: 0, card: 0 };

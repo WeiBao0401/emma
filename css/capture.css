@@ -1,0 +1,71 @@
+/* 拍课本（ui-capture.js, route 'capture', #tab-capture）. Owner: 拍课本 agent. Class names start with cap-.
+   A full page without the tab bar: paper background, the one column, serif titles, thin rules, the yellow tag for the
+   privacy tip, a save bar that stays at the bottom while the word list scrolls. */
+.cap-page{min-height:100vh;min-height:100dvh;padding:var(--top) var(--gutter) calc(32px + var(--bottom))}
+
+.cap-head{display:flex;align-items:center;gap:12px;height:var(--head);border-bottom:1px solid var(--rule)}
+.cap-back{display:inline-flex;align-items:center;gap:4px;min-width:72px;margin:0 0 0 -10px;color:var(--ink)}
+.cap-head-title{flex:1;text-align:center;font:600 17px/1 var(--serif);color:var(--ink)}
+.cap-head-step{min-width:72px;text-align:right}
+
+.cap-title{margin-top:28px;font:600 28px/1.2 var(--serif);letter-spacing:-.015em}
+.cap-lede{margin-top:12px;font:300 22px/1.5 var(--serif);color:var(--ink);text-wrap:pretty}
+.cap-wait{color:var(--muted)}
+.cap-tip{display:flex;align-items:center;gap:10px;margin-top:20px;padding:12px 16px;border-radius:var(--radius-btn);background:var(--tag-bg);
+  color:var(--ink);font:600 17px/1.45 var(--sans)}
+.cap-tip .icon{flex:none;width:20px;height:20px}
+.cap-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:24px}
+.cap-actions .text-btn{margin:0 -10px}
+.cap-main{min-width:220px;min-height:56px;font-size:17px}
+.cap-mock{margin-top:16px;color:var(--accent)}
+.cap-foot{margin-top:14px}
+.cap-page>.small{margin-top:10px}
+
+/* the photo: small while checking, a tap makes it the full column */
+.cap-photo{margin:18px 0 0}
+.cap-photo img{display:block;max-width:100%;max-height:300px;border:1px solid var(--rule);border-radius:4px;cursor:zoom-in;background:#fff}
+.cap-photo.big img{max-height:none;width:100%;cursor:zoom-out}
+.cap-photo figcaption{margin-top:6px}
+
+/* the unit picker */
+.cap-label{display:flex;align-items:center;gap:14px;margin-top:18px;font:600 15px/1.3 var(--sans);color:var(--muted)}
+.cap-unit{flex:1;max-width:360px;font:400 18px var(--serif);color:var(--ink)}
+
+/* one row per word: English, part of speech, the book's Chinese; the level under it */
+.cap-rows{list-style:none;margin:16px 0 0;padding:0;border-top:1px solid var(--rule)}
+.cap-row{position:relative;display:flex;align-items:flex-start;flex-wrap:wrap;gap:4px 12px;padding:10px 48px 10px 0;border-bottom:1px solid var(--rule)}
+.cap-fields{flex:1 1 100%;display:grid;grid-template-columns:minmax(0,1.3fr) 76px minmax(0,1.4fr);gap:0 14px;align-items:end}
+.cap-fields input{width:100%;min-height:44px;border:0;border-bottom:1px solid transparent;border-radius:0;background:transparent;padding:0;
+  color:var(--ink);outline:none;-webkit-appearance:none;appearance:none}
+.cap-fields input:focus{border-bottom:2px solid var(--ink)}
+.cap-w{font:500 20px/1.2 var(--serif)}
+.cap-pos{font:italic 400 16px/1.2 var(--serif);color:var(--muted)!important}
+.cap-cn{font:17px/1.3 var(--sans)}
+.cap-fields input::placeholder{color:var(--faint)}
+.cap-meta{flex:1 1 100%;display:flex;align-items:center;gap:12px;min-height:20px}
+.cap-tier{color:var(--muted)}
+.cap-unclear{display:none;border:0;border-radius:999px;background:var(--tag-bg);color:var(--ink);font:600 14px/1 var(--sans);padding:6px 12px;min-height:32px}
+.cap-row.unclear{background:color-mix(in srgb,var(--tag-bg) 45%,transparent)}
+.cap-row.unclear .cap-unclear{display:inline-flex;align-items:center}
+.cap-row.unclear .cap-tier{display:none}
+.cap-row.unclear .cap-fields input{border-bottom-color:var(--rule-strong)}
+.cap-del{position:absolute;right:0;top:12px;width:44px;height:44px;display:grid;place-items:center;border:0;background:transparent;color:var(--muted);border-radius:50%}
+.cap-del:active{background:var(--tag-bg)}
+.cap-del .icon{width:18px;height:18px}
+.cap-add{margin-top:10px}
+.cap-add .text-btn{margin-left:-10px}
+
+/* contents page rows: the unit name fixed, the title editable */
+.cap-toc-fields{grid-template-columns:96px minmax(0,1fr)}
+.cap-toc-id{font:600 17px/44px var(--serif);color:var(--ink)}
+
+/* the save bar stays at the bottom while she scrolls the list */
+.cap-bar{position:sticky;bottom:0;margin-top:20px;padding:12px 0 calc(12px + var(--bottom));background:var(--paper);border-top:1px solid var(--rule)}
+.cap-bar .cap-actions{margin-top:10px}
+.cap-sum{color:var(--ink)}
+
+@media (max-width:560px){
+  .cap-fields{grid-template-columns:minmax(0,1fr) 64px}
+  .cap-fields:not(.cap-toc-fields) .cap-cn{grid-column:1 / -1}
+  .cap-main{min-width:0;flex:1}
+}

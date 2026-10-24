@@ -59,3 +59,20 @@
 .parent-pills{display:flex;flex-wrap:wrap;gap:10px}
 .parent-pill{min-height:40px;padding:0 16px;border:1px solid var(--rule-strong);border-radius:999px;background:transparent;color:var(--ink);font:15px var(--sans)}
 .parent-pill.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+
+/* ---------- v1: 复习提纲重点词 (ui-parent.js outlinePanel) ---------- */
+.parent-outline-sum{margin-top:6px;color:var(--ink)}
+.parent-outline-note{margin-top:4px;color:var(--ink)}
+.parent-ow-bulk{margin-top:4px}
+.parent-ow-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:10px}
+.parent-ow{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:52px;padding:7px 12px;border:1px solid var(--rule-strong);border-radius:10px;
+  background:transparent;color:var(--ink);text-align:left;transition:background-color .15s var(--ease),color .15s var(--ease)}
+.parent-ow .w{font:400 17px/1.25 var(--serif);overflow-wrap:anywhere}
+.parent-ow.req .w{font-weight:650}
+.parent-ow .cn{font-size:12.5px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
+.parent-ow[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.parent-ow[aria-pressed="true"] .cn{color:color-mix(in srgb,var(--paper) 78%,transparent)}
+.parent-ow:active{background:var(--tag-bg)}
+.parent-ow[aria-pressed="true"]:active{background:var(--ink)}
+/* the intake answer that sets a default today (听写怎么考) */
+.parent-q .parent-q-effect{margin-top:8px;color:var(--ink)}

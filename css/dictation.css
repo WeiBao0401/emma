@@ -7,6 +7,19 @@
 .dict-paper{margin-top:8px;font-size:16px;color:var(--ink)}
 .btn.dict-start{min-height:56px;padding:0 24px 0 28px;font-size:17px;gap:12px}
 
+/* v1: the teacher's line before and after (lines 'dictation' scene), a smaller copy of 今天's */
+.dict-hello{display:flex;flex-direction:column;gap:8px;padding-bottom:6px}
+.dict-hello-label{font-size:14px;color:var(--muted)}
+.dict-en{font:600 26px/1.25 var(--serif);letter-spacing:-.01em;text-wrap:pretty}
+.dict-zh{font-size:16px;line-height:1.5;color:var(--muted)}
+.dict-pills{display:flex;flex-wrap:wrap;gap:10px}
+.dict-pill{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid color-mix(in srgb,var(--ink) 14%,transparent);border-radius:22px;background:#FFFFFF;color:var(--ink);font:16px/1 var(--sans);cursor:pointer}
+.dict-pill .icon{width:18px;height:18px}
+.dict-pill:active{background:var(--tag-bg)}
+@media (prefers-color-scheme: dark){.dict-pill{background:color-mix(in srgb,var(--ink) 7%,var(--paper))}}
+.dict-done .dict-hello{margin:6px 0 4px}
+.dict-hint{margin-top:8px}
+
 /* chips: 单元 and 考法 */
 .dict-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
 .dict-chip{min-height:46px;padding:0 18px;border:1px solid var(--rule-strong);border-radius:var(--radius-btn);font-size:16px;color:var(--ink);transition:background-color .2s var(--ease),color .2s var(--ease)}
@@ -63,6 +76,7 @@
 .dict-glance-list .cn{margin-left:auto;font-size:16px;color:var(--muted)}
 
 @media (min-width:700px){
+  .dict-en{font-size:30px}
   .dict-prompt{font-size:56px}
   .dict-prompt:lang(en){font-size:56px}
 }

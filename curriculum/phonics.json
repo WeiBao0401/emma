@@ -1,0 +1,238 @@
+{
+  "version": 1,
+  "about": "语音小卡（DESIGN 5.1）：每周 1 个读音规律。先复习 Starter 学过的开音节、闭音节，后面大致按课本单元出现的先后排。例词只用课标小学词和课标 1600 词里她学过的词；音标是英式。practice 的 gap 题：show 里的 _ 是空，填上 answer 就是 word。",
+  "rules": [
+    {
+      "id": "open",
+      "title": "开音节",
+      "review": true,
+      "rule": "元音字母在音节最后、后面没有辅音挡着，就读它在字母表里的音，像 go 的 o。",
+      "words": [
+        { "w": "he", "syl": "he", "ipa": "/hiː/", "cn": "他", "focus": ["e"] },
+        { "w": "go", "syl": "go", "ipa": "/ɡəʊ/", "cn": "去", "focus": ["o"] },
+        { "w": "future", "syl": "fu·ture", "ipa": "/ˈfjuːtʃə/", "cn": "将来", "focus": ["u"] },
+        { "w": "moment", "syl": "mo·ment", "ipa": "/ˈməʊmənt/", "cn": "时刻", "focus": ["o"] },
+        { "w": "silent", "syl": "si·lent", "ipa": "/ˈsaɪlənt/", "cn": "安静的", "focus": ["i"] }
+      ],
+      "practice": {
+        "ask": "听一听，补上缺的字母",
+        "items": [
+          { "kind": "gap", "word": "silent", "show": "s_lent", "options": ["i", "e", "a"], "answer": "i" },
+          { "kind": "gap", "word": "moment", "show": "m_ment", "options": ["a", "o", "u"], "answer": "o" },
+          { "kind": "gap", "word": "future", "show": "f_ture", "options": ["o", "e", "u"], "answer": "u" }
+        ]
+      }
+    },
+    {
+      "id": "closed",
+      "title": "闭音节",
+      "review": true,
+      "rule": "元音字母后面有辅音“关上门”，就读短音，像 hat 的 a 读 /æ/。",
+      "words": [
+        { "w": "hat", "syl": "hat", "ipa": "/hæt/", "cn": "帽子", "focus": ["a"] },
+        { "w": "red", "syl": "red", "ipa": "/red/", "cn": "红色的", "focus": ["e"] },
+        { "w": "hit", "syl": "hit", "ipa": "/hɪt/", "cn": "打", "focus": ["i"] },
+        { "w": "hot", "syl": "hot", "ipa": "/hɒt/", "cn": "热的", "focus": ["o"] },
+        { "w": "fun", "syl": "fun", "ipa": "/fʌn/", "cn": "乐趣", "focus": ["u"] },
+        { "w": "problem", "syl": "prob·lem", "ipa": "/ˈprɒbləm/", "cn": "问题", "focus": ["o"] }
+      ],
+      "practice": {
+        "ask": "听一听，补上缺的字母",
+        "items": [
+          { "kind": "gap", "word": "hit", "show": "h_t", "options": ["e", "i", "a"], "answer": "i" },
+          { "kind": "gap", "word": "fun", "show": "f_n", "options": ["a", "o", "u"], "answer": "u" },
+          { "kind": "gap", "word": "red", "show": "r_d", "options": ["e", "i", "a"], "answer": "e" }
+        ]
+      }
+    },
+    {
+      "id": "magic-e",
+      "title": "不发音的 e",
+      "rule": "词尾有一个不发音的 e，前面的元音就读字母表里的音，像 not 变成 note。",
+      "words": [
+        { "w": "same", "syl": "same", "ipa": "/seɪm/", "cn": "相同的", "focus": ["a", "e"] },
+        { "w": "page", "syl": "page", "ipa": "/peɪdʒ/", "cn": "页", "focus": ["a", "e"] },
+        { "w": "smile", "syl": "smile", "ipa": "/smaɪl/", "cn": "微笑", "focus": ["i", "e"] },
+        { "w": "hide", "syl": "hide", "ipa": "/haɪd/", "cn": "藏", "focus": ["i", "e"] },
+        { "w": "note", "syl": "note", "ipa": "/nəʊt/", "cn": "笔记", "focus": ["o", "e"] }
+      ],
+      "practice": {
+        "ask": "听一听，选你听到的词",
+        "items": [
+          { "kind": "pick", "say": "note", "options": ["not", "note"], "answer": "note" },
+          { "kind": "pick", "say": "plane", "options": ["plan", "plane"], "answer": "plane" },
+          { "kind": "pick", "say": "cut", "options": ["cut", "cute"], "answer": "cut" }
+        ]
+      }
+    },
+    {
+      "id": "oo",
+      "title": "oo 的两种读音",
+      "rule": "oo 多半读长长的 /uː/，像 pool；在 k 前面常读短短的 /ʊ/，像 book。",
+      "words": [
+        { "w": "pool", "syl": "pool", "ipa": "/puːl/", "cn": "水池", "focus": ["oo"] },
+        { "w": "balloon", "syl": "bal·loon", "ipa": "/bəˈluːn/", "cn": "气球", "focus": ["oo"] },
+        { "w": "food", "syl": "food", "ipa": "/fuːd/", "cn": "食物", "focus": ["oo"] },
+        { "w": "school", "syl": "school", "ipa": "/skuːl/", "cn": "学校", "focus": ["oo"] },
+        { "w": "look", "syl": "look", "ipa": "/lʊk/", "cn": "看", "focus": ["oo"] },
+        { "w": "book", "syl": "book", "ipa": "/bʊk/", "cn": "书", "focus": ["oo"] }
+      ],
+      "practice": {
+        "ask": "听一听，补上缺的字母",
+        "items": [
+          { "kind": "gap", "word": "pool", "show": "p_l", "options": ["o", "oo"], "answer": "oo" },
+          { "kind": "gap", "word": "balloon", "show": "ball_n", "options": ["oo", "o"], "answer": "oo" },
+          { "kind": "pick", "ask": "哪个词里的 oo 读短短的 /ʊ/？", "options": ["food", "look"], "answer": "look" }
+        ]
+      }
+    },
+    {
+      "id": "ck",
+      "title": "ck 和 k",
+      "rule": "元音读短音时，后面的 /k/ 写成 ck；长音或两个元音字母后面只写 k。",
+      "words": [
+        { "w": "pack", "syl": "pack", "ipa": "/pæk/", "cn": "收拾（行李）", "focus": ["ck"] },
+        { "w": "jacket", "syl": "jack·et", "ipa": "/ˈdʒækɪt/", "cn": "夹克衫", "focus": ["ck"] },
+        { "w": "snack", "syl": "snack", "ipa": "/snæk/", "cn": "零食", "focus": ["ck"] },
+        { "w": "check", "syl": "check", "ipa": "/tʃek/", "cn": "检查", "focus": ["ck"] },
+        { "w": "shake", "syl": "shake", "ipa": "/ʃeɪk/", "cn": "摇动", "focus": ["k"] },
+        { "w": "book", "syl": "book", "ipa": "/bʊk/", "cn": "书", "focus": ["k"] }
+      ],
+      "practice": {
+        "ask": "听一听，补上缺的字母",
+        "items": [
+          { "kind": "gap", "word": "jacket", "show": "ja_et", "options": ["ck", "k"], "answer": "ck" },
+          { "kind": "gap", "word": "snack", "show": "sna_", "options": ["k", "ck"], "answer": "ck" },
+          { "kind": "gap", "word": "shake", "show": "sha_e", "options": ["ck", "k"], "answer": "k" }
+        ]
+      }
+    },
+    {
+      "id": "ee-ea",
+      "title": "ee 和 ea",
+      "rule": "ee 和 ea 大多读长长的 /iː/，像 need 和 leaf。",
+      "note": "也有例外：ready 里的 ea 读 /e/，要单独记。",
+      "words": [
+        { "w": "need", "syl": "need", "ipa": "/niːd/", "cn": "需要", "focus": ["ee"] },
+        { "w": "jeans", "syl": "jeans", "ipa": "/dʒiːnz/", "cn": "牛仔裤", "focus": ["ea"] },
+        { "w": "leaf", "syl": "leaf", "ipa": "/liːf/", "cn": "叶子", "focus": ["ea"] },
+        { "w": "meaning", "syl": "mean·ing", "ipa": "/ˈmiːnɪŋ/", "cn": "意思", "focus": ["ea"] },
+        { "w": "screen", "syl": "screen", "ipa": "/skriːn/", "cn": "屏幕", "focus": ["ee"] },
+        { "w": "feeling", "syl": "feel·ing", "ipa": "/ˈfiːlɪŋ/", "cn": "感觉", "focus": ["ee"] }
+      ],
+      "practice": {
+        "ask": "听一听，选你听到的词",
+        "items": [
+          { "kind": "pick", "say": "read", "options": ["red", "read"], "answer": "read" },
+          { "kind": "pick", "say": "men", "options": ["men", "mean"], "answer": "men" },
+          { "kind": "build", "word": "feeling" }
+        ]
+      }
+    },
+    {
+      "id": "double",
+      "title": "双写辅音",
+      "rule": "短元音后面还有一个音节时，中间的辅音常写两遍，拆音节就从这两个字母中间分开。",
+      "words": [
+        { "w": "hobby", "syl": "hob·by", "ipa": "/ˈhɒbi/", "cn": "爱好", "focus": ["bb"] },
+        { "w": "better", "syl": "bet·ter", "ipa": "/ˈbetə/", "cn": "更好的", "focus": ["tt"] },
+        { "w": "happen", "syl": "hap·pen", "ipa": "/ˈhæpən/", "cn": "发生", "focus": ["pp"] },
+        { "w": "silly", "syl": "sil·ly", "ipa": "/ˈsɪli/", "cn": "傻的", "focus": ["ll"] },
+        { "w": "different", "syl": "dif·fer·ent", "ipa": "/ˈdɪfərənt/", "cn": "不同的", "focus": ["ff"] },
+        { "w": "carry", "syl": "car·ry", "ipa": "/ˈkæri/", "cn": "搬；带", "focus": ["rr"] }
+      ],
+      "practice": {
+        "ask": "听一听，补上缺的字母",
+        "items": [
+          { "kind": "gap", "word": "happen", "show": "ha_en", "options": ["p", "pp"], "answer": "pp" },
+          { "kind": "gap", "word": "silly", "show": "si_y", "options": ["ll", "l"], "answer": "ll" },
+          { "kind": "build", "word": "hobby" }
+        ]
+      }
+    },
+    {
+      "id": "ai-ay",
+      "title": "ai 和 ay",
+      "rule": "ai 和 ay 都读 /eɪ/：在词中间多写 ai，在词尾多写 ay。",
+      "words": [
+        { "w": "paint", "syl": "paint", "ipa": "/peɪnt/", "cn": "画；油漆", "focus": ["ai"] },
+        { "w": "main", "syl": "main", "ipa": "/meɪn/", "cn": "主要的", "focus": ["ai"] },
+        { "w": "pain", "syl": "pain", "ipa": "/peɪn/", "cn": "疼痛", "focus": ["ai"] },
+        { "w": "away", "syl": "a·way", "ipa": "/əˈweɪ/", "cn": "离开", "focus": ["ay"] },
+        { "w": "railway", "syl": "rail·way", "ipa": "/ˈreɪlweɪ/", "cn": "铁路", "focus": ["ai", "ay"] },
+        { "w": "play", "syl": "play", "ipa": "/pleɪ/", "cn": "玩", "focus": ["ay"] }
+      ],
+      "practice": {
+        "ask": "听一听，补上缺的字母",
+        "items": [
+          { "kind": "gap", "word": "main", "show": "m_n", "options": ["ai", "ay"], "answer": "ai" },
+          { "kind": "gap", "word": "away", "show": "aw_", "options": ["ai", "ay"], "answer": "ay" },
+          { "kind": "gap", "word": "paint", "show": "p_nt", "options": ["ay", "ai"], "answer": "ai" }
+        ]
+      }
+    },
+    {
+      "id": "tion",
+      "title": "词尾的 tion",
+      "rule": "词尾的 tion 读 /ʃn/，自己就是一个音节，整块记住。",
+      "words": [
+        { "w": "action", "syl": "ac·tion", "ipa": "/ˈækʃn/", "cn": "行动", "focus": ["tion"] },
+        { "w": "position", "syl": "po·si·tion", "ipa": "/pəˈzɪʃn/", "cn": "位置", "focus": ["tion"] },
+        { "w": "tradition", "syl": "tra·di·tion", "ipa": "/trəˈdɪʃn/", "cn": "传统", "focus": ["tion"] },
+        { "w": "conversation", "syl": "con·ver·sa·tion", "ipa": "/ˌkɒnvəˈseɪʃn/", "cn": "谈话", "focus": ["tion"] },
+        { "w": "information", "syl": "in·for·ma·tion", "ipa": "/ˌɪnfəˈmeɪʃn/", "cn": "信息", "focus": ["tion"] }
+      ],
+      "practice": {
+        "ask": "听一听，按音节拼出来",
+        "items": [
+          { "kind": "build", "word": "action" },
+          { "kind": "build", "word": "position" },
+          { "kind": "build", "word": "information" }
+        ]
+      }
+    },
+    {
+      "id": "ou-ow",
+      "title": "ou 和 ow",
+      "rule": "ou 和 ow 常读 /aʊ/：词中间多写 ou，词尾和 n、l、er 前多写 ow。",
+      "note": "ow 在词尾也常读 /əʊ/，像 grow、follow。",
+      "words": [
+        { "w": "around", "syl": "a·round", "ipa": "/əˈraʊnd/", "cn": "在周围", "focus": ["ou"] },
+        { "w": "sound", "syl": "sound", "ipa": "/saʊnd/", "cn": "声音", "focus": ["ou"] },
+        { "w": "loud", "syl": "loud", "ipa": "/laʊd/", "cn": "大声的", "focus": ["ou"] },
+        { "w": "mountain", "syl": "moun·tain", "ipa": "/ˈmaʊntən/", "cn": "山", "focus": ["ou"] },
+        { "w": "power", "syl": "pow·er", "ipa": "/ˈpaʊə/", "cn": "力量", "focus": ["ow"] },
+        { "w": "grow", "syl": "grow", "ipa": "/ɡrəʊ/", "cn": "生长", "focus": ["ow"] }
+      ],
+      "practice": {
+        "ask": "听一听，补上缺的字母",
+        "items": [
+          { "kind": "gap", "word": "loud", "show": "l_d", "options": ["ou", "ow"], "answer": "ou" },
+          { "kind": "gap", "word": "power", "show": "p_er", "options": ["ou", "ow"], "answer": "ow" },
+          { "kind": "gap", "word": "around", "show": "ar_nd", "options": ["ow", "ou"], "answer": "ou" }
+        ]
+      }
+    },
+    {
+      "id": "th-sh-ch",
+      "title": "th、sh、ch",
+      "rule": "两个字母合起来读一个音：th 把舌尖放在上下牙中间，sh 读 /ʃ/，ch 读 /tʃ/。",
+      "words": [
+        { "w": "three", "syl": "three", "ipa": "/θriː/", "cn": "三", "focus": ["th"] },
+        { "w": "other", "syl": "oth·er", "ipa": "/ˈʌðə/", "cn": "别的", "focus": ["th"] },
+        { "w": "shelf", "syl": "shelf", "ipa": "/ʃelf/", "cn": "架子", "focus": ["sh"] },
+        { "w": "choose", "syl": "choose", "ipa": "/tʃuːz/", "cn": "选择", "focus": ["ch"] },
+        { "w": "cheese", "syl": "cheese", "ipa": "/tʃiːz/", "cn": "奶酪", "focus": ["ch"] },
+        { "w": "each", "syl": "each", "ipa": "/iːtʃ/", "cn": "每个", "focus": ["ch"] }
+      ],
+      "practice": {
+        "ask": "听一听，补上缺的字母",
+        "items": [
+          { "kind": "gap", "word": "shelf", "show": "_elf", "options": ["ch", "sh", "th"], "answer": "sh" },
+          { "kind": "gap", "word": "cheese", "show": "_eese", "options": ["ch", "sh", "th"], "answer": "ch" },
+          { "kind": "gap", "word": "other", "show": "o_er", "options": ["sh", "ch", "th"], "answer": "th" }
+        ]
+      }
+    }
+  ]
+}

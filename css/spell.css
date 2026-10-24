@@ -1,0 +1,83 @@
+/* 字母块拼写（modes/spell.js，类名 spell-）和听音选词（modes/listen.js，类名 listen-）. Owner: 题型 agent.
+   Colours only from index.html :root (--paper, --ink, --accent, --tag-bg, --good, --danger, --rule). Big targets for
+   fingers on an iPad: tiles at least 64px, options at least 76px. Feedback is quiet: a colour and one line, no motion. */
+
+/* ---------------------------------------------------------------- 字母块拼写 */
+.spell{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:24px 0 48px}
+.spell-q{display:flex;flex-direction:column;gap:6px}
+.spell-prompt{font:600 32px/1.35 var(--sans);color:var(--ink);overflow-wrap:anywhere}
+.spell-prompt .say{width:40px;height:40px;vertical-align:-6px;margin-left:10px}
+.spell-prompt .say .icon{width:22px;height:22px}
+.spell-prompt-listen{display:flex;align-items:center;gap:10px;font-size:24px;color:var(--muted)}
+.spell-prompt-listen .say{margin-left:0}
+.spell-ask{color:var(--muted)}
+
+/* her word: one line of slots under a thin rule */
+.spell-answer{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:84px;padding:10px 0 14px;border-bottom:1px solid var(--rule-strong)}
+.spell-slot{display:inline-block;min-width:56px;height:64px;border-radius:10px;border:1px dashed var(--rule-strong);opacity:.6}
+.spell-syllable .spell-slot{min-width:84px}
+
+/* the tiles: serif letters on paper, a thin border; the bank keeps its place when a tile leaves */
+.spell-bank{display:flex;flex-wrap:wrap;gap:12px}
+.spell-tile{display:inline-flex;align-items:center;justify-content:center;min-width:64px;min-height:64px;padding:0 16px;
+  font:500 30px/1 var(--serif);color:var(--ink);background:var(--paper);border:1px solid var(--rule-strong);border-radius:10px;
+  -webkit-user-select:none;user-select:none;touch-action:manipulation;
+  transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease),opacity .15s var(--ease)}
+.spell-syllable .spell-tile{min-width:84px;padding:0 20px}
+.spell-tile:active:not(:disabled){background:var(--tag-bg)}
+.spell-tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.spell-bank .spell-tile.used{visibility:hidden}
+.spell-bank .spell-tile:disabled{cursor:default}
+.spell-placed{background:color-mix(in srgb,var(--accent) 7%,var(--paper));border-color:var(--accent)}
+.spell-placed:disabled{opacity:1}
+
+/* right: the word turns the accent colour on the yellow tag; wrong: the wrong tiles show red for a moment */
+.spell-placed.right,.spell-placed.reveal{border-color:var(--good);color:var(--good);font-weight:650;background:var(--tag-bg);box-shadow:inset 0 0 0 1px var(--good)}
+.spell-placed.wrong{border-color:var(--danger);color:var(--danger);background:var(--paper)}
+.spell.is-right .spell-answer,.spell.is-revealed .spell-answer{border-bottom-color:var(--good)}
+.spell.is-right .spell-bank .spell-tile,.spell.is-revealed .spell-bank .spell-tile{opacity:.35}
+
+.spell-hint{border-left:2px solid var(--accent);padding:2px 0 2px 14px;font:18px/1.55 var(--sans);color:var(--ink)}
+.spell-feedback{min-height:1.5em;font:17px/1.55 var(--sans);color:var(--ink)}
+.spell.is-right .spell-feedback{color:var(--good);font-weight:600}
+.spell-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:var(--btn-h)}
+.spell-actions .btn{margin-left:auto;min-width:140px}
+
+/* ---------------------------------------------------------------- 听音选词 */
+.listen{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:24px 0 48px}
+.listen-q{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.listen-play{display:inline-flex;align-items:center;gap:12px;min-height:72px;padding:0 28px 0 22px;border-radius:36px;
+  border:1px solid var(--accent);background:var(--paper);color:var(--accent);font:600 20px/1 var(--sans);
+  touch-action:manipulation;transition:background-color .15s var(--ease)}
+.listen-play .icon{width:30px;height:30px}
+.listen-play:active{background:var(--tag-bg)}
+.listen-play:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.listen-ask{color:var(--muted)}
+.listen-hint{border-left:2px solid var(--accent);padding:2px 0 2px 14px;font:20px/1.5 var(--sans);color:var(--ink)}
+
+/* four big English words: one column on a phone, two by two on an iPad */
+.listen-options{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:600px){.listen-options{grid-template-columns:1fr 1fr;gap:14px}}
+.listen-opt{min-height:76px;padding:14px 18px;text-align:left;font:500 28px/1.2 var(--serif);color:var(--ink);
+  border:1px solid var(--rule-strong);border-radius:12px;background:var(--paper);touch-action:manipulation;overflow-wrap:anywhere;
+  transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease)}
+.listen-opt:active:not(:disabled){background:var(--tag-bg)}
+.listen-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.listen-opt:disabled{cursor:default;opacity:.55}
+.listen-opt.right,.listen-opt.reveal{opacity:1;border-color:var(--good);color:var(--good);font-weight:650;box-shadow:inset 0 0 0 1px var(--good)}
+.listen-opt.right{background:var(--tag-bg)}
+.listen-opt.wrong{opacity:1;border-color:var(--danger);color:var(--danger);text-decoration:line-through;text-decoration-thickness:1px}
+
+.listen-feedback{min-height:1.5em;font:17px/1.55 var(--sans);color:var(--ink)}
+.listen.is-right .listen-feedback{color:var(--good);font-weight:600}
+.listen-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:var(--btn-h)}
+.listen-actions .btn{margin-left:auto;min-width:140px}
+
+/* a phone: slightly smaller tiles so a ten-letter word still fits in two rows */
+@media (max-width:420px){
+  .spell-tile{min-width:52px;min-height:56px;font-size:26px;padding:0 12px}
+  .spell-slot{min-width:46px;height:56px}
+  .spell-syllable .spell-tile,.spell-syllable .spell-slot{min-width:70px}
+  .listen-opt{font-size:24px;min-height:68px}
+}
+@media (prefers-reduced-motion:reduce){.spell-tile,.listen-opt,.listen-play{transition:none}}

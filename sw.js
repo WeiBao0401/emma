@@ -2,7 +2,7 @@
 // Keep VERSION identical to VERSION in js/config.js and bump both on every release, or the iPad keeps the old files.
 // Same origin as Wei's dictionary (its own scope and caches): every cache here starts with "emma-" and only "emma-" caches are ever
 // deleted, so neither app touches the other's. The check page (check/) has its own worker and "emma-check-" caches.
-const VERSION = '0.1.6';
+const VERSION = '0.2.0';
 const CACHE = 'emma-' + VERSION;
 // The offline dictionary (data/, about 4.6 MB, 2 MB gzipped) changes rarely, so it lives in its own cache that
 // survives app updates and is only downloaded when missing. Bump DATA_VERSION whenever a file in data/ changes.
@@ -14,9 +14,14 @@ const SHELL = [
   'js/banners.js', 'js/nav.js', 'js/session.js', 'js/ui-dom.js', 'js/ui-entry.js', 'js/ui-look.js', 'js/ui-lib.js', 'js/ui-review.js', 'js/ui-me.js',
   'js/curriculum.js', 'js/lines.js', 'js/plan.js', 'js/events.js', 'js/budget.js', 'js/kid-errors.js', 'js/dictation.js', 'js/modes/choice.js',
   'js/ui-home.js', 'js/ui-lesson.js', 'js/ui-dictation.js', 'js/ui-parent.js', 'js/ui-onboard.js',
+  // v1 (0.2.0): the midterm season. ui-lesson / ui-home / ui-parent load several of these with import(), so every one
+  // must be here or that part is missing offline
+  'js/modes/spell.js', 'js/modes/listen.js', 'js/sprint.js', 'js/grammar.js', 'js/ui-grammar.js', 'js/phonics.js', 'js/ui-phonics.js',
+  'js/intake.js', 'js/weekly.js', 'js/ui-weekly.js', 'js/capture.js', 'js/ui-capture.js',
   'css/home.css', 'css/lesson.css', 'css/dictation.css', 'css/choice.css', 'css/parent.css', 'css/onboard.css',
+  'css/spell.css', 'css/grammar.css', 'css/phonics.css', 'css/weekly.css', 'css/capture.css',
   'curriculum/standard-words.json', 'curriculum/prereq.json', 'curriculum/tags.json', 'curriculum/lines.json',
-  'curriculum/questions.json', 'curriculum/intake.json', 'curriculum/kebiao.json',
+  'curriculum/questions.json', 'curriculum/intake.json', 'curriculum/kebiao.json', 'curriculum/grammar.json', 'curriculum/phonics.json',
   'data/dict.txt', 'data/lemma.txt', 'data/ECDICT-LICENSE.txt',
 ];
 const isData = u => u.startsWith('data/');
