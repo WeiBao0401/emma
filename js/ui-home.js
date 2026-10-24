@@ -131,7 +131,7 @@ export function createHomeTab(ctx) {
   const phase = h('span', { className: 'runhead-meta home-phase' });
   const body = h('div', { className: 'home-body' });
   root.append(h('div', { className: 'home' },
-    h('header', { className: 'runhead' }, h('h1', { className: 'runhead-title', text: 'Emma 的英语老师' }), phase),
+    h('header', { className: 'runhead' }, h('h1', { className: 'runhead-title' }, 'Emma', h('span', { className: 'sub', text: ' 的英语老师' })), phase),
     statusSlot, body));
   ctx.statusSlot(statusSlot);
 
@@ -157,13 +157,24 @@ export function createHomeTab(ctx) {
   function greeting() {
     if (!line) return null;
     const l = line;
+    // the prototype Wei approved: “老师说”, the English line in large serif, then two pills (listen, show or hide Chinese).
+    // Opening the Chinese counts as a tap for the fade rule (DESIGN 2.5); hiding it again does not.
     const zh = h('p', { className: 'home-zh', lang: 'zh-CN', text: l.zh, hidden: !l.showZh });
-    const more = l.showZh || !l.zh ? null : h('button', { type: 'button', className: 'text-btn home-zh-btn', text: '看中文',
-      on: { click: ev => { zh.hidden = false; ev.currentTarget.remove(); l.showZh = true; (ctx.lines.tapZh || ctx.lines.markZhTapped || (() => {}))(l.id); } } });
+    const zhBtn = !l.zh ? null : h('button', { type: 'button', className: 'home-pill', text: l.showZh ? '收起中文' : '看中文',
+      on: { click: ev => {
+        const open = zh.hidden;
+        zh.hidden = !open;
+        l.showZh = open;
+        ev.currentTarget.textContent = open ? '收起中文' : '看中文';
+        if (open) (ctx.lines.tapZh || ctx.lines.markZhTapped || (() => {}))(l.id);
+      } } });
     return h('div', { className: 'home-hello' },
-      h('p', { className: 'home-en', lang: 'en' }, l.en,
-        h('button', { type: 'button', className: 'say', 'aria-label': '听一遍', on: { click: ev => ctx.say(l.en, ev.currentTarget) } }, icon('speak'))),
-      zh, more);
+      h('p', { className: 'home-label', text: '老师说' }),
+      h('p', { className: 'home-en', lang: 'en', text: l.en }),
+      zh,
+      h('div', { className: 'home-pills' },
+        h('button', { type: 'button', className: 'home-pill', on: { click: ev => ctx.say(l.en, ev.currentTarget) } }, icon('speak'), h('span', { text: '听一遍' })),
+        zhBtn));
   }
 
   function noticeRow(n) {
@@ -196,20 +207,40 @@ export function createHomeTab(ctx) {
     }
     // plan.js decides the light lesson (DESIGN 2.2, 2.3): after 21:00, a dictation night, the day before the exam,
     // coming back after a gap. Only the comeback default can be switched back to the standard lesson.
-    const start = h('button', { type: 'button', className: 'btn home-start', on: { click: () => ctx.go('lesson', { light: !!plan.light }) } }, '开始今天的课', icon('arrow'));
+    const start = h('button', { type: 'button', className: 'btn home-start', text: plan.light ? '开始轻松版' : '开始今天的课', on: { click: () => ctx.go('lesson', { light: !!plan.light }) } });
     let alt = null;
     if (plan.light && plan.lightReason === 'comeback') {
       const std = ctx.todayPlan({ ...planExtra(), standard: true });
-      if (!std.light && std.minutes) alt = h('button', { type: 'button', className: 'text-btn accent', text: `标准版 ${std.minutes} 分钟`, on: { click: () => ctx.go('lesson', { standard: true }) } });
+      if (!std.light && std.minutes) alt = h('button', { type: 'button', className: 'text-btn accent', text: `标准版 · ${std.minutes} 分钟`, on: { click: () => ctx.go('lesson', { standard: true }) } });
     } else if (!plan.light && plan.lightMinutes && plan.lightMinutes < plan.minutes) {
-      alt = h('button', { type: 'button', className: 'text-btn accent', text: `轻松版 ${plan.lightMinutes} 分钟`, on: { click: () => ctx.go('lesson', { light: true }) } });
+      alt = h('button', { type: 'button', className: 'text-btn accent', text: `轻松版 · ${plan.lightMinutes} 分钟`, on: { click: () => ctx.go('lesson', { light: true }) } });
     }
     const why = plan.reason || plan.why || '';
     return h('section', { className: 'home-plan' },
-      plan.minutes ? h('p', { className: 'lede' }, '今天约 ', n(plan.minutes), ' 分钟') : h('p', { className: 'lede', text: '今天的课准备好了' }),
+      plan.minutes ? h('p', { className: 'home-minutes' }, plan.light ? '今晚约 ' : '今天约 ', n(plan.minutes), ' 分钟') : h('p', { className: 'home-minutes', text: '今天的课准备好了' }),
       plan.summary ? h('p', { className: 'home-summary', text: plan.summary }) : null,
       why ? h('p', { className: 'home-why', text: why }) : null,
+      slots(plan),
       h('div', { className: 'home-actions' }, start, alt));
+  }
+
+  // the four cells of the day in one row (DESIGN 2.0): a line on top, dark for what she can do today, light for what
+  // has not opened yet (v0: 读一段、写几个词 “下周开播”)
+  function slots(plan) {
+    const note = c => {
+      if (c.status === 'done') return '做完了';
+      if (c.status === 'soon') return c.note || '下周开播';
+      if (c.status === 'skip') return c.id === 'write' ? '下周开播' : (c.note || '今天不做');
+      if (c.id === 'warmup') return c.items && c.items.length ? `${c.items.length} 张` : `${c.minutes} 分钟`;
+      if (c.id === 'wrap') return '一个小问题';
+      return c.minutes ? `${c.minutes} 分钟` : '';
+    };
+    const cells = (plan.cells || []).filter(c => c && c.id);
+    if (!cells.length) return null;
+    return h('div', { className: 'home-slots', role: 'list', 'aria-label': '今天的四格' },
+      ...cells.map(c => h('div', { className: `home-slot ${c.status}`, role: 'listitem' },
+        h('div', { className: 'home-slot-name', text: c.label }),
+        h('div', { className: 'home-slot-note', text: note(c) }))));
   }
 
   function links(now, days, plan) {
@@ -221,8 +252,8 @@ export function createHomeTab(ctx) {
       ctx.toast(list.length ? `这周练了：${list.join('、')}` : (goal ? `这周的目标是 ${goal} 天` : '这周还没开始'), 2400);
     };
     return h('nav', { className: 'home-links', 'aria-label': '其他入口' },
-      h('button', { type: 'button', className: 'text-btn accent', text: '明天有听写？', on: { click: () => ctx.go('dictation') } }),
-      h('button', { type: 'button', className: 'text-btn accent', text: '查词', on: { click: () => ctx.go('look') } }),
+      h('button', { type: 'button', className: 'text-btn home-link', text: '明天有听写？', on: { click: () => ctx.go('dictation') } }),
+      h('button', { type: 'button', className: 'text-btn home-link', text: '查词', on: { click: () => ctx.go('look') } }),
       h('button', { type: 'button', className: 'text-btn home-week', on: { click: tapWeek } }, h('span', { text: week })));
   }
 
