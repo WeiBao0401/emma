@@ -69,3 +69,9 @@
   .btn.home-start{min-height:66px;font-size:21px}
   .home-links .text-btn{font-size:17px}
 }
+
+/* 0.5.0 课文陪读: one quiet line under the start button (ui-textread.js opens a full-screen layer) */
+.home-textread{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px;margin-top:22px;padding-top:14px;border-top:1px solid var(--rule)}
+.home-textread-open{min-height:var(--btn-h);text-align:left}
+.home-textread-open b{font-weight:600}
+.home-textread-again{min-height:var(--btn-h);color:var(--muted)}

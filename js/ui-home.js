@@ -9,6 +9,8 @@
 //   go('lesson', { light: false, sprint: true })（ui-lesson.js 的 params.sprint）；
 //   增量一行“这周又能写出 N 个词。”（sprint.js 的 weeklyGains(events, now).line，和 plan 同一个口径；sprint.js 没有时
 //   用这里的 writtenThisWeek），不放倒计时、不放进度条；
+//   0.5.0：四格下面一行“课文陪读：拍一页课文，一句一句读懂”（ctx.textread.open()，ui-textread.js 盖一层全屏），读过的页再给
+//   “再读 Unit 1 · 第 8 页”（textread.js listSaved，最近的一页）；写几个词多“句型转换”（3 个句子），小卷日读一段是“期中阅读”。
 //   周日晚上起“这周小结出来了”一行（weekly.js 的 hasNewWeekly(kv, now)，点了 go('weekly')，页面是 ui-weekly.js）。
 //   weekly.js 是别的 agent 同时写的，按需 import()：文件没有、函数没有、nav 里没有 weekly 路由时这一行不出现。
 // 负责：今天标签 UI agent（ui-home.js、ui-lesson.js、ui-dictation.js、css/home.css、css/lesson.css、css/dictation.css）。
@@ -44,6 +46,7 @@ import { dayOf, CELL_LABELS } from './plan.js';
 import { ROUTES } from './nav.js';
 import * as D from './dictation.js';
 import { examPhase as examPhaseOf } from './lines.js';
+import { listSaved as textreadSaved } from './textread.js';
 
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -155,7 +158,7 @@ export function optionalModule(path) {
 // The 写几个词 cell once it opens (DESIGN 2.2): what today holds. Keys are the write cell's mode from plan.js.
 export const WRITE_KINDS = { spell: '拼几个词', spelling: '拼几个词', tiles: '拼几个词', tile: '拼几个词', keys: '拼几个词',
   grammar: '语法卡', 'grammar-card': '语法卡', card: '语法卡', phonics: '语音小卡', sound: '语音小卡', quiz: '小卷', sprint: '小卷',
-  order: '连词成句' };
+  order: '连词成句', transform: '句型转换' };
 // 读一段 once it opens (0.4.0): which episode, “第 2 集”; a light day reads it with 2 questions, after all six she reads one again
 export function readNote(c) {
   if (!c || !c.n) return c && c.note ? c.note : '';
@@ -174,7 +177,7 @@ export function slotText(c) {
   else if (c.id === 'warmup') note = items ? `${items} 张` : `${c.minutes} 分钟`;
   else if (c.id === 'wrap') note = '一个小问题';
   else if (c.id === 'read') note = readNote(c) || (c.minutes ? `${c.minutes} 分钟` : '');
-  else if (kind === '连词成句') note = items ? `${items} 个句子` : '';
+  else if (kind === '连词成句' || kind === '句型转换') note = items ? `${items} 个句子` : '';
   else if (kind === '拼几个词') note = items ? `${items} 个词` : c.note || (c.minutes ? `${c.minutes} 分钟` : '');
   else if (kind) note = c.note || c.title || (c.minutes ? `${c.minutes} 分钟` : '');
   else note = c.note || (c.minutes ? `${c.minutes} 分钟` : '');
@@ -291,7 +294,8 @@ export function createHomeTab(ctx) {
         h('p', { className: 'home-summary', text: '明天见。' }),
         gainLine(),
         again ? h('div', { className: 'home-actions' },
-          h('button', { type: 'button', className: 'text-btn accent', text: '再练一会儿', on: { click: () => ctx.go('lesson', { light: true, again: true }) } })) : null);
+          h('button', { type: 'button', className: 'text-btn accent', text: '再练一会儿', on: { click: () => ctx.go('lesson', { light: true, again: true }) } })) : null,
+        textreadRow());
     }
     // plan.js decides the light lesson (DESIGN 2.2, 2.3): after 21:00, a dictation night, the day before the exam,
     // coming back after a gap, a heavy homework day (parent's form). Only those two defaults can be switched back.
@@ -313,7 +317,21 @@ export function createHomeTab(ctx) {
       why ? h('p', { className: 'home-why', text: why }) : null,
       gainLine(),
       slots(plan),
-      h('div', { className: 'home-actions' }, start, alt));
+      h('div', { className: 'home-actions' }, start, alt),
+      textreadRow());
+  }
+
+  // 课文陪读 (0.5.0, ui-textread.js): photograph a page of the textbook and read it sentence by sentence with the teacher;
+  // the page read last can be opened again
+  function textreadRow() {
+    const tr = ctx.textread;
+    if (!tr || typeof tr.open !== 'function') return null;
+    let last = null;
+    try { last = textreadSaved(ctx.kv)[0] || null; } catch (e) { last = null; }
+    return h('div', { className: 'home-textread' },
+      h('button', { type: 'button', className: 'text-btn accent home-textread-open', on: { click: () => tr.open() } },
+        h('b', { text: '课文陪读' }), h('span', { text: '：拍一页课文，一句一句读懂' })),
+      last && typeof tr.openSaved === 'function' ? h('button', { type: 'button', className: 'text-btn home-textread-again', text: `再读 ${last.label}`, on: { click: () => tr.openSaved(last.id) } }) : null);
   }
 
   // the four cells of the day in one row (DESIGN 2.0): a line on top, dark for what she can do today, light for what

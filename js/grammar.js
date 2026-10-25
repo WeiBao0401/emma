@@ -61,7 +61,7 @@
 //       state：grammarState 的返回值，或 planState 拼好的整份（读 state.grammar、state.progress）；另认 state.history / state.events
 //       （事件数组：grammar.js 以外的语法题，比如 sprint.js 的兜底题，选错的误解也算）、state.grammarFocus（家长说的语法点 id）。
 //       upTo 给了就当课本进度（覆盖 progress.unit）。null = 今天没有卡（做过一份了，或者能排的都做完了）
-//       NextCard = { cardId, part: 1 | 2, reason: 'continue' | 'fix' | 'ahead' | 'unit' | 'exam' | 'order', why: 孩子能看的一句, tags?: [补地基的误解] }
+//       NextCard = { cardId, part: 1 | 2, reason: 'continue' | 'fix' | 'probe'（0.5.0：state.weakCards，地基探针看出“不会”的卡） | 'ahead' | 'unit' | 'exam' | 'order', why: 孩子能看的一句, tags?: [补地基的误解] }
 //   todayCard(gstate, now, { content, upTo }) -> NextCard | null   就是 nextCard（app.js 一直调它）
 //   misconceptionHits(state, now, { content, days }) -> { 误解标签: 次数 }   最近 days 天（默认 21）选错的干扰项；kv 里每道题算一次
 //   grammarWarmItems(state, now, { content, max }) -> [WarmItem]   给 plan.js：今天热身混哪 1-2 道语法题
@@ -454,6 +454,7 @@ function whyOf(card, reason, lead) {
   switch (reason) {
     case 'continue': return `上次的${spLR(name)}还没做完，接着做。`;
     case 'fix': return `这几天有几处错和${spLR(name)}有关，今天先把它补牢。`;
+    case 'probe': return `热身里几道小题看出来，${spLR(name)}还不太会，今天先把它补牢。`;
     case 'ahead': return lead ? `下个单元要学${spL(name)}，提前练一练。` : `下个单元要用到${spL(name)}，先练它。`;
     case 'unit': return lead ? `课本这个单元学${spL(name)}，跟上课本。` : `这个单元要用到${spL(name)}，先练它。`;
     case 'exam': return `期中前把${spLR(name)}练一练。`;
@@ -499,6 +500,9 @@ export function nextCard(state, now = new Date(), { content: c = null, upTo = nu
 
   const hits = misconceptionHits(state, now, { content: ct });
   const focusPoints = new Set(Array.isArray(state && state.grammarFocus) ? state.grammarFocus : []);
+  // 0.5.0: the cards the foundation probes found she does not know yet (screen.js weakFoundations().cards) come forward
+  // like a foundation card with repeated mistakes, foundation card or not (pronoun, there_be)
+  const weakCards = new Set(Array.isArray(state && state.weakCards) ? state.weakCards : []);
   const list = [];
   for (const card of ct.cards) {
     if (!reach(card) || (season && !examCard(card))) continue;
@@ -513,12 +517,13 @@ export function nextCard(state, now = new Date(), { content: c = null, upTo = nu
     let tier, reason;
     if (started) { tier = 0; reason = 'continue'; }
     else if (card.foundation && n >= FIX_MIN) { tier = 1; reason = 'fix'; }
+    else if (weakCards.has(card.id)) { tier = 1; reason = 'probe'; }
     else if (!season && inFocus(card)) { tier = 2; reason = focusReason; }
     else { tier = 3; reason = season ? 'exam' : 'order'; }
     list.push({ card, part, tier, reason, n, tags, lead: focusCards.includes(card) });
   }
   // the season goes wide (the first day of every card before any second day); otherwise one card's two days, then the next
-  list.sort((a, b) => a.tier - b.tier || (a.tier === 1 ? b.n - a.n : 0) || (season ? a.part - b.part : 0)
+  list.sort((a, b) => a.tier - b.tier || (a.tier === 1 ? b.n - a.n || (a.reason === 'fix' ? 0 : 1) - (b.reason === 'fix' ? 0 : 1) : 0) || (season ? a.part - b.part : 0)
     || byOrder(a.card, b.card) || a.part - b.part);
   const best = list[0];
   if (!best) return null;

@@ -62,6 +62,18 @@
 //     orderItems?,        modes/order.js writeItems：连词成句那天“写几个词”的句子 id
 //     orderWarm?,         modes/order.js warmItem：热身偶尔混的 1 句连词成句（id 数组，0-1 个）
 //     gains? / history?   这周的增量（sprint.weeklyGains 的结果），或事件数组（拿来现算）
+//     // 0.5.0 加的（都可以不给；第 3 批，design/teacher-next.md）
+//     probeItems?,        screen.js probeItems：今天的地基探针（0-2 道，ProbeItem）。轻松版 1 道；第一节课、小卷日、考前一天不放
+//     screenItems?,       screen.js screenItems：今天的 505 摸底（app.js 给到 15 个，plan 再截）。平时 12 个，期中季 6 个，她说“生词太多”
+//                         或读的时候卡在词上的 15 个；轻松版、第一节课、小卷日、考前一天、考试当天不放
+//     verbItems?,         modes/verb.js verbItems：找动词的句子 id（app.js 给 2 个，平时出 1 道，她说“句子看不懂”或卡在句子上出 2 道）；
+//                         轻松版、第一节课、小卷日不放
+//     askedWords?,        teacher.js askedReviewItems 里的单词（问老师讲过、今天该再考的，单词本里有的）：像读前见一面那样进热身，最多 2 个
+//                         （轻松版 1 个）。语法点那一半由 app.js 并进 grammarWarm（排在最前）
+//     transformItems?,    modes/order.js transformItems：句型转换那天“写几个词”的句子 id（sprint.js writePlan）
+//     readTune?,          { hard: 'words' | 'sentences' | 'find' | 'ok' | '', main: 'word' | 'sentence' | 'method' | '' }：她最近自己说的
+//                         “今天哪里最难”（两天以内）和读的求助分诊最多的一类（reader.js triageSummary），用来调上面两样的量
+//     examPassages?, examReading?   sprint.js quizPassage：小卷里的期中阅读小篇
 //     // 也认任务稿里的写法：{ entries, curriculum, settings, history, now }：entries 自动过 wordsForPlan，
 //     // settings.newPerDay 当 newPerDay，history 是事件数组（session_end）或 { lessonDays }，now 覆盖第二个参数
 //   }
@@ -105,6 +117,11 @@
 //     warmup 另有 order: [句子 id]（热身偶尔混的连词成句，cards 里是 { type: 'order', id, item: 'o:<id>', mode: 'order' }，放在最后）、
 //         preteach: [slug]（今天这一集的目标词，读前见一面）
 //     wrap：考前一天多一个 line: '今天早点睡。'
+//     0.5.0：warmup 另有 probe: [ProbeItem]、screen: [ScreenItem]、verb: [id]、asked: [slug]（热身里问老师讲过的词）；cards 里多
+//         { type: 'probe', id, item, block, mode: 'grammar' }（和语法题一起铺开）、{ type: 'screen', id }（单词卡后面，整批一起）、
+//         { type: 'verb', id, item: id, mode: 'verb' }（摸底后面）。read 格在小卷日放期中阅读小篇：status 'ready'、mode 'passage'、
+//         passageId、note '期中阅读'。write 格多 mode 'transform'（句型转换，items 是 3 个句子 id）。
+//         Plan 多 tune: [{ id: 'screen' | 'verb', why }]（这节课按她说的和读的求助多调了哪样，家长区看）
 //
 // 出卡规则（DESIGN 5.1）
 //   1. 封顶：上学日 20 张，周末 30 张，轻松版 12 张，第一节课 15 张，小卷日 5 张。
@@ -154,6 +171,11 @@ export const BANDS = ['scope', 'learned', 'recognize', 'primary', 'extra'];
 export const TILES = { regular: 4, light: 2, lightSeason: 3 };   // 热身字母块张数上限（期中季标准课按 SPELL_PER_DAY 算）
 export const GRAMMAR_WARM = { standard: 2, light: 1 };           // 热身混几道语法题（DESIGN 2.2）
 export const EARLY_SLEEP = '今天早点睡。';
+// 0.5.0 热身里的新东西（design/teacher-next.md 3.2、4.1、6.3，DESIGN 5.2）
+export const PROBE_WARM = { standard: 2, light: 1 };
+export const SCREEN_WARM = { standard: 12, season: 6, words: 15, tight: 6 };
+export const VERB_WARM = { standard: 1, sentences: 2 };
+export const ASKED_WORDS = { standard: 2, light: 1 };
 
 export const isWeekend = d => d.getDay() === 0 || d.getDay() === 6;
 
@@ -319,13 +341,17 @@ export function planToday(state = {}, now = new Date()) {
 
   // ---- 读一段 (DESIGN 5.6): reader.js says which episode; today decides whether and how much
   const rc = state.readCell && typeof state.readCell === 'object' ? state.readCell : null;
+  // the quiz day reads one 期中阅读小篇 instead of the episode (sprint.js quizPassage)
+  const passageCell = ps => ({ mode: 'passage', items: [], status: 'ready', passageId: ps.id, minutes: Math.max(1, num(ps.minutes, 6)), note: ps.label || '期中阅读', short: false });
   function readFor(isLight, quizDay) {
+    if (quizDay && quiz && quiz.passage) return passageCell(quiz.passage);
     const base = { mode: 'story', items: [] };
     if (!rc || rc.status === 'soon' || !rc.status) return { ...base, status: 'soon', minutes: 0, note: '下周开播' };
     const info = { episodeId: rc.episodeId, n: rc.n, of: rc.of, title: rc.title, titleZh: rc.titleZh, again: !!rc.again, resume: !!rc.resume };
     if (rc.status !== 'ready') return { ...base, ...info, status: rc.status, minutes: 0, note: rc.note || '' };
     const no = note => ({ ...base, ...info, status: 'skip', minutes: 0, note });
     if (first) return no('明天开始');
+    if (quizDay && quiz && quiz.passage) return passageCell(quiz.passage);
     if (quizDay) return no('今天做小卷');
     if (examEve) return no('考完接着读');
     if (dictation) return no('今晚写过听写，明天读');
@@ -335,6 +361,12 @@ export function planToday(state = {}, now = new Date()) {
     return { ...base, ...info, status: 'ready', minutes, short, note: rc.note || (rc.n ? `第 ${rc.n} 集` : '') };
   }
   const readTargets = new Set(Array.isArray(state.readTargets) ? state.readTargets : []);
+  const askedWords = new Set(Array.isArray(state.askedWords) ? state.askedWords : []);
+  // what she said was hardest lately, and where reading got stuck most (reader.js triageSummary): more of the matching help
+  const tune = state.readTune && typeof state.readTune === 'object' ? state.readTune : {};
+  const tuneWords = tune.hard === 'words' || tune.main === 'word';
+  const tuneSentences = tune.hard === 'sentences' || tune.main === 'sentence';
+  const examDay = examGap === 0;
 
   function build(isLight) {
     const quizDay = !!quiz && !isLight;
@@ -377,21 +409,31 @@ export function planToday(state = {}, now = new Date()) {
 
     // ---- 读前见一面 (DESIGN 5.6): this episode's target words she has in her word book, seen once before the story.
     // Words already in the warm-up count; the others come in (room first, then in place of the last review cards).
-    let preteach = [];
-    if (read.status === 'ready' && readTargets.size) {
+    // words that must be in the warm-up (this episode's targets, words 问老师 explained): room first, then in place of the
+    // last review cards (lowest band, surest), never the first card, a new word or another word that must be there
+    const keepSet = new Set();
+    const bring = (set, max) => {
       const inWarm = new Set(cards.map(w => w.slug));
-      const add = words.filter(w => w && readTargets.has(w.slug) && !inWarm.has(w.slug) && !reviewedToday(w) && !future(w)).slice(0, PRETEACH_MAX);
-      if (add.length) {
-        const room = Math.max(0, c - cards.length);
-        const out = add.length - room;
-        if (out > 0) {
-          // put off the last review cards (lowest band, surest), never the first card or a target word
-          let k = out;
-          for (let i = cards.length - 1; i > 0 && k > 0; i--) if (!readTargets.has(cards[i].slug) && !cards[i].isNew) { cards.splice(i, 1); k--; }
-        }
-        cards = [...cards, ...add.slice(0, Math.max(0, c - cards.length))];
-      }
+      const add = words.filter(w => w && set.has(w.slug) && !inWarm.has(w.slug) && !reviewedToday(w) && !future(w)).slice(0, max);
+      for (const w of cards) if (set.has(w.slug)) keepSet.add(w.slug);
+      for (const w of add) keepSet.add(w.slug);
+      if (!add.length) return;
+      const out = add.length - Math.max(0, c - cards.length);
+      let k = out;
+      for (let i = cards.length - 1; i > 0 && k > 0; i--) if (!keepSet.has(cards[i].slug) && !cards[i].isNew) { cards.splice(i, 1); k--; }
+      cards = [...cards, ...add.slice(0, Math.max(0, c - cards.length))];
+    };
+    let preteach = [];
+    if (read.status === 'ready' && read.mode === 'story' && readTargets.size) {
+      bring(readTargets, PRETEACH_MAX);
       preteach = cards.filter(w => readTargets.has(w.slug)).map(w => w.slug);
+    }
+    // 我问过的 (teacher.js): a word 问老师 explained comes back on day 2 and day 5
+    const noExtras = first || quizDay || examEve;
+    let asked = [];
+    if (!noExtras && askedWords.size && cards.length) {
+      bring(askedWords, isLight ? ASKED_WORDS.light : ASKED_WORDS.standard);
+      asked = cards.filter(w => askedWords.has(w.slug)).map(w => w.slug);
     }
 
     // ---- what kind of card each one is (DESIGN 2.2, 5.1)
@@ -399,7 +441,7 @@ export function planToday(state = {}, now = new Date()) {
     const tilesMax = first || quizDay || examEve ? 0
       : isLight ? (season ? TILES.lightSeason : TILES.light)
       : season ? SPELL_PER_DAY - (spellDay ? WRITE_SPELL : 0) : TILES.regular;
-    const preSet = new Set(preteach);
+    const preSet = new Set([...preteach, ...asked]);
     const eligible = w => !preSet.has(w.slug) && (season ? isKey(w) || !!w.write : !!w.write);
     let am = assignModes(cards, { first, tilesMax, eligible });
 
@@ -419,10 +461,18 @@ export function planToday(state = {}, now = new Date()) {
     let order = !first && !isLight && !quizDay && !examEve && cards.length && write.mode !== 'order' && Array.isArray(state.orderWarm)
       ? state.orderWarm.filter(Boolean).slice(0, 1) : [];
 
+    // ---- 0.5.0: 地基探针 (1-2), 505 摸底 (6-15 words), 找动词 (1-2). Never on the first lesson, the quiz day or the night
+    // before the exam; the 摸底 not on a light lesson or the exam day either (it waits for an ordinary day)
+    let probe = noExtras || !Array.isArray(state.probeItems) ? [] : state.probeItems.filter(Boolean).slice(0, isLight ? PROBE_WARM.light : PROBE_WARM.standard);
+    const screenMax = season ? SCREEN_WARM.season : tuneWords ? SCREEN_WARM.words : SCREEN_WARM.standard;
+    let screen = noExtras || isLight || examDay || !Array.isArray(state.screenItems) ? [] : state.screenItems.filter(Boolean).slice(0, screenMax);
+    let verb = noExtras || isLight || !Array.isArray(state.verbItems) ? [] : state.verbItems.filter(Boolean).slice(0, tuneSentences ? VERB_WARM.sentences : VERB_WARM.standard);
+
     // ---- keep to time (DESIGN 2.3): on a story day some recognition cards wait for tomorrow first; then the 连词成句 extra
     // goes, then tiles back to multiple choice, then fewer grammar questions. A school day with the story is about 13-15 minutes.
     const limit = read.status === 'ready' && !isLight && !weekend ? LIMITS.withRead : limitFor(isLight);
-    const warmSec = () => modes.reduce((a, m) => a + secOf(m), 0) + grammar.length * secOf('grammar') + order.length * secOf('order');
+    const warmSec = () => modes.reduce((a, m) => a + secOf(m), 0) + grammar.length * secOf('grammar') + order.length * secOf('order')
+      + probe.length * secOf('probe') + screen.length * secOf('screen') + verb.length * secOf('verb');
     const total = () => minOf(warmSec()) + (read.status === 'ready' ? read.minutes : 0) + (write.status === 'ready' ? write.minutes : 0) + WRAP_MINUTES;
     // a story day: recognition cards from the end of the list (lowest band, put off to tomorrow) go first, before the
     // 连词成句 sentence and before the spelling, so the key words are still written and one sentence is still ordered;
@@ -431,22 +481,37 @@ export function planToday(state = {}, now = new Date()) {
     if (read.status === 'ready') {
       const preSet2 = new Set(preteach);
       for (let i = cards.length - 1; i > 0 && total() > limit && cards.length > WARM_MIN; i--) {
-        if (modes[i] === 'tiles' || cards[i].isNew || preSet2.has(cards[i].slug)) continue;
+        if (modes[i] === 'tiles' || cards[i].isNew || preSet2.has(cards[i].slug) || asked.includes(cards[i].slug)) continue;
         cards.splice(i, 1); modes.splice(i, 1); trimmed++;
       }
     }
     if (total() > limit) order = [];
+    // 0.5.0: then fewer 摸底 words (none in the exam season, where spelling the key words matters more), tiles back to
+    // multiple choice, one grammar question besides the probes, no 摸底, one probe, no grammar, no 找动词, no probe
+    if (total() > limit && screen.length > SCREEN_WARM.tight) screen = screen.slice(0, SCREEN_WARM.tight);
+    if (total() > limit && season) screen = [];
     while (total() > limit && modes.includes('tiles')) modes[modes.lastIndexOf('tiles')] = 'mc4';
+    // the probes are grammar questions too: with them in, one grammar question is enough (the first one stays: 我问过的)
+    if (total() > limit && probe.length && grammar.length > 1 && !quizDay) grammar = grammar.slice(0, 1);
+    if (total() > limit) screen = [];
+    if (total() > limit && probe.length > 1) probe = probe.slice(0, 1);
     while (total() > limit && grammar.length && !quizDay) grammar = grammar.slice(0, -1);
+    if (total() > limit) verb = [];
+    if (total() > limit) probe = [];
 
     const wcards = cards.map((w, i) => ({ type: 'word', slug: w.slug, mode: modes[i] }));
-    const at = grammarSlots(cards.length, grammar.length);
-    for (let i = grammar.length - 1; i >= 0; i--) {
-      const g = grammar[i];
-      wcards.splice(at[i], 0, { type: 'grammar', id: g.id || g.item, item: g.item || g.id, point: g.point || null, card: g.card || null, mode: 'grammar' });
-    }
+    // grammar questions and probes spread through the word cards together (probes after the grammar ones)
+    const gp = [...grammar.map(g => ({ type: 'grammar', id: g.id || g.item, item: g.item || g.id, point: g.point || null, card: g.card || null, mode: 'grammar' })),
+      ...probe.map(x => ({ type: 'probe', id: x.id, item: x.item, block: x.block || null, point: x.point || null, card: x.card || null, mode: 'grammar' }))];
+    const at = grammarSlots(cards.length, gp.length);
+    for (let i = gp.length - 1; i >= 0; i--) wcards.splice(at[i], 0, gp[i]);
+    for (const x of screen) wcards.push({ type: 'screen', id: x.id });
+    for (const id of verb) wcards.push({ type: 'verb', id, item: id, mode: 'verb' });
     for (const id of order) wcards.push({ type: 'order', id, item: 'o:' + id, mode: 'order' });
-    return { cards, modes, grammar, order, preteach, wcards, write, read, pick, pulled, quizDay, R, I, Fp, trimmed, warmMin: minOf(warmSec()) };
+    const tuned = [];
+    if (tuneWords && screen.length > SCREEN_WARM.standard) tuned.push({ id: 'screen', why: `${tune.hard === 'words' ? '她说生词太多' : '读的时候多卡在词上'}：今天多认几个小学词（${screen.length} 个）。` });
+    if (tuneSentences && verb.length > VERB_WARM.standard) tuned.push({ id: 'verb', why: `${tune.hard === 'sentences' ? '她说句子看不懂' : '读的时候多卡在句子上'}：今天多找一句的动词。` });
+    return { cards, modes, grammar, order, preteach, asked, probe, screen, verb, tuned, wcards, write, read, pick, pulled, quizDay, R, I, Fp, trimmed, warmMin: minOf(warmSec()) };
   }
 
   const m = build(light);
@@ -461,16 +526,21 @@ export function planToday(state = {}, now = new Date()) {
   if (w.week) writeExtra.week = w.week;
   if (w.quiz) writeExtra.quiz = w.quiz;
   const r = m.read;
-  const readExtra = { mode: 'story', note: r.note || '' };
-  for (const k of ['episodeId', 'n', 'of', 'title', 'titleZh', 'short', 'again', 'resume']) if (r[k] !== undefined) readExtra[k] = r[k];
+  const readExtra = { mode: r.mode || 'story', note: r.note || '' };
+  for (const k of ['episodeId', 'passageId', 'n', 'of', 'title', 'titleZh', 'short', 'again', 'resume']) if (r[k] !== undefined) readExtra[k] = r[k];
+  const extras = m.probe.length + m.screen.length + m.verb.length;
   const cells = [
-    cell('warmup', items.length || m.grammar.length ? 'ready' : 'skip', m.warmMin, items, {
+    cell('warmup', items.length || m.grammar.length || extras ? 'ready' : 'skip', m.warmMin, items, {
       mode: 'mc4',
       cards: m.wcards,
       modes: Object.fromEntries(m.cards.map((x, i) => [x.slug, m.modes[i]])),
       grammar: m.grammar,
       order: m.order,
       preteach: m.preteach,
+      probe: m.probe,
+      screen: m.screen,
+      verb: m.verb,
+      asked: m.asked,
     }),
     cell('read', r.status, r.minutes, [], readExtra),
     cell('write', w.status, w.minutes, w.items, writeExtra),
@@ -514,7 +584,12 @@ export function planToday(state = {}, now = new Date()) {
       pulled: m.pulled.length,
       order: m.order.length,
       preteach: m.preteach.length,
+      probe: m.probe.length,
+      screen: m.screen.length,
+      verb: m.verb.length,
+      asked: m.asked.length,
     },
+    tune: m.tuned,
     kind: light ? 'easy' : weekend ? 'weekend' : 'standard',
     lightReason,
     first,
@@ -551,6 +626,7 @@ const WRITE_WHY = {
   grammar: '今天先练一张语法卡，因为语法每天练一点就好。',
   phonics: '今天先练一张语音小卡，因为会读了就更好拼。',
   order: '今天先排几个句子，因为排对顺序是写句子的第一步。',
+  transform: '今天先把几个句子变一变，因为会变否定句和问句，才算会用。',
 };
 const READ_WHY = '今天先读一集故事，因为每天读一点，句子就越看越懂。';
 
@@ -607,11 +683,13 @@ function writeBit(write) {
   if (write.mode === 'grammar') return '做一张语法卡';
   if (write.mode === 'phonics') return '看一张语音小卡';
   if (write.mode === 'order') return `排 ${write.items.length} 个句子`;
+  if (write.mode === 'transform') return `做 ${write.items.length} 道句型转换`;
   return '';
 }
 // 读一段 today, as a few words: “读第 2 集故事” / “读半集故事” / “再读第 3 集”
 function readBit(read) {
   if (!read || read.status !== 'ready') return '';
+  if (read.mode === 'passage') return '读一篇期中阅读';
   if (read.again) return `再读第 ${read.n} 集故事`;
   return read.short ? `读第 ${read.n} 集故事（做 2 道题）` : `读第 ${read.n} 集故事`;
 }

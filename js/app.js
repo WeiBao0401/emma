@@ -6,6 +6,11 @@
 // 0.4.0: 读一段 opens (reader.js: the six midterm episodes in curriculum/stories.json, loaded at boot; ui-lesson draws them
 // with ui-reader.js), eight grammar cards with the foundations first (grammar.js nextCard), and 连词成句 (modes/order.js,
 // curriculum/order.json: Wednesday's 写几个词 and now and then one in the warm-up).
+// 0.5.0 (第 3 批, design/teacher-next.md): the warm-up gets the foundation probes and the 505 word check (screen.js,
+// curriculum/probes.json), 找动词 (modes/verb.js), and what 问老师 explained comes back on day 2 and 5 (teacher.js
+// askedReviewItems); 句型转换 joins the 写几个词 rotation (modes/order.js, curriculum/transform.json); the quiz reads one
+// 期中阅读小篇 (curriculum/exam-reading.json, reader.js loadPassages); 课文陪读 (ui-textread.js) lays its own full-screen
+// layer over the app (app.textread, opened from 今天 and 问老师); the weekly teacher (teacher.js) thinks in the background.
 // v1 (0.2.0): the grammar cards are loaded at boot (grammar.js) and their progress goes into the plan's state with the
 // parent's form (intake.js: busy days, recent mistakes) and the review outline (kv 'outline'); the spelling, listening,
 // grammar and phonics parts of a lesson are loaded by ui-lesson.js itself (import()).
@@ -45,6 +50,10 @@ import { createChatTab } from './ui-chat.js';
 import { createVoiceInput } from './voice-input.js';
 import * as R from './reader.js';
 import * as O from './modes/order.js';
+import * as S from './screen.js';
+import * as T from './teacher.js';
+import * as V from './modes/verb.js';
+import { createTextRead } from './ui-textread.js';
 
 const params = new URLSearchParams(location.search);
 // ?mock=offline: mock mode where every model call fails like a dropped connection (tests the dictionary fallback)
@@ -114,6 +123,11 @@ const parentName = () => String(((kv.peek('profile', {}) || {}).parentCall) || '
 // The parent's form is a starting point (intake.js marks it 'pending'): the mistakes they listed go first for 21 days.
 const BOOST_DAYS = 21;
 
+// 期中阅读小篇 (reader.js loadPassages at boot): [{ id, label, minutes }] for sprint.js quizPassage
+let examPassages = [];
+const passageMinutes = ep => Math.max(4, Math.round((ep.words || 0) / 70 + (ep.questions || []).length * 0.7));
+const addDay = (day, n) => { const [y, m, d] = day.split('-').map(Number); return dayOf(new Date(y, m - 1, d + n, 12)); };
+
 // The v1 fields of the plan's state (CONTRACTS.md 9.3). Each part is optional: whatever fails is left out and plan.js
 // falls back (sprint.js's own grammar questions and card order, no busy day, no boost).
 function v1State(now, progress) {
@@ -128,15 +142,35 @@ function v1State(now, progress) {
     if (fresh && Array.isArray(d.review.grammar)) focus = d.review.grammar;
     if (isBusyDay(d, now)) out.busyDay = true;
   } catch (e) { console.warn('plan state: intake:', (e && e.message) || e); }
+  // 0.5.0: the foundation probes (screen.js): a block she does not know yet brings its card forward (weakCards; the
+  // foundation cards also through grammarFocus); 2 probes and the 505 words a day go into the warm-up
+  let weakCards = [];
+  try {
+    if (S.content()) {
+      const weak = S.weakFoundations(kv);
+      focus = [...focus, ...weak.points];
+      weakCards = weak.cards;
+      out.weakCards = weakCards;
+      out.probeItems = S.probeItems(kv, now, { max: 2 });
+      const inBook = words.favorites().map(e => e.headword).filter(Boolean);
+      out.screenItems = S.screenItems(kv, now, { max: S.SCREEN_MAX, skip: inBook });
+    }
+  } catch (e) { console.warn('plan state: screen:', (e && e.message) || e); }
+  // 我问过的 (teacher.js): a grammar point 问老师 explained comes back first among the warm-up grammar questions; a word
+  // comes back as a word card (only when it is in her word book)
+  let asked = [];
+  try { asked = T.askedReviewItems(kv, now) || []; } catch (e) { console.warn('plan state: asked:', (e && e.message) || e); }
+  out.askedWords = asked.filter(x => x.type === 'word').map(x => x.slug).filter(slug => { const e = words.get(slug); return !!(e && e.favorited && e.fsrs); });
   // grammar.js content loaded: its progress decides the warm-up items and today's card (null = no card today).
-  // nextCard puts a foundation card first when her recent wrong answers (or the parent's form) point at it.
+  // nextCard puts a foundation card first when her recent wrong answers (or the parent's form, or the probes) point at it.
   let gs = null;
   try {
     if (G.content()) {
       gs = G.grammarState(kv);
       out.grammar = gs;
-      out.grammarWarm = G.grammarWarmItems(gs, now, { max: 2 });
-      out.grammarCard = G.nextCard({ grammar: gs, progress, grammarFocus: focus }, now, { upTo: (progress && progress.unit) || '' });
+      const ag = asked.filter(x => x.type === 'grammar');
+      out.grammarWarm = [...ag, ...G.grammarWarmItems(gs, now, { max: Math.max(0, 2 - ag.length) }).filter(x => !ag.some(a => a.item === x.item))];
+      out.grammarCard = G.nextCard({ grammar: gs, progress, grammarFocus: focus, weakCards }, now, { upTo: (progress && progress.unit) || '' });
     }
   } catch (e) { console.warn('plan state: grammar:', (e && e.message) || e); }
   // 读一段: which episode today (reader.js readCell); its target words are seen once in the warm-up before the story
@@ -149,8 +183,16 @@ function v1State(now, progress) {
         out.readTargets = ((ep && ep.targets) || []).map(t => t.slug || R.slugify(t.w)).filter(slug => { const e = words.get(slug); return !!(e && e.favorited && e.fsrs); });
       }
       out.readCell = rc;
+      // 找动词: sentences from the episodes (2: the plan gives 1, or 2 when sentences are where she gets stuck)
+      out.verbItems = V.verbItems(kv, now, { n: 2 });
     }
+    // what she said was hardest lately (two days) and where reading got stuck most this week (reader.js triageSummary)
+    const ts = R.triageSummary(kv, { now, days: 7 });
+    const day = dayOf(now);
+    out.readTune = { hard: ts.lastHard && ts.lastHard.day >= addDay(day, -2) ? ts.lastHard.answer : '', main: ts.main || '' };
   } catch (e) { console.warn('plan state: reading:', (e && e.message) || e); }
+  // the quiz's 期中阅读小篇
+  if (examPassages.length) { out.examPassages = examPassages; out.examReading = kv.peek('exam.reading', null); }
   // 连词成句: Wednesday's sentences and the odd one in the warm-up (modes/order.js)
   try {
     if (O.content()) {
@@ -158,6 +200,8 @@ function v1State(now, progress) {
       // plan.js uses the warm-up sentence only on days 写几个词 is not 连词成句, so the two never overlap
       out.orderWarm = O.warmItem(kv, now, { grammar: gs });
     }
+    // 句型转换 (0.5.0): three sentences for its 写几个词 days
+    if (O.transformContent()) out.transformItems = O.transformItems(kv, now, { grammar: gs });
   } catch (e) { console.warn('plan state: order:', (e && e.message) || e); }
   return out;
 }
@@ -299,6 +343,7 @@ function showRoute(name, { force = false, params: p = null } = {}) {
   if (route === 'chat' && chat && r.name !== 'chat') chat.hide();         // closes the word card, drops a recording not finished
   if (route === 'lesson' && lesson && r.name !== 'lesson' && lesson.hide) lesson.hide();   // the story stops reading aloud
   if (route === 'capture' && capture && r.name !== 'capture') capture.hide(); // leaving 拍课本 drops the photo
+  if (app.textread) app.textread.hide();                                    // 课文陪读's layer closes (it drops the photo)
   const from = route;
   route = r.name;
   for (const s of SECTIONS) { const el = document.getElementById('tab-' + s); if (el) el.hidden = s !== r.section; }
@@ -409,7 +454,8 @@ function isIdle() {
   return !busyCount && !(look && look.isBusy()) && !(lesson && lesson.inSession()) && !(dictation && dictation.inSession()) &&
     !sheetView && !typing && !words.enriching() && !(parent && parent.holding()) &&
     !(weekly && weekly.holding()) && !(capture && capture.holding()) &&   // a share sheet open, a photo not saved yet
-    !(chat && (chat.inSession() || chat.holding()));                       // the teacher answering, a recording, a question not sent
+    !(chat && (chat.inSession() || chat.holding())) &&                     // the teacher answering, a recording, a question not sent
+    !(app.textread && (app.textread.inSession() || app.textread.holding())); // 课文陪读: a photo, a page being prepared or read
 }
 // Stricter, for a reload while the app is in use: nothing being read either.
 const isQuiet = () => isIdle() && !(look && look.hasResult()) && !(lib && lib.inDetail());
@@ -471,6 +517,11 @@ async function boot() {
       G.loadGrammar({ fetchJSON }).catch(e => console.warn('grammar:', (e && e.message) || e)),
       R.loadStories({ fetchJSON }).catch(e => console.warn('stories:', (e && e.message) || e)),
       O.loadOrder({ fetchJSON }).catch(e => console.warn('order:', (e && e.message) || e)),
+      // 0.5.0: the probes and the 505 words, the 句型转换 sentences, the midterm reading passages
+      S.loadScreen({ fetchJSON }).catch(e => console.warn('probes:', (e && e.message) || e)),
+      O.loadTransform({ fetchJSON }).catch(e => console.warn('transform:', (e && e.message) || e)),
+      R.loadPassages({ fetchJSON }).then(list => { examPassages = (list || []).map((ep, i) => ({ id: ep.id, label: ep.label || `期中阅读 · 第 ${i + 1} 篇`, minutes: passageMinutes(ep) })); })
+        .catch(e => console.warn('exam reading:', (e && e.message) || e)),
     ]);
   } catch (e) {
     console.error(e);
@@ -489,6 +540,8 @@ async function boot() {
   onboard = createOnboardView(app);
   weekly = createWeeklyView(app);
   chat = createChatTab(app);
+  // 课文陪读: its own full-screen layer over whatever page is open (ui-textread.js); 今天 and 问老师 open it
+  app.textread = createTextRead(app);
   renderStatus();
   updateBadge();
   showRoute(onboard.needed() ? 'onboard' : 'home', { force: true });
@@ -506,7 +559,8 @@ async function boot() {
   });
   document.documentElement.dataset.ready = '1';
   // lessons that ended without ui-lesson settling them (closed mid-way) are counted for the weekly page
-  setTimeout(() => { weeklyCatchUp(app).catch(() => {}); }, 3000);
+  // 我问过的 (teacher.js): the questions 问老师 explained are checked against what she answered since
+  setTimeout(() => { weeklyCatchUp(app).catch(() => {}); T.syncAsked(app).catch(() => {}); }, 3000);
   // the dictionary loads after the first paint, in small slices; views that rendered before it get the extras
   dict.ready.then(() => {
     for (const v of views) v.update();

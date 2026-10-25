@@ -1,0 +1,49 @@
+/* 认几个小学的老朋友（ui-screen.js renderScreen）. Owner: 地基探针和 505 摸底 agent. Class names start with scr-.
+   The 地基小题 use grammar.css (gram-) so they look like the grammar warm-up questions. Colors come from index.html :root
+   (--paper, --ink, --accent, --tag-bg, --rule ...); one column up to --col, big buttons for the iPad. */
+.scr{display:flex;flex-direction:column;gap:22px;padding:24px 0 48px;max-width:var(--col);width:100%;margin:0 auto}
+.scr-wait{padding:40px 0}
+.scr-probe{max-width:var(--col);width:100%;margin:0 auto}
+
+.scr-head{display:flex;flex-direction:column;gap:6px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.scr-title{font:600 15px/1.3 var(--serif);color:var(--ink)}
+.scr-intro{font:16px/1.55 var(--sans);color:var(--muted);text-wrap:pretty}
+
+/* the word: big and quiet, like the dictionary's headword */
+.scr-word{display:flex;align-items:center;justify-content:center;gap:12px;min-height:120px;padding:12px 0;
+  font:500 56px/1.15 var(--serif);letter-spacing:-.01em;color:var(--ink);text-align:center;overflow-wrap:anywhere}
+.scr-word .say{width:40px;height:40px;flex:none}
+.scr-word .say .icon{width:22px;height:22px}
+
+/* 认识 / 不确定 / 没学过: three big buttons in a row */
+.scr-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.scr-choice{min-height:72px;padding:12px 8px;border:1px solid var(--rule-strong);border-radius:12px;background:var(--paper);
+  color:var(--ink);font:500 21px/1.2 var(--sans);transition:background-color .15s var(--ease),border-color .15s var(--ease)}
+.scr-choice.know{border-color:var(--accent);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.scr-choice:active{background:var(--tag-bg)}
+.scr-choice:focus-visible,.scr-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* the 四选一 check: Chinese meanings */
+.scr-ask{font:500 19px/1.45 var(--sans);color:var(--ink)}
+.scr-options{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:600px){.scr-options{grid-template-columns:1fr 1fr;gap:14px}}
+.scr-opt{display:flex;align-items:center;gap:14px;min-height:64px;padding:12px 18px;text-align:left;
+  border:1px solid var(--rule-strong);border-radius:12px;background:var(--paper);color:var(--ink);
+  transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease)}
+.scr-letter{flex:none;width:26px;font:600 15px/1 var(--sans);color:var(--faint)}
+.scr-text{font:500 21px/1.35 var(--sans)}
+.scr-opt:active:not(:disabled){background:var(--tag-bg)}
+.scr-opt:disabled{cursor:default;opacity:.55}
+.scr-opt.right,.scr-opt.is-answer{opacity:1;border-color:var(--good);color:var(--good);box-shadow:inset 0 0 0 1px var(--good)}
+.scr-opt.right{background:var(--tag-bg)}
+.scr-opt.wrong{opacity:1;border-color:var(--danger);color:var(--danger)}
+.scr-opt.wrong .scr-text{text-decoration:line-through;text-decoration-thickness:1px}
+.text-btn.scr-forget{align-self:flex-end;font-size:16px;color:var(--muted)}
+
+.scr-note{font:500 19px/1.55 var(--sans);color:var(--ink);text-wrap:pretty}
+.scr-note.ok{color:var(--good)}
+.scr-actions{display:flex;justify-content:flex-end}
+.scr-actions .btn{min-width:180px}
+@media (max-width:599px){.scr-actions .btn{width:100%}.scr-word{font-size:46px}}
+@media (min-width:700px){.scr-word{font-size:64px}}
+@media (prefers-reduced-motion:reduce){.scr-choice,.scr-opt{transition:none}}

@@ -13,6 +13,12 @@
 //   写几个词  按 cell.mode：'tiles' 字母块拼写（只记事件，不再给 FSRS 评分，热身已经评过）、
 //          'grammar' 语法卡（ui-grammar.js 的 renderGrammarCard）、'phonics' 语音小卡（ui-phonics.js 的 renderPhonicsCard）、
 //          'order' 连词成句（modes/order.js 的 renderOrder，0.4.0）。热身格的 order 是偶尔混的 1 句，放在热身最后。
+//   0.5.0（第 3 批）：热身里多三样，都由 plan 的热身格给：地基探针（cell.probe，ui-screen.js renderProbe，和语法题一起铺开）、
+//          505 摸底（cell.screen，ui-screen.js renderScreen，单词卡后面一整批；她自己说的“认识 / 没学过”不算对错）、
+//          找动词（cell.verb，modes/verb.js renderVerb，摸底后面）；问老师讲过的词（cell.asked）和语法点（grammar 里带 asked 的）上方写“我问过的”。
+//          写几个词多 'transform' 句型转换（modes/order.js renderTransforms）。小卷日读一段格是期中阅读小篇（mode 'passage'，
+//          ui-reader.js renderPassage，只做题、原文一直开着；做完写 kv 'exam.reading'）。开课后在后台调 teacher.js maybeThinkWeek
+//          （每周第一次开课时想上一周），收尾调 syncAsked（对账“我问过的”），讲过又错了的点给一行“老师想换个讲法再说一遍”。
 //   收尾   老师夸一句（lines 'praise'，填今天写对的一个具体的词，带 spelled；没写对的就填认出的），
 //          “今天写对了 N 个”加最多 3 个词（DESIGN 2.2），再见用 'close'，期中季用 'exam'（没有就退回 'close'）。
 //          轻松版开头老师先说一句 'easy' 场景的话。考前一天加一句“今天早点睡。”
@@ -87,10 +93,15 @@ export const V1_MODULES = {
   grammarUI: './ui-grammar.js',
   phonics: './ui-phonics.js',
   sprint: './sprint.js',
-  // 0.4.0: 读一段 (the episode screen and its logic) and 连词成句
+  // 0.4.0: 读一段 (the episode screen and its logic) and 连词成句 (0.5.0: 句型转换 too)
   reader: './ui-reader.js',
   story: './reader.js',
   order: './modes/order.js',
+  // 0.5.0: 地基探针 and 505 摸底 (logic, screens), 找动词, the teacher's notebook (我问过的, 每周想一次)
+  screen: './screen.js',
+  screenUI: './ui-screen.js',
+  verb: './modes/verb.js',
+  teacher: './teacher.js',
 };
 // loadV1() -> Promise<{ listen, spell, grammar, grammarUI, phonics, sprint }>; a module that is missing or throws is null.
 // The browser's import is cached for the page's life; tests pass their own importer and get a fresh load.
@@ -238,7 +249,7 @@ export function quizItems(quiz) {
   return [...slugs.map(slug => ({ kind: 'spell', slug })), ...grammar.filter(q => !seen.has(q.item) && seen.add(q.item)).map(q => ({ kind: 'grammar', q }))];
 }
 
-const WRITE_ALIAS = { tiles: 'tiles', tile: 'tiles', spell: 'tiles', grammar: 'grammar', 'grammar-card': 'grammar', phonics: 'phonics', sound: 'phonics', quiz: 'quiz', sprint: 'quiz', order: 'order' };
+const WRITE_ALIAS = { tiles: 'tiles', tile: 'tiles', spell: 'tiles', grammar: 'grammar', 'grammar-card': 'grammar', phonics: 'phonics', sound: 'phonics', quiz: 'quiz', sprint: 'quiz', order: 'order', transform: 'transform' };
 export function writeKind(cell, mods = {}) {
   if (!cell || cell.status !== 'ready') return null;
   const k = WRITE_ALIAS[cell.mode] || null;
@@ -246,6 +257,7 @@ export function writeKind(cell, mods = {}) {
   if (k === 'grammar') return fnOf(mods.grammarUI, 'renderGrammarCard') && (cell.card ?? cell.point) != null ? 'grammar' : null;
   if (k === 'phonics') return fnOf(mods.phonics, 'renderPhonicsCard') ? 'phonics' : null;
   if (k === 'order') return fnOf(mods.order, 'renderOrder') && Array.isArray(cell.items) && cell.items.length ? 'order' : null;
+  if (k === 'transform') return fnOf(mods.order, 'renderTransforms') && Array.isArray(cell.items) && cell.items.length ? 'transform' : null;
   if (k === 'quiz') {
     // the quiz runs if one of its halves can: spelling needs spell.js, grammar questions draw here
     const items = quizItems(cell.quiz || { items: cell.items });
@@ -254,10 +266,18 @@ export function writeKind(cell, mods = {}) {
   return null;
 }
 
-// 读一段 today: the plan opened it (an episode to read) and the episode screen loaded
+// 读一段 today: the plan opened it (an episode to read) and the episode screen loaded; on a quiz day the 期中阅读小篇
+// (mode 'passage', 0.5.0) needs renderPassage and reader.js loadPassages
 export function readKind(cell, mods = {}) {
-  if (!cell || cell.status !== 'ready' || !cell.episodeId) return null;
+  if (!cell || cell.status !== 'ready') return null;
+  if (cell.mode === 'passage') return cell.passageId && fnOf(mods.reader, 'renderPassage') && fnOf(mods.story, 'loadPassages') ? 'passage' : null;
+  if (!cell.episodeId) return null;
   return fnOf(mods.reader, 'renderEpisode') ? 'story' : null;
+}
+// the warm-up's 0.5.0 extras the plan put in: probes, 505 words, 找动词 sentences, the words 问老师 explained
+export function warmExtras(cell) {
+  const list = k => (cell && Array.isArray(cell[k]) ? cell[k].filter(Boolean) : []);
+  return { probe: list('probe'), screen: list('screen'), verb: list('verb').filter(x => typeof x === 'string'), asked: list('asked') };
 }
 // the 连词成句 sentence the plan put at the end of the warm-up (cell.order, or { type: 'order' } cards)
 export function orderRefs(cell) {
@@ -287,7 +307,10 @@ export function grammarCardId(card, G = null) {
 export function sprintCells(cells, quiz, { forced = false } = {}) {
   if (!quiz || typeof quiz !== 'object' || !quizItems(quiz).length) return null;
   const base = CELL_IDS.map(id => (Array.isArray(cells) && cells.find(c => c && c.id === id)) || { id, label: LABELS[id], status: id === 'wrap' ? 'ready' : id === 'read' ? 'soon' : 'skip', items: [] });
+  const ps = quiz.passage && quiz.passage.id ? quiz.passage : null;
   return base.map(c => {
+    // 0.5.0: the quiz's 期中阅读小篇 takes the 读一段 cell
+    if (c.id === 'read' && ps && c.status !== 'done') return { ...c, label: c.label || LABELS.read, status: 'ready', mode: 'passage', passageId: ps.id, items: [], minutes: ps.minutes || c.minutes, note: ps.label || '期中阅读' };
     if (c.id === 'write') return { ...c, label: c.label || LABELS.write, status: 'ready', mode: 'quiz', quiz, items: quizItems(quiz).filter(x => x.kind === 'spell').map(x => x.slug), minutes: quiz.minutes || c.minutes, note: quiz.title || '考前小卷' };
     if (c.id === 'warmup' && forced) return { ...c, status: 'skip', items: [], note: '今天做小卷' };
     return { ...c };
@@ -449,6 +472,12 @@ export function createLessonView(ctx) {
   let reading = null;       // the episode on screen (ui-reader.js Controller: { onKey, stop })
   let readRes = null;       // what 读一段 gave back: { n, done, results, passedWords, ... }
   let orderRight = 0;       // 连词成句 sentences right first time, for the wrap
+  let transformRight = 0;   // 句型转换 sentences right first time (0.5.0)
+  let verbRight = 0;        // 找动词 sentences found first time (0.5.0)
+  let sQueue = [];          // the warm-up's 505 words, one batch after the word cards (0.5.0)
+  let vQueue = [];          // 找动词 sentence ids, after the 505 words (0.5.0)
+  let askedSet = new Set(); // word slugs 问老师 explained, in today's warm-up (0.5.0)
+  let examCache = null;     // reader.js loadPassages, once per page
   let wq = null;            // 写几个词 spelling / quiz: { queue: [{ kind, slug | q }], retried: Set, done, total }
   let writeK = '';          // what 写几个词 is today: 'tiles' | 'grammar' | 'phonics' | 'quiz'
   let lastGrade = 0;
@@ -567,13 +596,20 @@ export function createLessonView(ctx) {
     session = null;
     gQueue = [];
     oQueue = [];
+    sQueue = [];
+    vQueue = [];
     stopReading();
     readRes = null;
     orderRight = 0;
+    transformRight = 0;
+    verbRight = 0;
     wq = null;
     writeK = '';
     view = null;
     log({ type: 'session_start', kind, hour: now.getHours(), light, again: again || undefined, season: exam.season || undefined });
+    // 每周想一次 (teacher.js): the first lesson of a week thinks about the last one in the background, never in the way
+    const think = fnOf(mods.teacher, 'maybeThinkWeek');
+    if (think) { try { Promise.resolve(think(ctx)).catch(() => {}); } catch (err) { /* never blocks the lesson */ } }
     // one line from the teacher above the first card (DESIGN 2.5): why today is short, or what the exam season brings
     const os = first ? null : openScene({ light, phase: exam.phase });
     opener = os ? pickLine(os, { name: name(), minutes: plan.minutes || undefined, reason: plan.lightReason || undefined, exam: exam.phase || undefined }) : null;
@@ -654,6 +690,8 @@ export function createLessonView(ctx) {
     } catch (err) { console.warn('lesson: grammar warm-up:', (err && err.message) || err); }
     const seen = new Set();
     list = list.filter(x => !seen.has(x.item) && seen.add(x.item));
+    // 0.5.0: the foundation probes spread through the round with the grammar questions (after them)
+    if (fnOf(mods.screenUI, 'renderProbe')) for (const p of warmExtras(cell).probe) if (p && p.item && !seen.has(p.item)) { seen.add(p.item); list.push({ probe: p, item: p.item }); }
     const at = grammarSlots(nCards, list.length);
     return list.map((x, i) => ({ ...x, at: at[i] }));
   }
@@ -667,7 +705,11 @@ export function createLessonView(ctx) {
     modeBySlug = new Map(items.map((s, i) => [s, cardModeOf(warm, s, i)]));
     gQueue = ready ? warmupGrammar(warm, queue.length) : [];
     oQueue = ready && fnOf(mods.order, 'renderOrder') ? orderRefs(warm).slice(0, 1) : [];
-    if (!queue.length && !gQueue.length && !oQueue.length) { afterWarmup(); return; }
+    const ex = warmExtras(ready ? warm : null);
+    sQueue = fnOf(mods.screenUI, 'renderScreen') ? ex.screen : [];
+    vQueue = fnOf(mods.verb, 'renderVerb') ? ex.verb : [];
+    askedSet = new Set(ex.asked);
+    if (!queue.length && !gQueue.length && !oQueue.length && !sQueue.length && !vQueue.length) { afterWarmup(); return; }
     pool = buildPool(queue);
     session = queue.length ? createSession({
       queue,
@@ -695,8 +737,10 @@ export function createLessonView(ctx) {
     const s = session;
     const slug = s && s.current();
     const doneN = s ? s.done : 0;
-    if (gQueue.length && (!slug || doneN >= gQueue[0].at)) { drawGrammar(gQueue[0]); return; }
-    // the warm-up's one 连词成句 sentence comes last, after the words and the grammar
+    if (gQueue.length && (!slug || doneN >= gQueue[0].at)) { if (gQueue[0].probe) drawProbe(gQueue[0]); else drawGrammar(gQueue[0]); return; }
+    // after the words and the grammar: the 505 words in one batch, then 找动词, then the one 连词成句 sentence
+    if (!slug && sQueue.length) { drawScreen(sQueue.splice(0)); return; }
+    if (!slug && vQueue.length) { drawVerb(vQueue.splice(0)); return; }
     if (!slug && oQueue.length) { drawOrder(oQueue.splice(0, 1), 'warmup'); return; }
     if (!slug) { endWarmup(); return; }
     drawWord(slug);
@@ -742,8 +786,11 @@ export function createLessonView(ctx) {
     // the teacher's bet before she answers (teacher-memory 10.1); v1 still has no notebook, so p_teacher = p_base
     cur.p = predict(e, cur.mode);
     log({ type: 'predict', step: 'warmup', item: cur.item, slug, mode: cur.mode, unit: unitOf(e), p_base: cur.p, p_teacher: cur.p });
-    paint(LABELS.warmup, 'warmup', tools(feel, flag), view.el, [].concat(view.footer || []));
+    paint(LABELS.warmup, 'warmup', askedSet.has(slug) ? askedTag() : null, tools(feel, flag), view.el, [].concat(view.footer || []));
   }
+
+  // a word or a grammar point 问老师 explained a few days ago, back to see if it stuck (teacher.js 我问过的)
+  const askedTag = () => h('p', { className: 'small lesson-asked-tag', text: '我问过的' });
 
   function onAnswer(e, ev) {
     const stepNow = step || 'warmup';
@@ -811,7 +858,65 @@ export function createLessonView(ctx) {
       });
     } else { afterGrammar(g, null); return; }
     view = v;
-    paint(step === 'write' ? writeTitle() : LABELS.warmup, step, g.ref ? null : tools(feel, flag), box);
+    paint(step === 'write' ? writeTitle() : LABELS.warmup, step, g.ref && g.ref.asked ? askedTag() : null, g.ref ? null : tools(feel, flag), box);
+  }
+
+  // ---- 0.5.0: a foundation probe (ui-screen.js renderProbe draws it and logs its answers; we watch them like grammar)
+  function drawProbe(g) {
+    const fn = fnOf(mods.screenUI, 'renderProbe');
+    const item = g.item;
+    cur = { kind: 'grammar', item, mode: 'grammar', p: GRAMMAR_PRIOR, t: Date.now(), answered: false, g };
+    if (!fn) { afterGrammar(g, null); return; }
+    log({ type: 'predict', step, item, mode: 'grammar', p_base: GRAMMAR_PRIOR, p_teacher: GRAMMAR_PRIOR });
+    const box = h('article', { className: 'lesson-gq-box' });
+    let v = null;
+    try { v = fn(box, watchCtx(), { items: [g.probe], sid, step: 'warmup', onDone: res => afterGrammar(g, res) }); }
+    catch (err) { console.warn('lesson: probe:', (err && err.message) || err); v = null; }
+    if (!v) { afterGrammar(g, null); return; }
+    view = v;
+    paint(LABELS.warmup, 'warmup', box);
+  }
+
+  // ---- 0.5.0: the 505 words (“认几个小学的老朋友”): what she says she knows is not right or wrong, so it is not counted
+  function drawScreen(items) {
+    const fn = fnOf(mods.screenUI, 'renderScreen');
+    const box = h('article', { className: 'lesson-module lesson-module-screen' });
+    cur = { kind: 'screen', item: '', mode: 'screen', t: Date.now(), answered: false };
+    view = null;
+    paint(LABELS.warmup, 'warmup', box);
+    let finished = false;
+    const done = () => { if (finished) return; finished = true; cur = null; if (step === 'warmup') drawWarm(); };
+    if (!fn) { done(); return; }
+    try {
+      const r = fn(box, ctx, { items, sid, step: 'warmup', onDone: done });
+      if (r && typeof r.onKey === 'function') view = { onKey: r.onKey };
+    } catch (err) { console.warn('lesson: screen:', (err && err.message) || err); done(); }
+  }
+
+  // ---- 0.5.0: 找动词 (modes/verb.js): one sentence from the episodes, tap its verb
+  function drawVerb(ids) {
+    const fn = fnOf(mods.verb, 'renderVerb');
+    const box = h('article', { className: 'lesson-module lesson-module-verb' });
+    cur = { kind: 'verb', item: '', mode: 'verb', t: Date.now(), answered: false };
+    view = null;
+    paint(LABELS.warmup, 'warmup', box);
+    let finished = false;
+    const done = res => {
+      if (finished) return;
+      finished = true;
+      cur = null;
+      for (const r of (res && res.results) || []) {
+        if (!gResults.has(r.item)) gResults.set(r.item, { first: !!r.clean });
+        if (r.clean) verbRight++;
+        wrongStreak = r.clean ? 0 : wrongStreak + 1;
+      }
+      if (step === 'warmup') drawWarm();
+    };
+    if (!fn) { done(null); return; }
+    try {
+      const r = fn(box, watchCtx('warmup'), { items: ids, sid, step: 'warmup', onDone: done });
+      if (r && typeof r.onKey === 'function') view = { onKey: r.onKey };
+    } catch (err) { console.warn('lesson: verb:', (err && err.message) || err); done(null); }
   }
 
   // first answer per grammar item: for the wrap's count and the wrong streak
@@ -833,8 +938,8 @@ export function createLessonView(ctx) {
           if (ev && ev.type === 'answer' && ev.item) {
             if (!announced.has(ev.item)) {
               announced.add(ev.item);
-              // 连词成句 cannot be guessed (0.5); a reading question has four options (0.63, like grammar)
-              const p = ev.mode === 'order' ? 0.5 : GRAMMAR_PRIOR;
+              // 连词成句, 句型转换 and 找动词 cannot be guessed (0.5); a reading question has four options (0.63, like grammar)
+              const p = ev.mode === 'order' || ev.mode === 'transform' || ev.mode === 'verb' ? 0.5 : GRAMMAR_PRIOR;
               base.log({ type: 'predict', sid, step: ev.step || stepName || step, item: ev.item, mode: ev.mode, p_base: p, p_teacher: p });
             }
             if (/^g:/.test(ev.item)) noteGrammar(ev);
@@ -907,7 +1012,9 @@ export function createLessonView(ctx) {
 
   function afterWarmup() {
     const r = cellOf('read');
-    if (readKind(r, mods)) { startRead(r); return; }
+    const rk = readKind(r, mods);
+    if (rk === 'passage') { startPassage(r); return; }
+    if (rk) { startRead(r); return; }
     afterRead();
   }
   function afterRead() {
@@ -962,6 +1069,48 @@ export function createLessonView(ctx) {
     }
   }
 
+  // ---- 0.5.0: the quiz day's 期中阅读小篇 (reader.js loadPassages, ui-reader.js renderPassage): questions only, the text
+  // stays open; done passages go into kv 'exam.reading' so the next quiz reads another one
+  function loadExam() {
+    if (!examCache) {
+      const load = fnOf(mods.story, 'loadPassages');
+      examCache = load ? Promise.resolve(load({ fetchJSON: ctx.fetchJSON })).catch(err => { examCache = null; throw err; }) : Promise.resolve([]);
+    }
+    return examCache;
+  }
+  async function markPassage(id) {
+    try {
+      const rec = (await ctx.kv.get('exam.reading', null)) || {};
+      const out = { v: 1, done: { ...((rec && typeof rec.done === 'object' && rec.done) || {}), [id]: dayOf(new Date()) }, updated: new Date().toISOString() };
+      await ctx.kv.set('exam.reading', out);
+    } catch (err) { console.warn('lesson: exam reading:', (err && err.message) || err); }
+  }
+  function startPassage(cell) {
+    step = 'read';
+    cur = null;
+    view = null;
+    const box = h('div', { className: 'lesson-module lesson-module-read' });
+    paint(cell.note || '期中阅读', 'read', box);
+    let finished = false;
+    const done = res => {
+      if (finished || step !== 'read') return;
+      finished = true;
+      reading = null;
+      readRes = res ? { ...res, passage: true } : null;
+      if (res && res.done) { if (!stepsDone.includes('read')) stepsDone.push('read'); markPassage(cell.passageId); }
+      afterRead();
+    };
+    loadExam().then(list => {
+      if (finished || step !== 'read') return;
+      const ep = (list || []).find(p => p && p.id === cell.passageId);
+      if (!ep) { done(null); return; }
+      reading = fnOf(mods.reader, 'renderPassage')(box, watchCtx('read'), {
+        passage: ep, mode: 'questions', label: cell.note || ep.label || '期中阅读', sid, step: 'read', doneLabel: '接着上课', onDone: done,
+      });
+      if (reading && typeof reading.onKey === 'function') view = { onKey: reading.onKey };
+    }).catch(err => { console.warn('lesson: exam reading:', (err && err.message) || err); reading = null; done(null); });
+  }
+
   // ---------------------------------------------------------------- 连词成句 (modes/order.js)
 
   // ids: the sentences; where: 'warmup' (the one at the end of the warm-up) or 'write' (连词成句 day)
@@ -999,6 +1148,36 @@ export function createLessonView(ctx) {
     }
   }
 
+  // ---- 0.5.0 句型转换 (modes/order.js renderTransforms): 写几个词 on its days, three sentences
+  function drawTransform(ids) {
+    const fn = fnOf(mods.order, 'renderTransforms');
+    const box = h('article', { className: 'lesson-module lesson-module-order' });
+    cur = { kind: 'order', item: '', mode: 'transform', t: Date.now(), answered: false };
+    view = null;
+    paint(writeTitle(), 'write', box);
+    let finished = false;
+    const done = res => {
+      if (finished) return;
+      finished = true;
+      cur = null;
+      const list = (res && res.results) || [];
+      transformRight += list.filter(r => r.clean).length;
+      for (const r of list) {
+        if (!gResults.has(r.item)) gResults.set(r.item, { first: !!r.clean });
+        wrongStreak = r.clean ? 0 : wrongStreak + 1;
+      }
+      if (step === 'write') endWrite(!!(res && res.done), !!(res && res.done));
+    };
+    if (!fn) { done(null); return; }
+    try {
+      const r = fn(box, watchCtx('write'), { items: ids, sid, step: 'write', swaps: storySwaps(), onDone: done });
+      if (r && typeof r.onKey === 'function') view = { onKey: r.onKey };
+    } catch (err) {
+      console.warn('lesson: transform:', (err && err.message) || err);
+      done(null);
+    }
+  }
+
   // ---------------------------------------------------------------- 写几个词
 
   // 拼写日: the plan's 2-3 words; 考前小卷: its words, then its grammar questions. Both are a queue of
@@ -1017,6 +1196,7 @@ export function createLessonView(ctx) {
       return;
     }
     if (k === 'order') { drawOrder((cell.items || []).slice(), 'write'); return; }
+    if (k === 'transform') { drawTransform((cell.items || []).slice()); return; }
     drawModuleCard(cell, k);
   }
 
@@ -1060,7 +1240,7 @@ export function createLessonView(ctx) {
 
   const cellLabel = id => ((cellOf(id) || {}).label || LABELS[id]);
   // the title over 写几个词 says what it is today
-  const writeTitle = () => ({ grammar: '语法卡', phonics: '语音小卡', quiz: '考前小卷', order: '连词成句' })[writeK] || cellLabel('write');
+  const writeTitle = () => ({ grammar: '语法卡', phonics: '语音小卡', quiz: '考前小卷', order: '连词成句', transform: '句型转换' })[writeK] || cellLabel('write');
 
   // 语法卡 / 语音小卡: the module draws the whole card, logs its own answers and says when it is done.
   //   ui-grammar.js renderGrammarCard(container, ctx, { cardId, part, onDone, sid, step, doneLabel })
@@ -1243,10 +1423,13 @@ export function createLessonView(ctx) {
     } else {
       out.push(h('p', { className: 'lede', text: sprint ? '小卷做完了' : results.size || spelled.size ? `今天练了 ${results.size || spelled.size} 个词` : '今天的课上完了' }));
     }
-    const gOnly = firstOf(gResults).filter(([k]) => !/^o:/.test(k)).length;
+    const gOnly = firstOf(gResults).filter(([k]) => !/^[otv]:/.test(k)).length;
     if (gOnly) out.push(h('p', { className: 'small', text: `语法题做对了 ${gOnly} 道。` }));
     if (orderRight) out.push(h('p', { className: 'small', text: `自己排对了 ${orderRight} 个句子。` }));
-    if (readRes && readRes.done) {
+    if (transformRight) out.push(h('p', { className: 'small', text: `自己转对了 ${transformRight} 个句子。` }));
+    if (verbRight) out.push(h('p', { className: 'small', text: `一下就找到了 ${verbRight} 句话的动词。` }));
+    if (readRes && readRes.done && readRes.passage) out.push(h('p', { className: 'small', text: '做完了一篇期中阅读。' }));
+    else if (readRes && readRes.done) {
       const n = readRes.n || ((cellOf('read') || {}).n);
       const got = Array.isArray(readRes.passedWords) ? readRes.passedWords : [];
       out.push(h('p', { className: 'small', text: `读完了第 ${n} 集。` + (got.length ? `故事里的 ${got.slice(0, 3).join('、')} 都认出来了。` : '') }));
@@ -1261,6 +1444,8 @@ export function createLessonView(ctx) {
     stopReading();
     gQueue = [];
     oQueue = [];
+    sQueue = [];
+    vQueue = [];
     wq = null;
     cur = null;
     view = null;
@@ -1287,11 +1472,25 @@ export function createLessonView(ctx) {
     // The teacher's eve line already says it (with its Chinese), so then it is not said twice.
     const wc = cellOf('wrap');
     const sleep = eveLine ? '' : (wc && wc.line) || plan.closing || (exam.eve ? '今天早点睡。' : '');
+    // 我问过的 (teacher.js): settle today's answers against what 问老师 explained; a point she got wrong again gets a line
+    const retellSlot = h('div', { className: 'lesson-retell-slot' });
+    const T = mods.teacher;
+    if (T && typeof T.syncAsked === 'function') {
+      Promise.resolve(T.syncAsked(ctx)).then(() => {
+        if (step !== 'wrap' || !retellSlot.isConnected) return;
+        const e = typeof T.retellOffer === 'function' ? T.retellOffer(T.readAsked(ctx.kv), new Date()) : null;
+        if (!e) return;
+        retellSlot.replaceChildren(h('section', { className: 'lesson-ask lesson-readask', 'aria-label': '换个讲法' },
+          h('p', { className: 'small', text: `上次讲的 ${e.label}，老师想换个讲法再说一遍。` }),
+          h('button', { type: 'button', className: 'text-btn accent', text: '去听听', on: { click: () => ctx.go('chat', { retell: e.key }) } })));
+      }).catch(err => console.warn('lesson: asked:', (err && err.message) || err));
+    }
     stage.replaceChildren(header(LABELS.wrap), cellStrip('wrap'),
       h('section', { className: 'lesson-wrap' },
         lineBlock(praise),
         h('div', { className: 'lesson-tally' }, tally(hw)),
         askAboutReading(),
+        retellSlot,
         askBlock(dayN),
         lineBlock(close, 'lesson-line lesson-bye'),
         sleep ? h('p', { className: 'lesson-sleep', text: sleep }) : null,
@@ -1318,6 +1517,8 @@ export function createLessonView(ctx) {
     step = null;
     gQueue = [];
     oQueue = [];
+    sQueue = [];
+    vQueue = [];
     wq = null;
     cur = null;
     view = null;

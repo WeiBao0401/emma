@@ -178,7 +178,21 @@
        "w": "help",
        "zh": "救命，帮帮我"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "Help",
+      "note": "没有主语的祈使句：喊别人来帮忙，只有一个动词 Help。",
+      "kind": "imperative"
+     },
+     "tags": [
+      "imperative"
+     ],
+     "marks": {
+      "imperative": [
+       "Help"
+      ]
+     }
     },
     {
      "id": 2,
@@ -198,7 +212,25 @@
        "w": "schoolbag",
        "zh": "书包"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "My red scarf",
+      "verb": "is not",
+      "note": "谁 = My red scarf（我的红领巾），是 = is not（不在），在哪 = in my schoolbag（书包里）"
+     },
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ],
+     "marks": {
+      "be_verb": [
+       "is"
+      ],
+      "pronoun": [
+       "My",
+       "my"
+      ]
+     }
     },
     {
      "id": 3,
@@ -218,6 +250,22 @@
        "w": "Monday",
        "zh": "星期一"
       }
+     ],
+     "trunk": {
+      "subject": "Tomorrow",
+      "verb": "is",
+      "note": "谁 = Tomorrow（明天），是 = is，是什么 = Monday（星期一）"
+     },
+     "tags": [
+      "be_verb"
+     ],
+     "marks": {
+      "be_verb": [
+       "is"
+      ]
+     },
+     "example": [
+      "be_verb"
      ]
     },
     {
@@ -239,7 +287,32 @@
        "zh": "每个星期一"
       }
      ],
-     "point": "g:third_s"
+     "point": "g:third_s",
+     "trunk": {
+      "subject": "Ms Wang",
+      "verb": "checks",
+      "note": "谁 = Ms Wang（王老师），干什么 = checks（检查），什么时候 = every Monday（每个星期一）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "third_s": [
+       "checks"
+      ],
+      "pronoun": [
+       "our"
+      ],
+      "plural": [
+       "scarves"
+      ]
+     },
+     "example": [
+      "third_s",
+      "plural"
+     ]
     },
     {
      "id": 5,
@@ -259,6 +332,26 @@
        "w": "very",
        "zh": "很，特别"
       }
+     ],
+     "trunk": {
+      "subject": "She",
+      "verb": "is",
+      "note": "谁 = She（她，就是王老师），是 = is，什么样 = very strict（特别严格）"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ],
+      "pronoun": [
+       "She"
+      ]
+     },
+     "example": [
+      "be_adj"
      ]
     },
     {
@@ -279,6 +372,27 @@
        "w": "nervous",
        "zh": "紧张的"
       }
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "Don't be",
+      "note": "没有主语的祈使句：Don't be + 什么样 = 别……。叫对方别紧张。",
+      "kind": "imperative"
+     },
+     "tags": [
+      "imperative",
+      "be_adj"
+     ],
+     "marks": {
+      "imperative": [
+       "Don't"
+      ],
+      "be_adj": [
+       "be"
+      ]
+     },
+     "example": [
+      "imperative"
      ]
     },
     {
@@ -299,6 +413,27 @@
        "w": "under",
        "zh": "在……下面"
       }
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "Check",
+      "note": "没有主语的祈使句：Check（看看），在哪 = under your bed（你床底下）",
+      "kind": "imperative"
+     },
+     "tags": [
+      "imperative",
+      "pronoun"
+     ],
+     "marks": {
+      "imperative": [
+       "Check"
+      ],
+      "pronoun": [
+       "your"
+      ]
+     },
+     "example": [
+      "imperative"
      ]
     },
     {
@@ -315,6 +450,22 @@
        "w": "checked",
        "zh": "检查过了（check 的过去式）"
       }
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "checked",
+      "note": "谁 = I（我），干什么 = checked（看过了，check 的过去式）"
+     },
+     "tags": [
+      "past"
+     ],
+     "marks": {
+      "past": [
+       "checked"
+      ]
+     },
+     "example": [
+      "past"
      ]
     },
     {
@@ -335,7 +486,24 @@
        "w": "gone",
        "zh": "不见了"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "My eraser",
+      "verb": "is",
+      "note": "谁 = My eraser（我的橡皮），是 = is，什么样 = gone（不见了）"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ],
+      "pronoun": [
+       "My"
+      ]
+     }
     },
     {
      "id": 10,
@@ -355,7 +523,25 @@
        "w": "cat",
        "zh": "猫"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "Ask",
+      "note": "没有主语的祈使句：Ask（问问）+ your cat（你家的猫）",
+      "kind": "imperative"
+     },
+     "tags": [
+      "imperative",
+      "pronoun"
+     ],
+     "marks": {
+      "imperative": [
+       "Ask"
+      ],
+      "pronoun": [
+       "your"
+      ]
+     }
     },
     {
      "id": 11,
@@ -371,7 +557,15 @@
        "w": "haha",
        "zh": "哈哈"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "",
+      "note": "笑声，没有主语，也没有动词。",
+      "kind": "no_verb"
+     },
+     "tags": [],
+     "marks": {}
     },
     {
      "id": 12,
@@ -391,6 +585,26 @@
        "w": "desk",
        "zh": "书桌"
       }
+     ],
+     "trunk": {
+      "subject": "Momo",
+      "verb": "is sleeping",
+      "note": "谁 = Momo，干什么 = is sleeping（正在睡觉），在哪 = on my desk（我书桌上）"
+     },
+     "tags": [
+      "be_ing",
+      "pronoun"
+     ],
+     "marks": {
+      "be_ing": [
+       "is sleeping"
+      ],
+      "pronoun": [
+       "my"
+      ]
+     },
+     "example": [
+      "be_ing"
      ]
     },
     {
@@ -411,7 +625,24 @@
        "w": "at school",
        "zh": "在学校"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "you",
+      "verb": "Did ... forget",
+      "note": "谁 = you（你），干什么 = forget（忘了）。问过去的事，Did 放在最前面，后面的 forget 不变。"
+     },
+     "tags": [
+      "past",
+      "pronoun"
+     ],
+     "marks": {
+      "past": [
+       "Did"
+      ],
+      "pronoun": [
+       "it"
+      ]
+     }
     },
     {
      "id": 14,
@@ -431,6 +662,26 @@
        "w": "forget",
        "zh": "忘记"
       }
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "forget",
+      "note": "谁 = I（我），干什么 = never forget（从来不忘），忘什么 = it（它，红领巾）"
+     },
+     "tags": [
+      "pronoun",
+      "freq_adv"
+     ],
+     "marks": {
+      "pronoun": [
+       "it"
+      ],
+      "freq_adv": [
+       "never"
+      ]
+     },
+     "example": [
+      "freq_adv"
      ]
     },
     {
@@ -451,7 +702,24 @@
        "w": "ready",
        "zh": "准备好的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "your schoolbag",
+      "verb": "Is",
+      "note": "谁 = your schoolbag（你的书包），是 = Is，什么样 = ready（准备好的）。问句把 Is 放到最前面。"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "Is"
+      ],
+      "pronoun": [
+       "your"
+      ]
+     }
     },
     {
      "id": 16,
@@ -471,7 +739,24 @@
        "w": "it's",
        "zh": "它是（it is）"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "it",
+      "verb": "'s",
+      "note": "谁 = it（它，就是书包），是 = 's（it's = it is），什么样 = ready（准备好的）"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "'s"
+      ],
+      "pronoun": [
+       "it"
+      ]
+     }
     },
     {
      "id": 17,
@@ -492,7 +777,27 @@
        "zh": "在里面"
       }
      ],
-     "point": "g:there_be"
+     "point": "g:there_be",
+     "trunk": {
+      "subject": "no red scarf",
+      "verb": "there is",
+      "note": "there is + 什么 = 有……：there is no red scarf（没有红领巾），在哪 = in it（书包里）"
+     },
+     "tags": [
+      "there_be",
+      "pronoun"
+     ],
+     "marks": {
+      "there_be": [
+       "there is"
+      ],
+      "pronoun": [
+       "it"
+      ]
+     },
+     "example": [
+      "there_be"
+     ]
     },
     {
      "id": 18,
@@ -512,7 +817,20 @@
        "w": "nervous",
        "zh": "紧张的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "'m",
+      "note": "谁 = I（我），是 = 'm（I'm = I am），什么样 = so nervous（好紧张）"
+     },
+     "tags": [
+      "be_adj"
+     ],
+     "marks": {
+      "be_adj": [
+       "'m"
+      ]
+     }
     },
     {
      "id": 19,
@@ -532,7 +850,30 @@
        "w": "kind",
        "zh": "和善的，好心的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Ms Wang",
+      "verb": "is",
+      "note": "两句话用 but 连起来：谁 = Ms Wang，是 = is，什么样 = strict（严格）；谁 = she（她），是 = is，什么样 = kind（人很好）",
+      "also": [
+       {
+        "subject": "she",
+        "verb": "is"
+       }
+      ]
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ],
+      "pronoun": [
+       "she"
+      ]
+     }
     },
     {
      "id": 20,
@@ -552,7 +893,30 @@
        "w": "awake",
        "zh": "醒着的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Mia",
+      "verb": "is",
+      "note": "两句话用 but 连起来：谁 = Mia，在哪 = is in bed（躺在床上）；谁 = she（她，Mia），什么样 = is still awake（还醒着）",
+      "also": [
+       {
+        "subject": "she",
+        "verb": "is"
+       }
+      ]
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ],
+      "pronoun": [
+       "she"
+      ]
+     }
     },
     {
      "id": 21,
@@ -572,7 +936,20 @@
        "w": "too",
        "zh": "也"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Momo",
+      "verb": "is",
+      "note": "谁 = Momo，是 = is，什么样 = awake（醒着的）"
+     },
+     "tags": [
+      "be_adj"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ]
+     }
     },
     {
      "id": 22,
@@ -592,7 +969,24 @@
        "w": "window",
        "zh": "窗户"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "She",
+      "verb": "is sitting",
+      "note": "谁 = She（她，就是 Momo），干什么 = is sitting（正坐着），在哪 = at the window（窗边）"
+     },
+     "tags": [
+      "be_ing",
+      "pronoun"
+     ],
+     "marks": {
+      "be_ing": [
+       "is sitting"
+      ],
+      "pronoun": [
+       "She"
+      ]
+     }
     },
     {
      "id": 23,
@@ -612,7 +1006,20 @@
        "w": "sound",
        "zh": "声音"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Mia",
+      "verb": "hears",
+      "note": "谁 = Mia，干什么 = hears（听见），听见什么 = a sound（一个声音）"
+     },
+     "tags": [
+      "third_s"
+     ],
+     "marks": {
+      "third_s": [
+       "hears"
+      ]
+     }
     },
     {
      "id": 24,
@@ -633,7 +1040,27 @@
        "zh": "眼睛"
       }
      ],
-     "point": "g:there_be"
+     "point": "g:there_be",
+     "trunk": {
+      "subject": "two small blue eyes",
+      "verb": "There are",
+      "note": "There are + 什么 = 有……：There are two small blue eyes（有两只小小的蓝眼睛），在哪 = at the window（窗边）"
+     },
+     "tags": [
+      "there_be",
+      "plural"
+     ],
+     "marks": {
+      "there_be": [
+       "There are"
+      ],
+      "plural": [
+       "eyes"
+      ]
+     },
+     "example": [
+      "there_be"
+     ]
     },
     {
      "id": 25,
@@ -654,7 +1081,31 @@
        "zh": "绿色的"
       }
      ],
-     "point": "g:possessive_s"
+     "point": "g:possessive_s",
+     "trunk": {
+      "subject": "Momo's eyes",
+      "verb": "are",
+      "note": "谁 = Momo's eyes（Momo 的眼睛），是 = are，什么样 = green（绿色的）"
+     },
+     "tags": [
+      "be_adj",
+      "poss_s",
+      "plural"
+     ],
+     "marks": {
+      "be_adj": [
+       "are"
+      ],
+      "poss_s": [
+       "Momo's"
+      ],
+      "plural": [
+       "eyes"
+      ]
+     },
+     "example": [
+      "poss_s"
+     ]
     },
     {
      "id": 26,
@@ -674,6 +1125,30 @@
        "w": "these",
        "zh": "这些"
       }
+     ],
+     "trunk": {
+      "subject": "these",
+      "verb": "are",
+      "note": "谁 = these（这些），是 = are，问的是 whose eyes（谁的眼睛）"
+     },
+     "tags": [
+      "wh_q",
+      "be_verb",
+      "plural"
+     ],
+     "marks": {
+      "wh_q": [
+       "whose"
+      ],
+      "be_verb": [
+       "are"
+      ],
+      "plural": [
+       "eyes"
+      ]
+     },
+     "example": [
+      "wh_q"
      ]
     }
    ],
@@ -882,6 +1357,116 @@
       "answer": "awake",
       "explain": "白天睡觉，晚上就醒着，用 awake（醒着的）。"
      }
+    },
+    {
+     "id": "q5",
+     "type": "evidence",
+     "skill": "locate",
+     "skill_zh": "点出答案句",
+     "ask": "Where is Momo sleeping?",
+     "zh": "Momo 正在哪儿睡觉？",
+     "keyword": "sleeping",
+     "preview": true,
+     "answer": [
+      12
+     ],
+     "evidence": [
+      12
+     ],
+     "drop": 22,
+     "hints": [
+      "找一找题目里的 sleeping 这个词（正在睡觉），看它在哪一句。",
+      "在前半段的群聊里找，是 Mia 回 Tom 的话。",
+      "排除第 22 句：She is sitting at the window 说的是 Momo 坐在窗边，是坐着，不是睡觉，而且是后来深夜的事。",
+      "答案是第 12 句：Momo is sleeping on my desk.（Momo 正在我书桌上睡觉呢。）题目里的 sleeping 就在这一句，后面的 on my desk 就是在哪儿。"
+     ],
+     "then": {
+      "ask": "Where is Momo sleeping?",
+      "zh": "Momo 正在哪儿睡觉？",
+      "options": [
+       "On Mia's bed.",
+       "At the window.",
+       "On Mia's desk.",
+       "In Mia's schoolbag."
+      ],
+      "options_zh": [
+       "在 Mia 的床上。",
+       "在窗边。",
+       "在 Mia 的书桌上。",
+       "在 Mia 的书包里。"
+      ],
+      "answer": "On Mia's desk."
+     },
+     "variant": {
+      "ask": "Is Mia's schoolbag ready?",
+      "zh": "Mia 的书包收拾好了吗？",
+      "keyword": "ready",
+      "answer": [
+       16
+      ],
+      "evidence": [
+       16
+      ],
+      "explain": "第 15 句是 Lucy 问的：Is your schoolbag ready? 第 16 句才是 Mia 的回答：Yes, it's ready.（收拾好了。）找答案，要找回答的那一句。"
+     }
+    },
+    {
+     "id": "q6",
+     "type": "reference",
+     "skill": "ref",
+     "skill_zh": "代词指谁",
+     "ask": "Who is “She” in Sentence 22?",
+     "zh": "第 22 句里的 She 指谁？",
+     "pronoun": "She",
+     "at": 22,
+     "options": [
+      "Mia",
+      "Momo",
+      "Lucy",
+      "Ms Wang"
+     ],
+     "options_zh": [
+      "Mia",
+      "Momo",
+      "Lucy",
+      "王老师"
+     ],
+     "answer": "Momo",
+     "evidence": [
+      21,
+      22
+     ],
+     "drop": "Mia",
+     "hints": [
+      "回到第 22 句，再看它前面的第 21 句。",
+      "She 一般指前面刚说到的那一个。第 21 句刚说完 Momo is awake, too。",
+      "排除 Mia：第 20 句说 Mia is in bed，她躺在床上，不在窗边。",
+      "答案是 Momo。第 21 句说 Momo 也醒着，第 22 句接着说 She is sitting at the window：坐在窗边的就是 Momo。故事里说 Momo 都用 she。"
+     ],
+     "variant": {
+      "ask": "Who is “She” in Sentence 5?",
+      "zh": "第 5 句里的 She 指谁？",
+      "pronoun": "She",
+      "at": 5,
+      "options": [
+       "Lucy",
+       "Mia",
+       "Momo",
+       "Ms Wang"
+      ],
+      "options_zh": [
+       "Lucy",
+       "Mia",
+       "Momo",
+       "王老师"
+      ],
+      "answer": "Ms Wang",
+      "evidence": [
+       4,
+       5
+      ],
+      "explain": "第 4 句说 Ms Wang 每个星期一检查红领巾，第 5 句接着说 She is very strict：She 就是王老师。"
+     }
     }
    ]
   },
@@ -1026,7 +1611,24 @@
        "w": "red scarf",
        "zh": "红领巾"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "My red scarf",
+      "verb": "is",
+      "note": "谁 = My red scarf（我的红领巾），是 = is，什么样 = back（回来了）"
+     },
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ],
+     "marks": {
+      "be_verb": [
+       "is"
+      ],
+      "pronoun": [
+       "My"
+      ]
+     }
     },
     {
      "id": 2,
@@ -1046,7 +1648,24 @@
        "w": "garden",
        "zh": "院子，花园"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "It",
+      "verb": "is",
+      "note": "谁 = It（它，就是红领巾），是 = is，在哪 = under the big tree（大树下面）"
+     },
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ],
+     "marks": {
+      "be_verb": [
+       "is"
+      ],
+      "pronoun": [
+       "It"
+      ]
+     }
     },
     {
      "id": 3,
@@ -1066,6 +1685,30 @@
        "w": "there",
        "zh": "那儿"
       }
+     ],
+     "trunk": {
+      "subject": "Who",
+      "verb": "can hide",
+      "note": "谁 = Who（谁），干什么 = can hide（会藏），藏什么 = it（它，红领巾）"
+     },
+     "tags": [
+      "wh_q",
+      "can",
+      "pronoun"
+     ],
+     "marks": {
+      "wh_q": [
+       "Who"
+      ],
+      "can": [
+       "can"
+      ],
+      "pronoun": [
+       "it"
+      ]
+     },
+     "example": [
+      "wh_q"
      ]
     },
     {
@@ -1086,7 +1729,24 @@
        "w": "sleeping",
        "zh": "正在睡觉"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Momo, my grey cat",
+      "verb": "is sleeping",
+      "note": "谁 = Momo（就是 my grey cat，我的灰猫），干什么 = is sleeping（正在睡觉），在哪 = on my bed（我床上）"
+     },
+     "tags": [
+      "be_ing",
+      "pronoun"
+     ],
+     "marks": {
+      "be_ing": [
+       "is sleeping"
+      ],
+      "pronoun": [
+       "my"
+      ]
+     }
     },
     {
      "id": 5,
@@ -1107,7 +1767,24 @@
        "zh": "累的"
       }
      ],
-     "point": "g:third_s"
+     "point": "g:third_s",
+     "trunk": {
+      "subject": "She",
+      "verb": "looks",
+      "note": "谁 = She（她，就是 Momo），干什么 = looks very tired（看起来很累）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "looks"
+      ],
+      "pronoun": [
+       "She"
+      ]
+     }
     },
     {
      "id": 6,
@@ -1127,7 +1804,28 @@
        "w": "red scarves",
        "zh": "红领巾（scarf 的复数）"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Ms Wang",
+      "verb": "checks",
+      "note": "谁 = Ms Wang（王老师），干什么 = checks（检查），检查什么 = our red scarves（我们的红领巾）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "third_s": [
+       "checks"
+      ],
+      "pronoun": [
+       "our"
+      ],
+      "plural": [
+       "scarves"
+      ]
+     }
     },
     {
      "id": 7,
@@ -1147,7 +1845,24 @@
        "w": "dirty",
        "zh": "脏的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "your red scarf",
+      "verb": "is",
+      "note": "开头的 Mia 是在叫她。谁 = your red scarf（你的红领巾），是 = is，什么样 = very dirty（很脏）"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ],
+      "pronoun": [
+       "your"
+      ]
+     }
     },
     {
      "id": 8,
@@ -1167,7 +1882,20 @@
        "w": "Ms Wang",
        "zh": "王老师"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "'m",
+      "note": "谁 = I（我），是 = 'm（I'm = I am），什么样 = sorry（对不起）。后面的 Ms Wang 是在叫王老师。"
+     },
+     "tags": [
+      "be_adj"
+     ],
+     "marks": {
+      "be_adj": [
+       "'m"
+      ]
+     }
     },
     {
      "id": 9,
@@ -1187,6 +1915,26 @@
        "w": "this evening",
        "zh": "今天晚上"
       }
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "can wash",
+      "note": "谁 = I（我），干什么 = can wash（能洗），洗什么 = it（它，红领巾），什么时候 = this evening（今天晚上）"
+     },
+     "tags": [
+      "can",
+      "pronoun"
+     ],
+     "marks": {
+      "can": [
+       "can"
+      ],
+      "pronoun": [
+       "it"
+      ]
+     },
+     "example": [
+      "can"
      ]
     },
     {
@@ -1207,7 +1955,25 @@
        "w": "wash",
        "zh": "洗"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "Remember",
+      "note": "没有主语的祈使句：Remember to wash it = 记得要洗它。",
+      "kind": "imperative"
+     },
+     "tags": [
+      "imperative",
+      "pronoun"
+     ],
+     "marks": {
+      "imperative": [
+       "Remember"
+      ],
+      "pronoun": [
+       "it"
+      ]
+     }
     },
     {
      "id": 11,
@@ -1227,6 +1993,36 @@
        "w": "polite",
        "zh": "有礼貌的"
       }
+     ],
+     "trunk": {
+      "subject": "Ms Wang",
+      "verb": "is",
+      "note": "两句话用 but 连起来：谁 = Ms Wang，什么样 = is strict（很严格）；谁 = she（她），什么样 = is always polite（一直很有礼貌）",
+      "also": [
+       {
+        "subject": "she",
+        "verb": "is"
+       }
+      ]
+     },
+     "tags": [
+      "be_adj",
+      "pronoun",
+      "freq_adv"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ],
+      "pronoun": [
+       "she"
+      ],
+      "freq_adv": [
+       "always"
+      ]
+     },
+     "example": [
+      "freq_adv"
      ]
     },
     {
@@ -1247,6 +2043,26 @@
        "w": "too",
        "zh": "也"
       }
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "am",
+      "note": "谁 = I（我），是 = am，什么样 = polite（有礼貌），对谁 = to her（对她，王老师）"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "am"
+      ],
+      "pronoun": [
+       "her"
+      ]
+     },
+     "example": [
+      "pronoun"
      ]
     },
     {
@@ -1267,7 +2083,30 @@
        "w": "words",
        "zh": "话"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "remember",
+      "note": "谁 = I（我），干两件事：remember her words（记着她的话），and wash it（把它洗了）",
+      "also": [
+       {
+        "verb": "wash"
+       }
+      ]
+     },
+     "tags": [
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "pronoun": [
+       "her",
+       "it"
+      ],
+      "plural": [
+       "words"
+      ]
+     }
     },
     {
      "id": 14,
@@ -1287,7 +2126,28 @@
        "w": "hid",
        "zh": "藏（hide 的过去式）"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "who",
+      "verb": "hid",
+      "note": "谁 = who（谁），干什么 = hid（藏了，hide 的过去式），藏什么 = it（它）"
+     },
+     "tags": [
+      "wh_q",
+      "past",
+      "pronoun"
+     ],
+     "marks": {
+      "wh_q": [
+       "who"
+      ],
+      "past": [
+       "hid"
+      ],
+      "pronoun": [
+       "it"
+      ]
+     }
     },
     {
      "id": 15,
@@ -1307,7 +2167,14 @@
        "w": "now",
        "zh": "现在"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "have",
+      "note": "谁 = I（我），干什么 = have（有），有什么 = a plan（一个计划）"
+     },
+     "tags": [],
+     "marks": {}
     },
     {
      "id": 16,
@@ -1327,7 +2194,20 @@
        "w": "phone",
        "zh": "手机"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "put",
+      "note": "谁 = I（我），干什么 = put（放），放什么 = my phone（我的手机），放在哪 = at the window（窗边）"
+     },
+     "tags": [
+      "pronoun"
+     ],
+     "marks": {
+      "pronoun": [
+       "my"
+      ]
+     }
     },
     {
      "id": 17,
@@ -1347,7 +2227,28 @@
        "w": "at night",
        "zh": "在晚上"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "It",
+      "verb": "can take",
+      "note": "谁 = It（它，就是手机），干什么 = can take photos（能拍照），什么时候 = at night（晚上）"
+     },
+     "tags": [
+      "can",
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "can": [
+       "can"
+      ],
+      "pronoun": [
+       "It"
+      ],
+      "plural": [
+       "photos"
+      ]
+     }
     },
     {
      "id": 18,
@@ -1367,7 +2268,15 @@
        "w": "plan",
        "zh": "计划"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "",
+      "note": "没有动词的短句：Good plan（好计划），Mia 在夸自己。",
+      "kind": "no_verb"
+     },
+     "tags": [],
+     "marks": {}
     },
     {
      "id": 19,
@@ -1387,7 +2296,24 @@
        "w": "phone",
        "zh": "手机"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "my phone",
+      "verb": "makes",
+      "note": "什么时候 = At 12:05。谁 = my phone（我的手机），干什么 = makes a sound（响了一声）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "makes"
+      ],
+      "pronoun": [
+       "my"
+      ]
+     }
     },
     {
      "id": 20,
@@ -1407,7 +2333,20 @@
        "w": "face",
        "zh": "脸"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "A little white face",
+      "verb": "appears",
+      "note": "谁 = A little white face（一张白色的小脸），干什么 = appears（出现），在哪 = at the window（窗边）"
+     },
+     "tags": [
+      "third_s"
+     ],
+     "marks": {
+      "third_s": [
+       "appears"
+      ]
+     }
     },
     {
      "id": 21,
@@ -1427,7 +2366,20 @@
        "w": "grey",
        "zh": "灰色的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "a grey tail",
+      "verb": "appears",
+      "note": "谁 = a grey tail（一条灰尾巴），干什么 = appears（出现）"
+     },
+     "tags": [
+      "third_s"
+     ],
+     "marks": {
+      "third_s": [
+       "appears"
+      ]
+     }
     }
    ],
    "questions": [
@@ -1634,6 +2586,116 @@
       "answer": "appears",
       "explain": "早上太阳出来了，用 appears（出现）。主语 the sun 是单数，所以加 s。"
      }
+    },
+    {
+     "id": "q5",
+     "type": "evidence",
+     "skill": "locate",
+     "skill_zh": "点出答案句",
+     "ask": "When does Mia's phone make a sound?",
+     "zh": "Mia 的手机什么时候响了一声？",
+     "keyword": "phone",
+     "preview": true,
+     "answer": [
+      19
+     ],
+     "evidence": [
+      19
+     ],
+     "drop": 16,
+     "hints": [
+      "找一找题目里的 phone 这个词（手机），看它在哪几句。",
+      "phone 出现了不止一次。题目问的是“什么时候”，找带着时间的那一句。",
+      "排除第 16 句：I put my phone at the window 只说手机放在窗边，没说什么时候响。",
+      "答案是第 19 句：At 12:05, my phone makes a sound.（12 点 05 分，我的手机响了一声。）这句有 phone，有 makes a sound，还有时间 At 12:05。"
+     ],
+     "then": {
+      "ask": "When does Mia's phone make a sound?",
+      "zh": "Mia 的手机什么时候响了一声？",
+      "options": [
+       "In the morning.",
+       "In the evening.",
+       "At six.",
+       "At 12:05."
+      ],
+      "options_zh": [
+       "早上。",
+       "晚上。",
+       "六点。",
+       "12 点 05 分。"
+      ],
+      "answer": "At 12:05."
+     },
+     "variant": {
+      "ask": "What does Ms Wang say about Mia's red scarf?",
+      "zh": "王老师说 Mia 的红领巾怎么样？",
+      "keyword": "red scarf",
+      "answer": [
+       7
+      ],
+      "evidence": [
+       7
+      ],
+      "explain": "红领巾在第 1、6、7 句都出现了。第 7 句才是王老师说的话：your red scarf is very dirty（你的红领巾很脏）。"
+     }
+    },
+    {
+     "id": "q6",
+     "type": "reference",
+     "skill": "ref",
+     "skill_zh": "代词指谁",
+     "ask": "Who is “her” in Sentence 12?",
+     "zh": "第 12 句里的 her 指谁？",
+     "pronoun": "her",
+     "at": 12,
+     "options": [
+      "Ms Wang",
+      "Mia",
+      "Momo",
+      "the red scarf"
+     ],
+     "options_zh": [
+      "王老师",
+      "Mia",
+      "Momo",
+      "红领巾"
+     ],
+     "answer": "Ms Wang",
+     "evidence": [
+      11,
+      12
+     ],
+     "drop": "Mia",
+     "hints": [
+      "回到第 12 句，再看它前面的第 11 句。",
+      "to her 是“对她”。第 11 句说的是谁 always polite（一直很有礼貌）？",
+      "排除 Mia：这是 Mia 的日记，I 就是 Mia 自己，her 不会是她自己。",
+      "答案是 Ms Wang。第 11 句说王老师一直很有礼貌，第 12 句 So I am polite to her, too：所以我对她也很有礼貌。her 就是王老师。"
+     ],
+     "variant": {
+      "ask": "What is “It” in Sentence 17?",
+      "zh": "第 17 句里的 It 指什么？",
+      "pronoun": "It",
+      "at": 17,
+      "options": [
+       "the window",
+       "the big tree",
+       "Mia's phone",
+       "the red scarf"
+      ],
+      "options_zh": [
+       "窗户",
+       "大树",
+       "Mia 的手机",
+       "红领巾"
+      ],
+      "answer": "Mia's phone",
+      "evidence": [
+       16,
+       17
+      ],
+      "explain": "第 16 句说我把手机放在窗边，第 17 句 It can take photos at night：能拍照的是手机，窗户不会拍照。所以 It 是 Mia 的手机。"
+     }
     }
    ]
   },
@@ -1778,7 +2840,25 @@
        "w": "photos",
        "zh": "照片"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "look at",
+      "note": "开头的 Mum 是在叫妈妈。没有主语的祈使句：look at（看）+ these photos（这些照片）",
+      "kind": "imperative"
+     },
+     "tags": [
+      "imperative",
+      "plural"
+     ],
+     "marks": {
+      "imperative": [
+       "look"
+      ],
+      "plural": [
+       "photos"
+      ]
+     }
     },
     {
      "id": 2,
@@ -1798,7 +2878,24 @@
        "w": "happened",
        "zh": "发生了（happen 的过去式）"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "What",
+      "verb": "happened",
+      "note": "谁 = What（什么事），干什么 = happened（发生了，过去式）"
+     },
+     "tags": [
+      "wh_q",
+      "past"
+     ],
+     "marks": {
+      "wh_q": [
+       "What"
+      ],
+      "past": [
+       "happened"
+      ]
+     }
     },
     {
      "id": 3,
@@ -1818,7 +2915,20 @@
        "w": "at night",
        "zh": "在晚上"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Momo",
+      "verb": "is",
+      "note": "谁 = Momo，是 = is，什么样 = awake（醒着的），什么时候 = at night（晚上）"
+     },
+     "tags": [
+      "be_adj"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ]
+     }
     },
     {
      "id": 4,
@@ -1838,7 +2948,25 @@
        "w": "sock",
        "zh": "袜子"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "she",
+      "verb": "is carrying",
+      "note": "开头的 Look 是“你看”。谁 = she（她，就是 Momo），干什么 = is carrying（正叼着），叼什么 = my sock（我的袜子）"
+     },
+     "tags": [
+      "be_ing",
+      "pronoun"
+     ],
+     "marks": {
+      "be_ing": [
+       "is carrying"
+      ],
+      "pronoun": [
+       "she",
+       "my"
+      ]
+     }
     },
     {
      "id": 5,
@@ -1858,7 +2986,24 @@
        "w": "this",
        "zh": "这个"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "this",
+      "verb": "is",
+      "note": "谁 = this（这个），是 = is，问的是 who（谁）"
+     },
+     "tags": [
+      "wh_q",
+      "be_verb"
+     ],
+     "marks": {
+      "wh_q": [
+       "who"
+      ],
+      "be_verb": [
+       "is"
+      ]
+     }
     },
     {
      "id": 6,
@@ -1878,7 +3023,15 @@
        "w": "white",
        "zh": "白色的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "",
+      "note": "没有动词的短句，省掉了 It is：（这是）一只白色的小猫。",
+      "kind": "no_verb"
+     },
+     "tags": [],
+     "marks": {}
     },
     {
      "id": 7,
@@ -1898,7 +3051,31 @@
        "w": "runs away",
        "zh": "跑开"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "She",
+      "verb": "takes",
+      "note": "谁 = She（她，白猫），干两件事：takes my sock（叼走我的袜子），and runs away（跑掉）",
+      "also": [
+       {
+        "verb": "runs away"
+       }
+      ]
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "takes",
+       "runs"
+      ],
+      "pronoun": [
+       "She",
+       "my"
+      ]
+     }
     },
     {
      "id": 8,
@@ -1918,7 +3095,14 @@
        "w": "now",
        "zh": "现在"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "understand",
+      "note": "谁 = I（我），干什么 = understand（明白）"
+     },
+     "tags": [],
+     "marks": {}
     },
     {
      "id": 9,
@@ -1939,7 +3123,32 @@
        "zh": "朋友"
       }
      ],
-     "point": "g:third_s"
+     "point": "g:third_s",
+     "trunk": {
+      "subject": "Momo",
+      "verb": "carries",
+      "note": "谁 = Momo，干什么 = carries（带），带什么 = your socks（你的袜子），带给谁 = to her friend（她的朋友）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "third_s": [
+       "carries"
+      ],
+      "pronoun": [
+       "your",
+       "her"
+      ],
+      "plural": [
+       "socks"
+      ]
+     },
+     "example": [
+      "plural"
+     ]
     },
     {
      "id": 10,
@@ -1959,7 +3168,21 @@
        "w": "why",
        "zh": "为什么"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "",
+      "note": "没有动词的短句：But why?（可是为什么呢？）",
+      "kind": "no_verb"
+     },
+     "tags": [
+      "wh_q"
+     ],
+     "marks": {
+      "wh_q": [
+       "why"
+      ]
+     }
     },
     {
      "id": 11,
@@ -1979,7 +3202,21 @@
        "w": "white cat",
        "zh": "白猫"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "Look at",
+      "note": "没有主语的祈使句：Look at（看）+ the white cat（那只白猫）",
+      "kind": "imperative"
+     },
+     "tags": [
+      "imperative"
+     ],
+     "marks": {
+      "imperative": [
+       "Look"
+      ]
+     }
     },
     {
      "id": 12,
@@ -1999,6 +3236,26 @@
        "w": "very",
        "zh": "很"
       }
+     ],
+     "trunk": {
+      "subject": "She",
+      "verb": "is",
+      "note": "谁 = She（她，就是那只白猫），是 = is，什么样 = very thin（很瘦）"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ],
+      "pronoun": [
+       "She"
+      ]
+     },
+     "example": [
+      "pronoun"
      ]
     },
     {
@@ -2020,7 +3277,30 @@
        "zh": "没有家"
       }
      ],
-     "point": "g:third_s"
+     "point": "g:third_s",
+     "trunk": {
+      "subject": "I",
+      "verb": "think",
+      "note": "谁 = I（我），干什么 = think（想）；想的是一句话：谁 = she（她），干什么 = has no home（没有家）",
+      "also": [
+       {
+        "subject": "she",
+        "verb": "has"
+       }
+      ]
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "has"
+      ],
+      "pronoun": [
+       "she"
+      ]
+     }
     },
     {
      "id": 14,
@@ -2040,7 +3320,24 @@
        "w": "lonely",
        "zh": "孤单的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "She",
+      "verb": "is",
+      "note": "谁 = She（她），是 = is，什么样 = cold and lonely（又冷又孤单）"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ],
+      "pronoun": [
+       "She"
+      ]
+     }
     },
     {
      "id": 15,
@@ -2060,7 +3357,24 @@
        "w": "helping",
        "zh": "正在帮助"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Momo",
+      "verb": "is helping",
+      "note": "谁 = Momo，干什么 = is helping（正在帮），帮谁 = her（她，白猫）。句子最后是问号，是在问。"
+     },
+     "tags": [
+      "be_ing",
+      "pronoun"
+     ],
+     "marks": {
+      "be_ing": [
+       "is helping"
+      ],
+      "pronoun": [
+       "her"
+      ]
+     }
     },
     {
      "id": 16,
@@ -2080,7 +3394,28 @@
        "w": "good friends",
        "zh": "好朋友"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "they",
+      "verb": "are",
+      "note": "谁 = they（她们，Momo 和白猫），是 = are，是什么 = good friends（好朋友）"
+     },
+     "tags": [
+      "be_verb",
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "be_verb": [
+       "are"
+      ],
+      "pronoun": [
+       "they"
+      ],
+      "plural": [
+       "friends"
+      ]
+     }
     },
     {
      "id": 17,
@@ -2100,7 +3435,20 @@
        "w": "together",
        "zh": "一起"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "They",
+      "verb": "play",
+      "note": "谁 = They（她们），干什么 = play together（一起玩），什么时候 = at night（晚上）"
+     },
+     "tags": [
+      "pronoun"
+     ],
+     "marks": {
+      "pronoun": [
+       "They"
+      ]
+     }
     },
     {
      "id": 18,
@@ -2116,7 +3464,14 @@
        "w": "understand",
        "zh": "懂，明白"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "understand",
+      "note": "谁 = I（我），干什么 = understand（懂了）"
+     },
+     "tags": [],
+     "marks": {}
     },
     {
      "id": 19,
@@ -2136,7 +3491,24 @@
        "w": "lonely",
        "zh": "孤单的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "they",
+      "verb": "are not",
+      "note": "谁 = they（她们），是 = are not，什么样 = lonely（孤单）"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "are"
+      ],
+      "pronoun": [
+       "they"
+      ]
+     }
     },
     {
      "id": 20,
@@ -2156,7 +3528,20 @@
        "w": "six",
        "zh": "六（点）"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Mia",
+      "verb": "gets",
+      "note": "谁 = Mia，干什么 = gets home（到家），什么时候 = at six（六点）"
+     },
+     "tags": [
+      "third_s"
+     ],
+     "marks": {
+      "third_s": [
+       "gets"
+      ]
+     }
     },
     {
      "id": 21,
@@ -2176,6 +3561,22 @@
        "w": "open",
        "zh": "开着的"
       }
+     ],
+     "trunk": {
+      "subject": "The window",
+      "verb": "is",
+      "note": "谁 = The window（窗户），是 = is，什么样 = open（开着的）"
+     },
+     "tags": [
+      "be_adj"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ]
+     },
+     "example": [
+      "be_adj"
      ]
     },
     {
@@ -2196,6 +3597,22 @@
        "w": "not in",
        "zh": "不在……里"
       }
+     ],
+     "trunk": {
+      "subject": "Momo",
+      "verb": "is not",
+      "note": "谁 = Momo，是 = is not（不在），在哪 = in the house（家里）"
+     },
+     "tags": [
+      "be_verb"
+     ],
+     "marks": {
+      "be_verb": [
+       "is"
+      ]
+     },
+     "example": [
+      "be_verb"
      ]
     },
     {
@@ -2216,7 +3633,24 @@
        "w": "what",
        "zh": "什么"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "What",
+      "verb": "happened",
+      "note": "谁 = What（什么事），干什么 = happened（发生了），对谁 = to Momo"
+     },
+     "tags": [
+      "wh_q",
+      "past"
+     ],
+     "marks": {
+      "wh_q": [
+       "What"
+      ],
+      "past": [
+       "happened"
+      ]
+     }
     },
     {
      "id": 24,
@@ -2236,7 +3670,25 @@
        "w": "garden",
        "zh": "院子"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "she",
+      "verb": "Is ... hiding",
+      "note": "谁 = she（她，Momo），干什么 = hiding（躲着）。问句把 Is 放到最前面。"
+     },
+     "tags": [
+      "be_ing",
+      "pronoun"
+     ],
+     "marks": {
+      "be_ing": [
+       "Is",
+       "hiding"
+      ],
+      "pronoun": [
+       "she"
+      ]
+     }
     },
     {
      "id": 25,
@@ -2256,7 +3708,24 @@
        "w": "again",
        "zh": "又，再"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "they",
+      "verb": "Are",
+      "note": "谁 = they（她们），是 = Are，什么样 = together again（又在一起）。问句把 Are 放到最前面。"
+     },
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ],
+     "marks": {
+      "be_verb": [
+       "Are"
+      ],
+      "pronoun": [
+       "they"
+      ]
+     }
     },
     {
      "id": 26,
@@ -2272,7 +3741,20 @@
        "w": "calls",
        "zh": "喊，叫"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Mia",
+      "verb": "calls",
+      "note": "谁 = Mia，干什么 = calls（喊），喊的是 “Momo!”"
+     },
+     "tags": [
+      "third_s"
+     ],
+     "marks": {
+      "third_s": [
+       "calls"
+      ]
+     }
     },
     {
      "id": 27,
@@ -2292,6 +3774,26 @@
        "w": "come back",
        "zh": "回来"
       }
+     ],
+     "trunk": {
+      "subject": "Momo",
+      "verb": "does not come back",
+      "note": "谁 = Momo，干什么 = does not come back（就是不回来）。does not = doesn't，主语是 Momo 这样的一个，用 does。"
+     },
+     "tags": [
+      "do_q",
+      "third_s"
+     ],
+     "marks": {
+      "do_q": [
+       "does not"
+      ],
+      "third_s": [
+       "does not"
+      ]
+     },
+     "example": [
+      "do_q"
      ]
     }
    ],
@@ -2501,6 +4003,116 @@
       "answer": "lonely",
       "explain": "一个朋友都没有，会觉得孤单，用 lonely。"
      }
+    },
+    {
+     "id": "q5",
+     "type": "evidence",
+     "skill": "locate",
+     "skill_zh": "点出答案句",
+     "ask": "What time does Mia get home?",
+     "zh": "Mia 几点到家？",
+     "keyword": "home",
+     "preview": true,
+     "answer": [
+      20
+     ],
+     "evidence": [
+      20
+     ],
+     "drop": 13,
+     "hints": [
+      "找一找题目里的 home 这个词（家），看它在哪几句。",
+      "home 出现了不止一次。题目问的是 Mia 几点到家，找有 Mia 和时间的那一句。",
+      "排除第 13 句：I think she has no home 说的是小白猫没有家，不是 Mia 到家。",
+      "答案是第 20 句：Mia gets home at six.（Mia 六点到家。）gets home 是“到家”，at six 就是几点。"
+     ],
+     "then": {
+      "ask": "What time does Mia get home?",
+      "zh": "Mia 几点到家？",
+      "options": [
+       "At six.",
+       "At seven.",
+       "At night.",
+       "In the morning."
+      ],
+      "options_zh": [
+       "六点。",
+       "七点。",
+       "夜里。",
+       "早上。"
+      ],
+      "answer": "At six."
+     },
+     "variant": {
+      "ask": "Is the window open?",
+      "zh": "窗户开着吗？",
+      "keyword": "window",
+      "answer": [
+       21
+      ],
+      "evidence": [
+       21
+      ],
+      "explain": "window 在第 4 句和第 21 句都有。第 4 句说 Momo 把袜子叼到窗边，第 21 句 The window is open.（窗户开着。）才说开没开。"
+     }
+    },
+    {
+     "id": "q6",
+     "type": "reference",
+     "skill": "ref",
+     "skill_zh": "代词指谁",
+     "ask": "Who is “She” in Sentence 12?",
+     "zh": "第 12 句里的 She 指谁？",
+     "pronoun": "She",
+     "at": 12,
+     "options": [
+      "Mum",
+      "the white cat",
+      "Momo",
+      "Mia"
+     ],
+     "options_zh": [
+      "妈妈",
+      "那只白猫",
+      "Momo",
+      "Mia"
+     ],
+     "answer": "the white cat",
+     "evidence": [
+      11,
+      12
+     ],
+     "drop": "Momo",
+     "hints": [
+      "回到第 12 句，再看它前面的第 11 句。",
+      "第 11 句妈妈说 Look at the white cat，第 12 句紧接着说 She is very thin。",
+      "排除 Momo：第 11 句妈妈让 Mia 看的是那只白猫，不是 Momo。",
+      "答案是 the white cat（那只白猫）。妈妈先说看看那只白猫，再说她很瘦。第 13、14 句说的也是她：没有家，又冷又孤单。"
+     ],
+     "variant": {
+      "ask": "Who are “they” in Sentence 16?",
+      "zh": "第 16 句里的 they 指谁？",
+      "pronoun": "they",
+      "at": 16,
+      "options": [
+       "Mia and Mum",
+       "Mia and Momo",
+       "Mum and the white cat",
+       "Momo and the white cat"
+      ],
+      "options_zh": [
+       "Mia 和妈妈",
+       "Mia 和 Momo",
+       "妈妈和白猫",
+       "Momo 和白猫"
+      ],
+      "answer": "Momo and the white cat",
+      "evidence": [
+       15,
+       16
+      ],
+      "explain": "第 15 句 Mia 问：Momo 是在帮她（白猫）吗？第 16 句妈妈说 they are good friends：是好朋友的就是 Momo 和白猫。"
+     }
     }
    ]
   },
@@ -2647,7 +4259,20 @@
        "w": "not",
        "zh": "不"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Momo",
+      "verb": "is not",
+      "note": "谁 = Momo，是 = is not（不在），在哪 = at home（家里）"
+     },
+     "tags": [
+      "be_verb"
+     ],
+     "marks": {
+      "be_verb": [
+       "is"
+      ]
+     }
     },
     {
      "id": 2,
@@ -2667,7 +4292,25 @@
        "w": "nervous",
        "zh": "紧张的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "Don't be",
+      "note": "没有主语的祈使句：Don't be + 什么样 = 别……。叫对方别紧张。",
+      "kind": "imperative"
+     },
+     "tags": [
+      "imperative",
+      "be_adj"
+     ],
+     "marks": {
+      "imperative": [
+       "Don't"
+      ],
+      "be_adj": [
+       "be"
+      ]
+     }
     },
     {
      "id": 3,
@@ -2687,6 +4330,27 @@
        "w": "together",
        "zh": "一起"
       }
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "Let's look for",
+      "note": "没有主语的祈使句：Let's（我们一起……吧）+ look for（找）+ her（她，Momo）",
+      "kind": "imperative"
+     },
+     "tags": [
+      "imperative",
+      "pronoun"
+     ],
+     "marks": {
+      "imperative": [
+       "Let's"
+      ],
+      "pronoun": [
+       "her"
+      ]
+     },
+     "example": [
+      "imperative"
      ]
     },
     {
@@ -2707,7 +4371,14 @@
        "w": "plan",
        "zh": "计划"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "have",
+      "note": "谁 = I（我），干什么 = have（有），有什么 = a plan（一个计划）"
+     },
+     "tags": [],
+     "marks": {}
     },
     {
      "id": 5,
@@ -2727,7 +4398,35 @@
        "w": "white cat",
        "zh": "白猫"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "Find",
+      "note": "前半句没有主语，是祈使句：Find the white cat（找到白猫）；and 后面：谁 = we（我们），干什么 = can find Momo（就能找到 Momo）",
+      "kind": "imperative",
+      "also": [
+       {
+        "subject": "we",
+        "verb": "can find"
+       }
+      ]
+     },
+     "tags": [
+      "imperative",
+      "can",
+      "pronoun"
+     ],
+     "marks": {
+      "imperative": [
+       "Find"
+      ],
+      "can": [
+       "can"
+      ],
+      "pronoun": [
+       "we"
+      ]
+     }
     },
     {
      "id": 6,
@@ -2747,7 +4446,14 @@
        "w": "along",
        "zh": "沿着"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Mia and Lucy",
+      "verb": "walk",
+      "note": "谁 = Mia and Lucy（两个人），干什么 = walk（走），在哪 = along the street（沿着街道）。是两个人，walk 不加 s。"
+     },
+     "tags": [],
+     "marks": {}
     },
     {
      "id": 7,
@@ -2767,7 +4473,20 @@
        "w": "seven",
        "zh": "七（点）"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "It",
+      "verb": "is",
+      "note": "It 在这里说时间，不是“它”。是 = is，几点 = almost seven（快七点了）"
+     },
+     "tags": [
+      "be_verb"
+     ],
+     "marks": {
+      "be_verb": [
+       "is"
+      ]
+     }
     },
     {
      "id": 8,
@@ -2787,7 +4506,20 @@
        "w": "tail",
        "zh": "尾巴"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "a grey tail",
+      "verb": "appears",
+      "note": "谁 = a grey tail（一条灰尾巴），干什么 = appears（出现）"
+     },
+     "tags": [
+      "third_s"
+     ],
+     "marks": {
+      "third_s": [
+       "appears"
+      ]
+     }
     },
     {
      "id": 9,
@@ -2807,7 +4539,31 @@
        "w": "says",
        "zh": "说"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Lucy",
+      "verb": "says",
+      "note": "谁 = Lucy，干什么 = says（说）。引号里是她说的话：Follow that tail!（跟着那条尾巴！），没有主语的祈使句。",
+      "also": [
+       {
+        "subject": "",
+        "verb": "Follow",
+        "kind": "imperative"
+       }
+      ]
+     },
+     "tags": [
+      "imperative",
+      "third_s"
+     ],
+     "marks": {
+      "imperative": [
+       "Follow"
+      ],
+      "third_s": [
+       "says"
+      ]
+     }
     },
     {
      "id": 10,
@@ -2827,7 +4583,20 @@
        "w": "wall",
        "zh": "墙"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "The girls",
+      "verb": "follow",
+      "note": "谁 = The girls（两个女孩），干什么 = follow（跟着），跟着谁 = Momo，在哪 = along an old wall（沿着一堵旧墙）"
+     },
+     "tags": [
+      "plural"
+     ],
+     "marks": {
+      "plural": [
+       "girls"
+      ]
+     }
     },
     {
      "id": 11,
@@ -2847,6 +4616,26 @@
        "w": "silent",
        "zh": "不出声的"
       }
+     ],
+     "trunk": {
+      "subject": "They",
+      "verb": "are",
+      "note": "谁 = They（她们，两个女孩），是 = are，什么样 = silent（一声不出）"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "are"
+      ],
+      "pronoun": [
+       "They"
+      ]
+     },
+     "example": [
+      "be_adj"
      ]
     },
     {
@@ -2867,7 +4656,20 @@
        "w": "silent",
        "zh": "安静的，不出声的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "The street",
+      "verb": "is",
+      "note": "谁 = The street（街上），是 = is，什么样 = silent（静悄悄的）"
+     },
+     "tags": [
+      "be_adj"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ]
+     }
     },
     {
      "id": 13,
@@ -2888,7 +4690,27 @@
        "zh": "李奶奶的"
       }
      ],
-     "point": "g:possessive_s"
+     "point": "g:possessive_s",
+     "trunk": {
+      "subject": "Momo",
+      "verb": "goes",
+      "note": "谁 = Momo，干什么 = goes into（走进），走进哪 = Grandma Li's garden（李奶奶家的院子）"
+     },
+     "tags": [
+      "third_s",
+      "poss_s"
+     ],
+     "marks": {
+      "third_s": [
+       "goes"
+      ],
+      "poss_s": [
+       "Grandma Li's"
+      ]
+     },
+     "example": [
+      "poss_s"
+     ]
     },
     {
      "id": 14,
@@ -2909,7 +4731,23 @@
        "zh": "箱子"
       }
      ],
-     "point": "g:there_be"
+     "point": "g:there_be",
+     "trunk": {
+      "subject": "a box",
+      "verb": "There is",
+      "note": "There is + 什么 = 有……：There is a box（有一个箱子），在哪 = under a tree（树下）"
+     },
+     "tags": [
+      "there_be"
+     ],
+     "marks": {
+      "there_be": [
+       "There is"
+      ]
+     },
+     "example": [
+      "there_be"
+     ]
     },
     {
      "id": 15,
@@ -2929,6 +4767,22 @@
        "w": "sleeping",
        "zh": "正在睡觉"
       }
+     ],
+     "trunk": {
+      "subject": "the white cat",
+      "verb": "is sleeping",
+      "note": "在哪 = In the box（箱子里）。谁 = the white cat（那只白猫），干什么 = is sleeping（正在睡觉）"
+     },
+     "tags": [
+      "be_ing"
+     ],
+     "marks": {
+      "be_ing": [
+       "is sleeping"
+      ]
+     },
+     "example": [
+      "be_ing"
      ]
     },
     {
@@ -2950,7 +4804,35 @@
        "zh": "袜子"
       }
      ],
-     "point": "g:possessive_s"
+     "point": "g:possessive_s",
+     "trunk": {
+      "subject": "Almost all of Mia's socks",
+      "verb": "are",
+      "note": "谁 = Almost all of Mia's socks（Mia 差不多所有的袜子），是 = are，在哪 = in it（它里面，箱子里）"
+     },
+     "tags": [
+      "be_verb",
+      "poss_s",
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "be_verb": [
+       "are"
+      ],
+      "poss_s": [
+       "Mia's"
+      ],
+      "pronoun": [
+       "it"
+      ],
+      "plural": [
+       "socks"
+      ]
+     },
+     "example": [
+      "poss_s"
+     ]
     },
     {
      "id": 17,
@@ -2970,7 +4852,30 @@
        "w": "shakes",
        "zh": "摇，晃"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "The white cat",
+      "verb": "wakes up",
+      "note": "谁 = The white cat（白猫），干两件事：wakes up（醒来），and shakes her head（晃晃脑袋）",
+      "also": [
+       {
+        "verb": "shakes"
+       }
+      ]
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "wakes",
+       "shakes"
+      ],
+      "pronoun": [
+       "her"
+      ]
+     }
     },
     {
      "id": 18,
@@ -2990,7 +4895,20 @@
        "w": "milk",
        "zh": "牛奶"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Grandma Li",
+      "verb": "comes out",
+      "note": "谁 = Grandma Li（李奶奶），干什么 = comes out（走出来），带着什么 = with some milk（一些牛奶）"
+     },
+     "tags": [
+      "third_s"
+     ],
+     "marks": {
+      "third_s": [
+       "comes"
+      ]
+     }
     },
     {
      "id": 19,
@@ -3011,7 +4929,24 @@
        "zh": "猫"
       }
      ],
-     "point": "g:possessive_pronoun"
+     "point": "g:possessive_pronoun",
+     "trunk": {
+      "subject": "this cat",
+      "verb": "Is",
+      "note": "谁 = this cat（这只猫），是 = Is，是谁的 = yours（您的）。问句把 Is 放到最前面，最后的 Grandma Li 是在叫李奶奶。"
+     },
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ],
+     "marks": {
+      "be_verb": [
+       "Is"
+      ],
+      "pronoun": [
+       "yours"
+      ]
+     }
     },
     {
      "id": 20,
@@ -3031,7 +4966,24 @@
        "w": "Grandma Li",
        "zh": "李奶奶"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Grandma Li",
+      "verb": "shakes",
+      "note": "谁 = Grandma Li（李奶奶），干什么 = shakes her head（摇头）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "shakes"
+      ],
+      "pronoun": [
+       "her"
+      ]
+     }
     },
     {
      "id": 21,
@@ -3052,7 +5004,35 @@
        "zh": "故事"
       }
      ],
-     "point": "g:possessive_pronoun"
+     "point": "g:possessive_pronoun",
+     "trunk": {
+      "subject": "She",
+      "verb": "is not",
+      "note": "两句话用 but 连起来：谁 = She（她），是 = is not，是谁的 = mine（我的）；谁 = I（我），干什么 = know her story（知道她的故事）",
+      "also": [
+       {
+        "subject": "I",
+        "verb": "know"
+       }
+      ]
+     },
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ],
+     "marks": {
+      "be_verb": [
+       "is"
+      ],
+      "pronoun": [
+       "She",
+       "mine",
+       "her"
+      ]
+     },
+     "example": [
+      "pronoun"
+     ]
     }
    ],
    "questions": [
@@ -3261,6 +5241,116 @@
       "answer": "silent",
       "explain": "图书馆里要安静，用 silent。loud 是“大声的”，正好相反。"
      }
+    },
+    {
+     "id": "q5",
+     "type": "evidence",
+     "skill": "locate",
+     "skill_zh": "点出答案句",
+     "ask": "What does the white cat do after she wakes up?",
+     "zh": "白猫醒了以后做了什么？",
+     "keyword": "wakes up",
+     "preview": true,
+     "answer": [
+      17
+     ],
+     "evidence": [
+      17
+     ],
+     "drop": 20,
+     "hints": [
+      "找一找题目里的 wakes up 这个词（醒来），看它在哪一句。",
+      "白猫先是在箱子里睡觉（第 15 句），往后找她醒来的那一句。",
+      "排除第 20 句：Grandma Li shakes her head 也有 shakes her head，可那是李奶奶在摇头，不是白猫。",
+      "答案是第 17 句：The white cat wakes up and shakes her head.（白猫醒了，晃了晃脑袋。）醒了以后做的事就在 and 后面：shakes her head。"
+     ],
+     "then": {
+      "ask": "What does the white cat do after she wakes up?",
+      "zh": "白猫醒了以后做了什么？",
+      "options": [
+       "She runs away.",
+       "She drinks some milk.",
+       "She shakes her head.",
+       "She follows Momo."
+      ],
+      "options_zh": [
+       "她跑掉了。",
+       "她喝了一些牛奶。",
+       "她晃了晃脑袋。",
+       "她跟着 Momo 走。"
+      ],
+      "answer": "She shakes her head."
+     },
+     "variant": {
+      "ask": "Who says “Follow that tail!”?",
+      "zh": "“Follow that tail!”是谁说的？",
+      "keyword": "Follow that tail",
+      "answer": [
+       9
+      ],
+      "evidence": [
+       9
+      ],
+      "explain": "第 9 句：“Follow that tail!” Lucy says. 引号后面写着 Lucy says，所以这句是 Lucy 说的。"
+     }
+    },
+    {
+     "id": "q6",
+     "type": "reference",
+     "skill": "ref",
+     "skill_zh": "代词指谁",
+     "ask": "Who is “her” in Sentence 3?",
+     "zh": "第 3 句里的 her 指谁？",
+     "pronoun": "her",
+     "at": 3,
+     "options": [
+      "Mia",
+      "Lucy",
+      "Momo",
+      "the white cat"
+     ],
+     "options_zh": [
+      "Mia",
+      "Lucy",
+      "Momo",
+      "那只白猫"
+     ],
+     "answer": "Momo",
+     "evidence": [
+      1,
+      3
+     ],
+     "drop": "Mia",
+     "hints": [
+      "回到第 3 句，再看第 1 句 Mia 说了什么。",
+      "look for her 是“找她”。第 1 句说谁不在家？",
+      "排除 Mia：Lucy 是在跟 Mia 说话，要找的不是 Mia。",
+      "答案是 Momo。第 1 句 Mia 说 Momo is not at home!，所以第 3 句 Let's look for her together 是一起去找 Momo。"
+     ],
+     "variant": {
+      "ask": "What is “it” in Sentence 16?",
+      "zh": "第 16 句里的 it 指什么？",
+      "pronoun": "it",
+      "at": 16,
+      "options": [
+       "the box",
+       "the tree",
+       "the old wall",
+       "the street"
+      ],
+      "options_zh": [
+       "箱子",
+       "树",
+       "那堵旧墙",
+       "街道"
+      ],
+      "answer": "the box",
+      "evidence": [
+       15,
+       16
+      ],
+      "explain": "第 15 句说 In the box（箱子里），第 16 句 are in it：袜子在它里面。装着袜子的是箱子，所以 it 是 the box。"
+     }
     }
    ]
   },
@@ -3424,6 +5514,26 @@
        "w": "storm",
        "zh": "暴风雨"
       }
+     ],
+     "trunk": {
+      "subject": "she",
+      "verb": "came",
+      "note": "什么时候 = Last week（上个星期）。谁 = she（她，白猫），干什么 = came（来了，come 的过去式），怎么来的 = along this road（顺着这条路）"
+     },
+     "tags": [
+      "past",
+      "pronoun"
+     ],
+     "marks": {
+      "past": [
+       "came"
+      ],
+      "pronoun": [
+       "she"
+      ]
+     },
+     "example": [
+      "past"
      ]
     },
     {
@@ -3444,6 +5554,30 @@
        "w": "lonely",
        "zh": "孤单的"
       }
+     ],
+     "trunk": {
+      "subject": "She",
+      "verb": "was",
+      "note": "谁 = She（她），是 = was（is 的过去式），什么样 = cold, hungry and lonely（又冷又饿又孤单）"
+     },
+     "tags": [
+      "be_adj",
+      "past",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "was"
+      ],
+      "past": [
+       "was"
+      ],
+      "pronoun": [
+       "She"
+      ]
+     },
+     "example": [
+      "past"
      ]
     },
     {
@@ -3464,7 +5598,20 @@
        "w": "every day",
        "zh": "每天"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "give",
+      "note": "谁 = I（我，李奶奶），干什么 = give her milk（给她牛奶），什么时候 = every day（每天）"
+     },
+     "tags": [
+      "pronoun"
+     ],
+     "marks": {
+      "pronoun": [
+       "her"
+      ]
+     }
     },
     {
      "id": 4,
@@ -3485,7 +5632,28 @@
        "zh": "每天晚上"
       }
      ],
-     "point": "g:third_s"
+     "point": "g:third_s",
+     "trunk": {
+      "subject": "your cat",
+      "verb": "carries",
+      "note": "谁 = your cat（你家的猫），干什么 = carries socks here（把袜子叼到这儿），什么时候 = every night（每天晚上）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "third_s": [
+       "carries"
+      ],
+      "pronoun": [
+       "your"
+      ],
+      "plural": [
+       "socks"
+      ]
+     }
     },
     {
      "id": 5,
@@ -3505,7 +5673,15 @@
        "w": "Grandma Li",
        "zh": "李奶奶"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "Thank",
+      "note": "固定说法：Thank you（谢谢您），前面省掉了 I。最后的 Grandma Li 是在叫李奶奶。",
+      "kind": "phrase"
+     },
+     "tags": [],
+     "marks": {}
     },
     {
      "id": 6,
@@ -3525,7 +5701,24 @@
        "w": "girls",
        "zh": "女孩"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "You",
+      "verb": "are",
+      "note": "谁 = You（你们），是 = are，是什么 = polite girls（有礼貌的女孩）"
+     },
+     "tags": [
+      "be_verb",
+      "plural"
+     ],
+     "marks": {
+      "be_verb": [
+       "are"
+      ],
+      "plural": [
+       "girls"
+      ]
+     }
     },
     {
      "id": 7,
@@ -3545,6 +5738,26 @@
        "w": "you",
        "zh": "你（这里是“您”）"
       }
+     ],
+     "trunk": {
+      "subject": "she",
+      "verb": "Can ... live",
+      "note": "谁 = she（她，白猫），干什么 = live with you（跟您一起住）。问句把 Can 放到最前面。"
+     },
+     "tags": [
+      "can",
+      "pronoun"
+     ],
+     "marks": {
+      "can": [
+       "Can"
+      ],
+      "pronoun": [
+       "she"
+      ]
+     },
+     "example": [
+      "can"
      ]
     },
     {
@@ -3565,6 +5778,36 @@
        "w": "can't",
        "zh": "不能"
       }
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "'m",
+      "note": "两句话用 but 连起来：谁 = I（我），是 = 'm（I'm = I am），什么样 = sorry（对不起）；谁 = I，干什么 = can't keep her（养不了她）",
+      "also": [
+       {
+        "subject": "I",
+        "verb": "can't keep"
+       }
+      ]
+     },
+     "tags": [
+      "be_adj",
+      "can",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "'m"
+      ],
+      "can": [
+       "can't"
+      ],
+      "pronoun": [
+       "her"
+      ]
+     },
+     "example": [
+      "can"
      ]
     },
     {
@@ -3586,7 +5829,27 @@
        "zh": "在国外"
       }
      ],
-     "point": "g:third_s"
+     "point": "g:third_s",
+     "trunk": {
+      "subject": "My son",
+      "verb": "lives",
+      "note": "谁 = My son（我儿子），干什么 = lives abroad（住在国外）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "lives"
+      ],
+      "pronoun": [
+       "My"
+      ]
+     },
+     "example": [
+      "third_s"
+     ]
     },
     {
      "id": 10,
@@ -3606,6 +5869,26 @@
        "w": "son",
        "zh": "儿子"
       }
+     ],
+     "trunk": {
+      "subject": "He",
+      "verb": "is",
+      "note": "谁 = He（他，李奶奶的儿子），是 = is，是什么 = a good son（一个好儿子）"
+     },
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ],
+     "marks": {
+      "be_verb": [
+       "is"
+      ],
+      "pronoun": [
+       "He"
+      ]
+     },
+     "example": [
+      "be_verb"
      ]
     },
     {
@@ -3626,7 +5909,20 @@
        "w": "going abroad",
        "zh": "出国"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "'m going",
+      "note": "什么时候 = Next month（下个月）。谁 = I（我），干什么 = 'm going abroad（要出国）"
+     },
+     "tags": [
+      "be_ing"
+     ],
+     "marks": {
+      "be_ing": [
+       "'m going"
+      ]
+     }
     },
     {
      "id": 12,
@@ -3646,7 +5942,28 @@
        "w": "next",
        "zh": "下一个"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Who",
+      "verb": "can protect",
+      "note": "谁 = Who（谁），干什么 = can protect（能保护），保护谁 = her（她，白猫），什么时候 = in the next storm（下一场暴风雨）"
+     },
+     "tags": [
+      "wh_q",
+      "can",
+      "pronoun"
+     ],
+     "marks": {
+      "wh_q": [
+       "Who"
+      ],
+      "can": [
+       "can"
+      ],
+      "pronoun": [
+       "her"
+      ]
+     }
     },
     {
      "id": 13,
@@ -3666,7 +5983,20 @@
        "w": "big",
        "zh": "大的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "That",
+      "verb": "'s",
+      "note": "谁 = That（这），是 = 's（That's = That is），是什么 = a big problem（一个大问题）"
+     },
+     "tags": [
+      "be_verb"
+     ],
+     "marks": {
+      "be_verb": [
+       "'s"
+      ]
+     }
     },
     {
      "id": 14,
@@ -3686,7 +6016,24 @@
        "w": "like snow",
        "zh": "像雪一样"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "She",
+      "verb": "is",
+      "note": "谁 = She（她，白猫），是 = is，什么样 = white like snow（白得像雪）"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ],
+      "pronoun": [
+       "She"
+      ]
+     }
     },
     {
      "id": 15,
@@ -3706,7 +6053,25 @@
        "w": "call",
        "zh": "叫，称呼"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "Let's call",
+      "note": "没有主语的祈使句：Let's（我们一起……吧）+ call her Snowy（叫她 Snowy）",
+      "kind": "imperative"
+     },
+     "tags": [
+      "imperative",
+      "pronoun"
+     ],
+     "marks": {
+      "imperative": [
+       "Let's"
+      ],
+      "pronoun": [
+       "her"
+      ]
+     }
     },
     {
      "id": 16,
@@ -3726,7 +6091,24 @@
        "w": "home",
        "zh": "回家"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Momo",
+      "verb": "follows",
+      "note": "谁 = Momo，干什么 = follows us home（跟着我们回家）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "follows"
+      ],
+      "pronoun": [
+       "us"
+      ]
+     }
     },
     {
      "id": 17,
@@ -3746,7 +6128,20 @@
        "w": "understand",
        "zh": "懂，理解"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "understand",
+      "note": "谁 = I（我），干什么 = understand her（懂她，Momo）"
+     },
+     "tags": [
+      "pronoun"
+     ],
+     "marks": {
+      "pronoun": [
+       "her"
+      ]
+     }
     },
     {
      "id": 18,
@@ -3767,7 +6162,25 @@
        "zh": "保护"
       }
      ],
-     "point": "g:third_s"
+     "point": "g:third_s",
+     "trunk": {
+      "subject": "She",
+      "verb": "wants",
+      "note": "谁 = She（她，Momo），干什么 = wants to protect（想保护），保护谁 = her friend（她的朋友）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "wants"
+      ],
+      "pronoun": [
+       "She",
+       "her"
+      ]
+     }
     },
     {
      "id": 19,
@@ -3787,7 +6200,24 @@
        "w": "Mum",
        "zh": "妈妈"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Mum",
+      "verb": "shakes",
+      "note": "谁 = Mum（妈妈），干什么 = shakes her head（摇头）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "shakes"
+      ],
+      "pronoun": [
+       "her"
+      ]
+     }
     },
     {
      "id": 20,
@@ -3807,6 +6237,30 @@
        "w": "for us",
        "zh": "对我们来说"
       }
+     ],
+     "trunk": {
+      "subject": "Two cats",
+      "verb": "are",
+      "note": "谁 = Two cats（两只猫），是 = are，什么样 = too many（太多了），对谁 = for us（对我们家）"
+     },
+     "tags": [
+      "be_adj",
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "be_adj": [
+       "are"
+      ],
+      "pronoun": [
+       "us"
+      ],
+      "plural": [
+       "cats"
+      ]
+     },
+     "example": [
+      "plural"
      ]
     },
     {
@@ -3827,7 +6281,15 @@
        "w": "problem",
        "zh": "问题"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "",
+      "note": "感叹句：What a + 形容词 + 名词！没有动词，意思是“真是个大问题！”",
+      "kind": "exclaim"
+     },
+     "tags": [],
+     "marks": {}
     },
     {
      "id": 22,
@@ -3847,7 +6309,20 @@
        "w": "project",
        "zh": "（学校的）课题"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "remember",
+      "note": "谁 = I（我），干什么 = remember（想起），想起什么 = our class project（我们班的课题）"
+     },
+     "tags": [
+      "pronoun"
+     ],
+     "marks": {
+      "pronoun": [
+       "our"
+      ]
+     }
     },
     {
      "id": 23,
@@ -3867,7 +6342,14 @@
        "w": "idea",
        "zh": "主意"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "have",
+      "note": "谁 = I（我），干什么 = have（有），有什么 = an idea（一个主意）"
+     },
+     "tags": [],
+     "marks": {}
     }
    ],
    "questions": [
@@ -4077,6 +6559,116 @@
       "answer": "abroad",
       "explain": "加拿大在中国以外，住在那儿就是住在国外，用 abroad。"
      }
+    },
+    {
+     "id": "q5",
+     "type": "evidence",
+     "skill": "locate",
+     "skill_zh": "点出答案句",
+     "ask": "What does Grandma Li give the white cat every day?",
+     "zh": "李奶奶每天给白猫什么？",
+     "keyword": "every day",
+     "preview": true,
+     "answer": [
+      3
+     ],
+     "evidence": [
+      3
+     ],
+     "drop": 4,
+     "hints": [
+      "找一找题目里的 every day 这个词（每天），看它在哪一句。",
+      "every day（每天）和 every night（每天晚上）长得像，要找的是 every day。",
+      "排除第 4 句：这句是 every night，说的是 Momo 每天晚上叼袜子过来，不是李奶奶给什么。",
+      "答案是第 3 句：So I give her milk every day.（所以我每天给她喝牛奶。）I 是李奶奶，her 是白猫，give her milk 就是给她牛奶。"
+     ],
+     "then": {
+      "ask": "What does Grandma Li give the white cat every day?",
+      "zh": "李奶奶每天给白猫什么？",
+      "options": [
+       "Socks.",
+       "Milk.",
+       "A box.",
+       "A home."
+      ],
+      "options_zh": [
+       "袜子。",
+       "牛奶。",
+       "一个箱子。",
+       "一个家。"
+      ],
+      "answer": "Milk."
+     },
+     "variant": {
+      "ask": "What does Mia call the white cat?",
+      "zh": "Mia 给白猫起了什么名字？",
+      "keyword": "call",
+      "answer": [
+       15
+      ],
+      "evidence": [
+       15
+      ],
+      "explain": "第 15 句：Let's call her Snowy.（我们就叫她 Snowy 吧。）call her Snowy 就是叫她 Snowy。第 14 句说她白得像雪，是起这个名字的原因。"
+     }
+    },
+    {
+     "id": "q6",
+     "type": "reference",
+     "skill": "ref",
+     "skill_zh": "代词指谁",
+     "ask": "Who is “She” in Sentence 18?",
+     "zh": "第 18 句里的 She 指谁？",
+     "pronoun": "She",
+     "at": 18,
+     "options": [
+      "Mum",
+      "Snowy",
+      "Lucy",
+      "Momo"
+     ],
+     "options_zh": [
+      "妈妈",
+      "Snowy",
+      "Lucy",
+      "Momo"
+     ],
+     "answer": "Momo",
+     "evidence": [
+      16,
+      18
+     ],
+     "drop": "Snowy",
+     "hints": [
+      "回到第 18 句，往前看第 16 句。",
+      "第 16 句说 Momo follows us home，第 17 句 Now I understand her。第 17、18 句说的都是同一只猫。",
+      "排除 Snowy：her friend（她的朋友）才是 Snowy，想保护朋友的是另一只猫。",
+      "答案是 Momo。第 16 句 Momo 跟着我们回家，第 17、18 句接着说她：我懂她了，她想保护她的朋友 Snowy。"
+     ],
+     "variant": {
+      "ask": "Who is “He” in Sentence 10?",
+      "zh": "第 10 句里的 He 指谁？",
+      "pronoun": "He",
+      "at": 10,
+      "options": [
+       "Grandma Li's son",
+       "Lucy",
+       "Grandma Li",
+       "Momo"
+      ],
+      "options_zh": [
+       "李奶奶的儿子",
+       "Lucy",
+       "李奶奶",
+       "Momo"
+      ],
+      "answer": "Grandma Li's son",
+      "evidence": [
+       9,
+       10
+      ],
+      "explain": "第 9 句 My son lives abroad（我儿子住在国外），第 10 句 He is a good son：He 是“他”，说的就是李奶奶的儿子。"
+     }
     }
    ]
   },
@@ -4234,7 +6826,20 @@
        "w": "help",
        "zh": "帮助"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "need",
+      "note": "谁 = I（我），干什么 = need（需要），需要什么 = your help（你们帮忙）"
+     },
+     "tags": [
+      "pronoun"
+     ],
+     "marks": {
+      "pronoun": [
+       "your"
+      ]
+     }
     },
     {
      "id": 2,
@@ -4255,7 +6860,23 @@
        "zh": "家"
       }
      ],
-     "point": "g:third_s"
+     "point": "g:third_s",
+     "trunk": {
+      "subject": "Snowy",
+      "verb": "has",
+      "note": "谁 = Snowy，干什么 = has no home（没有家）。主语是 Snowy 一个，have 变成 has。"
+     },
+     "tags": [
+      "third_s"
+     ],
+     "marks": {
+      "third_s": [
+       "has"
+      ]
+     },
+     "example": [
+      "third_s"
+     ]
     },
     {
      "id": 3,
@@ -4275,7 +6896,25 @@
        "w": "class",
        "zh": "班级"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "she",
+      "verb": "Can ... be",
+      "note": "谁 = she（她，Snowy），干什么 = be our class project（当我们班的课题）。问句把 Can 放到最前面。"
+     },
+     "tags": [
+      "can",
+      "pronoun"
+     ],
+     "marks": {
+      "can": [
+       "Can"
+      ],
+      "pronoun": [
+       "she",
+       "our"
+      ]
+     }
     },
     {
      "id": 4,
@@ -4295,7 +6934,20 @@
        "w": "join",
        "zh": "加入"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "'m",
+      "note": "谁 = I（我），是 = 'm（I'm = I am），什么样 = ready to join（准备好加入了）"
+     },
+     "tags": [
+      "be_adj"
+     ],
+     "marks": {
+      "be_adj": [
+       "'m"
+      ]
+     }
     },
     {
      "id": 5,
@@ -4315,7 +6967,28 @@
        "w": "online",
        "zh": "在网上"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "can put",
+      "note": "谁 = I（我），干什么 = can put（能放），放什么 = her photos（她的照片），放在哪 = online（网上）"
+     },
+     "tags": [
+      "can",
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "can": [
+       "can"
+      ],
+      "pronoun": [
+       "her"
+      ],
+      "plural": [
+       "photos"
+      ]
+     }
     },
     {
      "id": 6,
@@ -4335,7 +7008,20 @@
        "w": "too",
        "zh": "也"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "I",
+      "verb": "Can ... join",
+      "note": "谁 = I（我），干什么 = join（加入）。问句把 Can 放到最前面。"
+     },
+     "tags": [
+      "can"
+     ],
+     "marks": {
+      "can": [
+       "Can"
+      ]
+     }
     },
     {
      "id": 7,
@@ -4355,7 +7041,25 @@
        "w": "look after",
        "zh": "照顾"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "We",
+      "verb": "need",
+      "note": "谁 = We（我们），干什么 = need（需要），需要什么 = volunteers（志愿者），干什么用 = to look after her（照顾她）"
+     },
+     "tags": [
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "pronoun": [
+       "We",
+       "her"
+      ],
+      "plural": [
+       "volunteers"
+      ]
+     }
     },
     {
      "id": 8,
@@ -4376,7 +7080,35 @@
        "zh": "需要"
       }
      ],
-     "point": "g:third_s"
+     "point": "g:third_s",
+     "trunk": {
+      "subject": "",
+      "verb": "Don't forget",
+      "note": "前半句是没有主语的祈使句：Don't forget（别忘了）；冒号后面是要记住的事：谁 = she（她），干什么 = needs a home（需要一个家）",
+      "kind": "imperative",
+      "also": [
+       {
+        "subject": "she",
+        "verb": "needs"
+       }
+      ]
+     },
+     "tags": [
+      "imperative",
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "imperative": [
+       "Don't"
+      ],
+      "third_s": [
+       "needs"
+      ],
+      "pronoun": [
+       "she"
+      ]
+     }
     },
     {
      "id": 9,
@@ -4396,7 +7128,29 @@
        "w": "volunteers",
        "zh": "志愿者"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Almost all my classmates",
+      "verb": "are",
+      "note": "谁 = Almost all my classmates（差不多全班同学），是 = are，是什么 = volunteers（志愿者）"
+     },
+     "tags": [
+      "be_verb",
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "be_verb": [
+       "are"
+      ],
+      "pronoun": [
+       "my"
+      ],
+      "plural": [
+       "classmates",
+       "volunteers"
+      ]
+     }
     },
     {
      "id": 10,
@@ -4416,7 +7170,25 @@
        "w": "online",
        "zh": "在网上"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "People",
+      "verb": "put",
+      "note": "谁 = People（大家），干什么 = put hearts（放小红心），放在哪 = on her photos online（网上她的照片上）"
+     },
+     "tags": [
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "pronoun": [
+       "her"
+      ],
+      "plural": [
+       "hearts",
+       "photos"
+      ]
+     }
     },
     {
      "id": 11,
@@ -4436,7 +7208,24 @@
        "w": "report",
        "zh": "报告"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Ms Wang",
+      "verb": "reads",
+      "note": "谁 = Ms Wang（王老师），干什么 = reads（看），看什么 = our report（我们的报告），什么时候 = today（今天）"
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "reads"
+      ],
+      "pronoun": [
+       "our"
+      ]
+     }
     },
     {
      "id": 12,
@@ -4456,7 +7245,20 @@
        "w": "silent",
        "zh": "不出声的"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "The class",
+      "verb": "is",
+      "note": "谁 = The class（全班），是 = is，什么样 = silent（一声不出）"
+     },
+     "tags": [
+      "be_adj"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ]
+     }
     },
     {
      "id": 13,
@@ -4476,7 +7278,20 @@
        "w": "smiles",
        "zh": "微笑"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Ms Wang",
+      "verb": "smiles",
+      "note": "谁 = Ms Wang（王老师），干什么 = smiles（笑）"
+     },
+     "tags": [
+      "third_s"
+     ],
+     "marks": {
+      "third_s": [
+       "smiles"
+      ]
+     }
     },
     {
      "id": 14,
@@ -4496,7 +7311,30 @@
        "w": "says",
        "zh": "说"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "she",
+      "verb": "says",
+      "note": "谁 = she（她，王老师），干什么 = says（说）。引号里是她的话：谁 = I（我），干什么 = have a big garden（有一个大院子）",
+      "also": [
+       {
+        "subject": "I",
+        "verb": "have"
+       }
+      ]
+     },
+     "tags": [
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "third_s": [
+       "says"
+      ],
+      "pronoun": [
+       "she"
+      ]
+     }
     },
     {
      "id": 15,
@@ -4516,7 +7354,24 @@
        "w": "me",
        "zh": "我"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Snowy",
+      "verb": "Can ... live",
+      "note": "谁 = Snowy，干什么 = live with me（跟我一起住）。问句把 Can 放到最前面。"
+     },
+     "tags": [
+      "can",
+      "pronoun"
+     ],
+     "marks": {
+      "can": [
+       "Can"
+      ],
+      "pronoun": [
+       "me"
+      ]
+     }
     },
     {
      "id": 16,
@@ -4537,7 +7392,34 @@
        "zh": "心，心肠"
       }
      ],
-     "point": "g:third_s"
+     "point": "g:third_s",
+     "trunk": {
+      "subject": "Ms Wang",
+      "verb": "is",
+      "note": "两句话用 but 连起来：谁 = Ms Wang，什么样 = is strict（很严格）；谁 = she（她），干什么 = has a big heart（心肠很好）",
+      "also": [
+       {
+        "subject": "she",
+        "verb": "has"
+       }
+      ]
+     },
+     "tags": [
+      "be_adj",
+      "third_s",
+      "pronoun"
+     ],
+     "marks": {
+      "be_adj": [
+       "is"
+      ],
+      "third_s": [
+       "has"
+      ],
+      "pronoun": [
+       "she"
+      ]
+     }
     },
     {
      "id": 17,
@@ -4558,7 +7440,20 @@
        "zh": "家"
       }
      ],
-     "point": "g:third_s"
+     "point": "g:third_s",
+     "trunk": {
+      "subject": "Snowy",
+      "verb": "has",
+      "note": "谁 = Snowy，干什么 = has a home（有家了）"
+     },
+     "tags": [
+      "third_s"
+     ],
+     "marks": {
+      "third_s": [
+       "has"
+      ]
+     }
     },
     {
      "id": 18,
@@ -4578,7 +7473,28 @@
        "w": "storms",
        "zh": "暴风雨（复数）"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Ms Wang",
+      "verb": "can protect",
+      "note": "谁 = Ms Wang（王老师），干什么 = can protect her（能保护她），from storms（不怕暴风雨）"
+     },
+     "tags": [
+      "can",
+      "pronoun",
+      "plural"
+     ],
+     "marks": {
+      "can": [
+       "can"
+      ],
+      "pronoun": [
+       "her"
+      ],
+      "plural": [
+       "storms"
+      ]
+     }
     },
     {
      "id": 19,
@@ -4598,7 +7514,24 @@
        "w": "abroad",
        "zh": "在国外"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Grandma Li",
+      "verb": "can go",
+      "note": "谁 = Grandma Li（李奶奶），干什么 = can go（能去），去哪 = to her son abroad（国外的儿子那儿）"
+     },
+     "tags": [
+      "can",
+      "pronoun"
+     ],
+     "marks": {
+      "can": [
+       "can"
+      ],
+      "pronoun": [
+       "her"
+      ]
+     }
     },
     {
      "id": 20,
@@ -4618,7 +7551,15 @@
        "w": "solved",
        "zh": "解决了"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "",
+      "verb": "",
+      "note": "省掉了 is 的短句：Problem solved = 问题解决了。",
+      "kind": "no_verb"
+     },
+     "tags": [],
+     "marks": {}
     },
     {
      "id": 21,
@@ -4638,7 +7579,20 @@
        "w": "smile",
        "zh": "微笑"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "We all",
+      "verb": "smile",
+      "note": "谁 = We all（我们大家），干什么 = smile（笑）。是很多人，smile 不加 s。"
+     },
+     "tags": [
+      "pronoun"
+     ],
+     "marks": {
+      "pronoun": [
+       "We"
+      ]
+     }
     },
     {
      "id": 22,
@@ -4658,7 +7612,20 @@
        "w": "again",
        "zh": "又，再"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "Momo",
+      "verb": "is",
+      "note": "什么时候 = That night（那天夜里）。谁 = Momo，是 = is，在哪 = at the window（窗边）"
+     },
+     "tags": [
+      "be_verb"
+     ],
+     "marks": {
+      "be_verb": [
+       "is"
+      ]
+     }
     },
     {
      "id": 23,
@@ -4678,6 +7645,31 @@
        "w": "what",
        "zh": "什么"
       }
+     ],
+     "trunk": {
+      "subject": "she",
+      "verb": "is ... looking at",
+      "note": "谁 = she（她，Momo），干什么 = is looking at（正在看），问的是 What（什么）"
+     },
+     "tags": [
+      "wh_q",
+      "be_ing",
+      "pronoun"
+     ],
+     "marks": {
+      "wh_q": [
+       "What"
+      ],
+      "be_ing": [
+       "is",
+       "looking"
+      ],
+      "pronoun": [
+       "she"
+      ]
+     },
+     "example": [
+      "wh_q"
      ]
     },
     {
@@ -4698,7 +7690,24 @@
        "w": "next",
        "zh": "接下来"
       }
-     ]
+     ],
+     "trunk": {
+      "subject": "What",
+      "verb": "happens",
+      "note": "谁 = What（什么事），干什么 = happens（发生），什么时候 = next（接下来）"
+     },
+     "tags": [
+      "wh_q",
+      "third_s"
+     ],
+     "marks": {
+      "wh_q": [
+       "What"
+      ],
+      "third_s": [
+       "happens"
+      ]
+     }
     }
    ],
    "questions": [
@@ -4902,6 +7911,116 @@
       "answer": "heart",
       "explain": "每天喂没有家的小猫，是心肠好，用 a big heart。"
      }
+    },
+    {
+     "id": "q5",
+     "type": "evidence",
+     "skill": "locate",
+     "skill_zh": "点出答案句",
+     "ask": "What do people put on Snowy's photos?",
+     "zh": "大家在 Snowy 的照片上放了什么？",
+     "keyword": "photos",
+     "preview": true,
+     "answer": [
+      10
+     ],
+     "evidence": [
+      10
+     ],
+     "drop": 5,
+     "hints": [
+      "找一找题目里的 photos 这个词（照片），看它在哪几句。",
+      "photos 出现了两次。题目问的是 people（大家）放了什么，找有 People 的那一句。",
+      "排除第 5 句：I can put her photos online 是 Tom 说他能把照片发到网上，不是大家在照片上放了什么。",
+      "答案是第 10 句：People put hearts on her photos online.（大家在网上给她的照片点了小红心。）"
+     ],
+     "then": {
+      "ask": "What do people put on Snowy's photos?",
+      "zh": "大家在 Snowy 的照片上放了什么？",
+      "options": [
+       "Milk.",
+       "Socks.",
+       "Names.",
+       "Hearts."
+      ],
+      "options_zh": [
+       "牛奶。",
+       "袜子。",
+       "名字。",
+       "小红心。"
+      ],
+      "answer": "Hearts."
+     },
+     "variant": {
+      "ask": "When does Ms Wang read the report?",
+      "zh": "王老师什么时候看了报告？",
+      "keyword": "report",
+      "answer": [
+       11
+      ],
+      "evidence": [
+       11
+      ],
+      "explain": "第 11 句：Ms Wang reads our report today.（今天，王老师看了我们的报告。）report 在这一句，today 就是什么时候。"
+     }
+    },
+    {
+     "id": "q6",
+     "type": "reference",
+     "skill": "ref",
+     "skill_zh": "代词指谁",
+     "ask": "Who is “her” in Sentence 7?",
+     "zh": "第 7 句里的 her 指谁？",
+     "pronoun": "her",
+     "at": 7,
+     "options": [
+      "Lucy",
+      "Snowy",
+      "Mia",
+      "Ms Wang"
+     ],
+     "options_zh": [
+      "Lucy",
+      "Snowy",
+      "Mia",
+      "王老师"
+     ],
+     "answer": "Snowy",
+     "evidence": [
+      2,
+      7
+     ],
+     "drop": "Lucy",
+     "hints": [
+      "回到第 7 句，往前看第 2 句。",
+      "look after her 是“照顾她”。群聊里大家一直在说谁没有家？",
+      "排除 Lucy：第 7 句是 Lucy 自己说的，她不会说“照顾 Lucy”。",
+      "答案是 Snowy。第 2 句 Snowy has no home，大家要帮的就是她。第 7 句 We need volunteers to look after her：我们需要志愿者来照顾她，her 就是 Snowy。"
+     ],
+     "variant": {
+      "ask": "Who is “she” in Sentence 14?",
+      "zh": "第 14 句里的 she 指谁？",
+      "pronoun": "she",
+      "at": 14,
+      "options": [
+       "Snowy",
+       "Mia",
+       "Ms Wang",
+       "Grandma Li"
+      ],
+      "options_zh": [
+       "Snowy",
+       "Mia",
+       "王老师",
+       "李奶奶"
+      ],
+      "answer": "Ms Wang",
+      "evidence": [
+       13,
+       14
+      ],
+      "explain": "第 13 句 Ms Wang smiles（王老师笑了），第 14 句接着说 she says：说“我有一个大院子”的就是王老师。"
+     }
     }
    ]
   }
@@ -4924,8 +8043,12 @@
    "coverage": 0.98,
    "maxUnknown": 3,
    "keys": 2,
-   "questions": 4,
-   "hints": 4
+   "questions": 6,
+   "hints": 4,
+   "examples": [
+    2,
+    3
+   ]
   },
   "summary": {
    "ok": true,
@@ -5260,32 +8383,112 @@
    }
   },
   "grammar": {
-   "g:third_s": [
-    "ep1:4",
-    "ep2:5",
-    "ep3:9",
-    "ep3:13",
-    "ep5:4",
-    "ep5:9",
-    "ep5:18",
-    "ep6:2",
-    "ep6:8",
-    "ep6:16",
-    "ep6:17"
+   "be_verb": [
+    "ep1:3",
+    "ep3:22",
+    "ep5:10"
    ],
-   "g:there_be": [
+   "third_s": [
+    "ep1:4",
+    "ep5:9",
+    "ep6:2"
+   ],
+   "plural": [
+    "ep1:4",
+    "ep3:9",
+    "ep5:20"
+   ],
+   "be_adj": [
+    "ep1:5",
+    "ep3:21",
+    "ep4:11"
+   ],
+   "imperative": [
+    "ep1:6",
+    "ep1:7",
+    "ep4:3"
+   ],
+   "past": [
+    "ep1:8",
+    "ep5:1",
+    "ep5:2"
+   ],
+   "be_ing": [
+    "ep1:12",
+    "ep4:15"
+   ],
+   "freq_adv": [
+    "ep1:14",
+    "ep2:11"
+   ],
+   "there_be": [
     "ep1:17",
     "ep1:24",
     "ep4:14"
    ],
-   "g:possessive_s": [
+   "poss_s": [
     "ep1:25",
     "ep4:13",
     "ep4:16"
    ],
-   "g:possessive_pronoun": [
-    "ep4:19",
+   "wh_q": [
+    "ep1:26",
+    "ep2:3",
+    "ep6:23"
+   ],
+   "can": [
+    "ep2:9",
+    "ep5:7",
+    "ep5:8"
+   ],
+   "pronoun": [
+    "ep2:12",
+    "ep3:12",
     "ep4:21"
+   ],
+   "do_q": [
+    "ep3:27"
+   ]
+  },
+  "grammar_cards": {
+   "there_be": [
+    "ep1:17",
+    "ep1:24",
+    "ep4:14"
+   ],
+   "possessive_s": [
+    "ep1:25",
+    "ep4:13",
+    "ep4:16"
+   ],
+   "pronoun": [
+    "ep2:12",
+    "ep3:12",
+    "ep4:21"
+   ],
+   "be_verb": [
+    "ep1:5",
+    "ep1:3",
+    "ep3:21"
+   ],
+   "can": [
+    "ep2:9",
+    "ep5:7",
+    "ep5:8"
+   ],
+   "present_simple": [
+    "ep1:4",
+    "ep3:27",
+    "ep5:9"
+   ],
+   "plural": [
+    "ep1:4",
+    "ep3:9",
+    "ep5:20"
+   ],
+   "freq_adverb": [
+    "ep1:14",
+    "ep2:11"
    ]
   }
  }

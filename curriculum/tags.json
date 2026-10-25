@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "误解标签表（teacher-memory 2.2）。标签只增不改名。单词题干扰项用 form / category / meaning / sound。0.4.0 并进了语法卡的 20 个标签和连词成句的 5 个顺序标签。",
+  "source": "误解标签表（teacher-memory 2.2）。标签只增不改名。单词题干扰项用 form / category / meaning / sound。0.4.0 并进了语法卡的 20 个标签和连词成句的 5 个顺序标签；0.5.0 并进了句型转换的 5 个标签。",
   "tags": {
     "form": { "zh": "形近", "kind": "word" },
     "category": { "zh": "同类", "kind": "word" },
@@ -44,6 +44,11 @@
     "adj_order": { "zh": "形容词放到了名词后面，或两个形容词顺序反了（a cat white）", "kind": "grammar" },
     "place_time": { "zh": "地点和时间放错了位置（at school 放到了中间）", "kind": "grammar" },
     "there_order": { "zh": "there be 句的顺序（a box there is under the tree）", "kind": "grammar" },
-    "wh_order": { "zh": "特殊疑问句的顺序（Where your bag is）", "kind": "grammar" }
+    "wh_order": { "zh": "特殊疑问句的顺序（Where your bag is）", "kind": "grammar" },
+    "not_missing": { "zh": "否定句漏了 not（isn't / doesn't / can't）", "kind": "grammar" },
+    "poss_person": { "zh": "物主代词没跟着换（问对方还用 my，She likes my cat）", "kind": "grammar" },
+    "some_any": { "zh": "否定句和问句里 some 没换成 any", "kind": "grammar" },
+    "wh_word": { "zh": "问词用错了（What / Where / How many）", "kind": "grammar" },
+    "wh_keep": { "zh": "对划线部分提问时，划线部分还留在句子里", "kind": "grammar" }
   }
 }

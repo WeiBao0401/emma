@@ -28,10 +28,22 @@
 //   formatBlocks(text) -> [{ type: 'p', lines: [Span[]] } | { type: 'ul', items: [Span[]] } | { type: 'ol', items: [{ n, spans }] }]
 //       Span = { text, bold }。只认 **加粗**、“- ”列表、“1. ”编号、换行和空行（界面用 h() 拼，不用 innerHTML）
 //   tokens(text) -> [{ s, en }]   英文单词单独一段（界面上可以点）
-//   speakable(text) -> string     “听一遍”读的英文部分（例句优先，中文不读）
-//   gatherContext(app, { now, exclude, events }) -> Promise<ChatContext>   给 chat-prompt.js buildSystemPrompt 的她的情况（见那边注释）
+//   speakable(text) -> string     “听一遍”读的英文部分（例句优先，中文不读；写着“不对”“错的”“不说”的那一行不读，免得把错句读给她听）
+//   gatherContext(app, { now, exclude, events, focus }) -> Promise<ChatContext>   给 chat-prompt.js buildSystemPrompt 的她的情况（见那边注释）
+//       focus：这次问到的语法点（focusPoints），对应语法卡的规则原文放进提示词（focusCards）；另带 teacher.js askedLines（“我问过的”）
+//   focusPoints(user, history) -> ['there_be', ...]   这次问的、这个问题线上老师刚讲的、读句子时句子里的语法点
+//   focusCards(points, content?) -> [{ title, unit, rule, table, examples }]   最多 2 张
+//   讲对（design/teacher-next.md 6.4）：老师答完，程序查英文例句里她不认识的词（knownChecker、offList）；超过 OFF_MAX（2）个，
+//       带着这几个词请老师整段重写一次（simplifyAsk），重写的替换原来的（消息上记 simplified: [词]）；重写失败就留原来的。
+//       带照片的那一轮、模拟模式、课标词表没读到时不查。
+//   knownChecker(app, ctx, { extra }) -> (word) => bool | null   她认识的：小学 505（含变化形式）、学到当前单元的课本词、
+//       单词本里的词、她自己在这个问题里写过的词、讲的那个词；课本没导入时课标 1600 词也算
+//   offList(text, known) -> [词]   回答里英文例句（3 个词以上的一段）里她不认识的词；人名、后面括号写了中文的词不算
+//   simplifyAsk(words) -> 发给老师的“换简单的词重写”那句
 //   missLines(events, { wordOf, tagName })、intakeInfo(rec)、grammarCards(kv, now, unitId, curriculum)、recentAsks(kv, { exclude })
-//   mockAnswer(text, { image, quick })、mockStream(text, { image, quick, onDelta, signal, sleep })   模拟模式的假老师（也是一字字出）
+//   mockAnswer(text, { image, quick })、mockStream(text, { image, quick, onDelta, signal, sleep })   模拟模式的假老师（也是一字字出）；
+//       quick 'retell' 是“上次讲的 X，换个讲法再说一遍”（teacher.js retellAsk）
+//   “我问过的”：老师每答完一次，把 META 的 point / words 记进 kv 'teacher.asked'（teacher.js noteAsked；“和学校讲的不一样”那次不记）
 //   dayKey(date)、ymd(date)、isDayKey(key)、normDay(rec, date)
 // 导出（有状态）
 //   createChat(app, { fetchImpl, now, sleep }) -> {
@@ -45,21 +57,27 @@
 //
 // 存储（kv，随备份导出）：'chat:YYYY-MM-DD' = { version: 1, date, messages: [Message] }，留最近 KEEP_DAYS 天。
 //   Message = { id, role: 'user' | 'assistant', text, at, thread, send?, quick?, image?: true（发过照片；照片本身不存）,
-//               reply_to?, meta?: { kind, point, words, check }, model?, provider?, error?, stopped?, flagged? }
+//               reply_to?, meta?: { kind, point, words, check }, model?, provider?, error?, stopped?, flagged?,
+//               simplified?: [词]（例句里她不认识的词太多，老师换简单的词重写过） }
+//   正在重写时老师消息上有 simplifying: true（只在内存，界面写一句“老师在把例句换成你学过的词”）
 //   出错又没出字的老师消息只在内存（再试一次时去掉），不存。
 // 事件（events.js 'ask'，每个问题一条，老师回答完再记）：
 //   { type: 'ask', step: 'chat', qid: 'chat', who: 'emma', item: 'chat:<消息 id>', about: 'chat:<kind>', kind, point: 'g:<点>' | '',
 //     words, topic（topicLabel）, check, followup（快捷按钮 id 或 ''）, image, unit, q（问题前 60 个字）, ok, code?, model?, provider?, retry? }
 //   “和学校讲的不一样”记 { type: 'flag', step: 'chat', reason: 'chat', item: 'chat:<老师消息 id>', kind, point }
 // 依赖：config.js（API_URL、POE_DIRECT_URL）、ai.js（AIError、normalizePoeUrl）、budget.js（isBudgetExhausted）、events.js（isoLocal）、
-//   curriculum.js（defaultUnitOrder）、grammar.js（content、grammarState、summary）、chat-prompt.js。
+//   curriculum.js（defaultUnitOrder、inflectionBases）、grammar.js（content、grammarState、summary）、teacher.js（“我问过的”、pointCard）、
+//   words.js（slugify）、chat-prompt.js。
 import { API_URL, POE_DIRECT_URL } from './config.js';
 import { AIError, normalizePoeUrl } from './ai.js';
 import { isBudgetExhausted } from './budget.js';
 import { isoLocal } from './events.js';
-import { defaultUnitOrder } from './curriculum.js';
+import { defaultUnitOrder, inflectionBases } from './curriculum.js';
 import * as G from './grammar.js';
-import { buildSystemPrompt, KINDS, KIND_LABEL, POINTS, POINT_LABEL, CHECKS, META_OPEN } from './chat-prompt.js';
+import * as T from './teacher.js';
+import * as S from './screen.js';
+import { slugify } from './words.js';
+import { buildSystemPrompt, KINDS, KIND_LABEL, POINTS, POINT_LABEL, CHECKS, META_OPEN, META_CLOSE } from './chat-prompt.js';
 
 export const KV_PREFIX = 'chat:';
 export const KEEP_DAYS = 30;
@@ -77,6 +95,8 @@ export const RETRY_DELAYS = [1500];
 const PHOTO_TEXT = '这是我拍的一道题。';
 const OLD_PHOTO = '（我之前发过一张照片，现在看不到了。）';
 const MISS_DAYS = 21;
+export const OFF_MAX = 2;
+const safe = (f, d = null) => { try { const r = f(); return r === undefined ? d : r; } catch (e) { return d; } };
 
 export const QUICK = [
   { id: 'again', label: '还是不懂', send: '我还是不太懂。换一个更简单的说法，拆小一点再讲一次。' },
@@ -478,8 +498,10 @@ export function tokens(text) {
 }
 
 // The English she should hear: example sentences first; single words only when there is no sentence.
+// Lines that show a wrong sentence (换个讲法 compares right and wrong: “不对：There is two cats.”) are never read aloud.
+const WRONG_LINE = /不对|错误|错的|错：|✗|×|❌|不能说|不说/;
 export function speakable(text, cap = 1200) {
-  const s = visibleText(text).replace(/\*\*/g, '').replace(/[’‘]/g, "'").replace(/_{2,}|＿+/g, ' blank ').replace(/\s\/\s/g, ' ').replace(/·/g, '');
+  const s = visibleText(text).split('\n').filter(l => !WRONG_LINE.test(l)).join('\n').replace(/\*\*/g, '').replace(/[’‘]/g, "'").replace(/_{2,}|＿+/g, ' blank ').replace(/\s\/\s/g, ' ').replace(/·/g, '');
   const segs = s.split(/[\u3000-\u303f\u4e00-\u9fff\uff00-\uffef“”\n]+/)
     .map(x => x.replace(/\s+/g, ' ').replace(/^[\s\-–•*\d.、)(:/=]+/, '').replace(/[\s(:/=-]+$/, '').trim())
     .filter(x => /[A-Za-z]{2,}/.test(x));
@@ -581,11 +603,113 @@ export function recentAsks(kv, { exclude = '', max = 3 } = {}) {
   return out;
 }
 
+// kv 'teacher.stuck' (teacher.js mergeStuck): each line with its evidence; old shapes (strings, bare arrays) read too
 const stuckLines = v => (Array.isArray(v) ? v : v && Array.isArray(v.items) ? v.items : [])
-  .map(x => (typeof x === 'string' ? x : x && (x.text || x.label || x.what || '')))
-  .map(clean).filter(Boolean).slice(0, 3);
+  .map(x => (typeof x === 'string' ? x : !x ? '' : clean(x.text || x.label || x.what || '') + (clean(x.text || x.label || x.what || '') && clean(x.evidence) ? `（${clean(x.evidence)}）` : '')))
+  .map(clean).filter(Boolean).slice(0, 5);
 
-export async function gatherContext(app, { now = new Date(), exclude = '', events = null } = {}) {
+// ---------------------------------------------------------------- 讲对: the grammar card for the point she asks about
+
+export function focusPoints(user = {}, history = []) {
+  const text = String((user && (user.send || user.text)) || '');
+  const out = [];
+  const t = topicOf(text, { image: !!(user && user.image) });
+  if (t.point) out.push(t.point);
+  // a follow-up in the same thread (还是不懂, 再举个例子, her answer): the point the teacher was on
+  for (let i = (history || []).length - 1; i >= 0; i--) {
+    const m = history[i];
+    if (m && m.role === 'assistant' && m.meta && m.meta.point) { out.push(m.meta.point); break; }
+  }
+  // a sentence she cannot read: the grammar in it
+  if (t.kind === 'sentence') for (const [re, id] of POINT_CUES) if (re.test(text)) { out.push(id); break; }
+  return [...new Set(out.map(p => T.normPoint(p)).filter(Boolean))];
+}
+
+export function focusCards(points = [], c = null) {
+  const ct = c || safe(() => G.content());
+  if (!ct) return [];
+  const out = [];
+  const seen = new Set();
+  for (const p of points || []) {
+    const pc = T.pointCard(p, ct);
+    if (!pc || seen.has(pc.card.id)) continue;
+    seen.add(pc.card.id);
+    const card = pc.card;
+    out.push({ title: card.title, unit: shortUnit(card.unit), rule: (Array.isArray(card.rule) ? card.rule : []).slice(0, 8),
+      table: card.table && Array.isArray(card.table.head) ? card.table : null,
+      examples: (Array.isArray(card.examples) ? card.examples : []).slice(0, 3).map(e => ({ en: e.en, zh: e.zh })) });
+    if (out.length >= 2) break;
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- 讲对: example sentences only with words she knows
+
+const NAMES = new Set(['tom', 'lily', 'lucy', 'mike', 'mia', 'leo', 'kitty', 'momo', 'snowy', 'emma', 'amy', 'sam', 'ben', 'tony', 'betty', 'peter',
+  'jack', 'kate', 'jim', 'ann', 'john', 'mary', 'alice', 'bob', 'david', 'linda', 'daming', 'lingling', 'wang', 'li', 'zhang', 'chen', 'liu',
+  'ms', 'mr', 'mrs', 'miss', 'beijing', 'china', 'english', 'chinese', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
+const CONTRACT = { "can't": 'can', "won't": 'will', "don't": 'do', "doesn't": 'does', "didn't": 'did', "isn't": 'is', "aren't": 'are',
+  "wasn't": 'was', "weren't": 'were', "haven't": 'have', "hasn't": 'has', "i'm": 'i', "let's": 'let' };
+const plainWord = w => { const x = String(w || '').toLowerCase().replace(/[’‘]/g, "'"); return CONTRACT[x] || x.replace(/'(s|re|m|ll|ve|d)$/, '').replace(/'$/, ''); };
+
+export function knownChecker(app, ctx = {}, { extra = [] } = {}) {
+  const cur = app && app.curriculum;
+  if (!cur || typeof cur.isPrimary !== 'function') return null;
+  const counts = safe(() => (cur.counts ? cur.counts() : null));
+  if (counts && !counts.primary) return null;   // the word lists did not load: cannot tell
+  const v = (ctx && ctx.vocab) || {};
+  const book = new Set();
+  for (const w of v.words || []) for (const p of String(w).toLowerCase().split(/[\s/]+/)) if (p) book.add(p.replace(/[^a-z'-]/g, ''));
+  const noBook = !(Number(v.textbook) > 0);
+  const ex = new Set();
+  for (const w of extra || []) for (const p of String(w || '').toLowerCase().match(/[a-z][a-z'’-]*/g) || []) ex.add(plainWord(p));
+  const yes = w => !!w && (book.has(w) || ex.has(w) || NAMES.has(w) || !!safe(() => cur.isPrimary(w)) || (noBook && !!safe(() => cur.isRequired && cur.isRequired(w))));
+  // primary words the 505 check found she does not know yet (0.5.0) do not count as known, unless she used them herself
+  const unknown = new Set((Array.isArray(v.unknown) ? v.unknown : []).map(x => plainWord(x)).filter(Boolean));
+  return word => {
+    const w = plainWord(word);
+    if (!w || w.length < 2 || /\d/.test(w)) return true;
+    if (unknown.has(w) && !ex.has(w)) return false;
+    if (yes(w)) return true;
+    const bases = [safe(() => cur.baseOf && cur.baseOf(w)), ...safe(() => inflectionBases(w), [])].filter(Boolean);
+    if (bases.some(yes)) return true;
+    return !!safe(() => { const e = app.words && app.words.get && app.words.get(slugify(w)); return e && e.favorited; });
+  };
+}
+
+// the English example sentences (a run of 3 words or more between Chinese); a word with its Chinese in brackets right after is fine
+export function offList(text, known) {
+  if (typeof known !== 'function') return [];
+  const out = [];
+  const add = w => { const k = plainWord(w); if (!out.includes(k)) out.push(k); };
+  // pen·cil is one word; /ˈpensl/ (phonetics) is not English to check
+  const body = visibleText(text).replace(/\*\*/g, '').replace(/[’‘]/g, "'").replace(/_{2,}|＿+/g, ' ').replace(/[·•]/g, '').replace(/\/[^/\n]{1,30}\//g, ' ');
+  for (const line of body.split('\n')) {
+    const s = line.replace(/([A-Za-z][A-Za-z'-]*)\s*[（(][^）)]*[\u4e00-\u9fff][^）)]*[）)]/g, ' it ');
+    for (const seg of s.split(/[\u3000-\u303f\u4e00-\u9fff\uff00-\uffef“”"：:；;（）()]+/)) {
+      const toks = [...seg.matchAll(/[A-Za-z][A-Za-z'-]*/g)];
+      if (toks.length < 3) continue;
+      for (const m of toks) {
+        for (const part of m[0].split('-').filter(Boolean)) {
+          const before = seg.slice(0, m.index);
+          const start = !/[A-Za-z]/.test(before) || /[.?!]\s*$/.test(before);
+          if (/^[A-Z]/.test(part) && part !== 'I' && !start) continue;   // a name inside a sentence
+          if (/^[A-Z]{2,4}$/.test(part)) continue;                          // OK, TV
+          if (!known(part)) add(part);
+        }
+      }
+    }
+  }
+  return out.slice(0, 8);
+}
+
+export const simplifyAsk = words => `（这条是 App 写给老师的，不是她说的。）刚才的英文例句里有几个词她可能还不认识：${words.join('、')}。` +
+  '请把刚才的回答整段重写一遍：结论、讲法和最后的小问题都不变，只把英文例句换成她认识的词（小学词和她学过的课本词）；实在要用的词，后面用括号写中文。' +
+  `直接写重写后的回答，开头不要说“好的”。最后一行照样写 ${META_OPEN} {...}${META_CLOSE}。`;
+const herWords = history => (history || []).filter(m => m && m.role === 'user').map(m => String(m.send || m.text || '')).join(' ');
+const focusWords = focus => (focus || []).map(g => [...(g.examples || []).map(e => e.en), ...(g.rule || [])].join(' ')).join(' ');
+
+export async function gatherContext(app, { now = new Date(), exclude = '', events = null, focus = [] } = {}) {
   const kv = app.kv;
   const peek = (k, d) => { try { return kv.peek(k, d); } catch (e) { return d; } };
   const profile = peek('profile', {}) || {};
@@ -615,6 +739,8 @@ export async function gatherContext(app, { now = new Date(), exclude = '', event
     }
     vocab = { primary, textbook: words.length, upTo: upto.length ? shortUnit(upto[upto.length - 1].id) : '', words };
   } catch (e) { vocab = { primary: 505, textbook: 0, upTo: '', words: [] }; }
+  // 0.5.0: the primary words the 505 check found she does not know (screen.js unknownPrimary): kept out of examples
+  try { if (S.content()) vocab.unknown = S.unknownPrimary(kv).slice(0, 40); } catch (e) { /* no list */ }
 
   let evs = events;
   if (!evs) {
@@ -635,6 +761,8 @@ export async function gatherContext(app, { now = new Date(), exclude = '', event
     intake: intake.lines, praise: intake.praise, phonics: intake.phonics,
     recent: recentAsks(kv, { exclude }),
     stuck: stuckLines(peek('teacher.stuck', null)),
+    asked: safe(() => T.askedLines(T.readAsked(kv), now), []),
+    focus: safe(() => focusCards(focus), []),
   };
 }
 
@@ -648,6 +776,10 @@ export function mockAnswer(text, { image = false, quick = '' } = {}) {
   }
   if (quick === 'example') return '**再来一个：**\n\nThere are two cats in the box.（盒子里有两只猫。）\n\n这里是 two cats，两只，所以用 **are**。' + META({ kind: 'grammar', point: 'there_be', words: ['box'], check: 'none' });
   if (quick === 'quiz') return '**来一道：**\n\nThere ___ a book on the desk.（桌子上有一本书。）\n\n填 is 还是 are？' + META({ kind: 'grammar', point: 'there_be', words: ['book', 'desk'], check: 'none' });
+  if (quick === 'retell') {
+    return '**换个角度：把对的和不对的放在一起比。**\n\n- 对：There **are** two cats.（有两只猫。）\n- 不对：There is two cats.（two cats 是两只，不能用 is。）\n\n先看后面是一个还是几个，再选 is 或 are。\n\n你来试试：There ___ three books on the desk.（桌子上有三本书。）填 is 还是 are？' +
+      META({ kind: 'grammar', point: 'there_be', words: [], check: 'none' });
+  }
   if (quick === 'recheck') return '**我又核对了一遍，刚才讲的没有错。**\n\n如果学校老师讲的不一样，以学校老师为准。你可以把老师的原话告诉我，我们一起对一下。' + META({ kind: 'other', point: '', words: [], check: 'none' });
   if (/^\s*(?:is|are|has|have|there is|i have)\s*[.。]?\s*$/i.test(s)) {
     const good = /^\s*(?:is|has|there is)\s*[.。]?\s*$/i.test(s);
@@ -685,7 +817,7 @@ export async function mockStream(text, { image = false, quick = '', onDelta = ()
 // ---------------------------------------------------------------- storage
 
 const ROLES = ['user', 'assistant'];
-const KEEP_FIELDS = ['id', 'role', 'text', 'at', 'thread', 'send', 'quick', 'image', 'reply_to', 'meta', 'model', 'provider', 'error', 'stopped', 'flagged', 'retry'];
+const KEEP_FIELDS = ['id', 'role', 'text', 'at', 'thread', 'send', 'quick', 'image', 'reply_to', 'meta', 'model', 'provider', 'error', 'stopped', 'flagged', 'retry', 'simplified'];
 function normMsg(m) {
   if (!m || typeof m !== 'object' || !ROLES.includes(m.role) || !m.id) return null;
   const out = {};
@@ -777,16 +909,18 @@ export function createChat(app, { fetchImpl = null, now = () => new Date(), slee
         const why = app.budget && app.budget.blockReason ? app.budget.blockReason(BUDGET_KIND) : '';
         if (why === 'month') throw new AIError('今天已经收到过百炼的“预算用完”（429），App 今天不再发请求。', 'budget');
         if (why) throw new AIError(why === 'kind' ? '今天问老师的花费到了上限（每天 5 元），明天恢复。' : '今天的花费到了 App 里设的上限，明天恢复。可以在家长区调高上限。', 'budget-day');
-        const ctx = await gatherContext(app, { now: now(), exclude: user.id });
+        const ctx = await gatherContext(app, { now: now(), exclude: user.id, focus: focusPoints(user, history) });
         messages = buildMessages(buildSystemPrompt(ctx), history, images);
         res = await streamChat({ route, messages, fetchImpl, signal, onDelta, budget: app.budget, sleep });
         teacher.model = res.model || route.model;
         teacher.provider = route.provider;
         record(res.usage || estimateUsage(messages, res.text), teacher.model);
+        if (!hasPhoto && res.finish !== 'length') res = await simpler(res, { route, messages, ctx, history, signal, update, teacher });
       }
       const { text, meta } = splitMeta(res.text);
       teacher.text = text;
       if (meta) teacher.meta = meta;
+      else if (res.firstMeta) teacher.meta = res.firstMeta;
       if (!text) throw new AIError('老师回了空话。', 'empty');
       if (res.finish === 'length') teacher.error = 'truncated';
     } catch (err) {
@@ -813,7 +947,44 @@ export function createChat(app, { fetchImpl = null, now = () => new Date(), slee
     await save();
     update();
     if (!teacher.transient || teacher.error) await logAsk(user, teacher, { retry });
+    if (!teacher.transient && !teacher.error && teacher.text) await noteAsked(user, teacher);
     return teacher;
+  }
+
+  // 讲对: more than OFF_MAX words she does not know in the English examples -> the teacher rewrites the answer once with
+  // simpler words. The first answer stays on screen until the rewrite starts arriving, and stays if the rewrite fails.
+  async function simpler(res, { route, messages, ctx, history, signal, update, teacher }) {
+    const first = splitMeta(res.text);
+    const known = knownChecker(app, ctx, { extra: [herWords(history), ...((first.meta && first.meta.words) || []), focusWords(ctx.focus)] });
+    const off = known ? offList(first.text, known) : [];
+    if (off.length <= OFF_MAX) return res;
+    const more = [...messages, { role: 'assistant', content: res.text }, { role: 'user', content: simplifyAsk(off) }];
+    if (teacher) { teacher.simplifying = true; update(); }
+    try {
+      const res2 = await streamChat({ route, messages: more, fetchImpl, signal, budget: app.budget, sleep,
+        onDelta: (piece, all) => { const t = visibleText(all); if (t && teacher) { teacher.text = t; update(); } } });
+      record(res2.usage || estimateUsage(more, res2.text), res2.model || route.model);
+      if (visibleText(res2.text).trim() && res2.finish !== 'length') {
+        if (teacher) teacher.simplified = off;
+        return { ...res2, model: res.model, firstMeta: first.meta };
+      }
+    } catch (err) {
+      if (err && err.partial) record(estimateUsage(more, err.partial), route.model);
+    } finally {
+      if (teacher) delete teacher.simplifying;
+    }
+    if (teacher) { teacher.text = first.text; delete teacher.simplified; }
+    return res;
+  }
+
+  // “我问过的” (teacher.js): what this answer explained comes back in the warm-up two and five days later
+  async function noteAsked(user, teacher) {
+    if (user.quick === 'recheck') return;   // checking again is not a new explanation
+    try {
+      const meta = teacher.meta || topicOf(user.send || user.text, { image: !!user.image });
+      const res = T.noteAsked(T.readAsked(kv), { meta, text: user.quick ? '' : user.text, now: now(), msg: teacher.id });
+      if (res.keys.length) await kv.set(T.ASKED_KEY, res.state);
+    } catch (e) { /* bookkeeping only */ }
   }
   function record(usage, model) {
     try { if (app.budget && app.budget.record && usage) app.budget.record(usage, BUDGET_KIND, model); } catch (e) { /* bookkeeping only */ }

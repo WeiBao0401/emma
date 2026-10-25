@@ -79,8 +79,8 @@ export const HISTORY_DAYS = 56;          // how far back ui-weekly reads events 
 export const MS_CAP = 60000;
 
 // read: a story question about a target word (item 'ep:…' with its slug) counts, and as “in a new sentence” (attemptOf)
-export const OBJECTIVE_MODES = ['mc4', 'listen', 'tiles', 'keys', 'cloze', 'order', 'paper', 'read'];
-export const WRITE_MODES = ['tiles', 'keys', 'paper', 'cloze', 'order'];
+export const OBJECTIVE_MODES = ['mc4', 'listen', 'tiles', 'keys', 'cloze', 'order', 'paper', 'read', 'transform'];
+export const WRITE_MODES = ['tiles', 'keys', 'paper', 'cloze', 'order', 'transform'];
 export const WORD_TAGS = ['form', 'category', 'meaning', 'sound'];
 
 // grammar tags (curriculum/tags.json) said the way the summary says them: “my 和 mine：上周常混，这周没再错”

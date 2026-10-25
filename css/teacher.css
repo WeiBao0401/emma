@@ -1,0 +1,26 @@
+/* 家长区“老师每周想一次”（ui-teacher.js）。类名一律 teacher-。颜色、字体用 index.html :root 的变量；按钮大，一栏 --col。 */
+.teacher{display:flex;flex-direction:column;gap:6px;padding:4px 0 8px}
+.teacher-when{color:var(--muted)}
+.teacher-err{color:var(--danger)}
+.teacher-h{margin-top:18px;font:600 16px/1.4 var(--serif);color:var(--ink)}
+.teacher-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.teacher-list li{border-left:2px solid var(--rule-strong);padding:2px 0 2px 12px}
+.teacher-next{counter-reset:tn}
+.teacher-next li{counter-increment:tn}
+.teacher-next .teacher-item::before{content:counter(tn) ". ";color:var(--muted);font-variant-numeric:tabular-nums}
+.teacher-item{font:16px/1.55 var(--sans);color:var(--ink);display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.teacher-why{margin-top:2px;color:var(--muted)}
+.teacher-kid{margin-top:6px;font:500 18px/1.5 var(--serif);color:var(--accent)}
+.teacher-tag{font-size:12.5px;line-height:1.6;padding:0 8px;border-radius:999px;background:var(--tag-bg);color:var(--ink)}
+.teacher-retell,.teacher-dropped{background:color-mix(in srgb,var(--danger) 14%,var(--paper));color:var(--danger)}
+.teacher-learned{background:color-mix(in srgb,var(--good) 14%,var(--paper));color:var(--good)}
+.teacher-stale{background:transparent;color:var(--faint);border:1px solid var(--rule)}
+.teacher-more{margin-top:16px;border-top:1px solid var(--rule)}
+.teacher-more summary{min-height:48px;display:flex;align-items:center;cursor:pointer;font:600 15px/1.4 var(--sans);color:var(--muted);list-style:none}
+.teacher-more summary::-webkit-details-marker{display:none}
+.teacher-evidence{white-space:pre-wrap;font:14px/1.7 var(--sans);color:var(--ink);padding-bottom:12px}
+.teacher-old{padding:8px 0 12px;border-top:1px solid var(--rule)}
+.teacher-old:first-of-type{border-top:0}
+.teacher-actions{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:20px}
+.teacher-go{min-width:220px}
+.teacher-status{color:var(--muted)}

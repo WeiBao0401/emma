@@ -47,3 +47,12 @@
   .ord-slot{min-width:48px;height:52px}
 }
 @media (prefers-reduced-motion:reduce){.ord-tile{transition:none}}
+
+/* 句型转换 (renderTransform): the statement she starts from, its underlined part, the task, then the new sentence's Chinese */
+.ord-from{font:500 26px/1.45 var(--serif);color:var(--ink);margin:0;overflow-wrap:anywhere}
+.ord-from .say{display:inline-flex;vertical-align:middle;width:40px;height:40px;margin-left:8px}
+.ord-mark{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:5px;text-decoration-color:var(--accent)}
+.ord-from-zh{color:var(--muted);margin:0}
+.ord-task{font:600 15px/1.4 var(--sans);color:var(--accent);letter-spacing:.02em;margin:12px 0 0;padding-top:12px;border-top:1px solid var(--rule)}
+.ord-transform .ord-zh{font-size:26px}
+@media (max-width:420px){.ord-from{font-size:22px}.ord-transform .ord-zh{font-size:22px}}

@@ -64,6 +64,7 @@
 .rd-line{display:flex;align-items:flex-start;gap:6px}
 .rd-no{flex:none;min-width:1.6em;padding-top:.62em;font:500 12px/1 var(--sans);font-variant-numeric:tabular-nums;color:var(--faint);text-align:right}
 .rd-s.cont{padding-top:0}
+.rd-s.rd-newpara{margin-top:14px}
 .rd-part{display:flex;flex-direction:column;gap:2px;margin:18px 0 6px;padding-top:12px;border-top:1px solid var(--rule)}
 .rd-story>.rd-part:first-child{margin-top:4px;border-top:0;padding-top:0}
 .rd-part-en{font:italic 500 16px/1.3 var(--serif);color:var(--muted)}
@@ -184,6 +185,59 @@
 .text-btn.rd-hear{align-self:flex-start;margin-left:-10px;font-size:16px}
 .rd-teaser{font-size:17px;line-height:1.6;color:var(--ink);padding:14px 0;border-top:1px solid var(--rule)}
 .text-btn.rd-boring{margin-right:auto;font-size:14px;color:var(--faint)}
+
+/* 0.5 ---------------------------------------------------------------- */
+/* 句子主干: 谁 (subject) has a soft marker under it, 干什么 (verb) a thick accent underline */
+.rd-subj{background:color-mix(in srgb,var(--marker) 75%,var(--paper));border-radius:3px;box-shadow:0 0 0 1px color-mix(in srgb,var(--marker-ink) 22%,transparent);box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.rd-verb{font-weight:600;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:3px;text-underline-offset:5px}
+.rd-trunk-note{font-size:17px;line-height:1.6;color:var(--ink)}
+.rd-legend{display:flex;gap:14px;font-size:14px;color:var(--muted)}
+.rd-legend .rd-subj,.rd-legend .rd-verb{padding:0 4px;color:var(--ink)}
+.rd-auto-note{margin-bottom:6px;color:var(--muted)}
+.rd-auto-note .rd-subj,.rd-auto-note .rd-verb{padding:0 3px;color:var(--ink)}
+
+/* 带着这道题读 (one question to look for while reading) */
+.rd-focus{display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-left:3px solid var(--accent);background:color-mix(in srgb,var(--tag-bg) 55%,var(--paper))}
+.rd-focus-q{font:500 20px/1.45 var(--sans);color:var(--ink)}
+.rd-focus-q:lang(en){font:500 22px/1.45 var(--serif)}
+.rd-focus-zh{font-size:15px;color:var(--muted)}
+.rd-preview li.rd-pv-focus .rd-pv-en{font-weight:600}
+.rd-pv-note{font-size:15px;color:var(--accent)}
+.rd-pv-one{display:flex;flex-direction:column;gap:2px}
+
+/* 点出答案句: every sentence is a button */
+.rd-story.rd-locate .rd-s{cursor:pointer;border:1px solid transparent;-webkit-user-select:none;user-select:none}
+.rd-story.rd-locate .rd-s:active{background:var(--tag-bg)}
+.rd-locate-box{max-height:58vh}
+.rd-s.rd-zone{background:var(--tag-bg)}
+.rd-story.rd-zoned .rd-s:not(.rd-zone):not(.rd-hit):not(.rd-miss){opacity:.4}
+.rd-s.rd-miss{border-color:var(--danger)}
+.rd-s.rd-miss .rd-en{color:var(--danger);text-decoration:line-through;text-decoration-thickness:1px}
+.rd-s.rd-hit{background:var(--tag-bg);box-shadow:inset 3px 0 0 var(--good);border-color:var(--good)}
+.rd-s.rd-dropped{opacity:.45;pointer-events:none}
+.rd-s.rd-dropped .rd-en{text-decoration:line-through;text-decoration-thickness:1px}
+.rd-locate-how{font-size:16px;color:var(--accent)}
+.rd-then{display:flex;flex-direction:column;gap:14px;padding-top:16px;border-top:1px solid var(--rule)}
+.rd-found{padding:10px 14px;border-radius:8px;background:var(--tag-bg);box-shadow:inset 3px 0 0 var(--good)}
+.rd-found .rd-no{display:inline-block;min-width:1.4em;padding:0;vertical-align:.3em}
+
+/* 指代题: the sentence, the pronoun marked */
+.rd-refq{display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-radius:10px;background:color-mix(in srgb,var(--tag-bg) 45%,var(--paper))}
+.rd-refq-en{font:400 23px/1.5 var(--serif);color:var(--ink)}
+.rd-pron{font-weight:650;color:var(--accent);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+
+/* 先想想这集的方法 (after two 方法 misses) */
+.rd-method{display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-left:3px solid var(--accent);background:color-mix(in srgb,var(--tag-bg) 55%,var(--paper))}
+.rd-method-title{font:600 18px/1.4 var(--sans);color:var(--ink)}
+.rd-method-line{font-size:16px;line-height:1.55;color:var(--ink)}
+
+/* 今天哪里最难？ */
+.rd-hard{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-top:1px solid var(--rule)}
+.rd-hard-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rd-hard-opt{min-height:56px;padding:10px 14px;border:1px solid var(--rule-strong);border-radius:12px;background:var(--paper);color:var(--ink);font:500 17px/1.35 var(--sans);text-align:center}
+.rd-hard-opt:active{background:var(--tag-bg)}
+.rd-hard-reply{font-size:17px;line-height:1.6;color:var(--ink)}
+@media (max-width:599px){.rd-hard-opts{grid-template-columns:1fr}}
 
 @media (min-width:700px){
   .rd-title{font-size:38px}

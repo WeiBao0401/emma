@@ -1,0 +1,2418 @@
+{
+ "version": 1,
+ "id": "exam-reading",
+ "title": "期中阅读小篇",
+ "about_zh": "照北京初一期中的阅读题型写的 3 篇短文（细节、推断、主旨、猜词义），每篇 5 道题。只用小学词和 Starter 到 Unit 3 的词，生词加注；猜词义题考的那个词（guess: true）读完题再给中文。",
+ "rules": {
+  "words": [
+   150,
+   200
+  ],
+  "maxNew": 5,
+  "questions": [
+   4,
+   5
+  ],
+  "hints": 4,
+  "types": [
+   "detail",
+   "infer",
+   "main",
+   "meaning"
+  ]
+ },
+ "passages": [
+  {
+   "id": "r1",
+   "n": 1,
+   "kind": "story",
+   "title": "My Grandma",
+   "title_zh": "我的奶奶",
+   "label": "期中阅读 · 第 1 篇",
+   "tip": {
+    "title": "先看题，再回原文找",
+    "lines": [
+     "先把 5 道题看一遍，知道要找什么。",
+     "每道题都回到原文，找到能证明答案的那一句再选。"
+    ],
+    "preview": true,
+    "q": "q1"
+   },
+   "names": [
+    {
+     "en": "Lucy",
+     "zh": "人名"
+    },
+    {
+     "en": "Beijing",
+     "zh": "北京"
+    }
+   ],
+   "glossary": [
+    {
+     "w": "homework",
+     "zh": "作业"
+    },
+    {
+     "w": "gate",
+     "zh": "大门",
+     "guess": true
+    }
+   ],
+   "sentences": [
+    {
+     "id": 1,
+     "para": 1,
+     "en": "My name is Lucy.",
+     "zh": "我叫 Lucy。",
+     "chunks": "My name is Lucy.",
+     "trunk": {
+      "subject": "My name",
+      "verb": "is",
+      "note": "谁 = My name（我的名字），是什么 = is Lucy"
+     },
+     "keys": [
+      {
+       "w": "name",
+       "zh": "名字"
+      }
+     ],
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 2,
+     "para": 1,
+     "en": "I live with my grandma in Beijing.",
+     "zh": "我和奶奶住在北京。",
+     "chunks": "I live / with my grandma / in Beijing.",
+     "trunk": {
+      "subject": "I",
+      "verb": "live",
+      "note": "谁 = I（我），干什么 = live（住）"
+     },
+     "keys": [
+      {
+       "w": "live",
+       "zh": "住"
+      },
+      {
+       "w": "grandma",
+       "zh": "奶奶"
+      }
+     ],
+     "tags": []
+    },
+    {
+     "id": 3,
+     "para": 1,
+     "en": "My parents work abroad, so I only see them on the screen.",
+     "zh": "我爸爸妈妈在国外工作，所以我只能在屏幕上见到他们。",
+     "chunks": "My parents work abroad, / so I only see them / on the screen.",
+     "trunk": {
+      "subject": "My parents",
+      "verb": "work",
+      "note": "谁 = My parents（我的父母），干什么 = work abroad（在国外工作）"
+     },
+     "keys": [
+      {
+       "w": "abroad",
+       "zh": "在国外"
+      },
+      {
+       "w": "screen",
+       "zh": "屏幕"
+      }
+     ],
+     "tags": [
+      "pronoun",
+      "plural"
+     ]
+    },
+    {
+     "id": 4,
+     "para": 2,
+     "en": "Grandma is very strict.",
+     "zh": "奶奶很严格。",
+     "chunks": "Grandma is very strict.",
+     "trunk": {
+      "subject": "Grandma",
+      "verb": "is",
+      "note": "谁 = Grandma（奶奶），怎么样 = is very strict（很严格）"
+     },
+     "keys": [
+      {
+       "w": "strict",
+       "zh": "严格的"
+      }
+     ],
+     "tags": [
+      "be_adj"
+     ]
+    },
+    {
+     "id": 5,
+     "para": 2,
+     "en": "She seldom smiles, and she checks my homework every evening.",
+     "zh": "她很少笑，每天晚上都检查我的作业。",
+     "chunks": "She seldom smiles, / and she checks my homework / every evening.",
+     "trunk": {
+      "subject": "She",
+      "verb": "seldom smiles",
+      "note": "谁 = She（奶奶），干什么 = seldom smiles（很少笑）；后半句 she checks（她检查）"
+     },
+     "keys": [
+      {
+       "w": "seldom",
+       "zh": "很少"
+      },
+      {
+       "w": "checks",
+       "zh": "检查"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "freq_adv",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 6,
+     "para": 2,
+     "en": "When I make a mistake, she points it out and says, \"Do it again.\"",
+     "zh": "我出错的时候，她会指出来，说：“再做一遍。”",
+     "chunks": "When I make a mistake, / she points it out / and says, / \"Do it again.\"",
+     "trunk": {
+      "subject": "she",
+      "verb": "points it out",
+      "note": "谁 = she（奶奶），干什么 = points it out（把它指出来）and says（说）"
+     },
+     "keys": [
+      {
+       "w": "mistake",
+       "zh": "错误"
+      },
+      {
+       "w": "points it out",
+       "zh": "把它指出来"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun",
+      "imperative"
+     ]
+    },
+    {
+     "id": 7,
+     "para": 2,
+     "en": "Sometimes I don't like her rules.",
+     "zh": "有时候我不喜欢她的规矩。",
+     "chunks": "Sometimes / I don't like / her rules.",
+     "trunk": {
+      "subject": "I",
+      "verb": "don't like",
+      "note": "谁 = I（我），干什么 = don't like（不喜欢）"
+     },
+     "keys": [
+      {
+       "w": "Sometimes",
+       "zh": "有时候"
+      },
+      {
+       "w": "rules",
+       "zh": "规矩"
+      }
+     ],
+     "tags": [
+      "do_q",
+      "freq_adv",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 8,
+     "para": 3,
+     "en": "But Grandma cares about me in many ways.",
+     "zh": "可是奶奶在很多方面都关心我。",
+     "chunks": "But Grandma cares about me / in many ways.",
+     "trunk": {
+      "subject": "Grandma",
+      "verb": "cares about",
+      "note": "谁 = Grandma，干什么 = cares about me（关心我）"
+     },
+     "keys": [
+      {
+       "w": "cares about",
+       "zh": "关心"
+      },
+      {
+       "w": "ways",
+       "zh": "方面，方式"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 9,
+     "para": 3,
+     "en": "Every morning, she gets up at six and makes breakfast for me.",
+     "zh": "每天早上，她六点起床，给我做早饭。",
+     "chunks": "Every morning, / she gets up at six / and makes breakfast for me.",
+     "trunk": {
+      "subject": "she",
+      "verb": "gets up",
+      "note": "谁 = she（奶奶），干什么 = gets up（起床）and makes breakfast（做早饭）"
+     },
+     "keys": [
+      {
+       "w": "gets up",
+       "zh": "起床"
+      },
+      {
+       "w": "breakfast",
+       "zh": "早饭"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 10,
+     "para": 3,
+     "en": "When it rains, she carries a big umbrella and waits for me at the school gate.",
+     "zh": "下雨的时候，她拿着一把大伞，在校门口等我。",
+     "chunks": "When it rains, / she carries a big umbrella / and waits for me / at the school gate.",
+     "trunk": {
+      "subject": "she",
+      "verb": "carries",
+      "note": "谁 = she（奶奶），干什么 = carries（拿着）and waits for（等）"
+     },
+     "keys": [
+      {
+       "w": "carries",
+       "zh": "拿着，带着"
+      },
+      {
+       "w": "waits for",
+       "zh": "等"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 11,
+     "para": 3,
+     "en": "When I come home late, she is worried.",
+     "zh": "我回家晚了，她就很担心。",
+     "chunks": "When I come home late, / she is worried.",
+     "trunk": {
+      "subject": "she",
+      "verb": "is",
+      "note": "谁 = she（奶奶），怎么样 = is worried（担心）"
+     },
+     "keys": [
+      {
+       "w": "late",
+       "zh": "晚"
+      },
+      {
+       "w": "worried",
+       "zh": "担心的"
+      }
+     ],
+     "tags": [
+      "be_adj"
+     ]
+    },
+    {
+     "id": 12,
+     "para": 3,
+     "en": "She stands at the window and looks out at the road.",
+     "zh": "她站在窗边，望着外面的路。",
+     "chunks": "She stands at the window / and looks out / at the road.",
+     "trunk": {
+      "subject": "She",
+      "verb": "stands",
+      "note": "谁 = She（奶奶），干什么 = stands（站）and looks out（向外看）"
+     },
+     "keys": [
+      {
+       "w": "stands",
+       "zh": "站"
+      },
+      {
+       "w": "road",
+       "zh": "路"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 13,
+     "para": 3,
+     "en": "When I am ill, she sits by my bed all night.",
+     "zh": "我生病的时候，她整夜坐在我床边。",
+     "chunks": "When I am ill, / she sits by my bed / all night.",
+     "trunk": {
+      "subject": "she",
+      "verb": "sits",
+      "note": "谁 = she（奶奶），干什么 = sits（坐）"
+     },
+     "keys": [
+      {
+       "w": "ill",
+       "zh": "生病的"
+      },
+      {
+       "w": "all night",
+       "zh": "整夜"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 14,
+     "para": 3,
+     "en": "She also tells me stories about my father as a little boy.",
+     "zh": "她还给我讲我爸爸小时候的故事。",
+     "chunks": "She also tells me stories / about my father / as a little boy.",
+     "trunk": {
+      "subject": "She",
+      "verb": "tells",
+      "note": "谁 = She（奶奶），干什么 = tells me stories（给我讲故事）"
+     },
+     "keys": [
+      {
+       "w": "tells",
+       "zh": "讲"
+      },
+      {
+       "w": "as a little boy",
+       "zh": "还是个小男孩的时候"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "plural"
+     ]
+    },
+    {
+     "id": 15,
+     "para": 4,
+     "en": "Then I understand.",
+     "zh": "这时我明白了。",
+     "chunks": "Then I understand.",
+     "trunk": {
+      "subject": "I",
+      "verb": "understand",
+      "note": "谁 = I（我），干什么 = understand（明白）"
+     },
+     "keys": [
+      {
+       "w": "understand",
+       "zh": "明白"
+      }
+     ],
+     "tags": []
+    },
+    {
+     "id": 16,
+     "para": 4,
+     "en": "Her rules come from her love.",
+     "zh": "她的规矩来自她的爱。",
+     "chunks": "Her rules / come from her love.",
+     "trunk": {
+      "subject": "Her rules",
+      "verb": "come from",
+      "note": "谁 = Her rules（她的规矩），干什么 = come from（来自）"
+     },
+     "keys": [
+      {
+       "w": "come from",
+       "zh": "来自"
+      },
+      {
+       "w": "love",
+       "zh": "爱"
+      }
+     ],
+     "tags": [
+      "pronoun",
+      "plural"
+     ]
+    },
+    {
+     "id": 17,
+     "para": 4,
+     "en": "Now I hug her every day.",
+     "zh": "现在我每天都抱抱她。",
+     "chunks": "Now I hug her / every day.",
+     "trunk": {
+      "subject": "I",
+      "verb": "hug",
+      "note": "谁 = I（我），干什么 = hug her（拥抱她）"
+     },
+     "keys": [
+      {
+       "w": "hug",
+       "zh": "拥抱"
+      },
+      {
+       "w": "every day",
+       "zh": "每天"
+      }
+     ],
+     "tags": [
+      "pronoun"
+     ]
+    },
+    {
+     "id": 18,
+     "para": 4,
+     "en": "She still seldom smiles, but I know she is happy.",
+     "zh": "她还是很少笑，但我知道她很开心。",
+     "chunks": "She still seldom smiles, / but I know / she is happy.",
+     "trunk": {
+      "subject": "She",
+      "verb": "seldom smiles",
+      "note": "谁 = She（奶奶），干什么 = still seldom smiles（还是很少笑）"
+     },
+     "keys": [
+      {
+       "w": "still",
+       "zh": "还是，仍然"
+      },
+      {
+       "w": "seldom",
+       "zh": "很少"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "freq_adv"
+     ]
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "Where do Lucy's parents work?",
+     "zh": "Lucy 的爸爸妈妈在哪儿工作？",
+     "options": [
+      "In Beijing.",
+      "Abroad.",
+      "At Lucy's school.",
+      "In a hospital."
+     ],
+     "options_zh": [
+      "在北京。",
+      "在国外。",
+      "在 Lucy 的学校。",
+      "在医院。"
+     ],
+     "answer": "Abroad.",
+     "evidence": [
+      3
+     ],
+     "drop": "In Beijing.",
+     "hints": [
+      "回到第 3 句，那句讲的是爸爸妈妈。",
+      "关键词是 parents 和 work。第 3 句 work 后面紧跟的那个词就是答案。",
+      "排除“In Beijing”：第 2 句说住在北京的是 Lucy 和奶奶，不是爸爸妈妈。",
+      "答案是“Abroad”。第 3 句：My parents work abroad（我爸爸妈妈在国外工作），所以 Lucy 只能在屏幕上见到他们。"
+     ],
+     "variant": {
+      "ask": "Where does Lucy live?",
+      "zh": "Lucy 住在哪儿？",
+      "options": [
+       "In Beijing.",
+       "Abroad.",
+       "At school.",
+       "In a hospital."
+      ],
+      "options_zh": [
+       "在北京。",
+       "在国外。",
+       "在学校。",
+       "在医院。"
+      ],
+      "answer": "In Beijing.",
+      "evidence": [
+       2
+      ],
+      "explain": "第 2 句：I live with my grandma in Beijing（我和奶奶住在北京）。在国外的是爸爸妈妈。"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "What does Grandma do when it rains?",
+     "zh": "下雨的时候，奶奶做什么？",
+     "options": [
+      "She waits for Lucy at the school gate.",
+      "She makes breakfast for Lucy.",
+      "She sits by Lucy's bed all night.",
+      "She tells Lucy stories."
+     ],
+     "options_zh": [
+      "她在校门口等 Lucy。",
+      "她给 Lucy 做早饭。",
+      "她整夜坐在 Lucy 床边。",
+      "她给 Lucy 讲故事。"
+     ],
+     "answer": "She waits for Lucy at the school gate.",
+     "evidence": [
+      10
+     ],
+     "drop": "She makes breakfast for Lucy.",
+     "hints": [
+      "找有 rains 的那一句。",
+      "关键词是 when it rains（下雨的时候），在第 10 句开头。看它后面奶奶做了什么。",
+      "排除“She makes breakfast for Lucy”：第 9 句说的是每天早上做早饭，和下雨没关系。",
+      "答案是“She waits for Lucy at the school gate”。第 10 句：下雨的时候，她拿着一把大伞，在 school gate 等我。"
+     ],
+     "variant": {
+      "ask": "What does Grandma do when Lucy is ill?",
+      "zh": "Lucy 生病的时候，奶奶做什么？",
+      "options": [
+       "She sits by Lucy's bed all night.",
+       "She carries a big umbrella.",
+       "She checks Lucy's homework.",
+       "She gets up at six."
+      ],
+      "options_zh": [
+       "她整夜坐在 Lucy 床边。",
+       "她拿着一把大伞。",
+       "她检查 Lucy 的作业。",
+       "她六点起床。"
+      ],
+      "answer": "She sits by Lucy's bed all night.",
+      "evidence": [
+       13
+      ],
+      "explain": "第 13 句：When I am ill, she sits by my bed all night（我生病的时候，她整夜坐在我床边）。关键词是 ill。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "meaning",
+     "skill": "meaning",
+     "skill_zh": "猜词义",
+     "ask": "What is the meaning of \"gate\" in Sentence 10?",
+     "zh": "第 10 句里的 gate 是什么意思？",
+     "options": [
+      "大门",
+      "教室",
+      "书包",
+      "公共汽车"
+     ],
+     "answer": "大门",
+     "evidence": [
+      10
+     ],
+     "drop": "书包",
+     "hints": [
+      "回到第 10 句，看 gate 前后的词。",
+      "gate 前面是 school。奶奶 waits for me at the school gate：她在学校的某个地方等 Lucy 放学出来。",
+      "排除“书包”：人不能站在书包那儿等人。",
+      "答案是“大门”。奶奶拿着伞在学校的 gate 等 Lucy，接孩子都在校门口，所以 school gate 是“校门”，gate 就是“大门”。"
+     ],
+     "variant": {
+      "ask": "What is the meaning of \"screen\" in Sentence 3?",
+      "zh": "第 3 句里的 screen 是什么意思？",
+      "options": [
+       "屏幕",
+       "学校",
+       "窗户",
+       "飞机"
+      ],
+      "answer": "屏幕",
+      "evidence": [
+       3
+      ],
+      "explain": "爸爸妈妈在国外，Lucy 只能 on the screen 见到他们：在手机或电脑的屏幕上视频。screen 就是“屏幕”。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "infer",
+     "skill": "infer",
+     "skill_zh": "推断",
+     "ask": "What is Grandma like?",
+     "zh": "奶奶是个什么样的人？",
+     "options": [
+      "Strict but kind.",
+      "Busy and angry.",
+      "Quiet and lonely.",
+      "Happy and silly."
+     ],
+     "options_zh": [
+      "严格，但是心好。",
+      "很忙，爱生气。",
+      "安静又孤单。",
+      "快乐又傻乎乎的。"
+     ],
+     "answer": "Strict but kind.",
+     "evidence": [
+      4,
+      8
+     ],
+     "drop": "Happy and silly.",
+     "hints": [
+      "把第 4 句和第 8 句连起来看。",
+      "第 4 句说 Grandma is very strict（很严格）；第 8 句说 Grandma cares about me in many ways（在很多方面关心我）。",
+      "排除“Happy and silly”：第 5 句和第 18 句都说她 seldom smiles（很少笑），她一点也不傻乎乎。",
+      "答案是“Strict but kind”。她很严格（第 4 句），可是早上做早饭、下雨去接、生病整夜陪着（第 9 到 13 句），都说明她心好。原文没有直接写 kind，要把几句连起来想。"
+     ],
+     "variant": {
+      "ask": "How does Lucy feel about Grandma now?",
+      "zh": "现在 Lucy 对奶奶是什么感情？",
+      "options": [
+       "She loves her.",
+       "She is angry with her.",
+       "She is lonely.",
+       "She doesn't know her."
+      ],
+      "options_zh": [
+       "她爱奶奶。",
+       "她生奶奶的气。",
+       "她很孤单。",
+       "她不认识奶奶。"
+      ],
+      "answer": "She loves her.",
+      "evidence": [
+       17
+      ],
+      "explain": "第 17 句：Now I hug her every day（现在我每天都抱抱她）。每天拥抱，说明她爱奶奶。"
+     }
+    },
+    {
+     "id": "q5",
+     "type": "main",
+     "skill": "main",
+     "skill_zh": "主旨",
+     "ask": "What is the story about?",
+     "zh": "这篇短文主要讲什么？",
+     "options": [
+      "Lucy's strict but kind grandma.",
+      "Lucy's parents and their work.",
+      "Lucy's first day at school.",
+      "Lucy's big umbrella."
+     ],
+     "options_zh": [
+      "Lucy 严格又心好的奶奶。",
+      "Lucy 的爸爸妈妈和他们的工作。",
+      "Lucy 上学的第一天。",
+      "Lucy 的大伞。"
+     ],
+     "answer": "Lucy's strict but kind grandma.",
+     "evidence": [
+      4,
+      8,
+      16
+     ],
+     "drop": "Lucy's big umbrella.",
+     "hints": [
+      "主旨题看全文：从头到尾，一直在讲谁？",
+      "第 4 句（奶奶很严格）、第 8 句（奶奶关心我）、第 16 句（她的规矩来自爱），讲的都是 Grandma。",
+      "排除“Lucy's big umbrella”：伞只在第 10 句出现了一次，是一个小细节。",
+      "答案是“Lucy's strict but kind grandma”。全文都在讲奶奶：她很严格，可是处处关心 Lucy，她的规矩里是爱。"
+     ],
+     "variant": {
+      "ask": "What does Lucy want to tell us?",
+      "zh": "Lucy 最想告诉我们什么？",
+      "options": [
+       "Grandma's rules come from her love.",
+       "Lucy's parents work abroad.",
+       "Lucy often makes mistakes.",
+       "Grandma likes umbrellas."
+      ],
+      "options_zh": [
+       "奶奶的规矩来自她的爱。",
+       "Lucy 的爸爸妈妈在国外工作。",
+       "Lucy 常常出错。",
+       "奶奶喜欢雨伞。"
+      ],
+      "answer": "Grandma's rules come from her love.",
+      "evidence": [
+       15,
+       16
+      ],
+      "explain": "第 15、16 句：Then I understand. Her rules come from her love（这时我明白了：她的规矩来自她的爱）。这是 Lucy 读懂奶奶以后最想说的话；爸爸妈妈在国外、出错、雨伞都是小细节。"
+     }
+    }
+   ]
+  },
+  {
+   "id": "r2",
+   "n": 2,
+   "kind": "story",
+   "title": "",
+   "title_zh": "",
+   "label": "期中阅读 · 第 2 篇",
+   "tip": {
+    "title": "不认识的词，看前后句猜",
+    "lines": [
+     "遇到不认识的词先别停，往下读。",
+     "看看它长得像哪个认识的词，再看前后句在说什么。"
+    ],
+    "preview": true,
+    "q": "q3"
+   },
+   "names": [
+    {
+     "en": "Tom",
+     "zh": "人名"
+    },
+    {
+     "en": "Kate",
+     "zh": "人名"
+    },
+    {
+     "en": "Jack",
+     "zh": "人名"
+    }
+   ],
+   "glossary": [
+    {
+     "w": "friendly",
+     "zh": "友好的",
+     "guess": true
+    }
+   ],
+   "sentences": [
+    {
+     "id": 1,
+     "para": 1,
+     "en": "Today is Tom's first day at junior high.",
+     "zh": "今天是 Tom 上初中的第一天。",
+     "chunks": "Today is / Tom's first day / at junior high.",
+     "trunk": {
+      "subject": "Today",
+      "verb": "is",
+      "note": "谁 = Today（今天），是什么 = is Tom's first day（Tom 的第一天）"
+     },
+     "keys": [
+      {
+       "w": "first day",
+       "zh": "第一天"
+      },
+      {
+       "w": "junior high",
+       "zh": "初中"
+      }
+     ],
+     "tags": [
+      "poss_s",
+      "be_verb"
+     ]
+    },
+    {
+     "id": 2,
+     "para": 1,
+     "en": "He is very nervous.",
+     "zh": "他很紧张。",
+     "chunks": "He is very nervous.",
+     "trunk": {
+      "subject": "He",
+      "verb": "is",
+      "note": "谁 = He（Tom），怎么样 = is very nervous（很紧张）"
+     },
+     "keys": [
+      {
+       "w": "nervous",
+       "zh": "紧张的"
+      }
+     ],
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 3,
+     "para": 1,
+     "en": "He doesn't know any students in his new school.",
+     "zh": "新学校里的同学，他一个也不认识。",
+     "chunks": "He doesn't know / any students / in his new school.",
+     "trunk": {
+      "subject": "He",
+      "verb": "doesn't know",
+      "note": "谁 = He（Tom），干什么 = doesn't know（不认识）"
+     },
+     "keys": [
+      {
+       "w": "doesn't know",
+       "zh": "不认识"
+      },
+      {
+       "w": "any",
+       "zh": "任何一个（不认识 any = 一个也不认识）"
+      }
+     ],
+     "tags": [
+      "do_q",
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 4,
+     "para": 1,
+     "en": "The school is big, and Tom can't find his classroom.",
+     "zh": "学校很大，Tom 找不到自己的教室。",
+     "chunks": "The school is big, / and Tom can't find / his classroom.",
+     "trunk": {
+      "subject": "The school",
+      "verb": "is",
+      "note": "谁 = The school，怎么样 = is big（很大）；后半句 Tom can't find（Tom 找不到）"
+     },
+     "keys": [
+      {
+       "w": "can't find",
+       "zh": "找不到"
+      },
+      {
+       "w": "classroom",
+       "zh": "教室"
+      }
+     ],
+     "tags": [
+      "be_adj",
+      "can"
+     ]
+    },
+    {
+     "id": 5,
+     "para": 2,
+     "en": "A girl in a red jacket comes over.",
+     "zh": "一个穿红夹克的女孩走了过来。",
+     "chunks": "A girl in a red jacket / comes over.",
+     "trunk": {
+      "subject": "A girl in a red jacket",
+      "verb": "comes over",
+      "note": "谁 = A girl in a red jacket（穿红夹克的女孩），干什么 = comes over（走过来）"
+     },
+     "keys": [
+      {
+       "w": "jacket",
+       "zh": "夹克"
+      },
+      {
+       "w": "comes over",
+       "zh": "走过来"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 6,
+     "para": 2,
+     "en": "\"Hi, I'm Kate,\" she says.",
+     "zh": "“你好，我是 Kate，”她说。",
+     "chunks": "\"Hi, I'm Kate,\" / she says.",
+     "trunk": {
+      "subject": "she",
+      "verb": "says",
+      "note": "谁 = she（那个女孩），干什么 = says（说）"
+     },
+     "keys": [
+      {
+       "w": "I'm",
+       "zh": "我是（= I am）"
+      },
+      {
+       "w": "says",
+       "zh": "说"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 7,
+     "para": 2,
+     "en": "\"I am a volunteer here, and I can help you.\"",
+     "zh": "“我是这里的志愿者，我可以帮你。”",
+     "chunks": "\"I am a volunteer here, / and I can help you.\"",
+     "trunk": {
+      "subject": "I",
+      "verb": "am",
+      "note": "谁 = I（Kate），是什么 = am a volunteer（是志愿者）；后半句 I can help you（我能帮你）"
+     },
+     "keys": [
+      {
+       "w": "volunteer",
+       "zh": "志愿者"
+      },
+      {
+       "w": "help",
+       "zh": "帮助"
+      }
+     ],
+     "tags": [
+      "be_verb",
+      "can"
+     ]
+    },
+    {
+     "id": 8,
+     "para": 2,
+     "en": "Kate takes Tom to the teaching building.",
+     "zh": "Kate 带 Tom 去教学楼。",
+     "chunks": "Kate takes Tom / to the teaching building.",
+     "trunk": {
+      "subject": "Kate",
+      "verb": "takes",
+      "note": "谁 = Kate，干什么 = takes Tom（带 Tom 去）"
+     },
+     "keys": [
+      {
+       "w": "takes",
+       "zh": "带（某人）去"
+      },
+      {
+       "w": "teaching building",
+       "zh": "教学楼"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 9,
+     "para": 2,
+     "en": "His classroom is on the third floor, next to the lab.",
+     "zh": "他的教室在三楼，就在实验室旁边。",
+     "chunks": "His classroom is / on the third floor, / next to the lab.",
+     "trunk": {
+      "subject": "His classroom",
+      "verb": "is",
+      "note": "谁 = His classroom（他的教室），在哪 = is on the third floor（在三楼）"
+     },
+     "keys": [
+      {
+       "w": "third floor",
+       "zh": "三楼"
+      },
+      {
+       "w": "lab",
+       "zh": "实验室"
+      }
+     ],
+     "tags": [
+      "pronoun",
+      "be_verb"
+     ]
+    },
+    {
+     "id": 10,
+     "para": 2,
+     "en": "On the way, Kate tells him about the school.",
+     "zh": "路上，Kate 给他讲学校的情况。",
+     "chunks": "On the way, / Kate tells him / about the school.",
+     "trunk": {
+      "subject": "Kate",
+      "verb": "tells",
+      "note": "谁 = Kate，干什么 = tells him（告诉他）"
+     },
+     "keys": [
+      {
+       "w": "On the way",
+       "zh": "在路上"
+      },
+      {
+       "w": "tells",
+       "zh": "告诉，讲"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 11,
+     "para": 2,
+     "en": "\"The dining hall is behind the library, and the food there is delicious,\" she says.",
+     "zh": "“食堂在图书馆后面，那儿的饭菜很好吃，”她说。",
+     "chunks": "\"The dining hall is behind the library, / and the food there is delicious,\" / she says.",
+     "trunk": {
+      "subject": "she",
+      "verb": "says",
+      "note": "谁 = she（Kate），干什么 = says（说）；她说的话里：The dining hall is behind the library（食堂在图书馆后面）"
+     },
+     "keys": [
+      {
+       "w": "dining hall",
+       "zh": "食堂"
+      },
+      {
+       "w": "delicious",
+       "zh": "好吃的"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "be_adj"
+     ]
+    },
+    {
+     "id": 12,
+     "para": 3,
+     "en": "In the classroom, Tom sits next to a boy called Jack.",
+     "zh": "在教室里，Tom 坐在一个叫 Jack 的男孩旁边。",
+     "chunks": "In the classroom, / Tom sits / next to a boy called Jack.",
+     "trunk": {
+      "subject": "Tom",
+      "verb": "sits",
+      "note": "谁 = Tom，干什么 = sits（坐）next to a boy（在一个男孩旁边）"
+     },
+     "keys": [
+      {
+       "w": "next to",
+       "zh": "在……旁边"
+      },
+      {
+       "w": "called",
+       "zh": "名叫"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 13,
+     "para": 3,
+     "en": "Jack is friendly, and he likes basketball too.",
+     "zh": "Jack 很友好，他也喜欢篮球。",
+     "chunks": "Jack is friendly, / and he likes basketball too.",
+     "trunk": {
+      "subject": "Jack",
+      "verb": "is",
+      "note": "谁 = Jack，怎么样 = is friendly；后半句 he likes basketball（他喜欢篮球）"
+     },
+     "keys": [
+      {
+       "w": "likes",
+       "zh": "喜欢"
+      },
+      {
+       "w": "too",
+       "zh": "也"
+      }
+     ],
+     "tags": [
+      "be_adj",
+      "third_s"
+     ]
+    },
+    {
+     "id": 14,
+     "para": 3,
+     "en": "At lunch, they eat together in the dining hall.",
+     "zh": "午饭时，他们一起在食堂吃饭。",
+     "chunks": "At lunch, / they eat together / in the dining hall.",
+     "trunk": {
+      "subject": "they",
+      "verb": "eat",
+      "note": "谁 = they（Tom 和 Jack），干什么 = eat together（一起吃饭）"
+     },
+     "keys": [
+      {
+       "w": "together",
+       "zh": "一起"
+      },
+      {
+       "w": "lunch",
+       "zh": "午饭"
+      }
+     ],
+     "tags": [
+      "pronoun"
+     ]
+    },
+    {
+     "id": 15,
+     "para": 3,
+     "en": "After lunch, Kate shows them the club wall.",
+     "zh": "午饭后，Kate 带他们去看社团墙。",
+     "chunks": "After lunch, / Kate shows them / the club wall.",
+     "trunk": {
+      "subject": "Kate",
+      "verb": "shows",
+      "note": "谁 = Kate，干什么 = shows them（给他们看）"
+     },
+     "keys": [
+      {
+       "w": "shows",
+       "zh": "给……看"
+      },
+      {
+       "w": "club",
+       "zh": "社团"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 16,
+     "para": 3,
+     "en": "There are many clubs, like the music club, the art club and the basketball club.",
+     "zh": "有很多社团，比如音乐社、美术社和篮球社。",
+     "chunks": "There are many clubs, / like the music club, / the art club / and the basketball club.",
+     "trunk": {
+      "subject": "many clubs",
+      "verb": "There are",
+      "note": "有什么 = There are many clubs（有很多社团）"
+     },
+     "keys": [
+      {
+       "w": "There are",
+       "zh": "有"
+      },
+      {
+       "w": "like",
+       "zh": "比如，像"
+      }
+     ],
+     "tags": [
+      "there_be",
+      "plural"
+     ]
+    },
+    {
+     "id": 17,
+     "para": 3,
+     "en": "Tom and Jack join the basketball club.",
+     "zh": "Tom 和 Jack 参加了篮球社。",
+     "chunks": "Tom and Jack join / the basketball club.",
+     "trunk": {
+      "subject": "Tom and Jack",
+      "verb": "join",
+      "note": "谁 = Tom and Jack，干什么 = join（参加）"
+     },
+     "keys": [
+      {
+       "w": "join",
+       "zh": "参加，加入"
+      },
+      {
+       "w": "basketball",
+       "zh": "篮球"
+      }
+     ],
+     "tags": []
+    },
+    {
+     "id": 18,
+     "para": 4,
+     "en": "In the evening, Tom writes in his diary.",
+     "zh": "晚上，Tom 在日记里写道：",
+     "chunks": "In the evening, / Tom writes / in his diary.",
+     "trunk": {
+      "subject": "Tom",
+      "verb": "writes",
+      "note": "谁 = Tom，干什么 = writes（写）"
+     },
+     "keys": [
+      {
+       "w": "evening",
+       "zh": "晚上"
+      },
+      {
+       "w": "diary",
+       "zh": "日记"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 19,
+     "para": 4,
+     "en": "\"My new school is great.\"",
+     "zh": "“我的新学校很棒。”",
+     "chunks": "\"My new school is great.\"",
+     "trunk": {
+      "subject": "My new school",
+      "verb": "is",
+      "note": "谁 = My new school（我的新学校），怎么样 = is great（很棒）"
+     },
+     "keys": [
+      {
+       "w": "great",
+       "zh": "很棒的"
+      }
+     ],
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 20,
+     "para": 4,
+     "en": "\"I am not nervous now, and I have two new friends!\"",
+     "zh": "“我现在不紧张了，我有了两个新朋友！”",
+     "chunks": "\"I am not nervous now, / and I have / two new friends!\"",
+     "trunk": {
+      "subject": "I",
+      "verb": "am not",
+      "note": "谁 = I（Tom），怎么样 = am not nervous（不紧张了）；后半句 I have（我有）"
+     },
+     "keys": [
+      {
+       "w": "nervous",
+       "zh": "紧张的"
+      },
+      {
+       "w": "friends",
+       "zh": "朋友"
+      }
+     ],
+     "tags": [
+      "be_adj",
+      "plural"
+     ]
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "Why is Tom nervous at first?",
+     "zh": "Tom 一开始为什么紧张？",
+     "options": [
+      "He doesn't know any students.",
+      "He can't play basketball.",
+      "He is ill.",
+      "He doesn't like his school."
+     ],
+     "options_zh": [
+      "他一个同学也不认识。",
+      "他不会打篮球。",
+      "他生病了。",
+      "他不喜欢他的学校。"
+     ],
+     "answer": "He doesn't know any students.",
+     "evidence": [
+      2,
+      3
+     ],
+     "drop": "He can't play basketball.",
+     "hints": [
+      "回到开头，看第 2 句和它后面那一句。",
+      "关键词是 nervous，在第 2 句。紧张的原因写在紧跟着的第 3 句。",
+      "排除“He can't play basketball”：第 13 句说 Jack 也（too）喜欢篮球，说明 Tom 喜欢篮球，原文没说他不会打。",
+      "答案是“He doesn't know any students”。第 3 句：He doesn't know any students in his new school（新学校里的同学他一个也不认识），所以他紧张。"
+     ],
+     "variant": {
+      "ask": "Why can't Tom find his classroom?",
+      "zh": "Tom 为什么找不到教室？",
+      "options": [
+       "The school is big.",
+       "He is late.",
+       "He is ill.",
+       "Kate is not there."
+      ],
+      "options_zh": [
+       "学校很大。",
+       "他迟到了。",
+       "他生病了。",
+       "Kate 不在。"
+      ],
+      "answer": "The school is big.",
+      "evidence": [
+       4
+      ],
+      "explain": "第 4 句：The school is big, and Tom can't find his classroom（学校很大，Tom 找不到教室）。"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "Where is Tom's classroom?",
+     "zh": "Tom 的教室在哪儿？",
+     "options": [
+      "On the first floor.",
+      "Next to the lab.",
+      "Behind the library.",
+      "In the dining hall."
+     ],
+     "options_zh": [
+      "在一楼。",
+      "在实验室旁边。",
+      "在图书馆后面。",
+      "在食堂里。"
+     ],
+     "answer": "Next to the lab.",
+     "evidence": [
+      9
+     ],
+     "drop": "Behind the library.",
+     "hints": [
+      "找有 classroom 的句子。第 4 句没说在哪，再往后找。",
+      "关键词是 His classroom，在第 9 句开头。",
+      "排除“Behind the library”：第 11 句说在图书馆后面的是 dining hall（食堂），不是教室。",
+      "答案是“Next to the lab”。第 9 句：His classroom is on the third floor, next to the lab（他的教室在三楼，就在实验室旁边）。是三楼，不是一楼。"
+     ],
+     "variant": {
+      "ask": "Where is the dining hall?",
+      "zh": "食堂在哪儿？",
+      "options": [
+       "Behind the library.",
+       "Next to the lab.",
+       "On the third floor.",
+       "In the teaching building."
+      ],
+      "options_zh": [
+       "在图书馆后面。",
+       "在实验室旁边。",
+       "在三楼。",
+       "在教学楼里。"
+      ],
+      "answer": "Behind the library.",
+      "evidence": [
+       11
+      ],
+      "explain": "第 11 句 Kate 说：The dining hall is behind the library（食堂在图书馆后面）。实验室旁边、三楼说的是 Tom 的教室。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "meaning",
+     "skill": "meaning",
+     "skill_zh": "猜词义",
+     "ask": "What is the meaning of \"friendly\" in Sentence 13?",
+     "zh": "第 13 句里的 friendly 是什么意思？",
+     "options": [
+      "友好的",
+      "生气的",
+      "紧张的",
+      "安静的"
+     ],
+     "answer": "友好的",
+     "evidence": [
+      13,
+      14
+     ],
+     "drop": "生气的",
+     "hints": [
+      "看第 13 句和后面的第 14 句。",
+      "friendly 长得像 friend（朋友）。第 14 句说，午饭时他们一起吃饭。",
+      "排除“生气的”：Jack 要是生气，Tom 不会和他一起吃饭、一起参加篮球社。",
+      "答案是“友好的”。friend 是朋友，friendly 就是“像朋友一样的，友好的”。Jack 对 Tom 很友好，所以他们一起吃饭，晚上 Tom 写他有了两个新朋友。"
+     ],
+     "variant": {
+      "ask": "What is the meaning of \"volunteer\" in Sentence 7?",
+      "zh": "第 7 句里的 volunteer 是什么意思？",
+      "options": [
+       "志愿者",
+       "老师",
+       "医生",
+       "妈妈"
+      ],
+      "answer": "志愿者",
+      "evidence": [
+       5,
+       7
+      ],
+      "explain": "第 5 句说 Kate 是一个女孩（a girl），不是老师；第 7 句她说自己是 volunteer，还说 I can help you（我能帮你）。在学校帮新同学的女孩，是志愿者。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "infer",
+     "skill": "infer",
+     "skill_zh": "推断",
+     "ask": "How does Tom feel in the evening?",
+     "zh": "晚上 Tom 感觉怎么样？",
+     "options": [
+      "Happy.",
+      "Nervous.",
+      "Lonely.",
+      "Angry."
+     ],
+     "options_zh": [
+      "开心。",
+      "紧张。",
+      "孤单。",
+      "生气。"
+     ],
+     "answer": "Happy.",
+     "evidence": [
+      19,
+      20
+     ],
+     "drop": "Nervous.",
+     "hints": [
+      "看最后两句：Tom 晚上在日记里写了什么。",
+      "关键词 In the evening 在第 18 句，日记里写的是第 19、20 句。",
+      "排除“Nervous”：第 20 句说 I am not nervous now（我现在不紧张了）。",
+      "答案是“Happy”。他写 My new school is great（新学校很棒），还有了两个新朋友，所以他很开心。原文没写 happy，要从这两句推出来。"
+     ],
+     "variant": {
+      "ask": "How does Tom feel in the morning?",
+      "zh": "早上 Tom 感觉怎么样？",
+      "options": [
+       "Nervous.",
+       "Happy.",
+       "Angry.",
+       "Tired."
+      ],
+      "options_zh": [
+       "紧张。",
+       "开心。",
+       "生气。",
+       "累。"
+      ],
+      "answer": "Nervous.",
+      "evidence": [
+       2
+      ],
+      "explain": "第 2 句：He is very nervous（他很紧张）。这是上学第一天的早上，他一个同学也不认识。"
+     }
+    },
+    {
+     "id": "q5",
+     "type": "main",
+     "skill": "main",
+     "skill_zh": "主旨",
+     "ask": "Which is the best name for the story?",
+     "zh": "哪个最适合做这篇短文的标题？",
+     "options": [
+      "Tom's First Day at Junior High",
+      "A Delicious Lunch",
+      "Kate's Club",
+      "How to Play Basketball"
+     ],
+     "options_zh": [
+      "Tom 上初中的第一天",
+      "一顿好吃的午饭",
+      "Kate 的社团",
+      "怎样打篮球"
+     ],
+     "answer": "Tom's First Day at Junior High",
+     "evidence": [
+      1,
+      20
+     ],
+     "drop": "A Delicious Lunch",
+     "hints": [
+      "标题要管住全文：看第 1 句和最后一句（第 20 句）。",
+      "第 1 句：Today is Tom's first day at junior high。全文从早上讲到晚上，讲的都是这一天。",
+      "排除“A Delicious Lunch”：午饭只在第 11、14 句提到，是一个小细节。",
+      "答案是“Tom's First Day at Junior High”。全文讲 Tom 上初中的第一天：从紧张、找不到教室，到交了新朋友，晚上很开心。"
+     ],
+     "variant": {
+      "ask": "How does Tom feel from morning to evening?",
+      "zh": "从早上到晚上，Tom 的心情是怎样的？",
+      "options": [
+       "Nervous first, then happy.",
+       "Happy first, then angry.",
+       "Busy first, then lonely.",
+       "Happy first, then nervous."
+      ],
+      "options_zh": [
+       "先紧张，后开心。",
+       "先开心，后生气。",
+       "先忙，后孤单。",
+       "先开心，后紧张。"
+      ],
+      "answer": "Nervous first, then happy.",
+      "evidence": [
+       2,
+       20
+      ],
+      "explain": "第 2 句早上 He is very nervous（他很紧张）；第 20 句晚上 I am not nervous now, and I have two new friends（不紧张了，有了新朋友）。全文就是这一天从紧张到开心的经过。"
+     }
+    }
+   ]
+  },
+  {
+   "id": "r3",
+   "n": 3,
+   "kind": "story",
+   "title": "",
+   "title_zh": "",
+   "label": "期中阅读 · 第 3 篇",
+   "tip": {
+    "title": "标题题：看开头和结尾",
+    "lines": [
+     "问“最好的标题”，要管住整篇，不能只管一句。",
+     "看开头怎么开始，结尾怎么结束，中间只出现一次的细节不选。"
+    ],
+    "preview": true,
+    "q": "q5"
+   },
+   "names": [
+    {
+     "en": "Amy",
+     "zh": "人名"
+    },
+    {
+     "en": "Snowy",
+     "zh": "猫的名字"
+    }
+   ],
+   "glossary": [
+    {
+     "w": "drops",
+     "zh": "滴（drops of rain 雨滴）",
+     "guess": true
+    }
+   ],
+   "sentences": [
+    {
+     "id": 1,
+     "para": 1,
+     "en": "Amy is in the photography club at her school.",
+     "zh": "Amy 是学校摄影社的。",
+     "chunks": "Amy is / in the photography club / at her school.",
+     "trunk": {
+      "subject": "Amy",
+      "verb": "is",
+      "note": "谁 = Amy，在哪 = is in the photography club（在摄影社）"
+     },
+     "keys": [
+      {
+       "w": "photography",
+       "zh": "摄影"
+      },
+      {
+       "w": "club",
+       "zh": "社团"
+      }
+     ],
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 2,
+     "para": 1,
+     "en": "She loves taking photos.",
+     "zh": "她很爱拍照。",
+     "chunks": "She loves / taking photos.",
+     "trunk": {
+      "subject": "She",
+      "verb": "loves",
+      "note": "谁 = She（Amy），干什么 = loves taking photos（爱拍照）"
+     },
+     "keys": [
+      {
+       "w": "loves",
+       "zh": "很喜欢"
+      },
+      {
+       "w": "taking photos",
+       "zh": "拍照"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 3,
+     "para": 1,
+     "en": "This month, the club has a photo competition.",
+     "zh": "这个月，社团办了一场摄影比赛。",
+     "chunks": "This month, / the club has / a photo competition.",
+     "trunk": {
+      "subject": "the club",
+      "verb": "has",
+      "note": "谁 = the club（社团），干什么 = has（有，办）"
+     },
+     "keys": [
+      {
+       "w": "competition",
+       "zh": "比赛"
+      },
+      {
+       "w": "month",
+       "zh": "月"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 4,
+     "para": 1,
+     "en": "The theme is \"Nature\".",
+     "zh": "主题是“大自然”。",
+     "chunks": "The theme is \"Nature\".",
+     "trunk": {
+      "subject": "The theme",
+      "verb": "is",
+      "note": "谁 = The theme（主题），是什么 = is \"Nature\"（大自然）"
+     },
+     "keys": [
+      {
+       "w": "theme",
+       "zh": "主题"
+      },
+      {
+       "w": "Nature",
+       "zh": "大自然"
+      }
+     ],
+     "tags": [
+      "be_verb"
+     ]
+    },
+    {
+     "id": 5,
+     "para": 1,
+     "en": "Amy wants to win a prize, so she goes to the park every day after school.",
+     "zh": "Amy 想得奖，所以每天放学后都去公园。",
+     "chunks": "Amy wants to win a prize, / so she goes to the park / every day after school.",
+     "trunk": {
+      "subject": "Amy",
+      "verb": "wants",
+      "note": "谁 = Amy，干什么 = wants to win a prize（想得奖）；后半句 she goes to the park（她去公园）"
+     },
+     "keys": [
+      {
+       "w": "win a prize",
+       "zh": "得奖"
+      },
+      {
+       "w": "after school",
+       "zh": "放学后"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 6,
+     "para": 1,
+     "en": "She takes many photos of trees, flowers and birds.",
+     "zh": "她拍了很多树、花和鸟的照片。",
+     "chunks": "She takes many photos / of trees, flowers and birds.",
+     "trunk": {
+      "subject": "She",
+      "verb": "takes",
+      "note": "谁 = She（Amy），干什么 = takes many photos（拍很多照片）"
+     },
+     "keys": [
+      {
+       "w": "takes many photos",
+       "zh": "拍很多照片"
+      },
+      {
+       "w": "birds",
+       "zh": "鸟"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "plural"
+     ]
+    },
+    {
+     "id": 7,
+     "para": 1,
+     "en": "But she doesn't like any of them.",
+     "zh": "可是她一张也不喜欢。",
+     "chunks": "But she doesn't like / any of them.",
+     "trunk": {
+      "subject": "she",
+      "verb": "doesn't like",
+      "note": "谁 = she（Amy），干什么 = doesn't like（不喜欢）"
+     },
+     "keys": [
+      {
+       "w": "doesn't like",
+       "zh": "不喜欢"
+      },
+      {
+       "w": "any of them",
+       "zh": "它们中的任何一个（不喜欢 any = 一个也不喜欢）"
+      }
+     ],
+     "tags": [
+      "do_q",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 8,
+     "para": 1,
+     "en": "\"They all look the same,\" she says.",
+     "zh": "“它们看起来都一样，”她说。",
+     "chunks": "\"They all look the same,\" / she says.",
+     "trunk": {
+      "subject": "she",
+      "verb": "says",
+      "note": "谁 = she（Amy），干什么 = says（说）；她说的话里：They all look the same（它们看起来都一样）"
+     },
+     "keys": [
+      {
+       "w": "look",
+       "zh": "看起来"
+      },
+      {
+       "w": "the same",
+       "zh": "一样的"
+      }
+     ],
+     "tags": [
+      "pronoun",
+      "third_s"
+     ]
+    },
+    {
+     "id": 9,
+     "para": 2,
+     "en": "One Saturday morning, it rains.",
+     "zh": "一个星期六的早上，下雨了。",
+     "chunks": "One Saturday morning, / it rains.",
+     "trunk": {
+      "subject": "it",
+      "verb": "rains",
+      "note": "谁 = it（说天气用 it），干什么 = rains（下雨）"
+     },
+     "keys": [
+      {
+       "w": "Saturday",
+       "zh": "星期六"
+      },
+      {
+       "w": "rains",
+       "zh": "下雨"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 10,
+     "para": 2,
+     "en": "Amy can't go to the park, so she is at home all morning.",
+     "zh": "Amy 去不了公园，所以整个上午都待在家里。",
+     "chunks": "Amy can't go to the park, / so she is at home / all morning.",
+     "trunk": {
+      "subject": "Amy",
+      "verb": "can't go",
+      "note": "谁 = Amy，干什么 = can't go（去不了）"
+     },
+     "keys": [
+      {
+       "w": "can't",
+       "zh": "不能"
+      },
+      {
+       "w": "all morning",
+       "zh": "整个上午"
+      }
+     ],
+     "tags": [
+      "can"
+     ]
+    },
+    {
+     "id": 11,
+     "para": 2,
+     "en": "She feels a bit sad.",
+     "zh": "她有点难过。",
+     "chunks": "She feels a bit sad.",
+     "trunk": {
+      "subject": "She",
+      "verb": "feels",
+      "note": "谁 = She（Amy），怎么样 = feels a bit sad（觉得有点难过）"
+     },
+     "keys": [
+      {
+       "w": "a bit",
+       "zh": "有点"
+      },
+      {
+       "w": "sad",
+       "zh": "难过的"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 12,
+     "para": 2,
+     "en": "Then she sees her cat, Snowy.",
+     "zh": "这时，她看到了她的猫 Snowy。",
+     "chunks": "Then she sees / her cat, Snowy.",
+     "trunk": {
+      "subject": "she",
+      "verb": "sees",
+      "note": "谁 = she（Amy），干什么 = sees（看到）"
+     },
+     "keys": [
+      {
+       "w": "Then",
+       "zh": "这时，然后"
+      },
+      {
+       "w": "sees",
+       "zh": "看到"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 13,
+     "para": 2,
+     "en": "Snowy is sitting on the shelf by the window.",
+     "zh": "Snowy 正坐在窗边的架子上。",
+     "chunks": "Snowy is sitting / on the shelf / by the window.",
+     "trunk": {
+      "subject": "Snowy",
+      "verb": "is sitting",
+      "note": "谁 = Snowy，干什么 = is sitting（正坐着）"
+     },
+     "keys": [
+      {
+       "w": "shelf",
+       "zh": "架子"
+      },
+      {
+       "w": "by the window",
+       "zh": "在窗边"
+      }
+     ],
+     "tags": [
+      "be_ing"
+     ]
+    },
+    {
+     "id": 14,
+     "para": 2,
+     "en": "Behind her, there are green leaves with drops of rain on them.",
+     "zh": "在它身后，有一些绿叶，上面挂着雨滴。",
+     "chunks": "Behind her, / there are green leaves / with drops of rain on them.",
+     "trunk": {
+      "subject": "green leaves",
+      "verb": "there are",
+      "note": "有什么 = there are green leaves（有绿叶）"
+     },
+     "keys": [
+      {
+       "w": "Behind",
+       "zh": "在……后面"
+      },
+      {
+       "w": "leaves",
+       "zh": "叶子（leaf 的复数）"
+      }
+     ],
+     "tags": [
+      "there_be",
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 15,
+     "para": 2,
+     "en": "The sun comes out.",
+     "zh": "太阳出来了。",
+     "chunks": "The sun comes out.",
+     "trunk": {
+      "subject": "The sun",
+      "verb": "comes out",
+      "note": "谁 = The sun（太阳），干什么 = comes out（出来）"
+     },
+     "keys": [
+      {
+       "w": "sun",
+       "zh": "太阳"
+      },
+      {
+       "w": "comes out",
+       "zh": "出来"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 16,
+     "para": 2,
+     "en": "Snowy looks at the leaves, and her green eyes are big and beautiful.",
+     "zh": "Snowy 看着那些叶子，它的绿眼睛又大又漂亮。",
+     "chunks": "Snowy looks at the leaves, / and her green eyes / are big and beautiful.",
+     "trunk": {
+      "subject": "Snowy",
+      "verb": "looks at",
+      "note": "谁 = Snowy，干什么 = looks at（看着）"
+     },
+     "keys": [
+      {
+       "w": "looks at",
+       "zh": "看着"
+      },
+      {
+       "w": "beautiful",
+       "zh": "漂亮的"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 17,
+     "para": 2,
+     "en": "Amy takes a photo of her.",
+     "zh": "Amy 给它拍了一张照片。",
+     "chunks": "Amy takes a photo / of her.",
+     "trunk": {
+      "subject": "Amy",
+      "verb": "takes",
+      "note": "谁 = Amy，干什么 = takes a photo（拍照）"
+     },
+     "keys": [
+      {
+       "w": "takes a photo",
+       "zh": "拍照"
+      },
+      {
+       "w": "her",
+       "zh": "它（这里指 Snowy）"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 18,
+     "para": 3,
+     "en": "A week later, the club teacher puts the photos on the wall.",
+     "zh": "一个星期以后，社团老师把照片贴到了墙上。",
+     "chunks": "A week later, / the club teacher puts the photos / on the wall.",
+     "trunk": {
+      "subject": "the club teacher",
+      "verb": "puts",
+      "note": "谁 = the club teacher（社团老师），干什么 = puts（放，贴）"
+     },
+     "keys": [
+      {
+       "w": "later",
+       "zh": "以后"
+      },
+      {
+       "w": "puts",
+       "zh": "放"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "plural"
+     ]
+    },
+    {
+     "id": 19,
+     "para": 3,
+     "en": "Amy's photo gets the first prize!",
+     "zh": "Amy 的照片得了一等奖！",
+     "chunks": "Amy's photo / gets the first prize!",
+     "trunk": {
+      "subject": "Amy's photo",
+      "verb": "gets",
+      "note": "谁 = Amy's photo（Amy 的照片），干什么 = gets the first prize（得了一等奖）"
+     },
+     "keys": [
+      {
+       "w": "gets",
+       "zh": "得到"
+      },
+      {
+       "w": "first prize",
+       "zh": "一等奖"
+      }
+     ],
+     "tags": [
+      "poss_s",
+      "third_s"
+     ]
+    },
+    {
+     "id": 20,
+     "para": 3,
+     "en": "Under it, the teacher writes, \"Nature is all around us.\"",
+     "zh": "照片下面，老师写着：“大自然就在我们身边。”",
+     "chunks": "Under it, / the teacher writes, / \"Nature is all around us.\"",
+     "trunk": {
+      "subject": "the teacher",
+      "verb": "writes",
+      "note": "谁 = the teacher（老师），干什么 = writes（写）"
+     },
+     "keys": [
+      {
+       "w": "Under",
+       "zh": "在……下面"
+      },
+      {
+       "w": "around us",
+       "zh": "在我们周围"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 21,
+     "para": 3,
+     "en": "Amy smiles.",
+     "zh": "Amy 笑了。",
+     "chunks": "Amy smiles.",
+     "trunk": {
+      "subject": "Amy",
+      "verb": "smiles",
+      "note": "谁 = Amy，干什么 = smiles（微笑）"
+     },
+     "keys": [
+      {
+       "w": "smiles",
+       "zh": "微笑"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 22,
+     "para": 3,
+     "en": "Now Snowy is the star of her family.",
+     "zh": "现在，Snowy 成了她家的明星。",
+     "chunks": "Now Snowy is / the star of her family.",
+     "trunk": {
+      "subject": "Snowy",
+      "verb": "is",
+      "note": "谁 = Snowy，是什么 = is the star（是明星）"
+     },
+     "keys": [
+      {
+       "w": "star",
+       "zh": "明星"
+      },
+      {
+       "w": "family",
+       "zh": "家，家人"
+      }
+     ],
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ]
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "Why does Amy go to the park every day?",
+     "zh": "Amy 为什么每天都去公园？",
+     "options": [
+      "She wants to win a prize.",
+      "She wants to play with Snowy.",
+      "She likes the rain.",
+      "Her teacher is in the park."
+     ],
+     "options_zh": [
+      "她想得奖。",
+      "她想和 Snowy 玩。",
+      "她喜欢下雨。",
+      "她的老师在公园里。"
+     ],
+     "answer": "She wants to win a prize.",
+     "evidence": [
+      5
+     ],
+     "drop": "She likes the rain.",
+     "hints": [
+      "找有 park 和 every day 的那一句。",
+      "关键词是 goes to the park every day，在第 5 句后半句。看它前面的 so（所以）：原因写在 so 前面。",
+      "排除“She likes the rain”：第 10 句说下雨的时候她去不了公园，第 11 句说她有点难过。",
+      "答案是“She wants to win a prize”。第 5 句：Amy wants to win a prize, so she goes to the park every day（Amy 想得奖，所以每天去公园）。"
+     ],
+     "variant": {
+      "ask": "Why is Amy at home on Saturday morning?",
+      "zh": "星期六早上 Amy 为什么在家？",
+      "options": [
+       "It rains.",
+       "She is ill.",
+       "Her cat is ill.",
+       "The park is far."
+      ],
+      "options_zh": [
+       "下雨了。",
+       "她生病了。",
+       "她的猫生病了。",
+       "公园太远了。"
+      ],
+      "answer": "It rains.",
+      "evidence": [
+       9,
+       10
+      ],
+      "explain": "第 9 句：One Saturday morning, it rains（星期六早上下雨了）。第 10 句：Amy can't go to the park, so she is at home（去不了公园，所以在家）。"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "What does Amy think of her photos from the park?",
+     "zh": "Amy 觉得她在公园拍的照片怎么样？",
+     "options": [
+      "They are very beautiful.",
+      "They all look the same.",
+      "They are about her cat.",
+      "They get the first prize."
+     ],
+     "options_zh": [
+      "很漂亮。",
+      "看起来都一样。",
+      "拍的是她的猫。",
+      "得了一等奖。"
+     ],
+     "answer": "They all look the same.",
+     "evidence": [
+      7,
+      8
+     ],
+     "drop": "They get the first prize.",
+     "hints": [
+      "看第 6、7、8 句，说的是在公园拍的照片。",
+      "关键词是 photos of trees, flowers and birds（第 6 句）。第 8 句是 Amy 自己说的话。",
+      "排除“They get the first prize”：得一等奖的是第 17 句给 Snowy 拍的那张，不是公园里的照片。",
+      "答案是“They all look the same”。第 7 句她一张也不喜欢，第 8 句她说：They all look the same（它们看起来都一样）。"
+     ],
+     "variant": {
+      "ask": "Where is Snowy?",
+      "zh": "Snowy 在哪儿？",
+      "options": [
+       "On the shelf by the window.",
+       "In the park.",
+       "Under the tree.",
+       "On Amy's bed."
+      ],
+      "options_zh": [
+       "在窗边的架子上。",
+       "在公园里。",
+       "在树下。",
+       "在 Amy 的床上。"
+      ],
+      "answer": "On the shelf by the window.",
+      "evidence": [
+       13
+      ],
+      "explain": "第 13 句：Snowy is sitting on the shelf by the window（Snowy 正坐在窗边的架子上）。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "meaning",
+     "skill": "meaning",
+     "skill_zh": "猜词义",
+     "ask": "What is the meaning of \"drops\" in Sentence 14?",
+     "zh": "第 14 句里的 drops 是什么意思？",
+     "options": [
+      "水滴",
+      "树枝",
+      "小鸟",
+      "窗户"
+     ],
+     "answer": "水滴",
+     "evidence": [
+      9,
+      14
+     ],
+     "drop": "小鸟",
+     "hints": [
+      "回到第 14 句，看 drops 后面跟着的词。",
+      "drops of rain：rain 是雨。第 9 句说，那天早上下雨了。",
+      "排除“小鸟”：drops of rain 是“雨的什么”，雨里没有小鸟。",
+      "答案是“水滴”。那天下了雨（第 9 句），叶子上挂着 drops of rain，就是雨滴、水滴。"
+     ],
+     "variant": {
+      "ask": "What is the meaning of \"theme\" in Sentence 4?",
+      "zh": "第 4 句里的 theme 是什么意思？",
+      "options": [
+       "主题",
+       "奖品",
+       "老师",
+       "照片"
+      ],
+      "answer": "主题",
+      "evidence": [
+       3,
+       4
+      ],
+      "explain": "第 3 句说社团办摄影比赛，第 4 句说比赛的 theme 是 Nature（大自然）：大家都拍大自然，这是比赛的主题。奖品是第 5 句的 prize。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "infer",
+     "skill": "infer",
+     "skill_zh": "推断",
+     "ask": "What can we learn from the story?",
+     "zh": "从这个故事里，我们能明白什么？",
+     "options": [
+      "Good photos can be all around us.",
+      "We must take photos in the park.",
+      "Cats don't like the rain.",
+      "Photos of trees are not good."
+     ],
+     "options_zh": [
+      "好照片可能就在我们身边。",
+      "我们一定要在公园里拍照。",
+      "猫不喜欢下雨。",
+      "树的照片都不好。"
+     ],
+     "answer": "Good photos can be all around us.",
+     "evidence": [
+      20
+     ],
+     "drop": "We must take photos in the park.",
+     "hints": [
+      "看最后几句：老师在照片下面写了什么。",
+      "关键词是 Nature is all around us（第 20 句）。再想想，Amy 得奖的照片是在哪儿拍的？",
+      "排除“We must take photos in the park”：得奖的那张不是在公园拍的，是在家里窗边拍的（第 13、17 句）。",
+      "答案是“Good photos can be all around us”。Amy 在公园拍了很多张都不满意，在家给 Snowy 拍的却得了一等奖。老师写：大自然就在我们身边，好照片也可能就在身边。"
+     ],
+     "variant": {
+      "ask": "What does the teacher write under Amy's photo?",
+      "zh": "老师在 Amy 的照片下面写了什么？",
+      "options": [
+       "Nature is all around us.",
+       "Cats are the best.",
+       "Go to the park every day.",
+       "Take photos of birds."
+      ],
+      "options_zh": [
+       "大自然就在我们身边。",
+       "猫最好了。",
+       "每天都去公园。",
+       "去拍鸟。"
+      ],
+      "answer": "Nature is all around us.",
+      "evidence": [
+       20
+      ],
+      "explain": "第 20 句：the teacher writes, \"Nature is all around us.\"（大自然就在我们身边。）"
+     }
+    },
+    {
+     "id": "q5",
+     "type": "main",
+     "skill": "main",
+     "skill_zh": "主旨",
+     "ask": "Which is the best name for the story?",
+     "zh": "哪个最适合做这个故事的标题？",
+     "options": [
+      "A Photo of Snowy",
+      "My Favourite Park",
+      "A Saturday in the Rain",
+      "Birds and Flowers"
+     ],
+     "options_zh": [
+      "一张 Snowy 的照片",
+      "我最喜欢的公园",
+      "一个下雨的星期六",
+      "鸟和花"
+     ],
+     "answer": "A Photo of Snowy",
+     "evidence": [
+      17,
+      19
+     ],
+     "drop": "Birds and Flowers",
+     "hints": [
+      "标题要管住整个故事。故事最后的结果是什么？",
+      "第 17 句 Amy 给 Snowy 拍了照片，第 19 句这张照片得了一等奖。全文都在讲为了比赛找一张好照片。",
+      "排除“Birds and Flowers”：鸟和花只在第 6 句出现，而且 Amy 不喜欢那些照片。",
+      "答案是“A Photo of Snowy”。故事讲 Amy 为了比赛找好照片：公园里拍的都不满意，最后在家给 Snowy 拍的那张得了一等奖。“A Saturday in the Rain”只讲了中间一段。"
+     ],
+     "variant": {
+      "ask": "What is the story about?",
+      "zh": "这个故事主要讲什么？",
+      "options": [
+       "Amy finds a good photo at home.",
+       "Amy plays in the park.",
+       "Amy's cat is ill.",
+       "Amy's teacher takes photos."
+      ],
+      "options_zh": [
+       "Amy 在家里找到了一张好照片。",
+       "Amy 在公园里玩。",
+       "Amy 的猫生病了。",
+       "Amy 的老师拍照片。"
+      ],
+      "answer": "Amy finds a good photo at home.",
+      "evidence": [
+       13,
+       17,
+       19
+      ],
+      "explain": "故事从比赛开始：公园里拍的她都不喜欢；下雨在家，她给窗边的 Snowy 拍了一张（第 13、17 句），这张得了一等奖（第 19 句）。讲的就是她在家里找到了好照片。"
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -2,6 +2,10 @@
 // 用 h() 拼，不用 innerHTML）；英文单词点一下看意思（单词本的课本意思，没有就离线词典），可以“查词”跳到查词页；
 // 老师回答旁有“听一遍”（只读英文例句）。下面是输入框、拍题、按住说话、发送。第一次打开给 3 个能点的示例问题。
 // 最新一条老师回答下面有三个快捷按钮（还是不懂、再举个例子、出道题考考我）和“和学校讲的不一样”（记 flag，请老师再核对）。
+// 老师的笔记本（teacher.js）：打开时先对一遍“我问过的”（syncAsked）；讲过的点在热身里再考做错了，老师在对话最后主动问一句
+// “上次讲的 X，我换个讲法再说一遍？”（好，再讲一遍 / 先不用）；每周第一次打开问一次“这周学下来，哪里最卡？”（记 ask 事件
+// qid 'chat_week'）；第一次打开的招呼下面有每周想一次给她的那一句（kidWeekLine，只说正面的）。
+// 例句里她不认识的词太多时老师会重写一次（chat.js），重写的那会儿气泡下面写一句“老师在把例句换成你学过的词”。
 // 负责：问老师 agent（chat.js、chat-prompt.js、ui-chat.js、css/chat.css、tests/chat.test.mjs）。
 //
 // 导出
@@ -9,6 +13,7 @@
 //     渲染进 #tab-chat（root 不给时）。params：{ ask?: 放进输入框的字, send?: true（直接发出去）| 字符串（直接发出去：气泡上
 //     显示 ask，发给老师的是这串字，带上 App 给她看过的中文、前一句这类背景）, image?: data URL（带一张照片） }
 //     别的页可以 ctx.go('chat', { ask: '这句话什么意思：…', send: true }) 把问题带进来（比如阅读里“这句还是不懂”）。
+//     params.retell：'teacher.asked' 的 key（'g:there_be'），直接开始“换个讲法再说一遍”（上课收尾可以这样带进来）。
 //     inSession()：老师正在回答或者正在录音（App 不自动更新）；holding()：输入框里有没发的字或照片。
 //   CHAT_COPY   问老师这里换的几句报错（其余走 ctx.kidError）
 //
@@ -17,6 +22,7 @@
 //   也认 startRecording / stopRecording，或者一个返回这样对象的函数）。
 import { h, icon, toast as baseToast, dateCn } from './ui-dom.js';
 import * as C from './chat.js';
+import * as T from './teacher.js';
 import { imageToJpeg } from './capture.js';
 import { slugify } from './words.js';
 
@@ -64,6 +70,8 @@ export function createChatTab(ctx, { root = null } = {}) {
   let olderOpen = false;
   let stick = true;          // keep the newest line in view while the teacher writes
   const bubbles = new Map(); // message id -> { wrap, body, tools, m }
+  let offer = null;          // teacher.js retellOffer: a point to tell again another way
+  let weekAsk = false;       // this week's “哪里最卡？” not answered yet
 
   // ---------------------------------------------------------------- the page
   const statusEl = h('div', { className: 'status-slot' });
@@ -118,6 +126,7 @@ export function createChatTab(ctx, { root = null } = {}) {
     if (m.pending && !m.text) kids.push(h('p', { className: 'chat-typing' }, '老师在想', h('span', { className: 'dots' })));
     else kids.push(...rich(m.text));
     if (m.pending && m.text) kids.push(h('span', { className: 'chat-caret', 'aria-hidden': 'true' }));
+    if (m.simplifying) kids.push(h('p', { className: 'chat-note small', text: '老师在把例句换成你学过的词……' }));
     if (m.stopped) kids.push(h('p', { className: 'chat-note small', text: '（停下了）' }));
     if (m.error) kids.push(h('p', { className: 'chat-err', text: kidLine(m.error) }));
     body.replaceChildren(...kids);
@@ -161,14 +170,81 @@ export function createChatTab(ctx, { root = null } = {}) {
     return h('div', { className: 'chat-row chat-row-teacher' }, h('div', { className: 'chat-msg chat-teacher chat-hello' }, h('div', { className: 'chat-body' },
       h('p', null, h('strong', { text: '有不懂的，都可以问' + (tn ? (/^[A-Za-z]/.test(tn) ? ' ' + tn : tn) : '我') + '。' })),
       h('p', { text: '课本、作业题、单词、语法、一句话看不懂，都行。我会讲到你真的懂了为止。' }),
-      h('p', { className: 'small', text: '可以打字，可以按住“说话”，也可以拍一道题。我回答里的英文单词，点一下就能看意思。' }))));
+      h('p', { className: 'small', text: '可以打字，可以按住“说话”，也可以拍一道题。我回答里的英文单词，点一下就能看意思。' }),
+      weekLine() ? h('p', { className: 'chat-week', text: weekLine() }) : null)));
+  }
+  const weekLine = () => { try { return T.kidWeekLine(ctx.kv, new Date()); } catch (e) { return ''; } };
+
+  // ---------------------------------------------------------------- the teacher's notebook (teacher.js)
+  function retellBlock(e) {
+    return h('div', { className: 'chat-row chat-row-teacher chat-retell' },
+      h('div', { className: 'chat-msg chat-teacher' }, h('div', { className: 'chat-body' },
+        h('p', null, h('strong', null, spansEl([{ text: `上次讲的 ${e.label}，我换个讲法再说一遍？`, bold: false }]))),
+        h('p', { className: 'small', text: '这几天热身里又考到它，有一道没做对。换个角度讲，常常就通了。' }))),
+      h('div', { className: 'chat-after' }, h('div', { className: 'chat-quick' },
+        h('button', { type: 'button', className: 'chat-chip', on: { click: () => startRetell(e) } }, '好，再讲一遍'),
+        h('button', { type: 'button', className: 'chat-chip chat-chip-quiet', on: { click: () => skipRetell(e) } }, '先不用'))));
+  }
+  async function startRetell(e) {
+    if (chat.isBusy() || preparing) return;
+    offer = null;
+    try { await T.markRetell(ctx.kv, e.key, { accepted: true }); } catch (err) { /* the question still goes */ }
+    const msgs = chat.messages();
+    if (msgs.length && msgs[msgs.length - 1].thread === chat.thread()) chat.newThread();
+    doSend({ text: T.retellLabel(e), send: T.retellAsk(e), quick: 'retell' });
+  }
+  async function skipRetell(e) {
+    offer = null;
+    render();
+    try { await T.markRetell(ctx.kv, e.key, { accepted: false }); } catch (err) { /* asked again next time */ }
+  }
+  function weekAskBlock() {
+    return h('div', { className: 'chat-row chat-row-teacher chat-weekask' },
+      h('div', { className: 'chat-msg chat-teacher' }, h('div', { className: 'chat-body' },
+        h('p', null, h('strong', { text: T.WEEK_ASK })),
+        h('p', { className: 'small', text: '点一个就好。老师记下来，下周对着帮你。' }))),
+      h('div', { className: 'chat-after' }, h('div', { className: 'chat-quick' },
+        ...T.WEEK_ASK_OPTIONS.map(o => h('button', { type: 'button', className: 'chat-chip', on: { click: () => answerWeek(o.id) } }, o.label)),
+        h('button', { type: 'button', className: 'chat-chip chat-chip-quiet', on: { click: () => answerWeek('skip') } }, '先不说'))));
+  }
+  async function answerWeek(id) {
+    weekAsk = false;
+    render();
+    try {
+      if (ctx.events && ctx.events.log) await ctx.events.log({ type: 'ask', step: 'chat', qid: 'chat_week', who: 'emma', answer: id, about: 'week_stuck:' + id });
+    } catch (e) { /* never blocks */ }
+    toast(id === 'skip' ? '好，有不懂的随时来问。' : '老师记下了。有不懂的随时来问。', 2200);
+  }
+  // what the notebook wants to say when she opens the page: settle “我问过的”, then a retell offer or this week's question
+  let refreshing = null;
+  function refreshNotebook() {
+    if (refreshing) return refreshing;
+    refreshing = (async () => {
+      const now = new Date();
+      let st = null;
+      try { st = await T.syncAsked(ctx, { now }); } catch (e) { st = null; }
+      offer = st ? T.retellOffer(st, now) : null;
+      weekAsk = false;
+      try {
+        const mon = T.mondayOf(now);
+        const used = ctx.kv.keys(C.KV_PREFIX).some(k => C.isDayKey(k) && k !== C.dayKey(now)) || T.lessonDaysIn(ctx.kv, mon, T.dayOf(now)).length > 0;
+        if (used && ctx.events && ctx.events.query) {
+          const asks = (await ctx.events.query({ since: mon, type: 'ask' })) || [];
+          weekAsk = !asks.some(x => x && x.qid === 'chat_week');
+        }
+      } catch (e) { weekAsk = false; }
+    })().finally(() => { refreshing = null; });
+    return refreshing;
   }
   function exampleBlock() {
     return h('div', { className: 'chat-examples' },
       h('p', { className: 'chat-ex-h small', text: '可以这样问' }),
       C.examples(unitLabel()).map(x => h('button', { type: 'button', className: 'chat-ex', on: { click: () => (x.fill ? fill(x.fill) : doSend({ text: x.text })) } },
         h('span', { text: x.text }), icon('chev'))),
-      h('button', { type: 'button', className: 'chat-ex', on: { click: openCamera } }, h('span', { text: '拍一道不会的题' }), icon('chev')));
+      h('button', { type: 'button', className: 'chat-ex', on: { click: openCamera } }, h('span', { text: '拍一道不会的题' }), icon('chev')),
+      // 0.5.0 课文陪读 (ui-textread.js, app.textread): a page of the textbook, read with the teacher sentence by sentence
+      ctx.textread && typeof ctx.textread.open === 'function'
+        ? h('button', { type: 'button', className: 'chat-ex', on: { click: () => ctx.textread.open() } }, h('span', { text: '拍一页课文，陪我读' }), icon('chev')) : null);
   }
 
   function render() {
@@ -186,6 +262,10 @@ export function createChatTab(ctx, { root = null } = {}) {
       kids.push(m.role === 'user' ? userBubble(m) : teacherBubble(m, { last: m === lastTeacher && m === lastMsg && m.thread === cur }));
     }
     if (lastMsg && lastMsg.thread !== cur) kids.push(divider(), exampleBlock());
+    if (!chat.isBusy()) {
+      if (offer) kids.push(retellBlock(offer));
+      else if (weekAsk) kids.push(weekAskBlock());
+    }
     list.replaceChildren(...kids);
     updateComposer();
   }
@@ -457,6 +537,15 @@ export function createChatTab(ctx, { root = null } = {}) {
     show(params = {}) {
       const p = params || {};
       render();
+      const notes = refreshNotebook();
+      if (p.retell) {
+        notes.then(() => {
+          const e = offer && offer.key === p.retell ? offer : null;
+          if (e) startRetell(e); else render();
+        });
+        return;
+      }
+      notes.then(() => { if (!chat.isBusy()) { const near = nearEnd(); render(); if (near) scrollEnd(true); } });
       if (p.image) { pendingImage = String(p.image); showPhoto(); }
       // send as a string: the bubble shows ask, the teacher gets the longer question with its background
       if (p.ask && typeof p.send === 'string' && p.send.trim() && !p.image && !chat.isBusy() && !preparing) {

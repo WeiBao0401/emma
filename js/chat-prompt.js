@@ -17,14 +17,18 @@
 //     name: 'Emma', teacherName: '她给老师起的名字' | '',
 //     unit: { id: 'U2', title: 'Unit 2 ...' } | null,                 现在学到哪个单元（kv 'progress'.unit）
 //     exam: { date: 'YYYY-MM-DD' | '', range: 'Starter 到 Unit 3' } | null,
-//     vocab: { primary: 505, textbook: 236, upTo: 'Unit 3', words: ['hello', ...] } | null,   她认识的词的规模和课本词
+//     vocab: { primary: 505, textbook: 236, upTo: 'Unit 3', words: ['hello', ...], unknown?: ['bear', ...] } | null,   她认识的词的规模和课本词；
+//            unknown（0.5.0）是 505 摸底里她还不认识的小学词（最多 40 个），例句不用
 //     misses: ['there be 的单复数（这 3 周错了 3 次）', ...],          最近常错的点，最多 8 条
 //     grammar: [{ title, unit, status: '在练' 等, rule: [句], tags: ['常见误解'] }],   语法卡进度和规则原文（讲法以卡为准）
 //     intake: [{ label, value }],                                     家长问卷里写的情况
 //     praise: 'specific' | 'short' | 'dislike' | '',                  被夸的时候（问卷 on_praise）
 //     phonics: 'yes' | 'some' | 'not_yet' | '',                       会不会音标（问卷 phonics）
 //     recent: ['语法 · there be：“there be 和 have 有什么区别？”（10-23）', ...],   她最近问过的 3 个问题
-//     stuck: ['...'] }                                                kv 'teacher.stuck'（以后的模块写；有就带上）
+//     stuck: ['...'],                                                 kv 'teacher.stuck'（每周想一次写，带证据；最多 5 条）
+//     asked: ['there be：10-20 讲过，10-22 热身里再考做错了……'],      “我问过的”再考的结果（teacher.js askedLines，最多 4 条）
+//     focus: [{ title, unit, rule: [句], table?: { head, rows }, examples: [{ en, zh }] }] }
+//                                                                     这次问到的语法点对应的语法卡（规则原文，讲法以卡为准，最多 2 张）
 //
 // 规则：中文弯引号，不用破折号，句子短。依赖：无。
 
@@ -64,12 +68,18 @@ export const TEACHING_RULES = `你只有一个目标：让她真的弄懂、学�
 1. 开头一句话给结论，用 **加粗**。
 2. 再用简单的中文讲为什么。一次只讲一个点，别的先不展开。少用术语；非用不可时，用课本的叫法（比如“be 动词”“名词复数”“物主代词”），后面马上用大白话说一遍。
 3. 举 1 到 2 个例子。英文例句要短，只用她认识的词（小学词和下面列的课本词），后面用括号写中文。关键的地方加粗。
+   写完例句，逐个词检查一遍她认不认识：不认识的换成简单的词；实在要用，就在这个词后面用括号写中文。人名用 Tom、Lily、Kitty 这类简单的。
 4. 最后问她一个很小的问题，确认她懂了：一道只有一个空的填空，或者二选一。问完就停，等她回答，不要替她回答。
 
 【她回答了你的小问题】
 - 对了：说清楚她哪里做对了，比如“你看到了 two，所以用 are”。然后结束这个点，或者问她要不要再来一道稍难一点的。
 - 错了：先说正确答案，再指出她哪一步想岔了，换一个更简单的讲法和一个新例子，再问一道同样小的题。
 - 她说“不知道”或“还是不懂”：退一步，把这个点拆得更小，从她肯定会的地方讲起，比如先只看主语是一个还是几个。
+
+【换个讲法】
+她做错了以前讲过的点，或者同一个点又来问：不要把上次的话再说一遍。换一个角度讲：把对的和错的放在一起比，
+或者把容易混的两个放在一起比（is 和 are、my 和 mine）；换新的例子，最好用她的生活和猫；讲完再出一道小题。
+错的句子单独一行，前面写“不对：”，比如“- 对：She **is** tall.”下一行“- 不对：She tall.（少了 is）”。
 
 【作业题、练习题】（她拍照或者打字发来的题）
 - 先带她想，不要一上来就给答案：先说这题考什么，再给一个像的例子，再告诉她第一步怎么做，然后请她说出自己的答案。
@@ -144,6 +154,9 @@ export function buildSystemPrompt(ctx = {}) {
     if (Number(v.textbook) > 0) parts.push(`课本${span}的 ${Number(v.textbook)} 个词`);
     else if (c.unit && (c.unit.title || c.unit.id)) parts.push('课本学过的词（词表还没导入，按外研版七上学到的单元估计）');
     facts.push(`她认识的词：${parts.join('，加上')}。比这些难的词，例句里不要用；非用不可时，后面括号写中文。`);
+    // 0.5.0: the 505 check (screen.js unknownPrimary)
+    const unk = Array.isArray(v.unknown) ? v.unknown.map(clean).filter(Boolean).slice(0, 40) : [];
+    if (unk.length) facts.push(`小学词里她还不认识：${unk.join(', ')}。例句别用这些词。`);
   }
   const pl = PRAISE_LINE[c.praise];
   if (pl) facts.push(pl);
@@ -157,13 +170,36 @@ export function buildSystemPrompt(ctx = {}) {
     out.push('【她最近常错的】讲到相关的地方时，顺手帮她对比一下：');
     out.push(...misses.map(m => '- ' + m));
   }
-  const stuck = list(c.stuck, 3);
+  const stuck = list(c.stuck, 5);
   if (stuck.length) {
     out.push('');
     out.push('【老师观察到她卡在哪】');
     out.push(...stuck.map(m => '- ' + m));
   }
-  const cards = (Array.isArray(c.grammar) ? c.grammar : []).filter(g => g && g.title).slice(0, 8);
+  const asked = list(c.asked, 4);
+  if (asked.length) {
+    out.push('');
+    out.push('【讲过以后隔几天再考的结果】');
+    out.push(...asked.map(m => '- ' + m));
+  }
+  const focus = (Array.isArray(c.focus) ? c.focus : []).filter(g => g && g.title && list(g.rule, 8).length).slice(0, 2);
+  if (focus.length) {
+    out.push('');
+    out.push('【这次问到的语法，以这张卡为准】讲这个点时，规则的说法、叫法和卡上一致；卡上没写的规则不要自己加，拿不准就照卡上说。');
+    for (const g of focus) {
+      out.push(`- 语法卡：${clean(g.title)}` + (g.unit ? `（${clean(g.unit)}）` : ''));
+      for (const r of list(g.rule, 8)) out.push(`  · ${r}`);
+      const t = g.table && Array.isArray(g.table.head) && Array.isArray(g.table.rows) ? g.table : null;
+      if (t) {
+        out.push(`  表：${t.head.map(clean).join(' | ')}`);
+        for (const row of t.rows.slice(0, 6)) if (Array.isArray(row)) out.push(`    ${row.map(clean).join(' | ')}`);
+      }
+      const ex = (Array.isArray(g.examples) ? g.examples : []).filter(e => e && clean(e.en)).slice(0, 3);
+      if (ex.length) out.push('  例句：' + ex.map(e => clean(e.en) + (clean(e.zh) ? `（${clean(e.zh)}）` : '')).join(' '));
+    }
+  }
+  const focusTitles = new Set(focus.map(g => clean(g.title)));
+  const cards = (Array.isArray(c.grammar) ? c.grammar : []).filter(g => g && g.title && !focusTitles.has(clean(g.title))).slice(0, 8);
   if (cards.length) {
     out.push('');
     out.push('【她学过的语法卡】讲这些语法时，说法和下面的规则一致：');

@@ -15,9 +15,14 @@
 //   PULL_MAX = 10           期中季热身有空位时，最多把几个还没到期的重点词提前拿来复习
 //   QUIZ_SPELL = 10, QUIZ_GRAMMAR = 5
 //   DEFAULT_RANGE = { from: 'S', to: 'U3' }   只填了日期没填范围时
-//   MODE_SECONDS            每种卡大约几秒：mc4 / listen / card 15，tiles 25，grammar 25，order 45（连词成句，0.4.0）
+//   MODE_SECONDS            每种卡大约几秒：mc4 / listen / card 15，tiles 25，grammar 25，order 45（连词成句，0.4.0）；
+//                           0.5.0：probe 25（地基探针）、screen 5（505 摸底一个词，算上核对）、verb 20（找动词）、transform 50
 //   WRITE_MINUTES           “写几个词”几分钟：spell 2，grammar 3，phonics 3，order 3
 //   WRITE_ROTATION          [周日..周六] 的“写几个词”：一、二、六语法卡，三连词成句（0.4.0，原来是拼写），四语音小卡，日、五拼写
+//   TRANSFORM_DAYS、writeModeOf(dow, season)   0.5.0：句型转换占轮换里的星期六（平时）、星期四和星期六（期中季）；
+//                           writePlan 和兜底语法卡的计数都用 writeModeOf。state.transformItems（modes/order.js transformItems）
+//                           没给或 state.noTransform 就跳过这一种
+//   quizPassage(state, now) 0.5.0：小卷里的期中阅读小篇（state.examPassages、state.examReading）；有小篇时小卷拼 6 个、语法 4 道
 //   UNIT_CARDS              v1 三张语法卡的 id（和 grammar.json 一样：pronoun、there_be、possessive_s）；
 //                           grammar.js 给了 state.grammarCard（todayCard 的 { cardId, part }）就用它的，给了 null 就是今天没有卡
 //   GRAMMAR_FALLBACK        兜底语法题（grammar.js 没给题的时候用），Unit 1 到 Unit 3 各 4-5 道
@@ -45,7 +50,7 @@
 //       state 是 plan 的 state，或 ui-lesson 手上的 { entries, words, curriculum, kv, grammar, plan, now }；
 //       state.plan.quiz 有了就直接返回它（首页和上课看到的是同一份）
 //       Quiz = { id: 'quiz:YYYY-MM-DD', date, kind: 'quiz', title, minutes, items: [slug], spell: [{ slug, headword, mode }],
-//                grammar: [GrammarItem], note }
+//                grammar: [GrammarItem], note, passage?: { id, label, minutes } }   passage：0.5.0 期中阅读小篇（plan 放进读一段格）
 //   weeklyGains(events, now) -> { since, written, writtenSlugs, recognized, recognizedSlugs, line }
 //       这周（周一起）第一次写对的词、第一次认出的词；line 是孩子看的一句：“这周又能写出 9 个词”，没有就是 ''
 //
@@ -66,9 +71,19 @@ export const PULL_MAX = 10;
 export const QUIZ_SPELL = 10;
 export const QUIZ_GRAMMAR = 5;
 export const DEFAULT_RANGE = { from: 'S', to: 'U3' };
-export const MODE_SECONDS = { mc4: 15, listen: 15, card: 15, tiles: 25, keys: 25, grammar: 25, order: 45 };
-export const WRITE_MINUTES = { spell: 2, grammar: 3, phonics: 3, order: 3 };
+export const MODE_SECONDS = { mc4: 15, listen: 15, card: 15, tiles: 25, keys: 25, grammar: 25, order: 45,
+  // 0.5.0: 地基探针 (a grammar question), 505 摸底 (one tap a word, checks included), 找动词, 句型转换
+  probe: 25, screen: 5, verb: 20, transform: 50 };
+export const WRITE_MINUTES = { spell: 2, grammar: 3, phonics: 3, order: 3, transform: 3 };
 export const WRITE_ROTATION = ['spell', 'grammar', 'grammar', 'order', 'phonics', 'spell', 'grammar'];   // 周日..周六
+// 0.5.0 句型转换 takes some days of the rotation without making it longer: Saturday (a grammar day) all year, and in the
+// exam season Thursday too (the phonics day). Monday and Tuesday stay grammar-card days.
+export const TRANSFORM_DAYS = { regular: [6], season: [4, 6] };
+export const writeModeOf = (dow, season = false) =>
+  ((season ? TRANSFORM_DAYS.season : TRANSFORM_DAYS.regular).includes(dow) ? 'transform' : WRITE_ROTATION[dow]);
+// 0.5.0: a quiz with a 期中阅读小篇 in it spells and asks a little less, so the whole quiz day stays near 15 minutes
+export const QUIZ_SPELL_WITH_READ = 6;
+export const QUIZ_GRAMMAR_WITH_READ = 4;
 export const UNIT_CARDS = { U1: 'pronoun', U2: 'there_be', U3: 'possessive_s' };   // grammar.json 的卡 id
 
 const pad = n => String(n).padStart(2, '0');
@@ -333,7 +348,10 @@ function grammarCard(state, sprint, now) {
     if (!cards.length) return null;
     const start = localMidnight(sprint.date); start.setDate(start.getDate() - SPRINT_DAYS);
     let k = 0;
-    for (let d = new Date(start); dayOf(d) < dayOf(now); d.setDate(d.getDate() + 1)) if (WRITE_ROTATION[d.getDay()] === 'grammar') k++;
+    // the days 句型转换 took are not grammar days (only when there are 句型转换 sentences at all)
+    const tOn = Array.isArray(state.transformItems) && state.transformItems.length > 0 && !state.noTransform;
+    const isGrammarDay = dow => (tOn ? writeModeOf(dow, true) : WRITE_ROTATION[dow]) === 'grammar';
+    for (let d = new Date(start); dayOf(d) < dayOf(now); d.setDate(d.getDate() + 1)) if (isGrammarDay(d.getDay())) k++;
     return { id: cards[k % cards.length], part: (Math.floor(k / cards.length) % 2) + 1, from: 'plan' };
   }
   const cur = p.unit ? rank(p.unit) : Infinity;
@@ -357,8 +375,10 @@ export function writePlan({ now = new Date(), state = {}, sprint = null, words =
   if (light) return { status: 'skip', mode: 'paper', items: [], minutes: 0, note: '轻松版不做' };
   // 考前小卷: the spelling half sits here, its grammar half in the warm-up (as ui-lesson's sprintCells lays it out)
   if (quiz) return { status: 'ready', mode: 'spell', items: quiz.items.slice(), minutes: Math.max(1, Math.round((quiz.items.length * 45) / 60)), note: '考前小卷', quiz };
-  const today = WRITE_ROTATION[now.getDay()];
-  const order = [today, ...['spell', 'grammar', 'order', 'phonics'].filter(m => m !== today)];
+  const today = writeModeOf(now.getDay(), !!(sprint && sprint.on));
+  // a 句型转换 day without sentences goes back to what the day was before (grammar on Saturday, phonics on Thursday)
+  const base = WRITE_ROTATION[now.getDay()];
+  const order = [...new Set([today, base, 'spell', 'grammar', 'order', 'transform', 'phonics'])];
   for (const mode of order) {
     if (mode === 'spell') {
       const list = spellPick(words, { warm, sprint, isKey, state, n: WRITE_SPELL });
@@ -369,6 +389,9 @@ export function writePlan({ now = new Date(), state = {}, sprint = null, words =
     } else if (mode === 'order' && !state.noOrder) {
       const list = Array.isArray(state.orderItems) ? state.orderItems.filter(Boolean) : [];
       if (list.length) return { status: 'ready', mode, items: list.slice(), minutes: WRITE_MINUTES.order, note: '' };
+    } else if (mode === 'transform' && !state.noTransform) {
+      const list = Array.isArray(state.transformItems) ? state.transformItems.filter(Boolean) : [];
+      if (list.length) return { status: 'ready', mode, items: list.slice(), minutes: WRITE_MINUTES.transform, note: '' };
     } else if (mode === 'phonics' && !state.noPhonics) {
       return { status: 'ready', mode, items: [], minutes: WRITE_MINUTES.phonics, note: '', card: state.phonicsCard || null, week: dayOf(mondayOf(now)) };
     }
@@ -403,14 +426,17 @@ export function buildQuiz(state = {}, now = new Date(), opts = {}) {
   if (!pool.length) return null;
   // the second quiz day starts further down the list, so the two days spell different words when there are enough
   const k = sp.phase === 'quiz' && Number.isFinite(sp.daysLeft) ? QUIZ_DAYS - sp.daysLeft : 0;
-  const start = pool.length > QUIZ_SPELL ? (k * QUIZ_SPELL) % pool.length : 0;
+  const passage = quizPassage(state, now);
+  const nSpell = passage ? QUIZ_SPELL_WITH_READ : QUIZ_SPELL;
+  const start = pool.length > nSpell ? (k * nSpell) % pool.length : 0;
   const spell = [];
-  for (let i = 0; i < pool.length && spell.length < QUIZ_SPELL; i++) spell.push(pool[(start + i) % pool.length]);
-  const grammar = grammarQuiz(state, now, QUIZ_GRAMMAR, sp);
-  const sec = spell.length * 45 + grammar.length * 30;
+  for (let i = 0; i < pool.length && spell.length < nSpell; i++) spell.push(pool[(start + i) % pool.length]);
+  const grammar = grammarQuiz(state, now, passage ? QUIZ_GRAMMAR_WITH_READ : QUIZ_GRAMMAR, sp);
+  const sec = spell.length * 45 + grammar.length * 30 + (passage ? passage.minutes * 60 : 0);
   const minutes = Math.min(15, Math.max(5, Math.round(sec / 60)));
   const date = dayOf(now);
   return {
+    ...(passage ? { passage } : {}),
     id: 'quiz:' + date,
     date,
     kind: 'quiz',
@@ -421,6 +447,20 @@ export function buildQuiz(state = {}, now = new Date(), opts = {}) {
     grammar,
     note: '写错的也没关系，明天热身再见。',
   };
+}
+
+// 0.5.0 期中阅读小篇 (curriculum/exam-reading.json, design/teacher-next.md 3.4): one passage in each quiz. state.examPassages
+// is [{ id, label, minutes }] (app.js, from reader.js loadPassages); state.examReading is kv 'exam.reading'
+// ({ done: { id: 'YYYY-MM-DD' } }). The one done today stays today's; otherwise the first not done yet, then the one done
+// longest ago. -> { id, label, minutes } | null
+export function quizPassage(state = {}, now = new Date()) {
+  const list = Array.isArray(state && state.examPassages) ? state.examPassages.filter(p => p && p.id) : [];
+  if (!list.length) return null;
+  const done = (state.examReading && typeof state.examReading === 'object' && state.examReading.done && typeof state.examReading.done === 'object') ? state.examReading.done : {};
+  const today = dayOf(now);
+  const pick = list.find(p => done[p.id] === today) || list.find(p => !done[p.id])
+    || list.slice().sort((a, b) => String(done[a.id]).localeCompare(String(done[b.id])))[0];
+  return { id: pick.id, label: pick.label || '期中阅读', minutes: Math.max(3, Number(pick.minutes) || 6) };
 }
 
 // ---------------------------------------------------------------- this week's gains

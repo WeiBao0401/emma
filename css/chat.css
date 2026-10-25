@@ -107,3 +107,8 @@
   .chat-tool-btn span{display:none}
   .chat-send{min-width:64px;padding:0 14px}
 }
+
+/* ---------- the teacher's notebook (teacher.js): this week's line, “换个讲法”, “这周哪里最卡？” ---------- */
+.chat-week{margin-top:10px;padding-top:10px;border-top:1px solid var(--rule);color:var(--accent)}
+.chat-retell .chat-teacher,.chat-weekask .chat-teacher{border-color:color-mix(in srgb,var(--accent) 30%,var(--rule))}
+.chat-chip-quiet{border-color:var(--rule-strong);color:var(--muted)}

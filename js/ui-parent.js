@@ -54,6 +54,9 @@ import { chatRoute, CHAT_DEFAULTS } from './chat.js';
 import * as R from './reader.js';
 import * as G from './grammar.js';
 import * as O from './modes/order.js';
+import * as S from './screen.js';
+import { renderTeacherWeek, teacherRow } from './ui-teacher.js';
+import { readPages } from './textread.js';
 import { asrRoute, ASR_DEFAULTS, DOUBAO_RESOURCE } from './voice-input.js';
 import { normalizePoeUrl } from './ai.js';
 
@@ -542,7 +545,8 @@ export function createParentView(ctx) {
           const g = x.point ? safe(() => ctx.curriculum.grammarName(x.point)) : '';
           return h('li', {},
             h('p', { lang: 'en', className: 'serif', text: x.en }),
-            h('p', { className: 'small', text: `第 ${x.n} 集第 ${x.i} 句 · ${HELP_NAME[x.level] || '点过看不懂'}${g ? ' · ' + g : ''}` }));
+            // 0.5.0: a sentence with a trunk shows the trunk first, so the step is the reader's own name for it (stepZh)
+            h('p', { className: 'small', text: `第 ${x.n} 集第 ${x.i} 句 · ${x.stepZh || HELP_NAME[x.level] || '点过看不懂'}${g ? ' · ' + g : ''}` }));
         })));
     };
   }
@@ -550,6 +554,28 @@ export function createParentView(ctx) {
     return () => h('ul', { className: 'parent-hard' }, gs.map(g => h('li', {},
       h('p', { text: `${g.label ? g.label + ' · ' : ''}${g.title}：${CARD_STATUS[g.status] || g.status}` }),
       g.answered ? h('p', { className: 'small', text: `一次就对 ${g.right} 道，看了提示改对 ${g.fuzzy} 道，没过 ${g.failed} 道${g.tags.length ? '。常错：' + g.tags.slice(0, 2).map(t => t.zh).join('；') : ''}` }) : null)));
+  }
+  // 0.5.0: where reading gets stuck (reader.js triageSummary, last 14 days): words, sentences or the method, what she said
+  // was hardest, the sentences she got stuck on
+  function triagePanel(ts) {
+    return () => {
+      if (!ts) return h('p', { className: 'small', text: '读的时候她点词、点“看不懂”、答错题，都会记下是卡在词、句子还是方法上。' });
+      const kids = [h('p', { className: 'small', text: ts.line })];
+      if (ts.lastHard && ts.lastHard.zh) kids.push(h('p', { className: 'small', text: `她自己说最难的：${ts.lastHard.zh}${ts.agree === false ? '（和记录不太一样，先信记录，再多看几次）' : ''}` }));
+      if (ts.sentences.length) {
+        kids.push(h('ul', { className: 'parent-hard' }, ts.sentences.slice(0, 3).map(x => h('li', {},
+          h('p', { lang: 'en', className: 'serif', text: x.en }),
+          h('p', { className: 'small', text: `第 ${x.n} 集第 ${x.i} 句` + (x.level >= 3 ? ' · 看了整句中文才懂' : '') })))));
+      }
+      if (ts.words.length) kids.push(h('p', { className: 'small', text: '点开看过的词：' + ts.words.slice(0, 8).join('、') }));
+      return h('div', {}, kids);
+    };
+  }
+  // 0.5.0: the six foundation blocks (screen.js probeSummary) and the 505 words (screenSummary); numbers only here, never on her side
+  function foundationPanel(blocks) {
+    return () => h('ul', { className: 'parent-hard' }, blocks.map(b => h('li', {},
+      h('p', { text: `${b.name}：${b.label}` }),
+      b.n ? h('p', { className: 'small', text: `做了 ${b.n} 道，第一次就对 ${b.right} 道${b.tags && b.tags.length ? '。选错的：' + b.tags.slice(0, 2).map(t => safe(() => (ctx.curriculum.tags[t] || {}).zh) || t).join('；') : ''}` }) : null)));
   }
   function learnGroup(kit) {
     const now = new Date();
@@ -568,7 +594,37 @@ export function createParentView(ctx) {
         value: gs.length ? `${started.length} / ${gs.length} 张开始了` : '还没开始', panel: gs.length ? grammarPanel(gs) : null }),
       kit.row({ label: '连词成句', sub: os && os.kinds.length ? '常错：' + os.kinds.slice(0, 2).map(k => k.name).join('、') : '星期三的“写几个词”和热身里会出',
         value: os && os.tried ? `排过 ${os.tried} 句，一次就对 ${os.clean} 句` : '还没排' }),
+      ...extraRows(kit, now),
     ], '看她卡在哪，好对着补。');
+  }
+  // 0.5.0 rows: 读的时候卡在哪, 老师这周的想法, 地基小题, 小学词摸底, 句型转换, 课文陪读
+  function extraRows(kit, now) {
+    const ts = safe(() => R.triageSummary(ctx.kv, { now, days: 14 }));
+    const tw = safe(() => teacherRow(ctx, now)) || { label: '老师这周的想法', sub: '', value: '' };
+    const blocks = safe(() => (S.content() ? S.probeSummary(ctx.kv) : [])) || [];
+    const sc = safe(() => (S.content() ? S.screenSummary(ctx.kv) : null));
+    const tsum = safe(() => (O.transformContent() ? O.transformSummary(ctx.kv, now) : null));
+    const pages = safe(() => readPages(ctx.kv));
+    const counted = {};
+    for (const b of blocks) counted[b.label] = (counted[b.label] || 0) + 1;
+    const decided = blocks.filter(b => ['steady', 'practicing', 'weak'].includes(b.status));
+    const weak = blocks.filter(b => b.status === 'weak').map(b => b.name);
+    const pageText = pages && pages.pages ? Object.entries(pages.byUnit).map(([u, ps]) => `${u === 'S' ? 'Starter' : u.replace(/^U/, 'Unit ')} 第 ${ps.join('、')} 页`).join('；') : '';
+    return [
+      kit.row({ key: 'learn-triage', label: '读的时候卡在哪', sub: ts && ts.main ? `最近两周卡在${ts.mainZh}上最多` : '分清是词、句子，还是做题不回原文找',
+        value: ts && (ts.total.word + ts.total.sentence + ts.total.method) ? `${ts.total.word + ts.total.sentence + ts.total.method} 次` : '还没记录', panel: triagePanel(ts) }),
+      kit.row({ key: 'teacher-week', label: tw.label || '老师这周的想法', sub: tw.sub, value: tw.value,
+        panel: () => { const box = h('div'); safe(() => renderTeacherWeek(box, ctx)); return box; } }),
+      kit.row({ key: 'learn-probe', label: '地基小题', sub: weak.length ? `还不会：${weak.join('、')}（对应的语法卡排到前面）` : '热身里每天 2 道，看 6 块地基哪块不稳',
+        value: blocks.some(b => b.n) ? (decided.length ? Object.entries(counted).filter(([l]) => ['稳', '在练', '不会'].includes(l)).map(([l, n]) => `${l} ${n}`).join(' · ') : '还在看') : '还没开始',
+        panel: blocks.length ? foundationPanel(blocks) : null }),
+      kit.row({ label: '小学词摸底', sub: sc && sc.done ? `认识 ${sc.known}，不认识 ${sc.new + sc.unsure + sc.wrong}（进了单词本）` + (sc.fakeHits ? `；老师编的词点了“认识” ${sc.fakeHits} 次，之后的“认识”都会核对` : '') : '热身里每天认十来个小学词，不会的进单词本',
+        value: sc && sc.of ? `摸过 ${sc.done} / ${sc.of}` : '还没开始' }),
+      kit.row({ label: '句型转换', sub: tsum && tsum.kinds.length ? '常错：' + tsum.kinds.slice(0, 2).map(k => k.name).join('、') : '星期六的“写几个词”（期中季星期四也有）',
+        value: tsum && tsum.tried ? `做过 ${tsum.tried} 句，一次就对 ${tsum.clean} 句` : '还没做' }),
+      kit.row({ label: '课文陪读', sub: pageText || '她在“今天”或问老师里拍一页课文，老师陪着一句一句读',
+        value: pages && pages.pages ? `读过 ${pages.pages} 页` : '还没读' }),
+    ];
   }
 
   // ---------------------------------------------------------------- 花费

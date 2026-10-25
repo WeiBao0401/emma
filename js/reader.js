@@ -36,6 +36,21 @@
 //                 hints: [4 句], explain?, variant: { ask | stem, zh, stem_zh, options, options_zh, answer, evidence?, explain } }]
 // }
 // 名字：speaker 写人名；她起的名字按整词换进全部文字（英文、中文、题目、提示），Tom 不会换掉 Tomorrow。
+//
+// 0.5（teacher-next 3.1、3.2、6.1、6.2）新加的字段，缺了照旧读：
+//   sentence.trunk = { subject: '主语原文', verb: '谓语原文（含 be、can、do；分开的写 Does ... like）', note: '谁 = Mia，干什么 = is looking for' }
+//   sentence.tags = ['there_be', 'poss_s', 'pronoun', 'be_adj', 'can', 'third_s' ...]   这句的语法标签（分诊按它数“哪类句子拆不开”）
+//   sentence.para = 第几段（1 起，期中阅读小篇用；没写时故事按 part、小篇按 line 算段）
+//   question.type = 'evidence'   点出答案句：她在原文里点一句；answer 是句子编号数组（点到其中一句就算对），options 不用
+//   question.type = 'reference'  指代题：问 it / they / she 指谁；pronoun: 'she'、sentence: 12（不写就从题目和依据句里找），
+//                                options 是原文里的名词
+//   question.keyword / keywords   回原文要找的关键词（不写就从提示“关键词是 …”、考的词、题目和依据句共有的词里找）
+//   question.preview: true        读前先看的那一道（不写用 tip.q，再没有用第一道点句子的题，再没有用第一道）
+// 提示阶梯：答错第 1 级固定是“回原文找关键词：…”（内容的第 1 级已经这样写的照用）；内容写的 4 级排在后面：
+//   第 2 级 = 内容第 1、2 级（去哪一句找、关键词），第 3 级 = 内容第 3 级（排除），第 4 级 = 内容第 4 级（讲清楚）。
+//   点句子的题：第 2 级“答案在第几段”，第 3 级缩到两句，第 4 级标出答案句（界面把这一段、这两句加底色）。
+// “这句看不懂”三下：第 1 下主干（标出主语和谓语，一句“谁 = …，干什么 = …”；没写 trunk 的句子退回断句），
+//   第 2 下意群断开 + 两个关键词，第 3 下整句中文。
 
 // ---------------------------------------------------------------- 导出
 //   FILE、KV_KEY = 'story:progress'、MODE = 'read'、STEP = 'read'、HINT_MAX = 4、HELP_MAX = 3、SHORT_QUESTIONS = 2
@@ -72,6 +87,25 @@
 //              minutes, again（6 集读完了，挑她最吃力的一集再读）, short（轻松版：只做 2 道题）, resume, note, items: [] }
 //   estimateMinutes(ep, { short, again })；wordsMet(kvOrProgress) -> { slug: 遇见次数 }；readingSummary(kvOrProgress, { content })
 //   checkEpisode(ep) -> [问题]   内容自检（测试用）：每道题恰好一个正确选项、提示 4 级、有变式题、依据句找得到……
+//   0.5：trunkOf(S) -> { subject, verb, note, tokens: [{ text, word?, role: 'subject' | 'verb' | null }], found } | null
+//        qtypeOf(Q) -> 'locate' | 'refer' | 'word' | 'main' | 'infer' | 'detail'（answer 事件的 qtype）
+//        keywordOf(Q)、methodLine(Q, kw)、paraOf(ep, S)、zoneOf(ep, Q, level) -> [句子 i]（第 2、3 级加底色的句子）
+//        focusOf(ep, questions?) -> 读前先看的那道题
+//        分诊：TRIAGE_KEY = 'read:triage'、TRIAGE、triageKind、emptyTriage、normTriage、readTriage、noteTriage、noteHard、
+//             triageToday(t, epId, now)、readAdjust(t, epId, now) -> { trunkFirst, methodTip, counts }、triageSummary(kv, { content, now, days })
+//        “今天哪里最难？”：HARD_QID = 'read_hard'、HARD_OPTIONS、hardEvent(ep, id)
+//        期中阅读小篇：EXAM_FILE、passageOf(raw)（一篇小篇 / 课文 -> Ep）、loadPassages({ fetchJSON, file }) -> [Ep]
+//
+// ---------------------------------------------------------------- kv 'read:triage'（0.5 新键）卡在哪一类，按集记
+//   { v: 1, eps: { [epId]: { word, sentence, method,                 一共几次
+//                            days: { 'YYYY-MM-DD': { word, sentence, method } },   每天几次（留 30 天），当天调整按它
+//                            log: [{ kind, from: 'tap' | 'help' | 'wrong', day, at, i?, level?, w?, q?, tags? }]（最近 40 条）,
+//                            hard: [{ answer: 'words' | 'sentences' | 'find' | 'ok', day, at }] } },   读完问的“今天哪里最难？”
+//     updated }
+//   怎么分：点词（不算名字）= 词；“看不懂”第 1、2 下 = 句子，第 3 下（看了整句中文才懂）= 词；
+//          题答错（每题算第一次错的那下）而依据句没求助过 = 方法；点句子的题点错 = 方法；指代题错 = 句子（代词指谁看不出，是句子拆不开）。
+//   当天调整：同一集当天“句子”3 次以上，没求助过的句子先标出主干；“方法”2 次以上，下一题前先提示本集的方法。
+//
 //
 // ---------------------------------------------------------------- kv 'story:progress'（新键）
 //   { v: 1, current: 正在读的那集 | null,
@@ -96,6 +130,12 @@
 //   lookup    { query, source, from: 'story', item: 'ep:<ep>:s<句号>', slug?, phase }   点开一个词（已有的事件类型）
 //   flag      { item, mode: 'read' }   “这题有问题”：跳过、不记分
 //   feel      { item: 'ep:<ep>', choice: 'boring' }   “这集不好看”
+//   0.5 只加字段：answer 带 qtype（locate / refer / word / main / infer / detail），点句子的题 choice 是 's<句号>' 另带 sentence；
+//             第一次答错带 triage（'method' | 'sentence'，依据句求助过的不带）；
+//             read_help 带 help（'trunk' | 'chunks' | 'keys' | 'zh'：这一下给她看的是什么）、tags（这句的语法标签）、triage（'sentence' | 'word'）、
+//             auto_trunk（这句的主干是自动先标出来的）；lookup（from 'story'）带 triage: 'word'（名字不带）
+//   ask       { qid: 'read_hard', who: 'emma', answer: 'words' | 'sentences' | 'find' | 'ok', about: 'read:<word|sentence|method|ok>',
+//               item: 'ep:<ep>', mode: 'read', episode }   读完问的“今天哪里最难？”（已有的事件类型）
 // slugify and localIso are the same as words.js (tests/reader.test.mjs checks): copied so the reader opens even while
 // the lookup modules change; a word's slug must match the word book's.
 export function slugify(word) {
@@ -117,7 +157,11 @@ export const SHORT_QUESTIONS = 2;
 export const SKILLS = {
   detail: '找细节', infer: '想一想', main: '这集讲什么', word: '词的意思', meaning: '看前后句猜词义', cloze: '用目标词填空', ref: '指的是谁',
   order: '先后顺序', who: '谁说的', tf: '对还是错',
+  locate: '找到答案句', evidence: '找到答案句', reference: '指的是谁',
 };
+// the same skill under another name: counted together (家长区、分诊)
+export const SKILL_GROUP = { evidence: 'locate', reference: 'ref' };
+const TYPE_SKILL = { evidence: 'locate', locate: 'locate', reference: 'ref', ref: 'ref', pronoun: 'ref' };
 export const HELP_LABELS = ['看不懂', '还不懂', '还不懂'];
 
 // 每集“读的方法”没写时按集数轮一条。都是北京初一阅读题的基本功，一次只讲一个。
@@ -287,7 +331,25 @@ function normSentence(s, i, speakers) {
     chunks: arr(chunks).map(str).filter(Boolean),
     keys: normKeys(s.keys ?? s.key_words ?? s.keywords ?? s.key ?? null),
     point: str(s.point ?? s.grammar), words: wordCount(en),
+    trunk: normTrunk(s.trunk ?? null),
+    tags: arr(s.tags ?? s.grammar_tags).map(str).filter(Boolean),
+    para: num(s.para ?? s.paragraph) || null,
+    // 课文陪读: the second check did not agree on this sentence's Chinese (这句问问老师)
+    unsure: !!s.unsure,
   };
+}
+// { subject, verb, note, kind?, also?: [{ subject, verb }] } (also [subject, verb] or 'subject | verb'); a note alone is kept
+// (Haha! has no subject and no verb, and the note says so)
+function normTrunk(t) {
+  if (!t) return null;
+  let o = t;
+  if (Array.isArray(t)) o = { subject: t[0], verb: t[1], note: t[2] };
+  else if (typeof t === 'string') { const [a, b, c] = t.split(/\s*[|｜]\s*/); o = { subject: a, verb: b, note: c }; }
+  else if (typeof t !== 'object') return null;
+  const lite = x => ({ subject: str(x.subject ?? x.subj ?? x.who ?? x.s), verb: str(x.verb ?? x.predicate ?? x.v ?? x.what) });
+  const out = { ...lite(o), note: str(o.note ?? o.zh ?? o.cn), kind: str(o.kind),
+    also: arr(o.also).filter(x => x && typeof x === 'object').map(lite).filter(x => x.subject || x.verb) };
+  return out.subject || out.verb || out.note ? out : null;
 }
 
 function sentenceList(raw, speakers = {}) {
@@ -407,9 +469,10 @@ function normOptions(raw) {
   return { kind, opts, shuffle: kind !== 'tf' && raw.shuffle !== false };
 }
 
-function evidenceOf(raw, sentences) {
+// sentence ids, numbers ('s4', 4) or a bit of the text -> sentence indexes (1 起)
+function sentenceIdx(list, sentences) {
   const out = [];
-  for (const e of arr(raw.evidence ?? raw.ref ?? raw.refs ?? raw.source_sentence ?? raw.from ?? raw.lines)) {
+  for (const e of arr(list)) {
     let i = 0;
     const s = str(e);
     const byId = sentences.find(x => x.id === s);
@@ -420,34 +483,86 @@ function evidenceOf(raw, sentences) {
   }
   return out;
 }
+function evidenceOf(raw, sentences, { ref = true } = {}) {
+  return sentenceIdx(raw.evidence ?? (ref ? raw.ref ?? raw.refs : raw.refs) ?? raw.source_sentence ?? raw.from ?? raw.lines, sentences);
+}
 
-function normQuestion(raw, ep, idx, sentences, parent = null) {
+const PRONOUNS = ['it', 'they', 'she', 'he', 'them', 'her', 'him', 'its', 'their', 'this', 'that', 'these', 'those', 'one'];
+// 指代题: the pronoun asked about and the sentence it is in
+function refOf(raw, q, sentences) {
+  const asked = `${q.ask} ${q.stem} ${q.zh}`;
+  let word = str(raw.pronoun ?? raw.ref_word ?? raw.refers ?? (typeof raw.ref === 'string' && !/^\s*s?\d+\s*$/i.test(raw.ref) ? raw.ref : ''));
+  if (!word) {
+    const quoted = [...asked.matchAll(/[“"‘']([A-Za-z]+)[”"’']/g)].map(m => m[1]).find(w => PRONOUNS.includes(w.toLowerCase()));
+    word = quoted || (tokenize(asked).find(t => t.word && PRONOUNS.slice(0, 9).includes(t.word)) || {}).text || '';
+  }
+  if (!word) return null;
+  const w = normW(word);
+  const has = i => { const s = sentences[i - 1]; return !!s && tokenize(s.en).some(t => t.word === w); };
+  let i = sentenceIdx(raw.sentence ?? raw.at ?? raw.in ?? raw.where, sentences)[0] || 0;
+  if (!i) { const m = asked.match(/(?:sentence|句子?)\s*(\d+)|第\s*(\d+)\s*句/i); if (m) i = sentenceIdx([m[1] || m[2]], sentences)[0] || 0; }
+  if (!i) i = [...q.evidence].reverse().find(has) || q.evidence[0] || 0;
+  return { word, i };
+}
+
+const has2 = x => Array.isArray(x) && x.length > 0;
+function normQuestion(raw, ep, idx, sentences, parent = null, env = {}) {
   if (!raw || typeof raw !== 'object') return null;
   const id = parent ? parent.id + 'v' : str(raw.id) || 'q' + (idx + 1);
-  const { kind, opts, shuffle } = normOptions(raw);
+  const type = str(raw.type ?? raw.kind ?? raw.format).toLowerCase();
+  const rawOpts = raw.options ?? raw.choices;
+  // 点出答案句: she taps a sentence; the answer is the sentence numbers (a variant with no options of its own is one too)
+  const locate = type === 'evidence' || type === 'locate' || (!has2(rawOpts) && Array.isArray(raw.answer ?? raw.sentences) && !(raw.wrong && typeof raw.wrong === 'object'))
+    || (!!parent && parent.kind === 'evidence' && !has2(rawOpts) && !type);
+  const { kind, opts, shuffle } = locate ? { kind: 'evidence', opts: [], shuffle: false } : normOptions(raw);
   // skill: an id ('detail') in type or skill; a Chinese name in skill is kept for the screen
-  const cands = [raw.skill, raw.type, raw.focus, raw.ability, raw.skill_zh, raw.skillName].map(str);
-  let skill = cands.find(x => SKILLS[x]) || '';
+  const cands = [raw.skill, raw.focus, raw.ability, raw.skill_zh, raw.skillName].map(str);
+  let skill = cands.find(x => SKILLS[x]) || TYPE_SKILL[type] || (SKILLS[type] ? type : '') || (locate ? 'locate' : '');
   if (!skill) skill = kind === 'tf' ? 'tf' : parent ? parent.skill : '';
+  cands.push(str(raw.type));
   const zhName = cands.find(x => CJK.test(x)) || '';
   const hints = arr(raw.hints ?? raw.ladder ?? raw.hint).map(str).filter(Boolean).slice(0, HINT_MAX);
-  const answer = (opts.find(o => o.correct) || {}).text || '';
+  const where = locate ? sentenceIdx(raw.answer ?? raw.sentences ?? raw.where ?? raw.evidence, sentences) : [];
+  // a 点句子 question's answer stays as written (the sentence numbers); answerText is what those sentences say
+  const answerText = locate ? where.map(i => sentences[i - 1].en).join(' ') : (opts.find(o => o.correct) || {}).text || '';
+  const answer = locate ? (Array.isArray(raw.answer) ? raw.answer : where.slice()) : answerText;
   let ask = str(raw.ask ?? raw.question ?? raw.prompt);
-  let stem = str(raw.stem ?? raw.sentence).replace(/_{2,}/g, '____');
+  let stem = str(raw.stem ?? raw.sentence_text ?? (typeof raw.sentence === 'string' && !/^\s*s?\d+\s*$/i.test(raw.sentence) ? raw.sentence : '')).replace(/_{2,}/g, '____');
   // a stem with no blank is the question itself
   if (!ask && stem && !stem.includes('____')) { ask = stem; stem = ''; }
+  const refType = skill === 'ref' || skill === 'reference' || TYPE_SKILL[type] === 'ref';
   const q = {
     id, item: `ep:${ep}:${id}`, ep, kind, skill, skillName: zhName || SKILLS[skill] || (parent ? parent.skillName : ''),
-    word: str(raw.word ?? raw.target) || (parent ? parent.word : ''),
+    word: str(raw.word ?? raw.target) || (parent && !refType ? parent.word : ''),
     ask, zh: str(raw.zh ?? raw.ask_zh ?? raw.question_zh ?? raw.cn ?? (ask === str(raw.stem) ? raw.stem_zh : '')), stem,
     stemZh: stem ? str(raw.stem_zh ?? raw.sentence_zh) : '',
-    options: opts, answer, hints,
+    options: opts, answer, answerText, hints,
     explain: str(raw.explain ?? raw.why ?? raw.reason) || hints[HINT_MAX - 1] || '',
-    evidence: evidenceOf(raw, sentences),
+    evidence: locate && !raw.evidence ? where.slice() : evidenceOf(raw, sentences, { ref: !refType }),
+    where, ref: null, keyword: '', ladder: [], ladderFrom: '', then: null, dropSentences: [],
+    preview: !!(raw.preview ?? raw.before ?? raw.first ?? raw.focus === true),
     variant: null, isVariant: !!parent, of: parent ? parent.item : null,
   };
-  if (!q.ask && !q.stem) q.ask = kind === 'tf' ? '这句话对不对？' : '选一个。';
+  if (!q.ask && !q.stem) q.ask = kind === 'tf' ? '这句话对不对？' : locate ? '在故事里点出答案在哪一句。' : '选一个。';
   if (parent && !q.evidence.length) q.evidence = parent.evidence.slice();
+  if (refType) q.ref = refOf(raw, q, sentences);
+  if (locate) {
+    // 点对了再选答案: a choice right after the sentence is found (then: { options, options_zh, answer })
+    const th = raw.then ?? raw.choose ?? null;
+    if (th && typeof th === 'object') {
+      const t = normQuestion({ ...th, type: str(th.type) || 'detail', skill: str(th.skill) || 'detail', hints: [], variant: null }, ep, idx, sentences, null, env);
+      if (t && t.options.some(o => o.correct)) {
+        t.id = id + 'c'; t.item = `ep:${ep}:${t.id}`; t.of = q.item; t.evidence = q.where.slice();
+        // no question of its own: the same question, now answered from the sentence she found
+        if (!str(th.ask ?? th.question ?? th.stem)) { t.ask = q.ask; t.zh = q.zh; }
+        t.variant = null; t.ladder = []; t.qtype = 'detail';
+        q.then = t;
+      }
+    }
+    // the sentence hint 3 rules out (排除第 22 句)
+    q.dropSentences = sentenceIdx(raw.drop ?? raw.exclude, sentences).filter(i => !q.where.includes(i));
+  }
+  q.qtype = qtypeOf(q);
   if (shuffle && opts.length > 2) {
     let seed = hash(q.item) || 1;
     const rnd = () => { seed = (Math.imul(seed, 1103515245) + 12345) >>> 0; return seed / 4294967296; };
@@ -455,9 +570,196 @@ function normQuestion(raw, ep, idx, sentences, parent = null) {
   }
   if (!parent) {
     const v = raw.variant ?? raw.twin ?? raw.again ?? null;
-    q.variant = v ? normQuestion(v, ep, idx, sentences, q) : null;
+    q.variant = v ? normQuestion(v, ep, idx, sentences, q, env) : null;
+    q.keyword = keywordOf(q, raw, sentences);
+    q.ladder = ladderOf(q, { sentences, parts: env.parts || [] });
   }
   return q;
+}
+
+// what kind of reading question this is (answer events carry it as qtype; teacher-next 6.1)
+export function qtypeOf(q) {
+  if (!q) return 'detail';
+  const g = SKILL_GROUP[q.skill] || q.skill;
+  if (q.kind === 'evidence' || g === 'locate') return 'locate';
+  if (g === 'ref') return 'refer';
+  if (g === 'word' || g === 'meaning' || g === 'cloze') return 'word';
+  if (g === 'main') return 'main';
+  if (g === 'infer') return 'infer';
+  return 'detail';
+}
+
+// ---------------------------------------------------------------- 回原文找关键词 (the first hint, always)
+
+const KEYWORD_RE = /关键词(?:是|：|:)\s*([^（(。，,：:；;、]+)/;
+const inQuestion = (q, w) => tokenize(`${q.ask} ${q.stem}`).some(t => t.word && (t.word === normW(w) || sameWord(t.word, normW(w))));
+// The words to look for in the story: written in the question, or named in its hints (“关键词是 every Monday”), or the
+// pronoun / the word asked about, or the words the question shares with the sentence its answer is in.
+export function keywordOf(q, raw = {}, sentences = []) {
+  const explicit = arr(raw && (raw.keyword ?? raw.keywords ?? raw.key_words ?? (typeof raw.key === 'string' ? raw.key : null))).map(str).filter(Boolean);
+  if (explicit.length) return explicit.join(' 和 ');
+  if (q.keyword) return q.keyword;
+  for (const h of q.hints || []) { const m = h.match(KEYWORD_RE); if (m && /[A-Za-z]/.test(m[1])) return m[1].trim().replace(/\s+/g, ' '); }
+  if (q.ref && q.ref.word) return q.ref.word;
+  // the word a meaning question asks about (never a cloze's answer: that would give it away)
+  if (q.word && inQuestion(q, q.word)) return q.word;
+  // a cloze: the words around the blank, said in the method line itself; 主旨题: the beginning and the end, not one word
+  if (q.stem && q.stem.includes('____')) return '';
+  if ((SKILL_GROUP[q.skill] || q.skill) === 'main') return '';
+  const qtoks = tokenize(`${q.ask} ${q.stem}`).filter(t => t.word);
+  if (!qtoks.length) return '';
+  // an evidence question's “answer” is its sentence: only real options count as the answer here
+  const ans = new Set([...(q.kind === 'evidence' ? [] : [q.answer]), ...q.options.map(o => o.text)].flatMap(x => tokenize(x).filter(t => t.word).map(t => t.word)));
+  const ev = (q.evidence.length ? q.evidence : q.where).flatMap(i => tokenize((sentences[i - 1] || {}).en).filter(t => t.word).map(t => t.word));
+  // likes counts for like
+  const inEv = w => ev.some(x => x === w || sameWord(x, w) || sameWord(w, x));
+  const keep = t => inEv(t.word) && !FUNCTION_SET.has(t.word) && !ans.has(t.word) && t.word.length > 1;
+  const phrases = [];
+  let cur = [];
+  for (const t of qtoks) { if (keep(t)) cur.push(t.text); else { if (cur.length) phrases.push(cur.join(' ')); cur = []; } }
+  if (cur.length) phrases.push(cur.join(' '));
+  return phrases.map(p => p.split(' ').slice(0, 3).join(' ')).slice(0, 2).join(' 和 ');
+}
+export function methodLine(q, kw = q && q.keyword) {
+  const k = kw ? `：${kw}。` : '：题目里的名字、时间、地方。';
+  const g = SKILL_GROUP[q.skill] || q.skill;
+  if (q.kind === 'evidence') return `回原文找关键词${k}找到有它的那一句，点它。`;
+  if (g === 'ref') return `回原文找关键词${k}看它前面的句子，说的是谁。`;
+  if (g === 'main') return kw ? `回原文找关键词${k}再看开头和结尾，整篇讲的是什么。` : '回原文找关键词：开头和结尾的句子最要紧，反复出现的词就是关键词。';
+  if (!kw && q.stem && q.stem.includes('____')) return '回原文找关键词：空格前后的词。在故事里找到说同一件事的那一句。';
+  if (g === 'word' || g === 'meaning' || g === 'cloze') return `回原文找关键词${k}看它前后的句子，意思就在那里。`;
+  return `回原文找关键词${k}找到有它的那一句，答案就在那里。`;
+}
+
+// the paragraph a sentence is in: written (para), the episode's part (群聊 / 那天深夜), or the line (a passage's paragraphs)
+export function paraOf(ep, s) {
+  if (!s) return null;
+  if (s.para) return { key: 'p' + s.para, n: s.para, label: '' };
+  const parts = (ep && ep.parts) || [];
+  if (s.part != null && parts[s.part]) { const p = parts[s.part]; return { key: 'part' + s.part, n: s.part + 1, label: p.labelZh || p.label || '' }; }
+  if (s.line != null && !(s.speaker)) {
+    const lines = [...new Set(((ep && ep.sentences) || []).map(x => x.line).filter(x => x != null))];
+    if (lines.length > 1) return { key: 'line' + s.line, n: lines.indexOf(s.line) + 1, label: '' };
+  }
+  return null;
+}
+// the sentences a 点句子 question narrows to: hint 2 the paragraph (or 3 sentences either side), hint 3 two sentences, hint 4 the answer
+export function zoneOf(ep, q, level) {
+  const ss = (ep && ep.sentences) || [];
+  const ans = q.kind === 'evidence' ? q.where : q.evidence;
+  const t = ans[0];
+  if (!t || level < 2) return [];
+  if (level >= HINT_MAX) return ans.slice();
+  if (level === 2) {
+    const p = paraOf(ep, ss[t - 1]);
+    if (p) {
+      const z = ss.filter(s => { const x = paraOf(ep, s); return x && x.key === p.key; }).map(s => s.i);
+      if (z.length > 1 && z.length < ss.length) return z;
+    }
+    return ss.filter(s => Math.abs(s.i - t) <= 3).map(s => s.i);
+  }
+  // the content's own hint 3 (排除第 22 句) keeps the paragraph; the made one narrows to two sentences
+  if (q.ladderFrom === 'content') return zoneOf(ep, q, 2);
+  // two sentences; which neighbour goes with the answer is fixed per question, so “the second one” is no trick
+  const before = hash(q.item) % 2 === 0;
+  const other = (before && t > 1) || t === ss.length ? t - 1 : t + 1;
+  return [t, other].filter(i => i >= 1 && i <= ss.length).sort((a, b) => a - b);
+}
+// the four hints she sees: 回原文找关键词 first, then what the content wrote (see the top of this file)
+const LEAD = '回原文找关键词';
+function ladderOf(q, ep) {
+  const h = q.hints;
+  // the content's first hint is already this method: as written (with the fixed words in front when they are missing)
+  if (h[0] && /^\s*回原文/.test(h[0])) { q.ladderFrom = 'content'; return h.slice(0, HINT_MAX); }
+  if (h[0] && /关键词|题目里的|题里的/.test(h[0])) { q.ladderFrom = 'content'; return [`${LEAD}。${h[0]}`, ...h.slice(1)].slice(0, HINT_MAX); }
+  q.ladderFrom = 'made';
+  const first = methodLine(q, q.keyword);
+  if (q.kind === 'evidence') {
+    const ss = ep.sentences || [];
+    const t = q.where[0];
+    const s = ss[t - 1];
+    if (!s) return [first, ...h].slice(0, HINT_MAX);
+    const noOf = i => (ss[i - 1] || {}).no || i;
+    const p = paraOf(ep, s);
+    const z2 = zoneOf(ep, q, 2), z3 = zoneOf(ep, q, 3);
+    const byPara = p && z2.every(i => { const x = paraOf(ep, ss[i - 1]); return x && x.key === p.key; });
+    const second = byPara ? (p.label ? `答案在“${p.label}”这一段。` : `答案在第 ${p.n} 段。`)
+      : `答案在第 ${noOf(z2[0])} 句到第 ${noOf(z2[z2.length - 1])} 句之间。`;
+    const third = z3.length === 2 ? `就在这两句里：第 ${noOf(z3[0])} 句和第 ${noOf(z3[1])} 句。` : `就在第 ${noOf(t)} 句附近。`;
+    return [first, second, third, h[3] || `答案在第 ${noOf(t)} 句：${s.en}`];
+  }
+  if (h.length >= HINT_MAX) return [first, h[0] + h[1], h[2], h[3]];
+  return [first, ...h].slice(0, HINT_MAX);
+}
+
+// the question she looks at before reading (读前先看一道题), and looks for while she listens
+export function focusOf(ep, list) {
+  const qs = list || (ep && ep.questions) || [];
+  if (!qs.length) return null;
+  const tq = ep && ep.tip && ep.tip.q;
+  return qs.find(q => q.preview) || qs.find(q => tq && q.id === tq) || qs.find(q => q.kind === 'evidence') || qs[0];
+}
+
+// ---------------------------------------------------------------- 句子主干: who + does what, marked in the sentence
+
+// it's = it + 's, I'm = I + 'm, don't = do + n't: a subject and its verb can share one written word
+const SPLIT_RE = /^(.+?)(['’](?:s|m|re|ll|ve|d)|n['’]t)$/i;
+const piecesOf = text => { const m = String(text).match(SPLIT_RE); return m ? [m[1], m[2]] : [String(text)]; };
+const unitKey = x => normW(x).replace(/'/g, '');
+const keysOfPhrase = phrase => tokenize(phrase).filter(x => x.word).flatMap(x => piecesOf(x.text).map(unitKey)).filter(Boolean);
+
+// sentence.trunk = { subject, verb, note, also: [{ subject, verb }] } -> every token of the sentence with its role
+// ('subject' | 'verb' | null; a word holding both, like it's, has parts); null when there is no trunk.
+// The verb may be split by the subject (Did you forget it? verb “Did ... forget”); each piece is found in order,
+// right after the subject first (Mia is ...), else anywhere (Where is my scarf?).
+export function trunkOf(s) {
+  const t = s && s.trunk;
+  if (!t) return null;
+  const toks = tokenize(s.en);
+  const units = [];
+  toks.forEach((x, k) => { if (x.word) piecesOf(x.text).forEach((p, j) => units.push({ k, j, text: p, key: unitKey(p), role: null })); });
+  const keys = units.map(u => u.key);
+  const findRun = (ws, from) => {
+    for (let a = Math.max(0, from); a + ws.length <= keys.length; a++) if (ws.every((w, j) => keys[a + j] === w && !units[a + j].role)) return a;
+    return -1;
+  };
+  const mark = (a, len, r) => { for (let j = a; j < a + len; j++) units[j].role = r; };
+  let found = true;
+  const clause = c => {
+    const subj = keysOfPhrase(c.subject);
+    let end = 0;
+    if (subj.length) { const a = findRun(subj, 0); if (a >= 0) { mark(a, subj.length, 'subject'); end = a + subj.length; } else found = false; }
+    let from = end;
+    for (const piece of String(c.verb || '').split(/\s*(?:\.\.\.|…)\s*/).map(keysOfPhrase).filter(x => x.length)) {
+      let a = findRun(piece, from);
+      if (a < 0) a = findRun(piece, 0);
+      if (a >= 0) { mark(a, piece.length, 'verb'); from = a + piece.length; continue; }
+      // written together but split in the sentence (Does like): one word at a time
+      for (const w of piece) {
+        let b = findRun([w], from);
+        if (b < 0) b = findRun([w], 0);
+        if (b < 0) { found = false; continue; }
+        mark(b, 1, 'verb');
+        from = b + 1;
+      }
+    }
+  };
+  clause(t);
+  for (const c of t.also || []) clause(c);
+  const out = toks.map(x => ({ ...x, role: null }));
+  for (const [k, x] of out.entries()) {
+    if (!x.word) continue;
+    const us = units.filter(u => u.k === k);
+    const roles = new Set(us.map(u => u.role));
+    if (roles.size === 1) x.role = us[0].role;
+    else x.parts = us.map(u => ({ text: u.text, role: u.role }));
+  }
+  // a space between two words of the same part goes with them, so the subject reads as one piece
+  const roleAt = k => (out[k] ? out[k].role || (out[k].parts ? out[k].parts[out[k].parts.length - 1].role : null) : null);
+  const roleFrom = k => (out[k] ? out[k].role || (out[k].parts ? out[k].parts[0].role : null) : null);
+  for (let k = 1; k < out.length - 1; k++) if (!out[k].word && roleAt(k - 1) && roleAt(k - 1) === roleFrom(k + 1)) out[k].role = roleAt(k - 1);
+  const note = t.note || [t.subject ? `谁 = ${t.subject}` : '', t.verb ? `干什么 = ${t.verb}` : ''].filter(Boolean).join('，');
+  return { subject: t.subject, verb: t.verb, note, kind: t.kind || '', tokens: out, found };
 }
 
 function epIdOf(raw, i) {
@@ -473,12 +775,15 @@ function normEpisode(raw, i, top) {
   const sentences = sentenceList(raw, speakers);
   const glossary = normGlossary(raw);
   const names = normNames(raw, top);
-  const questions = arr(raw.questions ?? raw.quiz).map((q, k) => normQuestion(q, id, k, sentences)).filter(Boolean);
+  const parts = normParts(raw);
+  const questions = arr(raw.questions ?? raw.quiz).map((q, k) => normQuestion(q, id, k, sentences, null, { parts })).filter(Boolean);
+  const tip = normTip(raw, n);
   return {
-    id, n, title: str(raw.title ?? raw.title_en),
+    id, n, title: str(raw.title ?? raw.title_en), label: str(raw.label),
     titleZh: str(raw.title_zh ?? raw.titleZh ?? raw.zh_title).replace(/^第\s*\d+\s*集\s*[·・:：]?\s*/, ''),
-    recap: str(raw.recap_zh ?? raw.recap ?? raw.previously ?? raw.intro_zh), tip: normTip(raw, n), parts: normParts(raw),
+    recap: str(raw.recap_zh ?? raw.recap ?? raw.previously ?? raw.intro_zh), tip, parts,
     targets: normTargets(raw, glossary), glossary, names, sentences, questions,
+    focus: (focusOf({ tip, questions }) || {}).id || '',
     teaser: str(raw.teaser_zh ?? raw.teaser ?? raw.next_zh ?? raw.cliffhanger).replace(/^(下一集|第\s*\d+\s*集)\s*[·・:：]\s*/, ''),
     words: sentences.reduce((a, s) => a + s.words, 0),
   };
@@ -694,12 +999,22 @@ export function hasTarget(ep, s) {
   return ((ep && ep.targets) || []).some(t => { const w = normW(t.w); return / /.test(w) ? text.includes(' ' + w + ' ') : toks.some(x => sameWord(x, w)); });
 }
 
-export function helpEvent(ep, s, level, { phase = 'listen' } = {}) {
+// what the n-th tap on 看不懂 shows: the trunk (or, with no trunk written, the chunks), then the chunks and key words, then the Chinese
+// HELP_STEP_ZH[helpKind(s, level)] says it for the parent page and the teacher (“要看主干”)
+export const HELP_STEP_ZH = { trunk: '要看主干', chunks: '要看断句', keys: '要看关键词', zh: '要看整句中文' };
+export function helpKind(s, level) {
+  const trunk = !!trunkOf(s);
+  return level >= HELP_MAX ? 'zh' : level === 2 ? (trunk ? 'chunks' : 'keys') : trunk ? 'trunk' : 'chunks';
+}
+export function helpEvent(ep, s, level, { phase = 'listen', autoTrunk = false } = {}) {
   return { type: 'read_help', item: `ep:${ep.id}:s${s.i}`, mode: MODE, episode: ep.id, sentence: s.i, level, phase, kind: 'sentence',
-    words: s.words, speaker: !!s.speaker, question: /\?["”]?\s*$/.test(s.en), point: s.point || null, has_target: hasTarget(ep, s) };
+    words: s.words, speaker: !!s.speaker, question: /\?["”]?\s*$/.test(s.en), point: s.point || null, has_target: hasTarget(ep, s),
+    help: helpKind(s, level), tags: (s.tags || []).slice(), triage: triageKind({ from: 'help', level }), ...(autoTrunk ? { auto_trunk: true } : {}) };
 }
 
 // ---------------------------------------------------------------- a question: the same hint ladder as the grammar cards (DESIGN 5.5)
+// 0.5: the hints she sees are q.ladder (第 1 级“回原文找关键词”); a 点句子 question (kind 'evidence') is picked by sentence
+// number (pick(i) / pickSentence(i), i 1 起), never runs out of choices, and hint 4 marks the answer's sentence.
 // 答对（没看提示）→ 过关，grade 3。答错 → 第 1 级自动出来；每再错一次自动多一级；“再给个提示”给下一级。
 // 改对 → 过关，用了提示记“模糊”，grade 2。到第 4 级（讲清楚，答案亮出来）→ 马上出变式题：做对才算过（grade 2），做错 grade 1。
 // 没有变式题的题，到第 4 级就结束，不算过（grade 1）。没答就点“给个提示”再答对：过关，记模糊。
@@ -709,24 +1024,43 @@ export function helpEvent(ep, s, level, { phase = 'listen' } = {}) {
 export function createAttempt(q, { now = () => Date.now() } = {}) {
   const clock = typeof now === 'function' ? () => +toDate(now()) : () => +toDate(now);
   const variant = q.variant || null;
+  const locate = q.kind === 'evidence';
+  const ladder = q.ladder && q.ladder.length ? q.ladder : q.hints;
+  // 点对了再选答案: once the sentence is found (or shown at hint 4), a choice; then the variant if hint 4 came
+  const then = locate && q.then && q.then.options.some(o => o.correct) ? q.then : null;
   const picked = new Set();
   const tags = [];
   let phase = 'ask', level = 0, wrongs = 0, passed = null, clean = false, firstTry = null, variantCorrect = null, hintEarly = false;
-  let t0 = clock(), vT0 = 0;
+  let afterThen = 'done', thenPick = null;
+  let t0 = clock(), vT0 = 0, thT0 = 0;
   const a = {
-    q, variant, options: q.options, vOptions: variant ? variant.options : null, picked,
+    q, variant, then, options: q.options, vOptions: variant ? variant.options : null, picked, locate, ladder,
     get phase() { return phase; }, get level() { return level; }, get wrongs() { return wrongs; }, get passed() { return passed; },
-    get clean() { return clean; }, get done() { return phase === 'done'; },
+    get clean() { return clean; }, get done() { return phase === 'done'; }, get thenPick() { return thenPick; },
     get grade() { return passed === null ? null : passed ? (clean ? 3 : 2) : 1; },
   };
-  const reveal = () => { if (variant && variant.options.some(o => o.correct)) { phase = 'variant'; vT0 = clock(); } else { phase = 'done'; passed = false; } };
+  const hintText = lv => ladder[lv - 1] || '';
+  const canVariant = () => !!variant && (variant.kind === 'evidence' ? variant.where.length > 0 : variant.options.some(o => o.correct));
+  const toThen = next => { afterThen = next; phase = 'then'; thT0 = clock(); };
+  const reveal = () => {
+    if (then) { if (canVariant()) toThen('variant'); else { passed = false; toThen('done'); } return; }
+    if (canVariant()) { phase = 'variant'; vT0 = clock(); } else { phase = 'done'; passed = false; }
+  };
+  // the locate question's own result is known (the choice after it does not change it)
+  const settled = () => phase === 'done' || (phase === 'then' && passed !== null);
+  // what she tapped: an option (by index) or, in a 点句子 question, a sentence (by its number i)
+  const choiceOf = (question, i) => {
+    if (question.kind === 'evidence') return i >= 1 && i <= 999 ? { text: 's' + i, correct: question.where.includes(i), tag: null, sentence: i } : null;
+    return question.options[i] || null;
+  };
   const base = (question, opt, ms, extra) => ({
-    item: question.item, mode: MODE, episode: question.ep, skill: question.skill || null, ...(question.word ? { word: question.word } : {}),
-    choice: opt.text, correct: !!opt.correct, ms: Math.max(0, Math.round(ms)), misconception: opt.correct ? null : opt.tag || null, ...extra,
+    item: question.item, mode: MODE, episode: question.ep, skill: question.skill || null, qtype: question.qtype || qtypeOf(question),
+    ...(question.word ? { word: question.word } : {}), choice: opt.text, ...(opt.sentence ? { sentence: opt.sentence } : {}),
+    correct: !!opt.correct, ms: Math.max(0, Math.round(ms)), misconception: opt.correct ? null : opt.tag || null, ...extra,
   });
-  // the options she can still tap: not picked, and not the one hint 3 crossed out
+  // the options she can still tap: not picked, and not the one hint 3 crossed out (a 点句子 question has too many to run out)
   const openLeft = () => q.options.filter((o, i) => !picked.has(i) && !(o.drop && level >= 3));
-  const onlyAnswerLeft = () => { const left = openLeft(); return left.length === 1 && !!left[0].correct; };
+  const onlyAnswerLeft = () => { if (locate) return false; const left = openLeft(); return left.length === 1 && !!left[0].correct; };
   a.hint = () => {
     if (phase !== 'ask' && phase !== 'retry') return null;
     if (level >= HINT_MAX) return null;
@@ -734,26 +1068,31 @@ export function createAttempt(q, { now = () => Date.now() } = {}) {
     level++;
     // hint 3 crossing out the last wrong one would leave only the answer: show hint 4 and the variant instead
     if (level < HINT_MAX && onlyAnswerLeft()) level = HINT_MAX;
-    const out = { level, text: q.hints[level - 1] || '', auto: false };
+    const out = { level, text: hintText(level), auto: false };
     if (level >= HINT_MAX) reveal();
     return out;
   };
   a.pick = i => {
     if (phase !== 'ask' && phase !== 'retry') return null;
-    const opt = q.options[i];
+    const opt = choiceOf(q, i);
     if (!opt || picked.has(i)) return null;
+    // the sentence hint 3 ruled out cannot be tapped
+    if (locate && level >= 3 && (q.dropSentences || []).includes(i)) return null;
     picked.add(i);
     const first = firstTry === null;
     if (first) firstTry = !!opt.correct;
     const seen = level;
     const ms = clock() - t0;
-    const out = { correct: !!opt.correct, text: opt.text, tag: opt.correct ? null : opt.tag, level: seen, first, done: false, hintShown: null };
+    const out = { correct: !!opt.correct, text: opt.text, tag: opt.correct ? null : opt.tag, level: seen, first, done: false, hintShown: null, firstWrong: false };
     if (opt.correct) {
       phase = 'done'; passed = true; clean = first && !hintEarly && level === 0;
-      out.done = true;
+      if (then) toThen('done');
+      out.done = phase === 'done';
+      out.found = true;
       out.event = base(q, opt, ms, { first_try: first, hint_level: seen, done: true, passed: true, grade: clean ? 3 : 2, fuzzy: !clean, ...(wrongs ? { fixed_after: seen } : {}) });
       return out;
     }
+    out.firstWrong = !wrongs;
     wrongs++;
     if (opt.tag) tags.push(opt.tag);
     phase = 'retry';
@@ -761,16 +1100,28 @@ export function createAttempt(q, { now = () => Date.now() } = {}) {
       level++;
       // only the answer is left to tap: tapping it would not be 改对了, so hint 4 (the answer and why) and the variant now
       if (level < HINT_MAX && onlyAnswerLeft()) level = HINT_MAX;
-      out.hintShown = { level, text: q.hints[level - 1] || '', auto: true };
+      out.hintShown = { level, text: hintText(level), auto: true };
       if (level >= HINT_MAX) reveal();
     }
     out.done = phase === 'done';
-    out.event = base(q, opt, ms, { first_try: first, hint_level: seen, ...(out.done ? { done: true, passed: false, grade: 1, fuzzy: false } : {}) });
+    out.event = base(q, opt, ms, { first_try: first, hint_level: seen, ...(settled() && passed === false ? { done: true, passed: false, grade: 1, fuzzy: false } : {}) });
     return out;
   };
+  // the choice after the sentence: one try; it is its own item (q5c) and never changes the question's grade
+  a.pickThen = i => {
+    if (phase !== 'then' || !then) return null;
+    const opt = then.options[i];
+    if (!opt) return null;
+    thenPick = { i, correct: !!opt.correct };
+    if (afterThen === 'variant') { phase = 'variant'; vT0 = clock(); } else phase = 'done';
+    const out = { correct: !!opt.correct, text: opt.text, tag: opt.correct ? null : opt.tag, done: phase === 'done', then: true };
+    out.event = { ...base(then, opt, clock() - thT0, { first_try: true, hint_level: 0, then: true, of: q.item }), qtype: 'detail' };
+    return out;
+  };
+  a.pickSentence = i => (locate ? a.pick(i) : null);
   a.pickVariant = i => {
     if (phase !== 'variant' || !variant) return null;
-    const opt = variant.options[i];
+    const opt = choiceOf(variant, i);
     if (!opt) return null;
     phase = 'done';
     variantCorrect = !!opt.correct;
@@ -779,7 +1130,7 @@ export function createAttempt(q, { now = () => Date.now() } = {}) {
     out.event = base(variant, opt, clock() - vT0, { first_try: true, hint_level: 0, variant: true, of: q.item, done: true, passed, grade: passed ? 2 : 1, fuzzy: !!passed });
     return out;
   };
-  a.result = () => ({ item: q.item, qid: q.id, skill: q.skill, word: q.word, passed: !!passed, grade: a.grade || 1, clean, firstTry: firstTry === true,
+  a.result = () => ({ item: q.item, qid: q.id, skill: q.skill, qtype: q.qtype || qtypeOf(q), word: q.word, passed: !!passed, grade: a.grade || 1, clean, firstTry: firstTry === true,
     hintLevel: level, wrongs, tags: tags.slice(), variantCorrect });
   return a;
 }
@@ -1042,12 +1393,13 @@ export function readingSummary(kv, { content: c = cached } = {}) {
       helps++;
       if (num(lv) >= HELP_MAX) full++;
       const s = ep.sentences[Number(i) - 1];
-      if (s) hard.push({ ep: ep.id, n: ep.n, i: s.i, en: s.en, level: num(lv), point: s.point || null });
+      if (s) hard.push({ ep: ep.id, n: ep.n, i: s.i, en: s.en, level: num(lv), point: s.point || null, tags: (s.tags || []).slice(),
+        help: helpKind(s, num(lv)), stepZh: HELP_STEP_ZH[helpKind(s, num(lv))] || '' });
     }
     for (const q of ep.questions) {
       const a = e.answers[q.id];
       if (!a) continue;
-      const k = q.skill || 'other';
+      const k = SKILL_GROUP[q.skill] || q.skill || 'other';
       const b = bySkill[k] || (bySkill[k] = { name: SKILLS[k] || '其他', n: 0, clean: 0, fuzzy: 0, failed: 0 });
       b.n++;
       if (a.clean) b.clean++; else if (a.passed) b.fuzzy++; else b.failed++;
@@ -1055,6 +1407,198 @@ export function readingSummary(kv, { content: c = cached } = {}) {
   }
   hard.sort((a, b) => b.level - a.level || a.n - b.n || a.i - b.i);
   return { done, of: eps.length, helps, full, hard: hard.slice(0, 8), bySkill, words: Object.keys(p.words).length, looked: Object.keys(p.looked).length };
+}
+
+// ---------------------------------------------------------------- 求助分诊: where she gets stuck (teacher-next 6.1, 6.2)
+// 词 / 句子 / 方法 need different help: words before the next episode, the trunk first, or 回原文找关键词 before each question.
+
+export const TRIAGE_KEY = 'read:triage';
+export const TRIAGE = { word: '词', sentence: '句子', method: '方法' };
+export const TRIAGE_LOG_MAX = 40;
+export const TRIAGE_DAYS_KEPT = 30;
+export const TRUNK_AFTER = 3;     // 句子 stuck this often today in one episode: the sentences not asked about yet show their trunk first
+export const METHOD_AFTER = 2;    // 方法 misses today in one episode: the next question starts with this episode's method
+export const HARD_QID = 'read_hard';
+export const HARD_OPTIONS = [
+  { id: 'words', zh: '生词太多', triage: 'word', reply: '老师记下了：生词多。读的时候点一下不认识的词，看意思就好。' },
+  { id: 'sentences', zh: '句子太长看不懂', triage: 'sentence', reply: '老师记下了：句子长。点“看不懂”，先找谁、干什么。' },
+  { id: 'find', zh: '找不到答案', triage: 'method', reply: '老师记下了：找答案难。做题前先回原文找关键词。' },
+  { id: 'ok', zh: '都还好', triage: null, reply: '好，老师记下了。' },
+];
+
+// from: 'tap' (a word, not a name) | 'help' (看不懂, level) | 'wrong' (a question's first wrong answer: helped = she asked about
+// its sentence already; qtype from qtypeOf)
+export function triageKind({ from = '', level = 0, helped = false, qtype = '' } = {}) {
+  if (from === 'tap') return 'word';
+  if (from === 'help') return level >= HELP_MAX ? 'word' : 'sentence';
+  if (from === 'wrong') {
+    if (qtype === 'locate') return 'method';
+    if (helped) return null;
+    return qtype === 'refer' ? 'sentence' : 'method';
+  }
+  return null;
+}
+
+const zeroCounts = () => ({ word: 0, sentence: 0, method: 0 });
+export function emptyTriage() { return { v: 1, eps: {}, updated: '' }; }
+function normTriageEp(e) {
+  const out = { ...zeroCounts(), days: {}, log: [], hard: [] };
+  if (!e || typeof e !== 'object') return out;
+  for (const k of Object.keys(TRIAGE)) out[k] = num(e[k]);
+  for (const [d, c] of Object.entries(obj(e.days))) if (isDay(d)) { const x = obj(c); out.days[d] = { word: num(x.word), sentence: num(x.sentence), method: num(x.method) }; }
+  out.log = arr(e.log).filter(x => x && typeof x === 'object' && TRIAGE[x.kind]).map(x => ({ ...x, day: isDay(x.day) ? x.day : '' })).slice(-TRIAGE_LOG_MAX);
+  out.hard = arr(e.hard).filter(x => x && HARD_OPTIONS.some(o => o.id === x.answer)).map(x => ({ answer: x.answer, day: str(x.day), at: str(x.at) })).slice(-10);
+  return out;
+}
+export function normTriage(raw) {
+  const t = emptyTriage();
+  if (!raw || typeof raw !== 'object') return t;
+  for (const [id, e] of Object.entries(obj(raw.eps))) if (id) t.eps[id] = normTriageEp(e);
+  t.updated = str(raw.updated);
+  return t;
+}
+export function readTriage(kv) {
+  return normTriage(safe(() => (kv && typeof kv.peek === 'function' ? kv.peek(TRIAGE_KEY, null) : null), null));
+}
+const triageOf = x => (x && typeof x.peek === 'function' ? readTriage(x) : normTriage(x));
+
+// one time she got stuck -> a new triage object (the old one is not changed); entry: { kind? | from, level, helped, qtype, i, w, q, tags }
+export function noteTriage(t, epId, entry = {}, now = new Date()) {
+  const out = normTriage(t);
+  const kind = entry.kind && TRIAGE[entry.kind] ? entry.kind : triageKind(entry);
+  if (!kind || !epId) return out;
+  const e = out.eps[epId] || normTriageEp(null);
+  const day = dayOf(now);
+  e[kind]++;
+  const d = e.days[day] || zeroCounts();
+  d[kind]++;
+  e.days[day] = d;
+  const keep = Object.keys(e.days).sort().slice(-TRIAGE_DAYS_KEPT);
+  e.days = Object.fromEntries(keep.map(k => [k, e.days[k]]));
+  const rec = { kind, from: str(entry.from) || 'other', day, at: isoLocal(now) };
+  if (num(entry.i)) rec.i = num(entry.i);
+  if (num(entry.level)) rec.level = num(entry.level);
+  if (str(entry.w)) rec.w = str(entry.w);
+  if (str(entry.q)) rec.q = str(entry.q);
+  const tags = arr(entry.tags).map(str).filter(Boolean);
+  if (tags.length) rec.tags = tags;
+  e.log = [...e.log, rec].slice(-TRIAGE_LOG_MAX);
+  out.eps[epId] = e;
+  out.updated = isoLocal(now);
+  return out;
+}
+// 今天哪里最难？ (answer: an HARD_OPTIONS id)
+export function noteHard(t, epId, answer, now = new Date()) {
+  const out = normTriage(t);
+  if (!epId || !HARD_OPTIONS.some(o => o.id === answer)) return out;
+  const e = out.eps[epId] || normTriageEp(null);
+  e.hard = [...e.hard, { answer, day: dayOf(now), at: isoLocal(now) }].slice(-10);
+  out.eps[epId] = e;
+  out.updated = isoLocal(now);
+  return out;
+}
+export function hardEvent(ep, answer, extra = {}) {
+  const o = HARD_OPTIONS.find(x => x.id === answer);
+  return { type: 'ask', qid: HARD_QID, who: 'emma', answer, about: 'read:' + ((o && o.triage) || 'ok'), item: `ep:${ep.id}`, mode: MODE, episode: ep.id, ...extra };
+}
+export function triageToday(t, epId, now = new Date()) {
+  const e = triageOf(t).eps[epId];
+  return { ...zeroCounts(), ...((e && e.days[dayOf(now)]) || {}) };
+}
+// the same-day changes inside one episode
+export function readAdjust(t, epId, now = new Date()) {
+  const c = triageToday(t, epId, now);
+  return { trunkFirst: c.sentence >= TRUNK_AFTER, methodTip: c.method >= METHOD_AFTER, counts: c };
+}
+
+const MAIN_LINE = {
+  sentence: '卡在句子上最多：句子拆不开。“看不懂”先看主干（谁、干什么），再看断句。',
+  word: '卡在词上最多：生词和变了形的词不认识。读前先把这集的词过一遍。',
+  method: '卡在方法上最多：做题不回原文找。做题前先回原文找关键词，找到那一句再选。',
+};
+// For the parent page, the weekly teacher and plan: where reading gets stuck over the last `days` days, with her own words.
+// -> { days, from, total, all, main, mainZh, line, episodes: [{ ep, n, title, word, sentence, method, hard }], self: { words, sentences, find, ok },
+//      lastHard: { ep, answer, zh, day } | null, agree, tags: [{ tag, n }], sentences: [{ ep, n, i, en, level, tags }], words: [w],
+//      adjust: { preteach, trunkFirst, methodFirst } }
+export function triageSummary(kv, { content: c = cached, now = new Date(), days = 14 } = {}) {
+  const t = triageOf(kv);
+  const from = addDays(dayOf(now), -(Math.max(1, days) - 1));
+  const total = zeroCounts(), all = zeroCounts();
+  const self = { words: 0, sentences: 0, find: 0, ok: 0 };
+  const episodes = [], tagN = {}, wordN = {}, stuck = new Map();
+  let lastHard = null;
+  for (const [id, e] of Object.entries(t.eps)) {
+    const ep = c && c.episode ? c.episode(id) : null;
+    for (const k of Object.keys(TRIAGE)) all[k] += e[k];
+    const win = zeroCounts();
+    for (const [d, x] of Object.entries(e.days)) if (d >= from) for (const k of Object.keys(TRIAGE)) win[k] += num(x[k]);
+    for (const k of Object.keys(TRIAGE)) total[k] += win[k];
+    const hard = e.hard.filter(x => x.day >= from);
+    for (const x of hard) { self[x.answer]++; if (!lastHard || x.at > lastHard.at) lastHard = { ep: id, answer: x.answer, at: x.at, day: x.day }; }
+    for (const x of e.log) {
+      if (x.day && x.day < from) continue;
+      if (x.kind === 'word' && x.w) wordN[x.w] = (wordN[x.w] || 0) + 1;
+      if (x.kind === 'sentence' || (x.from === 'help' && x.i)) {
+        for (const tag of x.tags || []) if (x.kind === 'sentence') tagN[tag] = (tagN[tag] || 0) + 1;
+        if (x.i) { const k = id + ':' + x.i; stuck.set(k, Math.max(stuck.get(k) || 0, num(x.level) || 1)); }
+      }
+    }
+    if (win.word + win.sentence + win.method || hard.length) {
+      episodes.push({ ep: id, n: ep ? ep.n : null, title: ep ? ep.title : '', ...win, hard: hard.length ? hard[hard.length - 1].answer : null });
+    }
+  }
+  episodes.sort((a, b) => (a.n ?? 99) - (b.n ?? 99) || String(a.ep).localeCompare(String(b.ep)));
+  const order = ['sentence', 'word', 'method'];
+  const top = order.reduce((best, k) => (total[k] > (best ? total[best] : 0) ? k : best), null);
+  const main = top && total[top] >= 2 ? top : null;
+  const sum = total.word + total.sentence + total.method;
+  const said = lastHard ? HARD_OPTIONS.find(o => o.id === lastHard.answer) : null;
+  if (lastHard) lastHard.zh = said ? said.zh : '';
+  // what she says against what the data says: her most common answer that is not 都还好
+  const selfTop = ['words', 'sentences', 'find'].reduce((best, k) => (self[k] > (best ? self[best] : 0) ? k : best), null);
+  const agree = selfTop && main ? HARD_OPTIONS.find(o => o.id === selfTop).triage === main : null;
+  const sentences = [...stuck].map(([k, level]) => {
+    const [ep, i] = [k.slice(0, k.lastIndexOf(':')), Number(k.slice(k.lastIndexOf(':') + 1))];
+    const e = c && c.episode ? c.episode(ep) : null;
+    const s = e ? e.sentences[i - 1] : null;
+    return s ? { ep, n: e.n, i, en: s.en, level, tags: (s.tags || []).slice() } : null;
+  }).filter(Boolean).sort((a, b) => b.level - a.level || a.n - b.n || a.i - b.i).slice(0, 5);
+  const parts = order.filter(k => total[k]).map(k => `${TRIAGE[k]} ${total[k]} 次`).join('，');
+  const bits = sum ? [`最近 ${days} 天读的时候卡住 ${sum} 次：${parts}。`, main ? MAIN_LINE[main] : ''] : ['最近还没有读的时候卡住的记录。'];
+  if (said) bits.push(`她${lastHard.day === dayOf(now) ? '今天' : '上次'}说最难的是“${said.zh}”。`);
+  return {
+    days, from, total, all, main, mainZh: main ? TRIAGE[main] : '', line: bits.filter(Boolean).join(''),
+    episodes, self, lastHard, agree,
+    tags: Object.entries(tagN).map(([tag, n]) => ({ tag, n })).sort((a, b) => b.n - a.n || a.tag.localeCompare(b.tag)),
+    sentences,
+    words: Object.entries(wordN).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([w]) => w).slice(0, 10),
+    adjust: { preteach: main === 'word', trunkFirst: main === 'sentence', methodFirst: main === 'method' },
+  };
+}
+
+// ---------------------------------------------------------------- 期中阅读小篇 and 课文陪读: one passage in the same shape as an episode
+
+export const EXAM_FILE = 'curriculum/exam-reading.json';
+// a passage (raw, the same shape as one episode of stories.json) -> Ep; an Ep is given back as it is
+export function passageOf(raw, { names = null } = {}) {
+  if (!raw || typeof raw !== 'object') return null;
+  if (Array.isArray(raw.sentences) && raw.sentences.length && raw.sentences.every(s => s && Number.isFinite(s.i)) && Array.isArray(raw.questions)) {
+    // an Ep built elsewhere: the fields the reader reads are filled in, so nothing on screen breaks
+    const fix = q => q && ({ ...q, options: q.options || [], hints: q.hints || [], evidence: q.evidence || [], where: q.where || (q.kind === 'evidence' ? sentenceIdx(q.answer, raw.sentences) : []),
+      dropSentences: q.dropSentences || [], ladder: q.ladder && q.ladder.length ? q.ladder : q.hints || [], qtype: q.qtype || qtypeOf(q), variant: q.variant ? fix(q.variant) : null, then: q.then ? fix(q.then) : null });
+    return { tip: normTip({}, 1), parts: [], targets: [], glossary: {}, names: {}, words: 0, ...raw, questions: raw.questions.map(fix).filter(Boolean) };
+  }
+  const c = createContent({ names: raw.cast || [], episodes: [{ ...raw, id: str(raw.id) || 'passage' }] }, { names });
+  return c.episodes[0] || null;
+}
+// exam-reading.json: { version, passages: [...] } (also episodes, or a bare array) -> [Ep]
+export function passagesOf(data) {
+  const list = Array.isArray(data) ? data : arr(data && (data.passages ?? data.episodes ?? data.texts));
+  return list.map((p, i) => passageOf({ ...p, id: str(p && p.id) || 'exam' + (i + 1) })).filter(Boolean);
+}
+export async function loadPassages({ fetchJSON, file = EXAM_FILE } = {}) {
+  const get = fetchJSON || (async p => { const r = await fetch(p); if (!r.ok) throw new Error(`${p} ${r.status}`); return r.json(); });
+  return passagesOf(await get(file));
 }
 
 // ---------------------------------------------------------------- content check (tests): things that would teach her something wrong
@@ -1068,9 +1612,19 @@ export function checkEpisode(ep) {
     if (!s.zh) out.push(`${ep.id} s${s.i}: no Chinese`);
     if (s.chunks.length >= 2 && chunksOf(s).join('|') !== s.chunks.join('|')) out.push(`${ep.id} s${s.i}: chunks do not add up to the sentence`);
     for (const k of s.keys) if (!tokenize(s.en).some(t => t.word && sameWord(t.word, normW(k.w))) && !normW(s.en).includes(normW(k.w))) out.push(`${ep.id} s${s.i}: key word ${k.w} is not in the sentence`);
+    // a trunk that is not in the sentence is not marked at all (the note still shows), never half marked
+    if (s.trunk && !trunkOf(s).found) out.push(`${ep.id} s${s.i}: trunk “${s.trunk.subject} / ${s.trunk.verb}” is not in the sentence`);
   }
+  const text = ' ' + ep.sentences.map(s => normW(s.en).replace(/[^a-z0-9' ]/g, ' ')).join(' ').replace(/\s+/g, ' ') + ' ';
   for (const q of ep.questions) {
+    if (q.ref) {
+      const s = ep.sentences[q.ref.i - 1];
+      if (!s || !tokenize(s.en).some(t => t.word === normW(q.ref.word))) out.push(`${where(q)}: pronoun ${q.ref.word} is not in sentence ${q.ref.i}`);
+      const ans = normW(q.answer).replace(/[^a-z0-9' ]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (ans && !text.includes(' ' + ans.replace(/^(the|a|an) /, '') + ' ') && !text.includes(' ' + ans + ' ')) out.push(`${where(q)}: the answer “${q.answer}” is not a word of the story`);
+    } else if (SKILL_GROUP[q.skill] === 'ref' || q.skill === 'ref') out.push(`${where(q)}: no pronoun to ask about`);
     for (const x of [q, q.variant].filter(Boolean)) {
+      if (x.kind === 'evidence') { if (!x.where.length) out.push(`${where(x)}: no answer sentence`); continue; }
       const right = x.options.filter(o => o.correct).length;
       if (right !== 1) out.push(`${where(x)}: ${right} correct options`);
       if (x.options.length < 2) out.push(`${where(x)}: fewer than 2 options`);
