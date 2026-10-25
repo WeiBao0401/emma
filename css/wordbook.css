@@ -1,0 +1,95 @@
+/* 单词本的积累（wordbook.js、ui-lib.js）。类名 wb-。沿用词典的安静风格：细线、留白、衬线词头；按钮大，iPad 上手指好点。 */
+
+/* 顶部一句这周的进步 */
+.wb-week{margin:18px 0 4px;font:400 22px/1.45 var(--serif);color:var(--ink);text-wrap:pretty}
+
+/* 加一个词 / 选几个练一下 */
+.wb-tools{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0 6px}
+.wb-tool{flex:1 1 180px;min-height:56px;font-size:17px}
+.wb-tool .icon{width:20px;height:20px}
+.wb-tool-2{background:var(--tag-bg);color:var(--ink)}
+.wb-big{min-height:56px;padding:0 28px;font-size:17px}
+
+/* 一行里的掌握程度和来源 */
+.wb-row .g{display:flex;align-items:baseline;gap:8px}
+.wb-row-src{flex:none;font-size:12px;line-height:16px;color:var(--faint);white-space:nowrap}
+.wb-lv{flex:none;display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:12px;font-size:13px;line-height:1;white-space:nowrap;
+  border:1px solid var(--rule-strong);color:var(--muted);background:transparent}
+.wb-lv-new{border-style:dashed;border-color:var(--rule-strong);color:var(--faint)}
+.wb-lv-know{border-color:transparent;background:var(--tag-bg);color:var(--ink)}
+.wb-lv-write{border-color:transparent;background:var(--accent);color:var(--btn-ink);font-weight:600}
+.word-row .wb-lv{align-self:center;margin-left:auto}
+
+/* 选词 */
+.wb-tick{flex:none;align-self:center;display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--rule-strong);color:var(--btn-ink)}
+.wb-tick .icon{width:18px;height:18px}
+.word-row.picked .wb-tick{background:var(--accent);border-color:var(--accent)}
+.word-row.picked{background:color-mix(in srgb,var(--tag-bg) 55%,transparent)}
+.wb-pickbar{position:fixed;z-index:var(--z-bar);left:0;right:0;bottom:var(--tabbar);display:flex;align-items:center;gap:16px;
+  padding:12px var(--gutter);background:var(--paper);border-top:1px solid var(--rule)}
+.wb-pickbar .wb-pick-n{flex:1;min-width:0;font-size:15px;color:var(--muted)}
+.wb-pickbar .text-btn{margin:0}
+.lib-list-view.wb-selecting .lib-body{padding-bottom:calc(var(--tabbar) + 120px)}
+.wb-srcline{margin-top:-4px}
+
+/* 推进来的几屏 */
+.wb-view{min-height:100vh}
+.wb-top .runhead{justify-content:flex-start}
+.wb-back{display:inline-flex;align-items:center;gap:2px;margin-left:-14px;font-size:16px}
+.wb-back .icon{width:22px;height:22px}
+.wb-body{padding:8px var(--gutter) calc(var(--bottom) + 64px)}
+.wb-h{font:600 24px/1.3 var(--serif);color:var(--ink);margin:12px 0 8px}
+.wb-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px;margin-top:28px}
+.wb-actions .text-btn{margin:0 -10px}
+.wb-loading{padding:40px 0}
+
+/* 加一个词 */
+.wb-in{display:block;width:100%;border:0;border-bottom:1px solid var(--rule-strong);border-radius:0;background:transparent;padding:10px 0;
+  font:400 28px/1.3 var(--serif);color:var(--ink);outline:none;-webkit-appearance:none;appearance:none}
+.wb-in:focus{border-bottom:2px solid var(--ink)}
+.wb-in::placeholder{color:var(--faint)}
+.wb-where{font:17px/1.6 var(--sans);resize:none;min-height:64px}
+.wb-label{display:block;margin-top:26px;font-size:14px;color:var(--muted)}
+.wb-preview{min-height:84px;padding:14px 0 0}
+.wb-pv{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px}
+.wb-pv-w{font:500 24px/1.2 var(--serif);color:var(--ink)}
+.wb-pv-ph{font-size:15px;color:var(--muted)}
+.wb-pv-cn{margin-top:6px;font-size:19px;line-height:1.5;color:var(--ink)}
+.wb-preview .text-btn{margin:6px -10px 0}
+
+/* 一个词的卡片 */
+.wb-card-top{display:flex;align-items:center;gap:8px;margin-top:14px}
+.wb-card-w{font:500 44px/1.1 var(--serif);letter-spacing:-.015em;color:var(--ink);overflow-wrap:anywhere}
+.wb-card-say{width:44px;height:44px}
+.wb-card-say .icon{width:24px;height:24px}
+.wb-card-ph{margin-top:6px;font-size:17px;color:var(--muted)}
+.wb-card-cn{margin-top:14px;font:400 24px/1.45 var(--serif);color:var(--ink)}
+.wb-card-level{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:18px}
+.wb-card-level .wb-lv{height:30px;padding:0 14px;font-size:15px;border-radius:15px}
+.wb-sec{margin-top:30px;padding-top:14px;border-top:1px solid var(--rule)}
+.wb-sec-h{font:600 14px/1.4 var(--sans);color:var(--muted);letter-spacing:.02em;margin-bottom:10px}
+.wb-srcs{display:flex;flex-wrap:wrap;gap:8px}
+.wb-src{display:inline-flex;align-items:center;min-height:30px;padding:0 12px;border-radius:15px;background:var(--tag-bg);color:var(--ink);font-size:15px}
+.wb-src-mistake{background:transparent;border:1px solid var(--danger);color:var(--danger)}
+.wb-where-note{margin-top:10px;font-size:16px;line-height:1.6;color:var(--ink)}
+.wb-sents{list-style:none;padding:0;margin:0}
+.wb-sent{padding:10px 0;border-bottom:1px solid var(--rule)}
+.wb-sent:last-child{border-bottom:0}
+.wb-sent-en{font:400 19px/1.55 var(--serif);color:var(--ink)}
+.wb-sent-zh{margin-top:2px;font-size:15px;line-height:1.5;color:var(--muted)}
+.wb-sent-where{margin-top:4px;font-size:13px;color:var(--faint)}
+.wb-miss{font-size:17px;line-height:1.6;color:var(--ink)}
+
+/* 练一下 */
+.wb-pr-top{display:flex;align-items:center;justify-content:space-between}
+.wb-pr-top .text-btn{margin:0 -10px}
+.wb-stage{display:flex;flex-direction:column;min-height:56vh}
+.wb-stage-foot:empty{display:none}
+.wb-sum{padding:28px 0}
+.wb-sum-line{margin-top:16px;font-size:18px;line-height:1.7}
+.wb-sum-w{font:500 19px/1.5 var(--serif);color:var(--ink)}
+
+@media (max-width:420px){
+  .wb-row-src{display:none}
+  .wb-card-w{font-size:36px}
+}

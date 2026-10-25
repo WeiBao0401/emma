@@ -47,6 +47,9 @@ import { ROUTES } from './nav.js';
 import * as D from './dictation.js';
 import { examPhase as examPhaseOf } from './lines.js';
 import { listSaved as textreadSaved } from './textread.js';
+// 0.7.0: 我要复习考试 (review.js) and 错题 due again today (mistakes.js) get a row under the four cells
+import { activePlan as reviewActive, todayIndex as reviewToday, summaryLine as reviewLine, unitList as reviewUnits } from './review.js';
+import { summary as mistakesSummary } from './mistakes.js';
 
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -218,7 +221,10 @@ export function createHomeTab(ctx) {
   const phase = h('span', { className: 'runhead-meta home-phase' });
   const body = h('div', { className: 'home-body' });
   root.append(h('div', { className: 'home' },
-    h('header', { className: 'runhead' }, h('h1', { className: 'runhead-title' }, 'Emma', h('span', { className: 'sub', text: ' 的英语老师' })), phase),
+    h('header', { className: 'runhead' }, h('h1', { className: 'runhead-title' }, 'Emma', h('span', { className: 'sub', text: ' 的英语老师' })),
+      // 0.7.0: 孩子端“我” (ui-kid-me.js) in the top right corner, where she looks first
+      h('div', { className: 'home-head-r' }, phase,
+        h('button', { type: 'button', className: 'home-me', 'aria-label': '我：学到哪、考试、喜欢的', on: { click: () => ctx.go('kidme') } }, '我'))),
     statusSlot, body));
   ctx.statusSlot(statusSlot);
 
@@ -295,7 +301,7 @@ export function createHomeTab(ctx) {
         gainLine(),
         again ? h('div', { className: 'home-actions' },
           h('button', { type: 'button', className: 'text-btn accent', text: '再练一会儿', on: { click: () => ctx.go('lesson', { light: true, again: true }) } })) : null,
-        textreadRow());
+        textreadRow(), moreRows());
     }
     // plan.js decides the light lesson (DESIGN 2.2, 2.3): after 21:00, a dictation night, the day before the exam,
     // coming back after a gap, a heavy homework day (parent's form). Only those two defaults can be switched back.
@@ -318,7 +324,7 @@ export function createHomeTab(ctx) {
       gainLine(),
       slots(plan),
       h('div', { className: 'home-actions' }, start, alt),
-      textreadRow());
+      textreadRow(), moreRows());
   }
 
   // 课文陪读 (0.5.0, ui-textread.js): photograph a page of the textbook and read it sentence by sentence with the teacher;
@@ -332,6 +338,30 @@ export function createHomeTab(ctx) {
       h('button', { type: 'button', className: 'text-btn accent home-textread-open', on: { click: () => tr.open() } },
         h('b', { text: '课文陪读' }), h('span', { text: '：拍一页课文，一句一句读懂' })),
       last && typeof tr.openSaved === 'function' ? h('button', { type: 'button', className: 'text-btn home-textread-again', text: `再读 ${last.label}`, on: { click: () => tr.openSaved(last.id) } }) : null);
+  }
+
+  // 0.7.0: 我要复习考试 (接着复习 when a review is under way) and the mistakes due again today
+  function moreRows() {
+    const now = new Date();
+    const rows = [];
+    try {
+      const rp = reviewActive(ctx.kv, now);
+      const i = rp ? reviewToday(rp, now) : -1;
+      if (rp) {
+        const units = Array.isArray(rp.units) ? reviewUnits(rp.units) : '';
+        rows.push(h('button', { type: 'button', className: 'text-btn accent home-row', on: { click: () => ctx.go('revise', { start: true }) } },
+          h('b', { text: units ? `接着复习 ${units}` : '接着复习' }), i >= 0 ? h('span', { text: '：' + reviewLine(rp, i) }) : null));
+      } else {
+        rows.push(h('button', { type: 'button', className: 'text-btn accent home-row', on: { click: () => ctx.go('revise') } },
+          h('b', { text: '我要复习考试' }), h('span', { text: '：说考哪几个单元，老师排几天的复习' })));
+      }
+    } catch (e) { console.warn('home: review row:', (e && e.message) || e); }
+    try {
+      const due = (mistakesSummary(ctx.kv, now) || {}).due || 0;
+      if (due > 0) rows.push(h('button', { type: 'button', className: 'text-btn accent home-row', on: { click: () => ctx.go('mistakes', { review: true }) } },
+        h('b', { text: `有 ${due} 道错题今天再考` })));
+    } catch (e) { console.warn('home: mistakes row:', (e && e.message) || e); }
+    return rows.length ? h('div', { className: 'home-textread home-more' }, ...rows) : null;
   }
 
   // the four cells of the day in one row (DESIGN 2.0): a line on top, dark for what she can do today, light for what

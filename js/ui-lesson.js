@@ -75,6 +75,9 @@ import { flashcard } from './ui-review.js';
 import { dayOf, CELL_LABELS as PLAN_LABELS } from './plan.js';
 import { lessonDays, dayNumber, dictationToday } from './ui-home.js';
 import { isoLocal } from './events.js';
+// 0.7.0: 今天想先练什么 at the start, 太简单 / 正好 / 太难 after each part (kid-me.js, ui-kid-me.js)
+import * as KM from './kid-me.js';
+import { renderFeedback, renderTodayAsk } from './ui-kid-me.js';
 
 export const ENOUGH_MIN = 25;
 export const ASK_KEY = 'ask.answers';
@@ -111,6 +114,8 @@ export const V1_MODULES = {
   // 0.6.0: 句子里回想 and 变形配对 (单词从认得到会用)
   cloze: './modes/cloze.js',
   forms: './modes/forms.js',
+  // 0.7.0: 错题 due again today, in the warm-up after 变形配对
+  mistakesUI: './ui-mistakes.js',
 };
 // loadV1() -> Promise<{ listen, spell, grammar, grammarUI, phonics, sprint }>; a module that is missing or throws is null.
 // The browser's import is cached for the page's life; tests pass their own importer and get a fresh load.
@@ -517,6 +522,9 @@ export function createLessonView(ctx) {
   let hiddenAt = 0;
   let wrapped = false;
   let token = 0;            // bumps on each start, so a late module load never draws over a newer lesson
+  let pendingFb = null;     // 0.7.0: the part just done; the next screen shows 太简单 / 正好 / 太难 on top (never in the way)
+  let mQueue = [];          // 0.7.0: 错题 due again today (plan cell.mistakes)
+  let mistakesRight = 0;
 
   const minutesIn = () => Math.round((Date.now() - t0) / 60000);
   const name = () => ((ctx.kv.peek('profile', {}) || {}).name || 'Emma');
@@ -566,8 +574,18 @@ export function createLessonView(ctx) {
     const top = opener ? lineBlock(opener, 'lesson-line lesson-opener') : null;
     opener = null;
     // replaceChildren would print a null as the text “null”
-    stage.replaceChildren(...[header(title), cellStrip(nowCell), top, noteSlot, ...body.flat()].filter(Boolean));
+    stage.replaceChildren(...[header(title), cellStrip(nowCell), top, noteSlot, fbBox(), ...body.flat()].filter(Boolean));
     if (minutesIn() >= ENOUGH_MIN) showEnough();
+  }
+
+  // 0.7.0: one quiet line about the part she just finished; she can tap it or just go on
+  function fbBox() {
+    const fb = pendingFb;
+    pendingFb = null;
+    if (!fb) return null;
+    const box = h('div', { className: 'lesson-fb' });
+    try { renderFeedback(box, ctx, { sid, ...fb }); } catch (err) { console.warn('lesson: feedback:', (err && err.message) || err); return null; }
+    return box;
   }
 
   // ---------------------------------------------------------------- start
@@ -585,6 +603,23 @@ export function createLessonView(ctx) {
     if (again) extra.doneToday = {};
     plan = ctx.todayPlan(extra);
     const now = new Date();
+    // 0.7.0: the teacher asks what she wants to practise first (not the first lesson, a quiz day or 再练一会儿); her pick
+    // is saved in kv 'kid.today', so the lesson starts again with it and does not ask twice
+    let ask = false;
+    try { ask = !again && KM.needsTodayAsk(ctx.kv, now, { first: !!(first || plan.first), quizDay: !!plan.quizDay || !!wantSprint }); } catch (err) { ask = false; }
+    if (ask) {
+      const box = h('div', { className: 'lesson-module lesson-today-ask' });
+      stage.replaceChildren(header('今天的课'), box);
+      let again2 = false;
+      try {
+        renderTodayAsk(box, ctx, { onPick: () => {
+          if (again2) return;
+          again2 = true;
+          setTimeout(() => { if (my === token) start({ light: l, standard, again, first, sprint: wantSprint }).catch(err => console.warn('lesson: start:', (err && err.message) || err)); }, 500);
+        } });
+        return;
+      } catch (err) { console.warn('lesson: today ask:', (err && err.message) || err); }
+    }
     light = !!(plan.light || l);
     exam = examInfo(ctx.kv.peek('progress', {}) || {}, now);
     if (plan.examSeason === true || (plan.season && plan.season.on === true)) exam.season = true;
@@ -624,6 +659,9 @@ export function createLessonView(ctx) {
     verbRight = 0;
     formsRight = 0;
     fQueue = [];
+    mQueue = [];
+    mistakesRight = 0;
+    pendingFb = null;
     wq = null;
     writeK = '';
     view = null;
@@ -732,8 +770,9 @@ export function createLessonView(ctx) {
     sQueue = fnOf(mods.screenUI, 'renderScreen') ? ex.screen : [];
     vQueue = fnOf(mods.verb, 'renderVerb') ? ex.verb : [];
     fQueue = fnOf(mods.forms, 'renderForms') ? ex.forms : [];
+    mQueue = ready && fnOf(mods.mistakesUI, 'renderMistakeReview') && Array.isArray(warm.mistakes) ? warm.mistakes.filter(x => x && x.id) : [];
     askedSet = new Set(ex.asked);
-    if (!queue.length && !gQueue.length && !oQueue.length && !sQueue.length && !vQueue.length && !fQueue.length) { afterWarmup(); return; }
+    if (!queue.length && !gQueue.length && !oQueue.length && !sQueue.length && !vQueue.length && !fQueue.length && !mQueue.length) { afterWarmup(); return; }
     pool = buildPool(queue);
     session = queue.length ? createSession({
       queue,
@@ -766,6 +805,7 @@ export function createLessonView(ctx) {
     if (!slug && sQueue.length) { drawScreen(sQueue.splice(0)); return; }
     if (!slug && vQueue.length) { drawVerb(vQueue.splice(0)); return; }
     if (!slug && fQueue.length) { drawForms(fQueue.splice(0, 1)[0]); return; }
+    if (!slug && mQueue.length) { drawMistakes(mQueue.splice(0)); return; }
     if (!slug && oQueue.length) { drawOrder(oQueue.splice(0, 1), 'warmup'); return; }
     if (!slug) { endWarmup(); return; }
     drawWord(slug);
@@ -973,6 +1013,31 @@ export function createLessonView(ctx) {
     } catch (err) { console.warn('lesson: forms:', (err && err.message) || err); done(null); }
   }
 
+  // ---- 0.7.0: 错题再考 (ui-mistakes.js renderMistakeReview writes kv 'mistake:<id>' and its own answer events)
+  function drawMistakes(items) {
+    const fn = fnOf(mods.mistakesUI, 'renderMistakeReview');
+    const box = h('article', { className: 'lesson-module lesson-module-mistakes' });
+    cur = { kind: 'mistake', item: '', mode: 'mistake', t: Date.now(), answered: false };
+    let finished = false;
+    const done = res => {
+      if (finished) return;
+      finished = true;
+      cur = null;
+      view = null;
+      const right = res && Number.isFinite(res.right) ? res.right : 0;
+      mistakesRight += right;
+      for (const x of items) if (!gResults.has(x.item || 'mx:' + x.id)) gResults.set(x.item || 'mx:' + x.id, { first: right > 0 });
+      if (step === 'warmup') drawWarm();
+    };
+    if (!fn || !items.length) { done(null); return; }
+    paint(LABELS.warmup, 'warmup', h('p', { className: 'small lesson-mx-head', text: '错题再考：上次错的，换一道同样的题。' }), box);
+    try {
+      const r = fn(box, ctx, { items, sid, step: 'warmup', onDone: done });
+      if (r && typeof r.onKey === 'function') view = { onKey: r.onKey, stop: r.stop };
+      if (!r) done(null);
+    } catch (err) { console.warn('lesson: mistakes:', (err && err.message) || err); done(null); }
+  }
+
   // ---- 0.6.0: 对比小卡 (ui-grammar.js renderContrast): one screen, two columns, 3 quick judgments (answers 'gc:<id>:<q>')
   function drawContrast(g) {
     const fn = fnOf(mods.grammarUI, 'renderContrast');
@@ -1086,6 +1151,7 @@ export function createLessonView(ctx) {
     if (session) { session.end(); session = null; }
     gQueue = [];
     if ((results.size || gResults.size) && !stepsDone.includes('warmup')) stepsDone.push('warmup');
+    if (!stop && (results.size || gResults.size)) pendingFb = { part: 'warmup' };
     if (stop) wrap(); else afterWarmup();
   }
 
@@ -1134,6 +1200,7 @@ export function createLessonView(ctx) {
       reading = null;
       readRes = res || null;
       if (res && res.done && !stepsDone.includes('read')) stepsDone.push('read');
+      if (res) pendingFb = { part: 'read', item: 'ep:' + cell.episodeId, mode: 'read' };
       afterRead();
     };
     try {
@@ -1177,6 +1244,7 @@ export function createLessonView(ctx) {
       reading = null;
       readRes = res ? { ...res, passage: true } : null;
       if (res && res.done) { if (!stepsDone.includes('read')) stepsDone.push('read'); markPassage(cell.passageId); }
+      if (res) pendingFb = { part: 'read', item: 'ep:' + cell.passageId, mode: 'read' };
       afterRead();
     };
     loadExam().then(list => {
@@ -1372,6 +1440,10 @@ export function createLessonView(ctx) {
   function endWrite(did = true, whole = false) {
     const any = did && (whole || spelled.size || gResults.size || (wq && wq.done));   // gResults also holds 连词成句 sentences
     if (any && !stepsDone.includes('write')) stepsDone.push('write');
+    if (any && writeK !== 'quiz') {
+      const wc = cellOf('write');
+      pendingFb = writeK === 'grammar' ? { part: 'grammar', item: 'g:' + ((wc && ((wc.card && typeof wc.card === 'object' ? wc.card.id : wc.card) || wc.point)) || ''), mode: 'grammar' } : { part: 'write', mode: writeK };
+    }
     wq = null;
     wrap();
   }
@@ -1566,7 +1638,7 @@ export function createLessonView(ctx) {
           h('button', { type: 'button', className: 'text-btn accent', text: '去听听', on: { click: () => ctx.go('chat', { retell: e.key }) } })));
       }).catch(err => console.warn('lesson: asked:', (err && err.message) || err));
     }
-    stage.replaceChildren(header(LABELS.wrap), cellStrip('wrap'),
+    stage.replaceChildren(header(LABELS.wrap), cellStrip('wrap'), ...[fbBox()].filter(Boolean),
       h('section', { className: 'lesson-wrap' },
         lineBlock(praise),
         h('div', { className: 'lesson-tally' }, tally(hw)),

@@ -1,0 +1,100 @@
+/* 错题（ui-mistakes.js）。Owner: 错题 agent. Class names start with mx-.
+   The dictionary's quiet style: one column, serif questions, thin rules, big buttons for a finger. */
+.mx-page{max-width:var(--col);margin:0 auto;padding:var(--top) var(--gutter) calc(48px + var(--tabbar))}
+.mx-title{margin-top:28px;font:600 28px/1.25 var(--serif);letter-spacing:-.015em}
+.mx-lede{margin-top:12px;font:300 21px/1.5 var(--serif);color:var(--ink);text-wrap:pretty}
+.mx-wait{color:var(--muted)}
+.mx-tip{margin-top:10px}
+.mx-mock{margin-top:8px;color:var(--accent)}
+.mx-warn{margin-top:8px;color:var(--danger)}
+.mx-label{margin-top:24px;font:600 13px/1.3 var(--sans);letter-spacing:.04em;color:var(--muted)}
+.mx-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 28px;margin-top:24px}
+.mx-actions .text-btn{margin:0 -10px;min-height:48px}
+.mx-big{min-width:240px;min-height:60px;font-size:18px}
+.mx-cam{min-width:280px;min-height:68px;font-size:20px}
+.mx-end{margin-top:32px;padding-top:20px;border-top:1px solid var(--rule)}
+.mx-page .sk-bars{margin-top:20px}
+.mx-empty{margin-top:36px;padding-top:20px;border-top:1px solid var(--rule);font:400 18px/1.55 var(--serif);color:var(--muted)}
+
+/* today's reviews */
+.mx-due{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;margin-top:28px;padding:18px 20px;
+  border-radius:var(--radius-btn);background:var(--tag-bg)}
+.mx-due-text{font:600 19px/1.4 var(--serif)}
+.mx-due .mx-big{min-width:160px}
+
+/* the book */
+.mx-book{margin-top:36px;padding-top:8px;border-top:1px solid var(--rule)}
+.mx-book-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-top:16px}
+.mx-h3{font:600 22px/1.3 var(--serif)}
+.mx-count{margin-top:6px}
+.mx-switch{display:inline-flex;border:1px solid var(--rule-strong);border-radius:var(--radius-btn);overflow:hidden}
+.mx-switch-btn{min-height:44px;padding:0 18px;border:0;background:none;color:var(--ink);font:15px var(--sans)}
+.mx-switch-btn.is-on{background:var(--accent);color:var(--btn-ink)}
+.mx-group{margin-top:18px}
+.mx-group-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;min-height:52px;padding:10px 0;cursor:pointer;
+  list-style:none;border-bottom:1px solid var(--rule-strong)}
+.mx-group-head::-webkit-details-marker{display:none}
+.mx-group-name{font:600 19px/1.3 var(--serif)}
+.mx-group-sub{font:15px var(--sans);color:var(--accent)}
+.mx-list{list-style:none;margin:0;padding:0}
+.mx-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;width:100%;min-height:64px;padding:12px 0;border:0;
+  border-bottom:1px solid var(--rule);background:none;color:var(--ink);text-align:left;font:inherit}
+.mx-row .icon{grid-column:2;grid-row:1 / span 2;color:var(--faint)}
+.mx-row-stem{font:400 18px/1.4 var(--serif);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.mx-row.is-done .mx-row-stem{color:var(--muted)}
+
+/* confirm what the teacher read */
+.mx-thumb{display:block;max-width:100%;max-height:320px;margin-top:16px;border:1px solid var(--rule);border-radius:4px}
+.mx-card{margin-top:24px;padding-top:16px;border-top:1px solid var(--rule-strong)}
+.mx-keep{display:flex;align-items:center;gap:12px;min-height:48px;font:600 17px var(--sans)}
+.mx-check{width:26px;height:26px;accent-color:var(--accent)}
+.mx-field{display:block;margin-top:12px}
+.mx-field-name{display:block;font:14px var(--sans);color:var(--muted)}
+.mx-input{display:block;width:100%;margin-top:6px;min-height:48px;padding:10px 12px;border:1px solid var(--rule-strong);border-radius:var(--radius-btn);
+  background:transparent;color:var(--ink);font:18px/1.5 var(--serif);resize:vertical}
+.mx-select{font-family:var(--sans);font-size:17px}
+.mx-two{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.mx-ok{margin-top:8px}
+.mx-ok.is-right,.mx-fb-head.is-right,dd.is-right{color:var(--good)}
+.mx-ok.is-wrong,.mx-fb-head.is-wrong,dd.is-wrong{color:var(--danger)}
+
+/* one question */
+.mx-top{margin-top:12px}
+.mx-back{display:inline-flex;align-items:center;gap:4px;min-height:48px;margin-left:-10px}
+.mx-chip{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:12px}
+.mx-tag{display:inline-block;padding:3px 10px;border-radius:3px;background:var(--tag-bg);color:var(--ink);font:600 13px/1.4 var(--sans)}
+.mx-stem{margin-top:16px;font:400 23px/1.5 var(--serif);text-wrap:pretty}
+.mx-stem .say{margin-left:8px;vertical-align:middle}
+.mx-stem-big{font-size:26px}
+.mx-zh{margin-top:4px}
+.mx-orig-opts{margin:10px 0 0;padding-left:1.6em;font:400 19px/1.6 var(--serif)}
+.mx-answers{display:flex;flex-wrap:wrap;gap:12px 40px;margin-top:18px}
+.mx-answers dt{font:14px var(--sans);color:var(--muted)}
+.mx-answers dd{margin:2px 0 0;font:600 21px/1.3 var(--serif)}
+.mx-photo{margin-top:14px}
+.mx-photo summary{min-height:44px;display:flex;align-items:center;color:var(--accent);font:15px var(--sans);cursor:pointer}
+.mx-explain{margin-top:24px;padding-top:18px;border-top:1px solid var(--rule)}
+.mx-conclusion{font:600 22px/1.45 var(--serif)}
+.mx-why p{margin-top:10px;font:400 18px/1.6 var(--serif)}
+.mx-example{margin-top:16px;padding:14px 16px;border-left:3px solid var(--accent);background:color-mix(in srgb,var(--tag-bg) 55%,transparent)}
+.mx-example-en{font:400 21px/1.45 var(--serif)}
+.mx-example-en .say{margin-left:8px;vertical-align:middle}
+.mx-practice:not(:empty){margin-top:28px;padding-top:4px;border-top:1px solid var(--rule)}
+.mx-history{margin-top:4px}
+.mx-hist-list{list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;margin:6px 0 0;padding:0;font:15px var(--sans);color:var(--muted)}
+.mx-rule{margin-top:16px}
+.mx-drop{color:var(--muted)}
+
+/* choice buttons */
+.mx-opts{display:grid;grid-template-columns:1fr;gap:12px;margin-top:20px}
+@media (min-width:600px){.mx-opts{grid-template-columns:1fr 1fr}}
+.mx-opt{display:flex;align-items:center;gap:14px;min-height:64px;padding:12px 16px;border:1px solid var(--rule-strong);border-radius:var(--radius-btn);
+  background:transparent;color:var(--ink);text-align:left;font:400 20px/1.35 var(--serif)}
+.mx-opt-key{flex:none;font:600 14px var(--sans);color:var(--muted)}
+.mx-opt:disabled{opacity:1}
+.mx-opt.is-right{border-color:var(--good);box-shadow:inset 0 0 0 1px var(--good)}
+.mx-opt.is-wrong{border-color:var(--danger);color:var(--danger)}
+.mx-fb{margin-top:16px}
+.mx-fb-head{font:600 20px/1.4 var(--serif)}
+.mx-fb-why{margin-top:6px;font:400 17px/1.55 var(--serif);color:var(--muted)}
+.mx-review .mx-label{margin-top:8px}

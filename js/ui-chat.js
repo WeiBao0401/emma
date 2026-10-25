@@ -25,6 +25,9 @@ import * as C from './chat.js';
 import * as T from './teacher.js';
 import { imageToJpeg } from './capture.js';
 import { slugify } from './words.js';
+// 0.7.0: “太简单了” in 问老师 changes the lesson's difficulty (kid-me.js); “我要考 Unit 1 2” gets a 开始复习 button (review.js)
+import * as K from './kid-me.js';
+import { parseReviewText, reviewReply } from './review.js';
 
 export const CHAT_COPY = {
   inspection: '这个问题老师这边讲不了，换个说法问问。',
@@ -85,7 +88,8 @@ export function createChatTab(ctx, { root = null } = {}) {
   const input = h('textarea', { className: 'chat-input', rows: 1, placeholder: '问老师……', 'aria-label': '想问老师什么',
     enterkeyhint: 'send', on: { input: () => { grow(); updateComposer(); }, keydown: onKey } });
   const fileInput = h('input', { type: 'file', accept: 'image/*', capture: 'environment', hidden: true, on: { change: onFile } });
-  const camBtn = h('button', { type: 'button', className: 'chat-tool-btn chat-cam', 'aria-label': '拍一道题', on: { click: openCamera } },
+  // 0.7.0: 拍题 opens the 错题 tab's camera (讲题、错题本、再考 live there now)
+  const camBtn = h('button', { type: 'button', className: 'chat-tool-btn chat-cam', 'aria-label': '拍一道题', on: { click: () => ctx.go('mistakes', { take: true }) } },
     cameraIcon(), h('span', { text: '拍题' }));
   // voice mode (Wei 10-25, like Doubao and WeChat): the box becomes one wide “按住 说话” bar; what she says shows above
   // it as she talks, letting go sends it to the teacher, sliding up cancels. The small button switches voice / keyboard.
@@ -149,6 +153,10 @@ export function createChatTab(ctx, { root = null } = {}) {
     if (!old && last && !m.error && m.text && !m.flagged) row.push(h('button', { type: 'button', className: 'text-btn chat-flag', on: { click: () => recheck(m) } }, RECHECK_LABEL));
     if (m.flagged) row.push(h('span', { className: 'small chat-flagged', text: '已请老师再核对' }));
     const out = [];
+    // 0.7.0: a local answer can carry one button (我要复习考试: 开始复习)
+    if (m.action && m.action.route) out.push(h('div', { className: 'chat-quick' }, h('button', { type: 'button', className: 'btn chat-action',
+      on: { click: () => ctx.go(m.action.route, m.action.params || {}) } }, m.action.label || '开始')));
+    if (m.local) return out.length ? out : null;
     if (row.length) out.push(h('div', { className: 'chat-tools' }, row));
     if (!old && last && !m.error && m.text) {
       out.push(h('div', { className: 'chat-quick' }, C.QUICK.map(q => h('button', { type: 'button', className: 'chat-chip',
@@ -171,6 +179,17 @@ export function createChatTab(ctx, { root = null } = {}) {
     return h('div', { className: 'chat-row chat-row-me' }, h('div', { className: 'chat-msg chat-me' },
       img ? h('img', { className: 'chat-img', src: img, alt: '拍的题' }) : m.image ? h('p', { className: 'chat-note small', text: '（拍了一张照片）' }) : null,
       m.text ? h('p', { className: 'chat-text' }, spansEl([{ text: m.text, bold: false }])) : null));
+  }
+  // 0.7.0: the teacher's picture beside each answer, with the name she gave the teacher in “我” (else 老师)
+  const teacherLabel = () => { try { return String(((ctx.kv.peek('profile', {}) || {}).teacherName) || '').trim() || '老师'; } catch (e) { return '老师'; } };
+  function addAvatars(rootEl) {
+    const name = teacherLabel();
+    for (const row of rootEl.querySelectorAll('.chat-row-teacher:not(.chat-has-av)')) {
+      row.classList.add('chat-has-av');
+      row.prepend(h('div', { className: 'chat-who' },
+        h('img', { className: 'chat-av', src: 'teacher-96.png', srcset: 'teacher-96.png 1x, teacher-256.png 3x', alt: '', width: 36, height: 36, decoding: 'async' }),
+        h('span', { className: 'chat-who-name', text: name })));
+    }
   }
   const divider = () => h('div', { className: 'chat-divider', role: 'separator' }, h('span', { text: '新问题' }));
   function greeting() {
@@ -250,7 +269,7 @@ export function createChatTab(ctx, { root = null } = {}) {
       h('p', { className: 'chat-ex-h small', text: '可以这样问' }),
       C.examples(unitLabel()).map(x => h('button', { type: 'button', className: 'chat-ex', on: { click: () => (x.fill ? fill(x.fill) : doSend({ text: x.text })) } },
         h('span', { text: x.text }), icon('chev'))),
-      h('button', { type: 'button', className: 'chat-ex', on: { click: openCamera } }, h('span', { text: '拍一道不会的题' }), icon('chev')),
+      h('button', { type: 'button', className: 'chat-ex', on: { click: () => ctx.go('mistakes', { take: true }) } }, h('span', { text: '拍一道不会的题' }), icon('chev')),
       // 0.5.0 课文陪读 (ui-textread.js, app.textread): a page of the textbook, read with the teacher sentence by sentence
       ctx.textread && typeof ctx.textread.open === 'function'
         ? h('button', { type: 'button', className: 'chat-ex', on: { click: () => ctx.textread.open() } }, h('span', { text: '拍一页课文，陪我读' }), icon('chev')) : null);
@@ -276,6 +295,7 @@ export function createChatTab(ctx, { root = null } = {}) {
       else if (weekAsk) kids.push(weekAskBlock());
     }
     list.replaceChildren(...kids);
+    addAvatars(list);
     updateComposer();
   }
 
@@ -309,6 +329,7 @@ export function createChatTab(ctx, { root = null } = {}) {
           h('span', { className: 'chat-day-sum small', text: `${asks.length} 个问题` + (first ? `：${first.length > 18 ? first.slice(0, 18) + '…' : first}` : '') })),
         h('div', { className: 'chat-day-list' }, d.messages.map(m => (m.role === 'user' ? userBubble(m) : teacherBubble(m, { old: true })))));
     }));
+    addAvatars(older);
   }
   function toggleOlder() {
     olderOpen = !olderOpen;
@@ -367,7 +388,32 @@ export function createChatTab(ctx, { root = null } = {}) {
     if (image) clearPhoto();
     closePop();
     stick = true;
-    const p = chat.send({ text: t, image, send, quick }, { onUpdate });
+    let sendText = send;
+    if (t && !image && !quick && !send) {
+      // 我要复习考试: answered here with a 开始复习 button, no model call
+      let hit = null;
+      try { const progress = ctx.kv.peek('progress', {}) || {}; hit = parseReviewText(t, { now: new Date(), current: progress.unit, progress }); } catch (e) { hit = null; }
+      if (hit) {
+        const r = reviewReply(hit, { now: new Date() });
+        await chat.addLocal({ user: { text: t }, assistant: { text: r.text, meta: { kind: 'method', point: '', words: [], check: 'none' }, action: r.action } });
+        try { if (ctx.events && ctx.events.log) ctx.events.log({ type: 'ask', step: 'chat', qid: 'chat', kind: 'method', about: 'chat:review', q: t.slice(0, 60) }); } catch (e) { /* never blocks */ }
+        render(); scrollEnd(true);
+        return;
+      }
+      // 太简单了 / 太难了: the lesson's difficulty changes (kid-me.js); a short line is answered here, a longer one still goes
+      let fb = null;
+      try { fb = await K.applyChatFeedback(ctx, t); } catch (e) { fb = null; }
+      if (fb) {
+        const choice = fb.parsed && fb.parsed.choice;
+        if (t.length <= 12) {
+          await chat.addLocal({ user: { text: t, feedback: choice }, assistant: { text: fb.reply || '好，记下了。', feedback: choice } });
+          render(); scrollEnd(true);
+          return;
+        }
+        sendText = `（她刚说：${choice === 'easy' ? '觉得太简单，想难一点' : '觉得太难'}。我已经调了上课的难度。这次讲的时候也照着调。）` + t;
+      }
+    }
+    const p = chat.send({ text: t, image, send: sendText, quick }, { onUpdate });
     render();
     scrollEnd(true);
     try { await p; } catch (e) { console.warn('chat:', (e && e.message) || e); }

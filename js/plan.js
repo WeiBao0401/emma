@@ -168,6 +168,7 @@ import {
   dayOf, unitRank, unitName, sprintOf, assignModes, grammarWarm, writePlan, buildQuiz, weeklyGains,
   MODE_SECONDS, PULL_MAX, SPELL_PER_DAY, WRITE_SPELL, WRITE_ROTATION,
 } from './sprint.js';
+import { todayMix } from './kid-me.js';
 
 export { dayOf, unitRank, unitName };
 
@@ -342,7 +343,13 @@ export function planToday(state = {}, now = new Date()) {
 
   const newDone = Math.max(0, num(state.newDoneToday, 0));
   const introDone = Math.max(0, num(state.introDoneToday, newDone));
-  const newPerDay = Math.min(MAX_NEW_PER_DAY, Math.max(0, num(state.newPerDay ?? settings.newPerDay, MAX_NEW_PER_DAY)));
+  // 0.7.0 (kid-me.js): what she said about the difficulty (state.knobs) and what she wants to practise first today
+  // (state.todayChoice). Both optional: without them nothing changes. Only numbers move, never the order or the time rules.
+  const kn = state.knobs && typeof state.knobs === 'object' ? state.knobs : null;
+  const kw = (kn && kn.warmup) || {}, kr = (kn && kn.read) || {}, kwr = (kn && kn.write) || {}, kg = (kn && kn.grammar) || {};
+  const kNum = x => (Number.isFinite(x) ? x : 0);
+  let newPerDay = Math.min(MAX_NEW_PER_DAY, Math.max(0, num(state.newPerDay ?? settings.newPerDay, MAX_NEW_PER_DAY)));
+  if (kn && !first) newPerDay = Math.max(1, Math.min(MAX_NEW_PER_DAY + kNum(kw.newCapBonus), newPerDay + kNum(kw.newDelta)));
   const introQuota = Math.max(0, num(state.textbookPerDay, TEXTBOOK_PER_DAY) - introDone);
   const freshQuota = Math.max(0, newPerDay - newDone);
   const introPool = intros.slice(0, introQuota);
@@ -362,6 +369,10 @@ export function planToday(state = {}, now = new Date()) {
   // DESIGN 6.4: the two quiz days (2-3 days before the exam) swap the standard lesson for a 10-15 minute quiz
   const quiz = !first && sp.phase === 'quiz' ? buildQuiz({ ...state, words, progress, unitRanks: ranks, plan: null }, now, { sprint: sp }) : null;
 
+  const choice = !first && !quiz && !examEve && typeof state.todayChoice === 'string' && state.todayChoice ? state.todayChoice : '';
+  const mix = choice ? todayMix(choice, { examSet: !!(progress.examDate || progress.examFrom) }) : null;
+  const mixId = mix ? mix.id : 'plan';
+
   // ---- 读一段 (DESIGN 5.6): reader.js says which episode; today decides whether and how much
   const rc = state.readCell && typeof state.readCell === 'object' ? state.readCell : null;
   // the quiz day reads one 期中阅读小篇 instead of the episode (sprint.js quizPassage)
@@ -378,10 +389,13 @@ export function planToday(state = {}, now = new Date()) {
     if (quizDay) return no('今天做小卷');
     if (examEve) return no('考完接着读');
     if (dictation) return no('今晚写过听写，明天读');
-    const short = !!isLight;
+    // 0.7.0: 太难 reads the short version; 多读故事 the full one even on a light day, 多练单词 / 练语法 the short one
+    const short = mixId === 'read' ? false : mixId === 'words' || mixId === 'grammar' || mixId === 'exam' ? true : !!isLight || !!kr.short;
     const full = Math.max(1, num(rc.minutes, 5));
-    const minutes = short ? Math.max(1, Math.min(full, num(rc.shortMinutes, Math.ceil(full * 0.6)))) : full;
-    return { ...base, ...info, status: 'ready', minutes, short, note: rc.note || (rc.n ? `第 ${rc.n} 集` : '') };
+    const challenge = Math.max(kNum(kr.challenge), mixId === 'read' ? 1 : 0);
+    const minutes = short ? Math.max(1, Math.min(full, num(rc.shortMinutes, Math.ceil(full * 0.6)))) : Math.max(1, full + kNum(kr.minutesDelta));
+    return { ...base, ...info, status: 'ready', minutes, short, note: rc.note || (rc.n ? `第 ${rc.n} 集` : ''),
+      ...(challenge ? { challenge } : {}), ...(kr.autoTrunk ? { autoTrunk: true } : {}), ...(kr.selfFirst ? { selfFirst: true } : {}) };
   }
   const readTargets = new Set(Array.isArray(state.readTargets) ? state.readTargets : []);
   const askedWords = new Set(Array.isArray(state.askedWords) ? state.askedWords : []);
@@ -397,7 +411,9 @@ export function planToday(state = {}, now = new Date()) {
   function build(isLight) {
     const quizDay = !!quiz && !isLight;
     const read = readFor(isLight, quizDay);
-    const c = first ? CAPS.first : quizDay ? CAPS.quiz : capFor(isLight);
+    const c0 = first ? CAPS.first : quizDay ? CAPS.quiz : capFor(isLight);
+    const capDelta = mix && !first && !quizDay ? kNum(mix.warmup.capDelta) : 0;
+    const c = isLight && capDelta > 0 ? c0 : Math.max(mix && mix.warmup.minCards ? Math.min(c0, mix.warmup.minCards) : 1, c0 + capDelta);
     const inQuiz = quizDay ? new Set(quiz.items) : null;
     const keep = w => !inQuiz || !inQuiz.has(w.slug);
     const R = reviews.filter(keep), I = introPool.filter(keep), Fp = freshPool;
@@ -453,7 +469,7 @@ export function planToday(state = {}, now = new Date()) {
     };
     let preteach = [];
     if (read.status === 'ready' && read.mode === 'story' && readTargets.size) {
-      bring(readTargets, PRETEACH_MAX);
+      bring(readTargets, PRETEACH_MAX + kNum(kr.preteachDelta));
       preteach = cards.filter(w => readTargets.has(w.slug)).map(w => w.slug);
     }
     // 我问过的 (teacher.js): a word 问老师 explained comes back on day 2 and day 5
@@ -468,15 +484,18 @@ export function planToday(state = {}, now = new Date()) {
 
     // ---- what kind of card each one is (DESIGN 2.2, 5.1)
     const spellDay = !isLight && !first && !quizDay && WRITE_ROTATION[now.getDay()] === 'spell';
-    const tilesMax = first || quizDay || examEve ? 0
+    let tilesMax = first || quizDay || examEve ? 0
       : isLight ? (season ? TILES.lightSeason : TILES.light)
       : season ? SPELL_PER_DAY - (spellDay ? WRITE_SPELL : 0) : TILES.regular;
+    if (tilesMax) tilesMax = Math.max(0, tilesMax + kNum(kw.tilesDelta) + (mix ? kNum(mix.warmup.tilesDelta) : 0));
     const preSet = new Set([...preteach, ...asked]);
     const eligible = w => !preSet.has(w.slug) && (season ? isKey(w) || !!w.write : !!w.write);
     let am = assignModes(cards, { first, tilesMax, eligible });
 
     // ---- 写几个词
-    const write = writePlan({ now, state, sprint: sp, words, warm: new Set(cards.map(w => w.slug)), light: isLight, first, quiz: quizDay ? quiz : null, isKey });
+    const writeFirst = mixId === 'words' || mixId === 'exam' ? 'spell' : mixId === 'grammar' ? (state.grammarCard === null ? 'transform' : 'grammar') : '';
+    const writeDelta = kNum(kwr.itemsDelta) + (mix ? kNum(mix.write.itemsDelta) : 0);
+    const write = writePlan({ now, state: writeFirst || writeDelta ? { ...state, writeFirst, writeDelta } : state, sprint: sp, words, warm: new Set(cards.map(w => w.slug)), light: isLight, first, quiz: quizDay ? quiz : null, isKey });
     // a spelling day with nothing left to spell there (every key word is already in the warm-up): the warm-up spells them all
     if (season && spellDay && write.mode !== 'spell') am = assignModes(cards, { first, tilesMax: SPELL_PER_DAY, eligible });
     cards = am.cards;
@@ -485,7 +504,7 @@ export function planToday(state = {}, now = new Date()) {
     // first card, a new word, a target word before the story or a word 问老师 explained; the exam season takes the outline's
     // key words first, other days the words on the 写得出 line (a tiles card before a four-choice one), then the most reviewed
     const clozeMax = !clozeOk.size || !tilesMax ? 0
-      : isLight ? (season ? CLOZE_WARM.lightSeason : CLOZE_WARM.light) : season ? CLOZE_WARM.season : CLOZE_WARM.standard;
+      : Math.max(0, (isLight ? (season ? CLOZE_WARM.lightSeason : CLOZE_WARM.light) : season ? CLOZE_WARM.season : CLOZE_WARM.standard) + kNum(kw.clozeDelta));
     if (clozeMax) {
       const score = (w, i) => (season ? (isKey(w) ? 0 : 4) : 0) + (w.write ? 0 : 2) + (modes[i] === 'tiles' ? 0 : 1);
       cards.map((w, i) => ({ w, i })).filter(({ w, i }) => i > 0 && !w.isNew && clozeOk.has(w.slug) && !preSet.has(w.slug))
@@ -494,7 +513,8 @@ export function planToday(state = {}, now = new Date()) {
     }
 
     // ---- grammar in the warm-up: 1-2 a day; the quiz day brings its 5
-    const gN = first || examEve || quizDay || !cards.length ? 0 : isLight ? GRAMMAR_WARM.light : GRAMMAR_WARM.standard;
+    const gN0 = first || examEve || quizDay || !cards.length ? 0 : isLight ? GRAMMAR_WARM.light : GRAMMAR_WARM.standard;
+    const gN = gN0 ? Math.max(0, Math.min(3, gN0 + kNum(kg.warmDelta) + (mix ? kNum(mix.warmup.grammarDelta) : 0))) : 0;
     let grammar = quizDay ? (quiz.grammar || []).slice() : grammarWarm({ ...state, progress, unitRanks: ranks }, now, gN, sp);
 
     // ---- 连词成句 now and then in the warm-up (modes/order.js warmItem): not on a 连词成句 day, the first lesson, a light
@@ -504,8 +524,11 @@ export function planToday(state = {}, now = new Date()) {
 
     // ---- 0.5.0: 地基探针 (1-2), 505 摸底 (6-15 words), 找动词 (1-2). Never on the first lesson, the quiz day or the night
     // before the exam; the 摸底 not on a light lesson or the exam day either (it waits for an ordinary day)
-    let probe = noExtras || !Array.isArray(state.probeItems) ? [] : state.probeItems.filter(Boolean).slice(0, isLight ? PROBE_WARM.light : PROBE_WARM.standard);
-    const screenMax = season ? SCREEN_WARM.season : tuneWords ? SCREEN_WARM.words : SCREEN_WARM.standard;
+    let probe = noExtras || !Array.isArray(state.probeItems) ? [] : state.probeItems.filter(Boolean).slice(0, Math.max(0, (isLight ? PROBE_WARM.light : PROBE_WARM.standard) + kNum(kw.probeDelta)));
+    let screenMax = season ? SCREEN_WARM.season : tuneWords ? SCREEN_WARM.words : SCREEN_WARM.standard;
+    if (kw.screenTight) screenMax = Math.min(screenMax, SCREEN_WARM.tight);
+    // 0.7.0: 错题 due again today (mistakes.js mistakeReviewItems, 1-2), after the grammar questions and probes
+    let mistakes = noExtras || !Array.isArray(state.mistakeItems) ? [] : state.mistakeItems.filter(x => x && x.id).slice(0, isLight ? 1 : 2);
     let screen = noExtras || isLight || examDay || !Array.isArray(state.screenItems) ? [] : state.screenItems.filter(Boolean).slice(0, screenMax);
     let verb = noExtras || isLight || !Array.isArray(state.verbItems) ? [] : state.verbItems.filter(Boolean).slice(0, tuneSentences ? VERB_WARM.sentences : VERB_WARM.standard);
     // ---- 0.6.0: one 变形配对 group, one 对比小卡 (the misconception she hit most lately); neither on a light lesson
@@ -518,7 +541,7 @@ export function planToday(state = {}, now = new Date()) {
     const limit = read.status === 'ready' && !isLight && !weekend ? LIMITS.withRead : limitFor(isLight);
     const warmSec = () => modes.reduce((a, m) => a + secOf(m), 0) + grammar.length * secOf('grammar') + order.length * secOf('order')
       + probe.length * secOf('probe') + screen.length * secOf('screen') + verb.length * secOf('verb')
-      + forms.length * secOf('forms') + contrast.length * secOf('contrast')
+      + forms.length * secOf('forms') + contrast.length * secOf('contrast') + mistakes.length * secOf('grammar') * 2
       + grammar.filter(g => g && g.intro).length * secOf('alt_intro');
     const total = () => minOf(warmSec()) + (read.status === 'ready' ? read.minutes : 0) + (write.status === 'ready' ? write.minutes : 0) + WRAP_MINUTES;
     // a story day: recognition cards from the end of the list (lowest band, put off to tomorrow) go first, before the
@@ -552,8 +575,9 @@ export function planToday(state = {}, now = new Date()) {
     while (total() > limit && grammar.length && !quizDay) grammar = grammar.slice(0, -1);
     if (total() > limit) verb = [];
     if (total() > limit) probe = [];
+    if (total() > limit && mistakes.length > 1) mistakes = mistakes.slice(0, 1);
 
-    const wcards = cards.map((w, i) => ({ type: 'word', slug: w.slug, mode: modes[i] }));
+    const wcards = cards.map((w, i) => ({ type: 'word', slug: w.slug, mode: modes[i], ...(kw.distractor && kw.distractor !== 'normal' ? { distractor: kw.distractor } : {}) }));
     // grammar questions and probes spread through the word cards together (probes after the grammar ones)
     const gp = [...grammar.map(g => ({ type: 'grammar', id: g.id || g.item, item: g.item || g.id, point: g.point || null, card: g.card || null, mode: 'grammar',
       ...(g.kind === 'alt' ? { kind: 'alt' } : {}), ...(g.intro ? { intro: true } : {}) })),
@@ -561,6 +585,7 @@ export function planToday(state = {}, now = new Date()) {
       ...contrast.map(x => ({ type: 'contrast', id: x.id, item: x.item || 'gc:' + x.id, title: x.title || '', tags: Array.isArray(x.tags) ? x.tags.slice() : [], mode: 'contrast' }))];
     const at = grammarSlots(cards.length, gp.length);
     for (let i = gp.length - 1; i >= 0; i--) wcards.splice(at[i], 0, gp[i]);
+    for (const x of mistakes) wcards.push({ type: 'mistake', id: x.id, item: x.item || 'mx:' + x.id, mode: 'mistake' });
     for (const x of screen) wcards.push({ type: 'screen', id: x.id });
     for (const id of verb) wcards.push({ type: 'verb', id, item: id, mode: 'verb' });
     for (const f of forms) wcards.push({ type: 'forms', id: 'forms', item: 'forms', mode: 'forms', kind: f.kind, items: f.items.slice() });
@@ -570,7 +595,7 @@ export function planToday(state = {}, now = new Date()) {
     if (tuneSentences && verb.length > VERB_WARM.standard) tuned.push({ id: 'verb', why: `${tune.hard === 'sentences' ? '她说句子看不懂' : '读的时候多卡在句子上'}：今天多找一句的动词。` });
     const cloze = cards.filter((w, i) => modes[i] === 'cloze').map(w => w.slug);
     const picked = cards.filter(w => pickedSet.has(w.slug)).map(w => w.slug);
-    return { cards, modes, grammar, order, preteach, asked, probe, screen, verb, forms, contrast, cloze, picked, tuned, wcards, write, read, pick, pulled, quizDay, R, I, Fp, trimmed, warmMin: minOf(warmSec()) };
+    return { cards, modes, grammar, order, preteach, asked, probe, screen, verb, forms, contrast, cloze, picked, tuned, wcards, mistakes, write, read, pick, pulled, quizDay, R, I, Fp, trimmed, warmMin: minOf(warmSec()) };
   }
 
   const m = build(light);
@@ -586,8 +611,8 @@ export function planToday(state = {}, now = new Date()) {
   if (w.quiz) writeExtra.quiz = w.quiz;
   const r = m.read;
   const readExtra = { mode: r.mode || 'story', note: r.note || '' };
-  for (const k of ['episodeId', 'passageId', 'n', 'of', 'title', 'titleZh', 'short', 'again', 'resume']) if (r[k] !== undefined) readExtra[k] = r[k];
-  const extras = m.probe.length + m.screen.length + m.verb.length + m.forms.length + m.contrast.length;
+  for (const k of ['episodeId', 'passageId', 'n', 'of', 'title', 'titleZh', 'short', 'again', 'resume', 'challenge', 'autoTrunk', 'selfFirst']) if (r[k] !== undefined) readExtra[k] = r[k];
+  const extras = m.mistakes.length + m.probe.length + m.screen.length + m.verb.length + m.forms.length + m.contrast.length;
   const cells = [
     cell('warmup', items.length || m.grammar.length || extras ? 'ready' : 'skip', m.warmMin, items, {
       mode: 'mc4',
@@ -604,6 +629,7 @@ export function planToday(state = {}, now = new Date()) {
       forms: m.forms,
       contrast: m.contrast,
       picked: m.picked,
+      mistakes: m.mistakes,
     }),
     cell('read', r.status, r.minutes, [], readExtra),
     cell('write', w.status, w.minutes, w.items, writeExtra),
@@ -618,7 +644,7 @@ export function planToday(state = {}, now = new Date()) {
 
   // ---- the two sentences on the home page
   const why = reasonOf({ first, cards: cells[0].status === 'done' ? [] : m.cards, light, lightReason, gap, band, inScope, examSeason, rank, quizDay: m.quizDay, sp, isKey, write: cells[2], read: cells[1] });
-  const summary = summaryOf({ first, n: items.length, dictation, cards: m.cards, rank, quizDay: m.quizDay, write: cells[2], read: cells[1], warmDone: cells[0].status === 'done' });
+  const summary0 = summaryOf({ first, n: items.length, dictation, cards: m.cards, rank, quizDay: m.quizDay, write: cells[2], read: cells[1], warmDone: cells[0].status === 'done' });
 
   const weekDays = num(state.weekDays, 0) > 0 ? num(state.weekDays, 0)
     : (lessonDays || []).filter(d => d >= mondayOf(now) && d <= today).length;
@@ -632,7 +658,9 @@ export function planToday(state = {}, now = new Date()) {
     lightMinutes,
     cells,
     why,
-    summary,
+    summary: mix && mix.note && summary0 ? mix.note + summary0 : summary0,
+    today: { choice: choice || '', mix },
+    difficulty: kn ? kn.levels || null : null,
     counts: {
       due: reviews.length,
       fresh: newIn,
@@ -655,6 +683,7 @@ export function planToday(state = {}, now = new Date()) {
       forms: m.forms.length,
       contrast: m.contrast.length,
       picked: m.picked.length,
+      mistakes: m.mistakes.length,
     },
     tune: m.tuned,
     kind: light ? 'easy' : weekend ? 'weekend' : 'standard',

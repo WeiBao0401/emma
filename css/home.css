@@ -75,3 +75,11 @@
 .home-textread-open{min-height:var(--btn-h);text-align:left}
 .home-textread-open b{font-weight:600}
 .home-textread-again{min-height:var(--btn-h);color:var(--muted)}
+/* 0.7.0: 孩子端“我” in the top right corner; the rows for 我要复习考试 and 错题 */
+.home-head-r{display:flex;align-items:center;gap:10px;min-width:0;max-width:62%}
+.home-head-r .home-phase{max-width:none;min-width:0}
+.home-me{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--rule);background:var(--paper);color:var(--ink);font:600 16px var(--sans);display:flex;align-items:center;justify-content:center}
+.home-me:active{background:var(--tag-bg)}
+.home-more{margin-top:0;padding-top:0;border-top:0}
+.home-row{min-height:var(--btn-h);text-align:left}
+.home-row b{font-weight:600}

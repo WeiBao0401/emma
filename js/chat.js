@@ -80,6 +80,7 @@ import * as G from './grammar.js';
 import * as T from './teacher.js';
 import * as S from './screen.js';
 import { slugify } from './words.js';
+import * as K from './kid-me.js';
 import { buildSystemPrompt, KINDS, KIND_LABEL, POINTS, POINT_LABEL, CHECKS, META_OPEN, META_CLOSE } from './chat-prompt.js';
 
 export const KV_PREFIX = 'chat:';
@@ -793,6 +794,9 @@ export async function gatherContext(app, { now = new Date(), exclude = '', event
     asked: safe(() => T.askedLines(T.readAsked(kv), now), []),
     focus: safe(() => focusCards(focus), []),
     contrast: safe(() => contrastRefs({ text, points: focus, events: evs || [] }), []),
+    // 0.7.0 孩子端“我” (kid-me.js): what she likes, and the difficulty she asked for
+    prefs: safe(() => K.prefsForPrompt(kv), ''),
+    level: safe(() => K.difficulty(kv, now), null),
   };
 }
 
@@ -847,7 +851,7 @@ export async function mockStream(text, { image = false, quick = '', onDelta = ()
 // ---------------------------------------------------------------- storage
 
 const ROLES = ['user', 'assistant'];
-const KEEP_FIELDS = ['id', 'role', 'text', 'at', 'thread', 'send', 'quick', 'image', 'reply_to', 'meta', 'model', 'provider', 'error', 'stopped', 'flagged', 'retry', 'simplified'];
+const KEEP_FIELDS = ['id', 'role', 'text', 'at', 'thread', 'send', 'quick', 'image', 'reply_to', 'meta', 'model', 'provider', 'error', 'stopped', 'flagged', 'retry', 'simplified', 'action', 'feedback', 'local'];
 function normMsg(m) {
   if (!m || typeof m !== 'object' || !ROLES.includes(m.role) || !m.id) return null;
   const out = {};
@@ -1050,6 +1054,22 @@ export function createChat(app, { fetchImpl = null, now = () => new Date(), slee
     },
     stop() { if (ctrl) ctrl.abort(); },
     newThread() { thread = newId('t'); return thread; },
+    // 0.7.0: a pair of messages answered on the iPad, no model call (太简单了, 我要考 Unit 1 2): saved like any other pair.
+    // assistant: { text, meta?, action?: { label, route, params }, feedback? }
+    async addLocal({ user = {}, assistant = {} } = {}) {
+      ensureDay();
+      const t = String(user.text || '').trim();
+      if (busy || !t) return null;
+      const last = msgs[msgs.length - 1];
+      if (last && now() - new Date(last.at) >= THREAD_GAP_MS && last.thread === thread) thread = newId('t');
+      const u = { id: newId('m'), role: 'user', text: t, at: isoLocal(now()), thread, ...(user.feedback ? { feedback: user.feedback } : {}) };
+      const a = { id: newId('m'), role: 'assistant', text: String(assistant.text || ''), at: isoLocal(now()), thread, reply_to: u.id, local: true,
+        meta: assistant.meta || { kind: 'other', point: '', words: [], check: 'none' },
+        ...(assistant.action ? { action: assistant.action } : {}), ...(assistant.feedback ? { feedback: assistant.feedback } : {}) };
+      msgs.push(u, a);
+      await save();
+      return { user: u, assistant: a };
+    },
     async flag(teacherId) {
       const m = msgs.find(x => x.id === teacherId && x.role === 'assistant');
       if (!m) return false;

@@ -163,7 +163,13 @@ export function buildSystemPrompt(ctx = {}) {
   if (pl) facts.push(pl);
   const ph = PHONICS_LINE[c.phonics];
   if (ph) facts.push(ph);
+  // 0.7.0 孩子端“我”: what she likes (kid-me.js prefsForPrompt) and the difficulty she asked for
+  const lv = c.level && typeof c.level === 'object' ? c.level : null;
+  const lvOf = k => (lv && Number.isFinite(lv[k]) ? lv[k] : 0);
+  if (lv && (lvOf('grammar') === -1 || lvOf('warmup') === -1)) facts.push('她最近觉得题偏难：例子再短一点，小题出最简单的那种。');
+  else if (lv && (lvOf('grammar') >= 1 || lvOf('warmup') >= 1)) facts.push('她最近觉得太简单：小题可以出变式或让她自己造句。');
   out.push(...facts.map(f => '- ' + f));
+  if (typeof c.prefs === 'string' && c.prefs.trim()) out.push(c.prefs.trim());
 
   const misses = list(c.misses, 8);
   if (misses.length) {

@@ -347,7 +347,7 @@ export function createParentView(ctx) {
   fetch(INTAKE_FILE).then(r => { if (!r.ok) throw new Error(`${INTAKE_FILE} ${r.status}`); return r.json(); })
     .then(d => { schema = d; if (me) me.render(); }, e => { schemaError = (e && e.message) || String(e); console.warn('intake:', schemaError); });
   const intakeCount = () => intakeFilled(schema, intake().answers || {}, { progress: progress(), profile: profile() });
-  const saveProgress = patch => ctx.kv.set('progress', { ...progress(), ...patch, updated: new Date().toISOString() });
+  const saveProgress = patch => ctx.kv.set('progress', { ...progress(), ...patch, by: 'parent', updated: new Date().toISOString() });
   const saveProfile = patch => ctx.kv.set('profile', { ...profile(), ...patch });
   const units = () => { try { return ctx.curriculum.units() || []; } catch (e) { return []; } };
   const unitTitle = id => ((units().find(u => u.id === id) || {}).title) || id || '';

@@ -119,3 +119,9 @@
 .chat-week{margin-top:10px;padding-top:10px;border-top:1px solid var(--rule);color:var(--accent)}
 .chat-retell .chat-teacher,.chat-weekask .chat-teacher{border-color:color-mix(in srgb,var(--accent) 30%,var(--rule))}
 .chat-chip-quiet{border-color:var(--rule-strong);color:var(--muted)}
+/* 0.7.0: the teacher's picture and name beside each answer */
+.chat-row-teacher.chat-has-av{position:relative;padding-left:46px}
+.chat-who{display:flex;align-items:center;min-height:20px;margin-bottom:-2px}
+.chat-av{position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--tag-bg)}
+.chat-who-name{font-size:13px;line-height:1.2;color:var(--muted)}
+.chat-action{min-height:var(--btn-h)}

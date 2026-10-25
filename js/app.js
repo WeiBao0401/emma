@@ -59,6 +59,12 @@ import * as S from './screen.js';
 import * as T from './teacher.js';
 import * as V from './modes/verb.js';
 import { createTextRead } from './ui-textread.js';
+// 0.7.0 (第 5 批): 孩子端“我”, 我要复习考试, 错题 (the fifth tab)
+import * as K from './kid-me.js';
+import { createKidMeView } from './ui-kid-me.js';
+import { createReviewRequestView } from './ui-review-request.js';
+import * as MX from './mistakes.js';
+import { createMistakesTab } from './ui-mistakes.js';
 
 const params = new URLSearchParams(location.search);
 // ?mock=offline: mock mode where every model call fails like a dropped connection (tests the dictionary fallback)
@@ -258,7 +264,7 @@ function v1State(now, progress) {
   return out;
 }
 
-let look, lib, home, lesson, dictation, parent, onboard, weekly, capture, chat;
+let look, lib, home, lesson, dictation, parent, onboard, weekly, capture, chat, kidme, revise, mistakes;
 let sheetView = null;
 
 // The ctx every view gets (CONTRACTS.md "ctx"). Called `app` inside the dictionary's views.
@@ -296,6 +302,12 @@ const app = {
     const day = dayOf(now);
     const dayRec = kv.peek('day:' + day, {}) || {};
     const progress = kv.peek('progress', {}) || {};
+    // 0.7.0: what she said about the difficulty (kid-me.js) and what she picked to practise first today
+    let kid = {};
+    try { const difficulty = K.difficulty(kv, now); kid = { difficulty, knobs: K.knobs(difficulty), todayChoice: K.todayChoice(kv, now) }; }
+    catch (e) { console.warn('plan state: kid-me:', (e && e.message) || e); }
+    // 0.7.0: two mistakes from 错题 due again today go into the warm-up (mistakes.js)
+    try { kid.mistakeItems = MX.mistakeReviewItems(kv, now, { max: 2 }); } catch (e) { console.warn('plan state: mistakes:', (e && e.message) || e); }
     let unitRanks;
     try { unitRanks = Object.fromEntries((curriculum.units() || []).map(u => [u.id, u.order])); } catch (e) { unitRanks = undefined; }
     return {
@@ -310,6 +322,7 @@ const app = {
       lessonDays: lessonDays(kv),
       unitRanks: unitRanks && Object.keys(unitRanks).length ? unitRanks : undefined,
       ...v1State(now, progress),
+      ...kid,
       ...extra,
     };
   },
@@ -384,7 +397,7 @@ function buildTabbar() {
     tabbar.append(b);
   }
 }
-const viewOf = name => ({ home, chat, lesson, dictation, look, lib, parent, onboard, weekly, capture })[name];
+const viewOf = name => ({ home, chat, lesson, dictation, look, lib, parent, onboard, weekly, capture, kidme, revise, mistakes })[name];
 function showRoute(name, { force = false, params: p = null } = {}) {
   const r = resolveRoute(name);
   if (r.name === route && !force && !p) return;
@@ -396,6 +409,8 @@ function showRoute(name, { force = false, params: p = null } = {}) {
   if (route === 'lesson' && lesson && r.name !== 'lesson' && lesson.hide) lesson.hide();   // the story stops reading aloud
   if (route === 'capture' && capture && r.name !== 'capture') capture.hide(); // leaving 拍课本 drops the photo
   if (app.textread) app.textread.hide();                                    // 课文陪读's layer closes (it drops the photo)
+  if (route === 'revise' && revise && r.name !== 'revise') revise.hide();   // the review stops reading aloud
+  if (route === 'mistakes' && mistakes && r.name !== 'mistakes') mistakes.hide(); // drops the photo, stops the request
   const from = route;
   route = r.name;
   for (const s of SECTIONS) { const el = document.getElementById('tab-' + s); if (el) el.hidden = s !== r.section; }
@@ -507,7 +522,10 @@ function isIdle() {
     !sheetView && !typing && !words.enriching() && !(parent && parent.holding()) &&
     !(weekly && weekly.holding()) && !(capture && capture.holding()) &&   // a share sheet open, a photo not saved yet
     !(chat && (chat.inSession() || chat.holding())) &&                     // the teacher answering, a recording, a question not sent
-    !(app.textread && (app.textread.inSession() || app.textread.holding())); // 课文陪读: a photo, a page being prepared or read
+    !(app.textread && (app.textread.inSession() || app.textread.holding())) && // 课文陪读: a photo, a page being prepared or read
+    !(kidme && kidme.holding()) && !(revise && revise.inSession()) &&      // 0.7.0: “我” not saved, a review running
+    !(mistakes && (mistakes.inSession() || mistakes.holding())) &&          // the teacher reading or explaining, questions not kept
+    !(lib && lib.inSession && lib.inSession());                             // 单词本's 练一下
 }
 // Stricter, for a reload while the app is in use: nothing being read either.
 const isQuiet = () => isIdle() && !(look && look.hasResult()) && !(lib && lib.inDetail());
@@ -597,6 +615,10 @@ async function boot() {
   onboard = createOnboardView(app);
   weekly = createWeeklyView(app);
   chat = createChatTab(app);
+  kidme = createKidMeView(app);
+  revise = createReviewRequestView(app);
+  mistakes = createMistakesTab(app);
+  MX.loadBank({ fetchJSON }).catch(e => console.warn('mistakes bank:', (e && e.message) || e));
   // 课文陪读: its own full-screen layer over whatever page is open (ui-textread.js); 今天 and 问老师 open it
   app.textread = createTextRead(app);
   renderStatus();

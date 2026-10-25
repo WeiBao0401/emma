@@ -382,19 +382,24 @@ export function writePlan({ now = new Date(), state = {}, sprint = null, words =
   const today = writeModeOf(now.getDay(), !!(sprint && sprint.on));
   // a 句型转换 day without sentences goes back to what the day was before (grammar on Saturday, phonics on Thursday)
   const base = WRITE_ROTATION[now.getDay()];
-  const order = [...new Set([today, base, 'spell', 'grammar', 'order', 'transform', 'phonics'])];
+  // 0.7.0: state.writeFirst (her 今天想先练什么, plan.js) goes first; state.writeDelta (kid-me knobs) adds or drops a few
+  const first0 = ['spell', 'grammar', 'order', 'transform', 'phonics'].includes(state.writeFirst) ? [state.writeFirst] : [];
+  const order = [...new Set([...first0, today, base, 'spell', 'grammar', 'order', 'transform', 'phonics'])];
+  const delta = Number.isFinite(state.writeDelta) ? state.writeDelta : 0;
+  const sized = (list, lo, hi) => list.slice(0, Math.max(lo, Math.min(hi, list.length + Math.min(0, delta))));
   for (const mode of order) {
     if (mode === 'spell') {
-      const list = spellPick(words, { warm, sprint, isKey, state, n: WRITE_SPELL });
-      if (list.length >= 2) return { status: 'ready', mode, items: list.map(w => w.slug), minutes: WRITE_MINUTES.spell, note: '' };
+      const n = Math.max(2, WRITE_SPELL + delta);
+      const list = spellPick(words, { warm, sprint, isKey, state, n });
+      if (list.length >= 2) return { status: 'ready', mode, items: list.map(w => w.slug), minutes: Math.max(1, Math.round(WRITE_MINUTES.spell * list.length / WRITE_SPELL)), note: '' };
     } else if (mode === 'grammar' && !state.noGrammar) {
       const card = grammarCard(state, sprint, now);
       if (card) return { status: 'ready', mode, items: [], minutes: WRITE_MINUTES.grammar, note: '', card };
     } else if (mode === 'order' && !state.noOrder) {
-      const list = Array.isArray(state.orderItems) ? state.orderItems.filter(Boolean) : [];
+      const list = Array.isArray(state.orderItems) ? sized(state.orderItems.filter(Boolean), 1, 5) : [];
       if (list.length) return { status: 'ready', mode, items: list.slice(), minutes: WRITE_MINUTES.order, note: '' };
     } else if (mode === 'transform' && !state.noTransform) {
-      const list = Array.isArray(state.transformItems) ? state.transformItems.filter(Boolean) : [];
+      const list = Array.isArray(state.transformItems) ? sized(state.transformItems.filter(Boolean), 1, 5) : [];
       if (list.length) return { status: 'ready', mode, items: list.slice(), minutes: WRITE_MINUTES.transform, note: '' };
     } else if (mode === 'phonics' && !state.noPhonics) {
       return { status: 'ready', mode, items: [], minutes: WRITE_MINUTES.phonics, note: '', card: state.phonicsCard || null, week: dayOf(mondayOf(now)) };

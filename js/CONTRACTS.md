@@ -513,3 +513,14 @@ await run();
 - 0.5.0 还没接的（可选）：首页的 `kidWeekLine`（问老师第一页已经有）；plan 按 `triageSummary(kv).adjust.preteach` 把这集目标词多放进热身（现在只调摸底和找动词的量）；家长区显示 `plan.tune`；语法卡借 `meta.grammar_cards` 的例句（grammar.js 的事）；阅读器给本周语法点加底色（3.5，阅读器的事）；周统计跳过 `then: true` 的答题事件；`budget.js` 给课文陪读单独的类别和上限；`capture.js` 的通用看图函数；期中阅读小篇的另一份 3 篇草稿（阅读内容 agent 写的，`../../design/exam-reading-alt.json`）没合进来，要用时并成 r4-r6，`check_stories.mjs` 的 `EXAM_RULES.passages` 改成 6
 - 还没做（v2）：番外 6 集以后每天现写的故事、“会写了”第 7、21 天复查、“这不对”之后下节课出题核对、家长区完整笔记本、家长区“下个单元哪天开始”（kv `progress.nextFrom`）、键盘拼写（0.6.0 起设置里有 `spellMode`，默认 `'tiles'`；`'keys'` 句子里回想会用键盘，要等体检页确认键盘安全再打开，家长区还没有开关）、grammar.js 出小卷题（`grammarQuizItems`，现在小卷用 sprint.js 的兜底题）、语法卡例句借用故事里的句子（stories.json `meta.grammar` 有索引）、问老师的提示词带上阅读进度和最吃力的句子。
 - 导入的课本词中文取自第三方词表（`cn_source: 'book-list'`，网页抓取可能缺字），没有的留空等 AI 补（`needs_core`）；整份包要等 Wei 拍课本核对后再给 Emma 用。
+
+## 12. 第 5 批（0.7.0）接线记录
+- 文件：孩子端“我” `kid-me.js` / `ui-kid-me.js` / `css/kid-me.css`（`km-`）；复习考试 `review.js` / `ui-review-request.js` / `css/review-request.css`（`rvq-`）；错题 `mistakes.js` / `ui-mistakes.js` / `css/mistakes.css`（`mx-`）；单词本 `wordbook.js` / `css/wordbook.css`（`wb-`）；老师头像 `teacher-96.png`、`teacher-256.png`
+- 路由：`mistakes`（第 3 个标签，params `{ id?, review?, take? }`）、`kidme`（今天下面，不藏标签栏，首页右上角“我”进）、`revise`（今天下面，全屏，params `{ units?, date?, start? }`）
+- kv 新键：`kid.prefs`、`kid.level`、`kid.today`、`review:plan`、`mistake:<id>`、`wordbook.own`；`progress.by` 是 `'emma'` 或 `'parent'`
+- 事件：新类型 `feedback`；新题型 `mistake`；`ask qid 'today'`（上课前的选择）、`ask about 'chat:review'`；step 多 `review`、`mistakes`、`wordbook`
+- plan.js 的 state 多 `difficulty`、`knobs`、`todayChoice`、`mistakeItems`（app.js planState 给）；Plan 多 `today`、`difficulty`、热身格 `mistakes`、`counts.mistakes`，读一段格可能带 `challenge`、`autoTrunk`、`selfFirst`（阅读器还没读）
+- sprint.js `writePlan` 认 `state.writeFirst`（先试哪种）和 `state.writeDelta`（多或少几个）
+- chat.js `addLocal({ user, assistant })`：存一对本地消息，不调模型；消息多可选字段 `action`、`feedback`、`local`
+- modes/spell.js `canSpell`：词条 `own: true` 或 history 里有 `source: 'self'` 也能拼
+- 各模块的完整清单在 `wip/b5/*-needs.md`；没接的：choice.js 干扰项远近、ui-grammar tune、screen skipSteady、阅读器 challenge / autoTrunk / selfFirst、家长区“她说的难度”

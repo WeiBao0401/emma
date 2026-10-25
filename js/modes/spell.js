@@ -225,6 +225,9 @@ export function canSpell(entry, curriculum) {
   const w = headOf(entry);
   if (!w || w.length < 3 || !lettersOnly(w) || (entry && entry.phrase)) return false;
   if (entry.required === true) return true;
+  // 0.7.0 (Wei 10-25): a word she added to her word book herself (history source 'self', wordbook.js) is spelled too,
+  // so it can reach 会写
+  if (entry.own === true || (Array.isArray(entry.history) && entry.history.some(x => x && x.source === 'self'))) return true;
   if (entry.required === false) return false;
   try { return !!(curriculum && typeof curriculum.isRequired === 'function' && curriculum.isRequired(w)); } catch (e) { return false; }
 }
