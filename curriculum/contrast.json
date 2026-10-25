@@ -1,0 +1,261 @@
+{
+  "version": 1,
+  "source": "对比小卡（teacher-next 4.3）：Claude 原创预写，Wei 过目。她最容易混的成对知识点，一张一屏：zh 是一句中文说清区别，left / right 是左右两列（head 是这一列的词，note 是什么时候用，examples 各 2 句，mark 是要加底色的词），quiz 是 3 道快速判断题（options 两个选项，answer 是对的那个，tag 是选错时记的误解标签，explain 是一句解释）。tags 是这张卡主要对着的误解标签（她错过 2 次以上就推这张，grammar.js contrastItems）；also 是也能用上的标签（contrastFor 在找不到主卡时用，words 是这张卡说的那几个词，选项里出现这些词时优先这张）。cards 是相关的语法卡。只用小学 505 词、课标另列的数词、七上 Starter 到 Unit 3 的词和故事里的人名，不含课文。新标签 a_an、can_cant 放在 grammar.json 的 tags 里，等并进 tags.json。",
+  "contrasts": [
+    {
+      "id": "is_are", "title": "is 和 are", "tags": ["be_agree"], "also": [], "words": ["is", "are"], "cards": ["be_verb"],
+      "zh": "一个人或一样东西用 is，两个以上用 are。",
+      "left": { "head": "is", "note": "一个", "examples": [
+        { "en": "Momo is grey.", "zh": "Momo 是灰色的。", "mark": ["is"] },
+        { "en": "My cat is in the box.", "zh": "我的猫在盒子里。", "mark": ["is"] }
+      ] },
+      "right": { "head": "are", "note": "两个以上", "examples": [
+        { "en": "Momo and Snowy are cats.", "zh": "Momo 和 Snowy 是猫。", "mark": ["are"] },
+        { "en": "The two cats are in the box.", "zh": "两只猫在盒子里。", "mark": ["are"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "Snowy ____ very small.", "options": ["is", "are"], "answer": "is", "tag": "be_agree", "zh": "Snowy 很小。", "explain": "Snowy 是一只猫，一个用 is。" },
+        { "id": "q2", "stem": "Mia and Lucy ____ in Class 3.", "options": ["is", "are"], "answer": "are", "tag": "be_agree", "zh": "Mia 和 Lucy 在三班。", "explain": "Mia 和 Lucy 是两个人，用 are。" },
+        { "id": "q3", "stem": "My socks ____ under the bed.", "options": ["is", "are"], "answer": "are", "tag": "be_agree", "zh": "我的袜子在床底下。", "explain": "socks 加了 s，是好几只，用 are。" }
+      ]
+    },
+    {
+      "id": "be_or_verb", "title": "要 is 还是不要 is", "tags": ["be_missing", "be_plus_verb"], "also": ["be_do_mix"], "words": [], "cards": ["be_verb"],
+      "zh": "主语后面是形容词、名词或地点，要有 is；后面是 like、sleep 这样的动词，就不要 is。",
+      "left": { "head": "要 is", "note": "后面是形容词、名词、地点", "examples": [
+        { "en": "Momo is hungry.", "zh": "Momo 饿了。", "mark": ["is"] },
+        { "en": "Momo is in the box.", "zh": "Momo 在盒子里。", "mark": ["is"] }
+      ] },
+      "right": { "head": "不要 is", "note": "后面是动词", "examples": [
+        { "en": "Momo likes milk.", "zh": "Momo 喜欢牛奶。", "mark": ["likes"] },
+        { "en": "Momo sleeps in the box.", "zh": "Momo 在盒子里睡觉。", "mark": ["sleeps"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "ask": "哪句对？", "options": ["Snowy is very small.", "Snowy very small."], "answer": "Snowy is very small.", "tag": "be_missing", "zh": "Snowy 很小。", "explain": "small 是形容词，前面要有 is。" },
+        { "id": "q2", "ask": "哪句对？", "options": ["Mia is likes cats.", "Mia likes cats."], "answer": "Mia likes cats.", "tag": "be_plus_verb", "zh": "Mia 喜欢猫。", "explain": "likes 是动词，前面不要 is。" },
+        { "id": "q3", "ask": "哪句对？", "options": ["Momo is under the bed.", "Momo under the bed."], "answer": "Momo is under the bed.", "tag": "be_missing", "zh": "Momo 在床底下。", "explain": "under the bed 说的是地点，前面要有 is。" }
+      ]
+    },
+    {
+      "id": "there_is_are", "title": "There is 和 There are", "tags": ["there_be_agree"], "also": [], "words": ["there"], "cards": ["there_be"],
+      "zh": "看 There 后面的第一个东西：一个或不能数的用 is，两个以上用 are。",
+      "left": { "head": "There is", "note": "一个，或不能数的", "examples": [
+        { "en": "There is a cat under the tree.", "zh": "树下有一只猫。", "mark": ["There is"] },
+        { "en": "There is some milk in the cup.", "zh": "杯子里有一些牛奶。", "mark": ["There is"] }
+      ] },
+      "right": { "head": "There are", "note": "两个以上", "examples": [
+        { "en": "There are two cats in the garden.", "zh": "花园里有两只猫。", "mark": ["There are"] },
+        { "en": "There are some socks on the bed.", "zh": "床上有几只袜子。", "mark": ["There are"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "There ____ a white cat at the window.", "options": ["is", "are"], "answer": "is", "tag": "there_be_agree", "zh": "窗边有一只白猫。", "explain": "后面是 a white cat，一只，用 is。" },
+        { "id": "q2", "stem": "There ____ three books on Mia's desk.", "options": ["is", "are"], "answer": "are", "tag": "there_be_agree", "zh": "Mia 的书桌上有三本书。", "explain": "后面是 three books，三本，用 are。" },
+        { "id": "q3", "stem": "There ____ some water in the cup.", "options": ["is", "are"], "answer": "is", "tag": "there_be_agree", "zh": "杯子里有一些水。", "explain": "water 不能数，用 is。" }
+      ]
+    },
+    {
+      "id": "there_have", "title": "there is 和 have", "tags": ["there_have"], "also": [], "words": ["there", "have", "has"], "cards": ["there_be"],
+      "zh": "说“哪里有”用 there is、there are；说“谁有”用 have、has。",
+      "left": { "head": "there is / are", "note": "哪里有", "examples": [
+        { "en": "There is a cat in the box.", "zh": "盒子里有一只猫。", "mark": ["There is"] },
+        { "en": "There are two cats in the garden.", "zh": "花园里有两只猫。", "mark": ["There are"] }
+      ] },
+      "right": { "head": "have / has", "note": "谁有", "examples": [
+        { "en": "Mia has a grey cat.", "zh": "Mia 有一只灰猫。", "mark": ["has"] },
+        { "en": "I have a red scarf.", "zh": "我有一条红领巾。", "mark": ["have"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "There ____ two cats in the garden.", "options": ["are", "have"], "answer": "are", "tag": "there_have", "zh": "花园里有两只猫。", "explain": "说“哪里有”，用 There are，不说 There have。" },
+        { "id": "q2", "stem": "I ____ two good friends.", "options": ["have", "there are"], "answer": "have", "tag": "there_have", "zh": "我有两个好朋友。", "explain": "说“谁有”，主语是 I，用 have。" },
+        { "id": "q3", "stem": "There ____ a big tree near Grandma Li's home.", "options": ["is", "has"], "answer": "is", "tag": "there_have", "zh": "李奶奶家附近有一棵大树。", "explain": "说“哪里有”，用 There is，不说 There has。" }
+      ]
+    },
+    {
+      "id": "my_mine", "title": "my 和 mine", "tags": ["poss_adj_vs_pron"], "also": [], "words": ["my", "mine"], "cards": ["pronoun"],
+      "zh": "“我的”后面有名词用 my，后面没有名词用 mine。",
+      "left": { "head": "my", "note": "后面跟名词", "examples": [
+        { "en": "This is my cat.", "zh": "这是我的猫。", "mark": ["my"] },
+        { "en": "My cat is grey.", "zh": "我的猫是灰色的。", "mark": ["My"] }
+      ] },
+      "right": { "head": "mine", "note": "单独用", "examples": [
+        { "en": "This cat is mine.", "zh": "这只猫是我的。", "mark": ["mine"] },
+        { "en": "Is this bag yours? Yes, it's mine.", "zh": "这个包是你的吗？是，是我的。", "mark": ["mine"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "Momo is ____ cat.", "options": ["my", "mine"], "answer": "my", "tag": "poss_adj_vs_pron", "zh": "Momo 是我的猫。", "explain": "后面有名词 cat，用 my。" },
+        { "id": "q2", "stem": "This red scarf is ____.", "options": ["my", "mine"], "answer": "mine", "tag": "poss_adj_vs_pron", "zh": "这条红领巾是我的。", "explain": "后面没有名词了，用 mine。" },
+        { "id": "q3", "stem": "____ schoolbag is under the desk.", "options": ["My", "Mine"], "answer": "My", "tag": "poss_adj_vs_pron", "zh": "我的书包在书桌下面。", "explain": "后面有名词 schoolbag，用 My。" }
+      ]
+    },
+    {
+      "id": "her_hers", "title": "her 和 hers", "tags": [], "also": ["poss_adj_vs_pron"], "words": ["her", "hers"], "cards": ["pronoun"],
+      "zh": "“她的”后面有名词用 her，后面没有名词用 hers。",
+      "left": { "head": "her", "note": "后面跟名词", "examples": [
+        { "en": "This is Lucy. Her bag is blue.", "zh": "这是 Lucy。她的书包是蓝色的。", "mark": ["Her"] },
+        { "en": "Mia loves her cat.", "zh": "Mia 很爱她的猫。", "mark": ["her"] }
+      ] },
+      "right": { "head": "hers", "note": "单独用", "examples": [
+        { "en": "The blue bag is hers.", "zh": "蓝书包是她的。", "mark": ["hers"] },
+        { "en": "Is this pen Lucy's? Yes, it's hers.", "zh": "这支钢笔是 Lucy 的吗？是，是她的。", "mark": ["hers"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "Lucy can't find ____ pen.", "options": ["her", "hers"], "answer": "her", "tag": "poss_adj_vs_pron", "zh": "Lucy 找不到她的钢笔了。", "explain": "后面有名词 pen，用 her。" },
+        { "id": "q2", "stem": "Is this Lucy's book? Yes, it's ____.", "options": ["her", "hers"], "answer": "hers", "tag": "poss_adj_vs_pron", "zh": "这是 Lucy 的书吗？是，是她的。", "explain": "后面没有名词了，用 hers。" },
+        { "id": "q3", "stem": "Mia gives ____ cat some milk.", "options": ["her", "hers"], "answer": "her", "tag": "poss_adj_vs_pron", "zh": "Mia 给她的猫一些牛奶。", "explain": "后面有名词 cat，用 her。" }
+      ]
+    },
+    {
+      "id": "he_his", "title": "he 和 his", "tags": ["subj_vs_poss"], "also": [], "words": ["he", "his"], "cards": ["pronoun"],
+      "zh": "he 是“他”，放在开头做事；his 是“他的”，后面跟着他的东西。",
+      "left": { "head": "he", "note": "他", "examples": [
+        { "en": "This is Tom. He is in Class 3.", "zh": "这是 Tom。他在三班。", "mark": ["He"] },
+        { "en": "He can take good photos.", "zh": "他能拍出很好的照片。", "mark": ["He"] }
+      ] },
+      "right": { "head": "his", "note": "他的", "examples": [
+        { "en": "His bike is blue.", "zh": "他的自行车是蓝色的。", "mark": ["His"] },
+        { "en": "Tom loves his photos.", "zh": "Tom 很爱他的照片。", "mark": ["his"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "Tom is my classmate. ____ is very tall.", "options": ["He", "His"], "answer": "He", "tag": "subj_vs_poss", "zh": "Tom 是我的同学。他很高。", "explain": "开头做事的是“他”，用 He。" },
+        { "id": "q2", "stem": "____ name is Tom.", "options": ["He", "His"], "answer": "His", "tag": "subj_vs_poss", "zh": "他的名字叫 Tom。", "explain": "说“他的”名字，用 His。" },
+        { "id": "q3", "stem": "Tom can't find ____ pen.", "options": ["he", "his"], "answer": "his", "tag": "subj_vs_poss", "zh": "Tom 找不到他的钢笔了。", "explain": "后面有 pen，是“他的”钢笔，用 his。" }
+      ]
+    },
+    {
+      "id": "he_she", "title": "he 和 she", "tags": ["he_she"], "also": [], "words": ["he", "she"], "cards": ["pronoun"],
+      "zh": "说男孩、男的用 he，说女孩、女的用 she。",
+      "left": { "head": "he", "note": "男孩、男的", "examples": [
+        { "en": "Tom is my classmate. He is tall.", "zh": "Tom 是我的同学。他很高。", "mark": ["He"] },
+        { "en": "This is my father. He is a doctor.", "zh": "这是我爸爸。他是医生。", "mark": ["He"] }
+      ] },
+      "right": { "head": "she", "note": "女孩、女的", "examples": [
+        { "en": "Mia is my friend. She is kind.", "zh": "Mia 是我的朋友。她很好。", "mark": ["She"] },
+        { "en": "Ms Wang is our teacher. She is strict.", "zh": "王老师是我们的老师。她很严格。", "mark": ["She"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "Grandma Li gives Snowy milk. ____ is very kind.", "options": ["He", "She"], "answer": "She", "tag": "he_she", "zh": "李奶奶给 Snowy 牛奶。她很好。", "explain": "李奶奶是女的，用 She。" },
+        { "id": "q2", "stem": "My father works in a hospital. ____ is a doctor.", "options": ["He", "She"], "answer": "He", "tag": "he_she", "zh": "我爸爸在医院工作。他是医生。", "explain": "爸爸是男的，用 He。" },
+        { "id": "q3", "stem": "Lucy is in Class 3. ____ is Mia's friend.", "options": ["He", "She"], "answer": "She", "tag": "he_she", "zh": "Lucy 在三班。她是 Mia 的朋友。", "explain": "Lucy 是女孩，用 She。" }
+      ]
+    },
+    {
+      "id": "i_me", "title": "I 和 me", "tags": ["subj_obj"], "also": [], "words": ["i", "me"], "cards": ["pronoun"],
+      "zh": "I 放在句子开头，是做事的“我”；me 放在动词或 with、for 后面。",
+      "left": { "head": "I", "note": "开头做事", "examples": [
+        { "en": "I love Momo.", "zh": "我很爱 Momo。", "mark": ["I"] },
+        { "en": "I am Mia.", "zh": "我是 Mia。", "mark": ["I"] }
+      ] },
+      "right": { "head": "me", "note": "动词、with 后面", "examples": [
+        { "en": "Momo loves me.", "zh": "Momo 很爱我。", "mark": ["me"] },
+        { "en": "Can you help me?", "zh": "你能帮帮我吗？", "mark": ["me"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "____ have a grey cat.", "options": ["I", "Me"], "answer": "I", "tag": "subj_obj", "zh": "我有一只灰猫。", "explain": "开头做事的“我”，用 I。" },
+        { "id": "q2", "stem": "Momo sleeps with ____.", "options": ["I", "me"], "answer": "me", "tag": "subj_obj", "zh": "Momo 和我一起睡。", "explain": "在 with 后面，用 me。" },
+        { "id": "q3", "stem": "Lucy and ____ are good friends.", "options": ["I", "me"], "answer": "I", "tag": "subj_obj", "zh": "Lucy 和我是好朋友。", "explain": "Lucy and I 在开头做事，用 I。" }
+      ]
+    },
+    {
+      "id": "a_an", "title": "a 和 an", "tags": ["a_an"], "also": [], "words": ["a", "an"], "cards": ["plural"],
+      "zh": "看紧跟在后面的那个词：读起来以元音开头（apple、egg、orange、old）用 an，别的用 a。",
+      "left": { "head": "a", "note": "后面的词不以元音开头", "examples": [
+        { "en": "Momo is a cat.", "zh": "Momo 是一只猫。", "mark": ["a"] },
+        { "en": "Mia has a big apple.", "zh": "Mia 有一个大苹果。", "mark": ["a"] }
+      ] },
+      "right": { "head": "an", "note": "后面的词以元音开头", "examples": [
+        { "en": "Mia has an apple.", "zh": "Mia 有一个苹果。", "mark": ["an"] },
+        { "en": "Momo looks at an egg.", "zh": "Momo 看着一个鸡蛋。", "mark": ["an"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "Mia eats ____ egg every morning.", "options": ["a", "an"], "answer": "an", "tag": "a_an", "zh": "Mia 每天早上吃一个鸡蛋。", "explain": "egg 读起来以元音开头，用 an。" },
+        { "id": "q2", "stem": "Snowy is ____ white cat.", "options": ["a", "an"], "answer": "a", "tag": "a_an", "zh": "Snowy 是一只白猫。", "explain": "紧跟着的 white 不以元音开头，用 a。" },
+        { "id": "q3", "stem": "It is ____ old box.", "options": ["a", "an"], "answer": "an", "tag": "a_an", "zh": "这是一个旧盒子。", "explain": "紧跟着的 old 以元音开头，用 an。" }
+      ]
+    },
+    {
+      "id": "this_these", "title": "this 和 these", "tags": ["a_plural"], "also": [], "words": ["this", "these"], "cards": ["plural"],
+      "zh": "this 说一个，后面的名词不变；these 说两个以上，后面的名词变复数。",
+      "left": { "head": "this", "note": "一个", "examples": [
+        { "en": "This cat is Momo.", "zh": "这只猫是 Momo。", "mark": ["This"] },
+        { "en": "This box is big.", "zh": "这个盒子很大。", "mark": ["This"] }
+      ] },
+      "right": { "head": "these", "note": "两个以上", "examples": [
+        { "en": "These cats are cute.", "zh": "这些猫很可爱。", "mark": ["These"] },
+        { "en": "These boxes are big.", "zh": "这些盒子很大。", "mark": ["These"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "____ socks are Mia's.", "options": ["This", "These"], "answer": "These", "tag": "a_plural", "zh": "这些袜子是 Mia 的。", "explain": "socks 加了 s，是好几只，用 These。" },
+        { "id": "q2", "stem": "____ photo is very good.", "options": ["This", "These"], "answer": "This", "tag": "a_plural", "zh": "这张照片拍得很好。", "explain": "photo 没加 s，是一张，用 This。" },
+        { "id": "q3", "stem": "Look at ____ two cats!", "options": ["this", "these"], "answer": "these", "tag": "a_plural", "zh": "看这两只猫！", "explain": "two cats 是两只，用 these。" }
+      ]
+    },
+    {
+      "id": "have_has", "title": "have 和 has", "tags": [], "also": ["third_s_missing", "third_s_spelling", "third_s_extra"], "words": ["have", "has"], "cards": ["present_simple"],
+      "zh": "I、you、we、they 和两个以上用 have；he、she、it 和一个人用 has。",
+      "left": { "head": "have", "note": "I、you、we、they", "examples": [
+        { "en": "I have a grey cat.", "zh": "我有一只灰猫。", "mark": ["have"] },
+        { "en": "We have a new classmate.", "zh": "我们有一个新同学。", "mark": ["have"] }
+      ] },
+      "right": { "head": "has", "note": "he、she、it，一个", "examples": [
+        { "en": "Mia has a grey cat.", "zh": "Mia 有一只灰猫。", "mark": ["has"] },
+        { "en": "Momo has green eyes.", "zh": "Momo 有一双绿眼睛。", "mark": ["has"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "Snowy ____ blue eyes.", "options": ["have", "has"], "answer": "has", "tag": "third_s_missing", "zh": "Snowy 有一双蓝眼睛。", "explain": "Snowy 是一只猫，用 has。" },
+        { "id": "q2", "stem": "I ____ a red scarf.", "options": ["have", "has"], "answer": "have", "tag": "third_s_extra", "zh": "我有一条红领巾。", "explain": "主语是 I，用 have。" },
+        { "id": "q3", "stem": "Lucy and Mia ____ the same teacher.", "options": ["have", "has"], "answer": "have", "tag": "third_s_extra", "zh": "Lucy 和 Mia 有同一个老师。", "explain": "Lucy 和 Mia 是两个人，用 have。" }
+      ]
+    },
+    {
+      "id": "like_likes", "title": "like 和 likes", "tags": ["third_s_missing", "third_s_extra"], "also": ["third_s_spelling"], "words": ["like", "likes"], "cards": ["present_simple"],
+      "zh": "主语是 he、she、it 或一个人，动词加 s；主语是 I、you、we、they，动词不变。",
+      "left": { "head": "like", "note": "I、you、we、they", "examples": [
+        { "en": "I like cats.", "zh": "我喜欢猫。", "mark": ["like"] },
+        { "en": "Mia and Lucy like Snowy.", "zh": "Mia 和 Lucy 喜欢 Snowy。", "mark": ["like"] }
+      ] },
+      "right": { "head": "likes", "note": "he、she、it，一个", "examples": [
+        { "en": "Mia likes cats.", "zh": "Mia 喜欢猫。", "mark": ["likes"] },
+        { "en": "Momo likes boxes.", "zh": "Momo 喜欢盒子。", "mark": ["likes"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "Snowy ____ milk.", "options": ["like", "likes"], "answer": "likes", "tag": "third_s_missing", "zh": "Snowy 喜欢牛奶。", "explain": "Snowy 是一只猫，like 加 s。" },
+        { "id": "q2", "stem": "We ____ Ms Wang.", "options": ["like", "likes"], "answer": "like", "tag": "third_s_extra", "zh": "我们喜欢王老师。", "explain": "主语是 we，用 like，不加 s。" },
+        { "id": "q3", "stem": "Tom and I ____ cats.", "options": ["like", "likes"], "answer": "like", "tag": "third_s_extra", "zh": "Tom 和我喜欢猫。", "explain": "Tom 和我是两个人，用 like。" }
+      ]
+    },
+    {
+      "id": "do_does", "title": "do 和 does", "tags": ["do_does", "does_verb_s"], "also": [], "words": ["do", "does", "don't", "doesn't"], "cards": ["present_simple"],
+      "zh": "问句和否定句里，I、you、we、they 借 do，he、she、it 和一个人借 does，后面的动词都不变。",
+      "left": { "head": "do", "note": "I、you、we、they", "examples": [
+        { "en": "Do you like cats?", "zh": "你喜欢猫吗？", "mark": ["Do"] },
+        { "en": "I don't like rain.", "zh": "我不喜欢下雨。", "mark": ["don't"] }
+      ] },
+      "right": { "head": "does", "note": "he、she、it，一个", "examples": [
+        { "en": "Does Momo like boxes?", "zh": "Momo 喜欢盒子吗？", "mark": ["Does"] },
+        { "en": "Snowy doesn't like water.", "zh": "Snowy 不喜欢水。", "mark": ["doesn't"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "____ Snowy like milk?", "options": ["Do", "Does"], "answer": "Does", "tag": "do_does", "zh": "Snowy 喜欢牛奶吗？", "explain": "Snowy 是一只猫，借 Does。" },
+        { "id": "q2", "stem": "____ you have a cat?", "options": ["Do", "Does"], "answer": "Do", "tag": "do_does", "zh": "你有猫吗？", "explain": "主语是 you，借 Do。" },
+        { "id": "q3", "stem": "Momo ____ like water.", "options": ["don't", "doesn't"], "answer": "doesn't", "tag": "do_does", "zh": "Momo 不喜欢水。", "explain": "Momo 是一只猫，借 doesn't。" }
+      ]
+    },
+    {
+      "id": "can_cant", "title": "can 和 can't", "tags": ["modal_do", "can_cant"], "also": ["modal_s"], "words": ["can", "can't"], "cards": ["can"],
+      "zh": "can 是“会、能”；“不会、不能”就说 can't，不借 doesn't；后面的动词都不变。",
+      "left": { "head": "can", "note": "会、能", "examples": [
+        { "en": "Momo can jump high.", "zh": "Momo 能跳得很高。", "mark": ["can"] },
+        { "en": "Can you swim? Yes, I can.", "zh": "你会游泳吗？会。", "mark": ["Can", "can"] }
+      ] },
+      "right": { "head": "can't", "note": "不会、不能", "examples": [
+        { "en": "Momo can't swim.", "zh": "Momo 不会游泳。", "mark": ["can't"] },
+        { "en": "Grandma Li can't keep Snowy.", "zh": "李奶奶不能养 Snowy。", "mark": ["can't"] }
+      ] },
+      "quiz": [
+        { "id": "q1", "stem": "Momo is a cat. She ____ read books.", "options": ["can", "can't"], "answer": "can't", "tag": "can_cant", "zh": "Momo 是一只猫。它不会看书。", "explain": "猫不会看书，用 can't。" },
+        { "id": "q2", "stem": "Fish ____ swim.", "options": ["can", "can't"], "answer": "can", "tag": "can_cant", "zh": "鱼会游泳。", "explain": "鱼会游泳，用 can。" },
+        { "id": "q3", "stem": "Snowy ____ open the door.", "options": ["can't", "doesn't can"], "answer": "can't", "tag": "modal_do", "zh": "Snowy 打不开门。", "explain": "“不能”直接说 can't，不借 doesn't。" }
+      ]
+    }
+  ]
+}

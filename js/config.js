@@ -1,5 +1,5 @@
 // Keep VERSION identical to VERSION in sw.js; bump both on every release (tests/run.mjs checks).
-export const VERSION = '0.5.1';
+export const VERSION = '0.6.0';
 
 export const API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
 
@@ -90,11 +90,15 @@ export const DEFAULT_SETTINGS = {
   chatModelPoe: 'gpt-5.4',
   // 语音输入 (v0.3.0, voice-input.js asrRoute): 'auto' = 豆包 when doubaoToken is filled, else Bailian (apiKey).
   // 豆包 old console: doubaoAppId + doubaoToken (Access Token); new console: the API Key in doubaoToken, no App ID.
-  // doubaoCluster is read as the resource id ('' = volc.bigasr.auc_turbo).
+  // doubaoCluster is the streaming resource id ('' = volc.seedasr.sauc.duration, 豆包流式语音识别 2.0, words appear as she
+  // speaks). A recording-file resource like volc.bigasr.auc_turbo is only used by the 极速版 fallback.
   asrProvider: 'auto',
   doubaoAppId: '',
   doubaoToken: '',
   doubaoCluster: '',
+  // 0.6.0 句子里回想 (modes/cloze.js inputOf): 'tiles' letter tiles (default), 'keys' the on-screen keyboard. CONTRACTS: the
+  // keyboard waits until the 体检页 says it is safe on her iPad
+  spellMode: 'tiles',
 };
 
 // Qwen TTS (SPEC 5.1): same Bailian key and host as the chat calls. The audio comes back as a 24 h link

@@ -29,6 +29,7 @@
 //     asked: ['there be：10-20 讲过，10-22 热身里再考做错了……'],      “我问过的”再考的结果（teacher.js askedLines，最多 4 条）
 //     focus: [{ title, unit, rule: [句], table?: { head, rows }, examples: [{ en, zh }] }] }
 //                                                                     这次问到的语法点对应的语法卡（规则原文，讲法以卡为准，最多 2 张）
+//     contrast: [{ title, zh, left: { head, note, examples: [{ en, zh }] }, right }]   0.6.0：她容易混的这一对（对比小卡，最多 1 张）
 //
 // 规则：中文弯引号，不用破折号，句子短。依赖：无。
 
@@ -196,6 +197,19 @@ export function buildSystemPrompt(ctx = {}) {
       }
       const ex = (Array.isArray(g.examples) ? g.examples : []).filter(e => e && clean(e.en)).slice(0, 3);
       if (ex.length) out.push('  例句：' + ex.map(e => clean(e.en) + (clean(e.zh) ? `（${clean(e.zh)}）` : '')).join(' '));
+    }
+  }
+  // 0.6.0 对比小卡: the pair she mixes up, side by side (chat.js contrastRefs)
+  const cmp = (Array.isArray(c.contrast) ? c.contrast : []).filter(x => x && x.title && x.zh && x.left && x.right).slice(0, 1);
+  if (cmp.length) {
+    out.push('');
+    out.push('【她容易混的这一对，App 里的对比小卡这样讲】讲这个区别时可以照着这张卡：先说那一句，再各给一个例子。');
+    for (const x of cmp) {
+      out.push(`- ${clean(x.title)}：${clean(x.zh)}`);
+      for (const sd of [x.left, x.right]) {
+        const ex = (Array.isArray(sd.examples) ? sd.examples : []).filter(e => e && clean(e.en)).slice(0, 2);
+        out.push(`  · ${clean(sd.head)}` + (clean(sd.note) ? `（${clean(sd.note)}）` : '') + (ex.length ? '：' + ex.map(e => clean(e.en) + (clean(e.zh) ? `（${clean(e.zh)}）` : '')).join(' ') : ''));
+      }
     }
   }
   const focusTitles = new Set(focus.map(g => clean(g.title)));

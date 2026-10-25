@@ -22,8 +22,8 @@
 // （没有的话这里按同样的值兜底，老数据照常读）：
 //   chatProvider 'auto' | 'bailian' | 'poe'：auto = 填了中转站地址和 Poe Key 就用 Poe，否则百炼（chatRouteOf）
 //   chatModelBailian（默认 'qwen3.8-max'）、chatModelPoe（默认 'gpt-5.4'）、poeUrl、poeKey（和查词的 Poe 共用）
-//   asrProvider 'auto' | 'bailian' | 'doubao'：auto = 填了豆包的 Access Token（新版控制台是 API Key）就用豆包，否则百炼（asrRouteOf）
-//   doubaoAppId（旧版控制台的 APP ID，新版空着）、doubaoToken、doubaoCluster（当资源 ID 用，默认 volc.bigasr.auc_turbo）
+//   asrProvider 'auto' | 'bailian' | 'doubao'：auto = 填了豆包的 Access Token 就用豆包（流式，边说边出字），否则百炼（asrRouteOf）
+//   doubaoAppId（火山引擎控制台的 APP ID）、doubaoToken、doubaoCluster（资源 ID，默认 volc.seedasr.sauc.duration，豆包流式 2.0）
 //   “从中转站读模型列表”：GET <poeUrl>/models（带 Poe Key），只留名字里带 gpt 的，版本号高的在前（gptModels）。
 // 开机问卷：题目在公开的 curriculum/intake.json（另一个 agent 写的，形状见文件里的 rules），回答存 kv 'parent.intake'
 //   { version: 1, at, updated, answers: { 题 id: 值 } }，写一项存一项，可以分几次填。题的 to 指向 progress.* 和
@@ -912,7 +912,7 @@ export function createParentView(ctx) {
 
   function asrProviderPanel(kit) {
     return () => [
-      h('p', { className: 'small', text: '自动：填了豆包的 Token 就用豆包，没填就用百炼（用上面的百炼 Key，约 1 分钱一分钟）。' }),
+      h('p', { className: 'small', text: '自动：填了豆包的 App ID 和 Access Token 就用豆包，边说边出字；没填就用百炼（用上面的百炼 Key，约 1 分钱一分钟）。豆包连不上时自动换百炼听写。' }),
       pillRow(ASR_PROVIDERS, asrRouteOf(ctx.settings()).want, k => save(ctx.saveSettings({ asrProvider: k }), '存好了').then(() => kit.render()), '语音输入用哪个'),
     ];
   }
@@ -921,13 +921,13 @@ export function createParentView(ctx) {
     const r = asrRouteOf(s);
     return kit.group('语音输入', [
       kit.row({ key: 'asr', label: '用哪个识别', sub: r.text, value: ASR_PROVIDERS.find(([k]) => k === r.want)[1], panel: asrProviderPanel(kit) }),
-      kit.row({ key: 'dbappid', label: '豆包 App ID', sub: '旧版控制台才有，新版空着', value: s.doubaoAppId || '还没填',
-        panel: fieldPanel(kit, { key: 'dbappid', field: 'doubaoAppId', placeholder: 'App ID', note: '火山引擎“豆包语音”控制台的 APP ID（旧版控制台）。新版控制台只有一个 API Key 的话，这里空着。' }) }),
-      kit.row({ key: 'dbtoken', label: '豆包 Access Token', sub: '新版控制台的 API Key 也填这里', value: secretValue(s.doubaoToken),
-        panel: fieldPanel(kit, { key: 'dbtoken', field: 'doubaoToken', secret: true, placeholder: 'Access Token 或 API Key', note: '旧版控制台：应用的 Access Token。新版控制台：API Key。只存在这台 iPad 里，不进备份文件。要先开通“录音文件识别大模型（极速版）”。' }) }),
+      kit.row({ key: 'dbappid', label: '豆包 App ID', sub: '火山引擎控制台的 APP ID', value: s.doubaoAppId || '还没填',
+        panel: fieldPanel(kit, { key: 'dbappid', field: 'doubaoAppId', placeholder: 'App ID', note: '火山引擎“豆包语音”控制台里应用的 APP ID。' }) }),
+      kit.row({ key: 'dbtoken', label: '豆包 Access Token', sub: '和 App ID 一起填', value: secretValue(s.doubaoToken),
+        panel: fieldPanel(kit, { key: 'dbtoken', field: 'doubaoToken', secret: true, placeholder: 'Access Token', note: '这个应用的 Access Token。只存在这台 iPad 里，不进备份文件。要先开通“豆包流式语音识别模型 2.0”。' }) }),
       kit.row({ key: 'dbcluster', label: '豆包资源 ID', sub: '一般不用改', value: s.doubaoCluster || DOUBAO_RESOURCE,
-        panel: fieldPanel(kit, { key: 'dbcluster', field: 'doubaoCluster', placeholder: DOUBAO_RESOURCE, fallback: DOUBAO_RESOURCE, note: `默认 ${DOUBAO_RESOURCE}（录音文件极速版）。控制台给的资源 ID 不一样时才改。` }) }),
-    ], '她在“问老师”里按住说话，松开后整段识别成文字，放进输入框，她看一眼再发。');
+        panel: fieldPanel(kit, { key: 'dbcluster', field: 'doubaoCluster', placeholder: DOUBAO_RESOURCE, fallback: DOUBAO_RESOURCE, note: `默认 ${DOUBAO_RESOURCE}（豆包流式语音识别 2.0，按时长计费）。控制台给的资源 ID 不一样时才改。` }) }),
+    ], '她在“问老师”里按住说话，用豆包时边说边出字，松开后文字留在输入框里，她看一眼再发。豆包连不上时自动换百炼整段听写。');
   }
 
   // ---------------------------------------------------------------- the page

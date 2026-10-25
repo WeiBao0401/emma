@@ -16,7 +16,8 @@
 //   QUIZ_SPELL = 10, QUIZ_GRAMMAR = 5
 //   DEFAULT_RANGE = { from: 'S', to: 'U3' }   只填了日期没填范围时
 //   MODE_SECONDS            每种卡大约几秒：mc4 / listen / card 15，tiles 25，grammar 25，order 45（连词成句，0.4.0）；
-//                           0.5.0：probe 25（地基探针）、screen 5（505 摸底一个词，算上核对）、verb 20（找动词）、transform 50
+//                           0.5.0：probe 25（地基探针）、screen 5（505 摸底一个词，算上核对）、verb 20（找动词）、transform 50；
+//                           0.6.0：cloze 30（句子里回想）、forms 45（变形配对一组）、contrast 60（对比小卡）、alt_intro 40（换个讲法那一屏）
 //   WRITE_MINUTES           “写几个词”几分钟：spell 2，grammar 3，phonics 3，order 3
 //   WRITE_ROTATION          [周日..周六] 的“写几个词”：一、二、六语法卡，三连词成句（0.4.0，原来是拼写），四语音小卡，日、五拼写
 //   TRANSFORM_DAYS、writeModeOf(dow, season)   0.5.0：句型转换占轮换里的星期六（平时）、星期四和星期六（期中季）；
@@ -73,7 +74,10 @@ export const QUIZ_GRAMMAR = 5;
 export const DEFAULT_RANGE = { from: 'S', to: 'U3' };
 export const MODE_SECONDS = { mc4: 15, listen: 15, card: 15, tiles: 25, keys: 25, grammar: 25, order: 45,
   // 0.5.0: 地基探针 (a grammar question), 505 摸底 (one tap a word, checks included), 找动词, 句型转换
-  probe: 25, screen: 5, verb: 20, transform: 50 };
+  probe: 25, screen: 5, verb: 20, transform: 50,
+  // 0.6.0: 句子里回想 (a spelling card in a sentence), 变形配对 (one group), 对比小卡 (one screen, 3 quick judgments), and the
+  // 换个讲法 screen before the first alt question of a card (counted on top of that question's 25)
+  cloze: 30, forms: 45, contrast: 60, alt_intro: 40 };
 export const WRITE_MINUTES = { spell: 2, grammar: 3, phonics: 3, order: 3, transform: 3 };
 export const WRITE_ROTATION = ['spell', 'grammar', 'grammar', 'order', 'phonics', 'spell', 'grammar'];   // 周日..周六
 // 0.5.0 句型转换 takes some days of the rotation without making it longer: Saturday (a grammar day) all year, and in the
@@ -465,10 +469,12 @@ export function quizPassage(state = {}, now = new Date()) {
 
 // ---------------------------------------------------------------- this week's gains
 
-const SPELL_MODES = new Set(['tiles', 'keys']);
+const SPELL_MODES = new Set(['tiles', 'keys', 'cloze']);
 const KNOW_MODES = new Set(['mc4', 'listen', 'card']);
 const slugOf = e => e.slug || (typeof e.item === 'string' && e.item.startsWith('w:') ? e.item.slice(2) : '');
-const wroteIt = e => e.correct === true && (e.type === 'spell' || e.type === 'dictation' || (e.type === 'answer' && SPELL_MODES.has(e.mode)));
+// 句子里回想: 提示 shows the sentence's Chinese and reads it aloud, so an answer after a hint is not a clean one (0.6.0)
+const wroteIt = e => e.correct === true && (e.type === 'spell' || e.type === 'dictation' || (e.type === 'answer' && SPELL_MODES.has(e.mode)
+  && !(e.mode === 'cloze' && e.hint_level > 0)));
 const knewIt = e => e.type === 'answer' && e.correct === true && e.first_try !== false && KNOW_MODES.has(e.mode);
 
 export function weeklyGains(events = [], now = new Date()) {

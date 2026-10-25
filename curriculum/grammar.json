@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "语法卡（DESIGN 5.4、5.5）：Claude 原创预写，Wei 过目。v1 的三张（代词、there be、名词所有格）；10-25 加了四张打地基的卡（be 动词、名词复数、一般现在时和三单、can，foundation: true）和一张下个单元的卡（Unit 4 频度副词，ahead: true，提前练）。order 是排课的先后（grammar.js nextCard）；fixes 是她选了就该先补这张地基卡的误解标签；label 是卡片上的小标签。例句和题目只用小学 505 词、课标另列的数词和星期、七上 Starter 到 Unit 3 的词，不含课文；usually 由频度副词卡教。names 是还没并进 prereq.json 的语法点名字。每题：answer 是正确选项，wrong 是干扰项和它的误解标签；hints 是四级提示（1 点出考点、2 给一个像的例子、3 给第一步、4 讲清楚）；variant 是第 4 级之后马上出的变式题；spares 是备用题，错过的题 1、3、7 天后从这里挑同类的新句子，热身里每天混 1-2 道也从这里出。kind：fill 填空（stem 里的 ____ 是空，cue 是括号里的提示），pick 选出正确的一项（ask 是题目要求）。",
+  "source": "语法卡（DESIGN 5.4、5.5）：Claude 原创预写，Wei 过目。v1 的三张（代词、there be、名词所有格）；10-25 加了四张打地基的卡（be 动词、名词复数、一般现在时和三单、can，foundation: true）和一张下个单元的卡（Unit 4 频度副词，ahead: true，提前练）。order 是排课的先后（grammar.js nextCard）；fixes 是她选了就该先补这张地基卡的误解标签；label 是卡片上的小标签。例句和题目只用小学 505 词、课标另列的数词和星期、七上 Starter 到 Unit 3 的词，不含课文；usually 由频度副词卡教。names 是还没并进 prereq.json 的语法点名字。每题：answer 是正确选项，wrong 是干扰项和它的误解标签；hints 是四级提示（1 点出考点、2 给一个像的例子、3 给第一步、4 讲清楚）；variant 是第 4 级之后马上出的变式题；spares 是备用题，错过的题 1、3、7 天后从这里挑同类的新句子，热身里每天混 1-2 道也从这里出。kind：fill 填空（stem 里的 ____ 是空，cue 是括号里的提示），pick 选出正确的一项（ask 是题目要求）。alt 是第二讲法（teacher-next 4.3）：换一个角度讲同一张卡（title、rule、pairs 配对或 steps 判断步骤、5 个新例句、3 道题 a01-a03，题的写法同上，没有变式题，第 4 级之后从同类备用题里挑一道当变式），同一张卡里同一个误解错 2 次以上、或第 4 级提示后变式还错，下一次就用它讲（grammar.js altDue）。",
   "tags": {
     "subj_vs_poss": { "zh": "主格和物主代词（I / my）", "kind": "grammar" },
     "be_agree": { "zh": "be 动词和主语不一致（I is / they is）", "kind": "grammar" },
@@ -21,7 +21,9 @@
     "can_who": { "zh": "Can I 和 Can you 用反了", "kind": "grammar" },
     "adv_meaning": { "zh": "频度副词的意思弄混（always / never）", "kind": "grammar" },
     "adv_position": { "zh": "频度副词放错位置（go often / always is）", "kind": "grammar" },
-    "how_often": { "zh": "How often 和 How many 弄混", "kind": "grammar" }
+    "how_often": { "zh": "How often 和 How many 弄混", "kind": "grammar" },
+    "a_an": { "zh": "a 和 an 用反了（a apple / an cat）", "kind": "grammar" },
+    "can_cant": { "zh": "can 和 can't 弄反了（会 / 不会）", "kind": "grammar" }
   },
   "names": {
     "g:can": "can（会、能、请求）"
@@ -69,6 +71,64 @@
         "gender": { "name": "his 和 her", "point": "g:possessive_pronoun" },
         "be": { "name": "be 动词", "point": "g:be" },
         "plural": { "name": "名词复数", "point": "g:plural" }
+      },
+      "alt": {
+        "title": "两步判断：是不是“谁的”？后面有没有名词？",
+        "rule": [
+          "第 1 步：先问自己，这里说的是不是“谁的”。",
+          "不是“谁的”：在句子开头用 I、he、she；在动词或 with 后面用 me、him、her。",
+          "是“谁的”，再走第 2 步：后面紧跟着名词吗？",
+          "有名词用 my、your、his、her、our、their（my cat）；没有名词用 mine、yours、his、hers、ours、theirs（It's mine.）。"
+        ],
+        "steps": [
+          { "ask": "说的是“谁的”吗？", "branches": [{ "if": "不是", "then": "开头用 I、he、she；动词后面用 me、him、her" }, { "if": "是", "then": "走第 2 步" }] },
+          { "ask": "后面紧跟着名词吗？", "branches": [{ "if": "有名词", "then": "my、your、his、her、our、their：my cat" }, { "if": "没有名词", "then": "mine、yours、his、hers、ours、theirs：It's mine." }] }
+        ],
+        "examples": [
+          { "en": "This is my cat. Her name is Momo.", "zh": "这是我的猫。它的名字叫 Momo。", "mark": ["my", "Her"] },
+          { "en": "The grey cat is mine. The white cat is hers.", "zh": "灰猫是我的。白猫是她的。", "mark": ["mine", "hers"] },
+          { "en": "Lucy is my friend. I like her very much.", "zh": "Lucy 是我的朋友。我很喜欢她。", "mark": ["my", "her"] },
+          { "en": "That is Tom's bike. The bike is his.", "zh": "那是 Tom 的自行车。这辆自行车是他的。", "mark": ["his"] },
+          { "en": "Snowy has no home. Can she live with us?", "zh": "Snowy 没有家。它能和我们住在一起吗？", "mark": ["she", "us"] }
+        ],
+        "questions": [
+          {
+            "id": "a01", "family": "adj", "kind": "fill",
+            "stem": "This is ____ cat. Her name is Momo.", "cue": "I",
+            "answer": "my", "wrong": { "I": "subj_vs_poss", "me": "obj_vs_poss", "mine": "poss_adj_vs_pron" },
+            "zh": "这是我的猫。它的名字叫 Momo。",
+            "hints": [
+              "第 1 步：这里说的是“谁的”猫吗？是，说的是“我的”猫。",
+              "第 2 步：后面紧跟着名词吗？空后面是 cat。像这样：This is your bag.",
+              "“我的”有 my 和 mine。后面有名词 cat，用哪一个？",
+              "答案是 my。是“谁的”，后面又有名词 cat，用 my；mine 后面不跟名词。"
+            ]
+          },
+          {
+            "id": "a02", "family": "pron", "kind": "fill",
+            "stem": "The grey cat is ____. The white cat is Lucy's.", "cue": "我的",
+            "answer": "mine", "wrong": { "my": "poss_adj_vs_pron", "me": "obj_vs_poss", "I": "subj_vs_poss" },
+            "zh": "灰猫是我的。白猫是 Lucy 的。",
+            "hints": [
+              "第 1 步：说的是“谁的”吗？是，“灰猫是我的”。",
+              "第 2 步：空后面还有名词吗？没有，这句到这里就完了。像这样：The bag is yours.",
+              "后面没有名词，用 my 还是 mine？",
+              "答案是 mine。是“谁的”，后面没有名词，用 mine；my 后面一定要跟名词。"
+            ]
+          },
+          {
+            "id": "a03", "family": "obj", "kind": "fill",
+            "stem": "Snowy is hungry. Mia gives ____ some milk.", "cue": "she",
+            "answer": "her", "wrong": { "she": "subj_obj", "hers": "obj_vs_poss", "him": "he_she" },
+            "zh": "Snowy 饿了。Mia 给它一些牛奶。",
+            "hints": [
+              "第 1 步：这里说的是“谁的”吗？不是，说的是“给谁”牛奶。",
+              "不是“谁的”，就看位置：空在动词 gives 后面。像这样：I like him.",
+              "Snowy 是“她”。“她”有 she 和 her，动词后面用哪一个？",
+              "答案是 her。不是“谁的”，又在动词 gives 后面，用宾格 her；she 只放在句子开头。"
+            ]
+          }
+        ]
       },
       "questions": [
         {
@@ -395,6 +455,64 @@
         "q": { "name": "there be 问句", "point": "g:there_be" },
         "howmany": { "name": "How many", "point": "g:how_many_much" }
       },
+      "alt": {
+        "title": "先问“哪里有”，再看紧跟着的第一个东西",
+        "rule": [
+          "先分清：说“哪里有什么”用 there be；说“谁有什么”用 have 或 has。",
+          "There 后面用 is 还是 are，就看紧跟在后面的第一个东西。",
+          "第一个东西是 a、an，或者 milk、water 这种不能数的，用 is；是 two、many、some 加复数，用 are。",
+          "问“有没有”，把 is、are 搬到 there 前面：Is there…? Are there…?"
+        ],
+        "steps": [
+          { "ask": "说的是“哪里有”还是“谁有”？", "branches": [{ "if": "哪里有", "then": "There is / There are：There is a cat in the box." }, { "if": "谁有", "then": "have / has：Mia has a cat." }] },
+          { "ask": "There 后面紧跟着的第一个东西是什么？", "branches": [{ "if": "a、an，或 milk、water", "then": "There is" }, { "if": "two、many、some 加复数", "then": "There are" }] }
+        ],
+        "examples": [
+          { "en": "There is a white cat under the tree.", "zh": "树下有一只白猫。", "mark": ["There is"] },
+          { "en": "There are two cats in Mia's room.", "zh": "Mia 的房间里有两只猫。", "mark": ["There are"] },
+          { "en": "There is some milk on the table.", "zh": "桌子上有一些牛奶。", "mark": ["There is"] },
+          { "en": "Grandma Li has a garden. There are many flowers in it.", "zh": "李奶奶有一个花园。花园里有很多花。", "mark": ["has", "There are"] },
+          { "en": "Is there a cat in the box? Yes, there is.", "zh": "盒子里有猫吗？有。", "mark": ["Is there"] }
+        ],
+        "questions": [
+          {
+            "id": "a01", "family": "is", "kind": "fill",
+            "stem": "There ____ a grey cat under the desk.",
+            "answer": "is", "wrong": { "are": "there_be_agree", "has": "there_have", "have": "there_have" },
+            "zh": "书桌下面有一只灰猫。",
+            "hints": [
+              "先问：说的是“哪里有”还是“谁有”？这里是“书桌下面有”。",
+              "再看紧跟在空后面的第一个东西：a grey cat。像这样：There is a white cat under the tree.",
+              "第一个东西前面是 a，一只猫。用 is 还是 are？",
+              "答案是 is。说“哪里有”用 there be；紧跟着的是 a grey cat，一只，用 is。"
+            ]
+          },
+          {
+            "id": "a02", "family": "are", "kind": "fill",
+            "stem": "There ____ some socks under Mia's bed.",
+            "answer": "are", "wrong": { "is": "there_be_agree", "has": "there_have", "have": "there_have" },
+            "zh": "Mia 的床底下有几只袜子。",
+            "hints": [
+              "先问：说的是“哪里有”还是“谁有”？这里是“床底下有”。",
+              "再看紧跟在空后面的第一个东西：some socks。像这样：There are two cats in Mia's room.",
+              "socks 加了 s，是好几只。用 is 还是 are？",
+              "答案是 are。紧跟着的是 some socks，好几只袜子，用 are；“哪里有”不用 has、have。"
+            ]
+          },
+          {
+            "id": "a03", "family": "have", "kind": "fill",
+            "stem": "Mia ____ a grey cat.",
+            "answer": "has", "wrong": { "there is": "there_have", "there are": "there_have" },
+            "zh": "Mia 有一只灰猫。",
+            "hints": [
+              "先问：说的是“哪里有”还是“谁有”？这句是“Mia 有”。",
+              "像这样：I have a cat. “谁有”用 have，前面放人。",
+              "“谁有”不用 there is、there are。剩下的是哪一个？",
+              "答案是 has。说“谁有”用 have 或 has；Mia 是一个人，用 has。"
+            ]
+          }
+        ]
+      },
       "questions": [
         {
           "id": "q01", "part": 1, "family": "is", "kind": "fill",
@@ -712,6 +830,64 @@
         "pron": { "name": "'s 和物主代词", "point": "g:possessive_pronoun" },
         "omit": { "name": "省掉后面的名词", "point": "g:possessive_s" },
         "be": { "name": "be 动词", "point": "g:be" }
+      },
+      "alt": {
+        "title": "贴标签：东西是谁的，就在谁后面贴 's",
+        "rule": [
+          "先找“谁”：东西是谁的？“Mia 的猫”，谁就是 Mia。",
+          "在“谁”后面贴上 's，再放东西：Mia's cat。",
+          "“谁”已经是 s 结尾的好几个人，只贴 '：the girls' room。",
+          "顺序和中文一样：谁 + 's + 东西，不倒过来说 the cat of Mia。"
+        ],
+        "pairs": [
+          { "left": "Mia 的猫", "right": "Mia's cat", "note": "一个人：贴 's" },
+          { "left": "李奶奶的牛奶", "right": "Grandma Li's milk", "note": "一个人：贴 's" },
+          { "left": "女孩们的房间", "right": "the girls' room", "note": "s 结尾的好几个人：只贴 '" }
+        ],
+        "examples": [
+          { "en": "Momo is Mia's cat.", "zh": "Momo 是 Mia 的猫。", "mark": ["Mia's"] },
+          { "en": "Snowy drinks Grandma Li's milk.", "zh": "Snowy 喝李奶奶的牛奶。", "mark": ["Grandma Li's"] },
+          { "en": "Tom's photos are very good.", "zh": "Tom 的照片拍得很好。", "mark": ["Tom's"] },
+          { "en": "The cats' food is in the box.", "zh": "猫咪们的猫粮在盒子里。", "mark": ["cats'"] },
+          { "en": "Is this Lucy's bag? No, it's Mia's.", "zh": "这是 Lucy 的书包吗？不，是 Mia 的。", "mark": ["Lucy's", "Mia's"] }
+        ],
+        "questions": [
+          {
+            "id": "a01", "family": "s", "kind": "fill",
+            "stem": "This is ____ sock.", "cue": "Mia",
+            "answer": "Mia's", "wrong": { "Mia": "poss_s_missing", "Mias": "poss_s_missing", "Mias'": "poss_plural" },
+            "zh": "这是 Mia 的袜子。",
+            "hints": [
+              "先找“谁”：袜子是谁的？是 Mia 的。",
+              "在“谁”后面贴 's，再放东西。像这样：Momo is Mia's cat.",
+              "Mia 是一个人，不是 s 结尾的好几个人。贴 's 还是只贴 '？",
+              "答案是 Mia's。东西是 Mia 的，在 Mia 后面贴 's：Mia's sock。"
+            ]
+          },
+          {
+            "id": "a02", "family": "plural", "kind": "fill",
+            "stem": "This is the ____ room.", "cue": "女孩们的",
+            "answer": "girls'", "wrong": { "girl's": "plural_missing", "girls's": "poss_plural", "girls": "poss_s_missing" },
+            "zh": "这是女孩们的房间。",
+            "hints": [
+              "先找“谁”：房间是谁的？是女孩们的，好几个女孩。",
+              "好几个女孩是 girls，已经有 s。像这样：the cats' food。",
+              "girls 已经是 s 结尾，还要再贴 's 吗？",
+              "答案是 girls'。girls 已经以 s 结尾，只贴 '；girl's 是“一个女孩的”。"
+            ]
+          },
+          {
+            "id": "a03", "family": "of", "kind": "pick", "ask": "“李奶奶的牛奶”英语怎么说？",
+            "answer": "Grandma Li's milk", "wrong": { "the milk of Grandma Li": "poss_of_overuse", "Grandma Li milk": "poss_s_missing", "Grandma Lis milk": "poss_s_missing" },
+            "zh": "李奶奶的牛奶",
+            "hints": [
+              "先找“谁”：牛奶是谁的？是李奶奶的。",
+              "顺序和中文一样：谁 + 's + 东西。像这样：Mia's cat。",
+              "说人的东西，不用倒过来的 of。哪一个在 Grandma Li 后面贴了 's？",
+              "答案是 Grandma Li's milk。谁 + 's + 东西，顺序和中文一样；不说 the milk of Grandma Li。"
+            ]
+          }
+        ]
       },
       "questions": [
         {
@@ -1032,6 +1208,64 @@
         "extra": { "name": "be 和 like 这类动词", "point": "g:be" },
         "neg": { "name": "be 的否定", "point": "g:be" },
         "q": { "name": "be 的问句和回答", "point": "g:be" }
+      },
+      "alt": {
+        "title": "找搭档：主语是谁，就找它的搭档",
+        "rule": [
+          "先找主语：句子开头说的是谁、是什么。",
+          "再给它找搭档：I 找 am；一个人或一样东西找 is；you 和两个以上找 are。",
+          "搭档不能丢：中文说“Momo 很小”，英语也要说 Momo is small。",
+          "主语后面已经有 like、love 这样的动词，就不用找搭档：I like cats。"
+        ],
+        "pairs": [
+          { "left": "I", "right": "am", "note": "I am Mia." },
+          { "left": "he、she、it，一个人或一样东西", "right": "is", "note": "Momo is grey." },
+          { "left": "you、we、they，两个以上", "right": "are", "note": "Mia and Lucy are friends." }
+        ],
+        "examples": [
+          { "en": "Momo is my cat. She is grey.", "zh": "Momo 是我的猫。它是灰色的。", "mark": ["is"] },
+          { "en": "I am Mia. I am in Class 3.", "zh": "我是 Mia。我在三班。", "mark": ["am"] },
+          { "en": "Mia and Lucy are good friends.", "zh": "Mia 和 Lucy 是好朋友。", "mark": ["are"] },
+          { "en": "The two cats are under the bed.", "zh": "两只猫在床底下。", "mark": ["are"] },
+          { "en": "Ms Wang is our teacher. She is very strict.", "zh": "王老师是我们的老师。她很严格。", "mark": ["is"] }
+        ],
+        "questions": [
+          {
+            "id": "a01", "family": "agree", "kind": "fill",
+            "stem": "Momo and Snowy ____ in the garden.",
+            "answer": "are", "wrong": { "is": "be_agree", "am": "be_agree" },
+            "zh": "Momo 和 Snowy 在花园里。",
+            "hints": [
+              "先找主语：空前面说的是 Momo and Snowy。",
+              "像这样：Mia and Lucy are good friends. 两个人一起，搭档是 are。",
+              "Momo 和 Snowy 是两只猫。两个以上找哪个搭档？",
+              "答案是 are。主语是两只猫，两个以上的搭档是 are。"
+            ]
+          },
+          {
+            "id": "a02", "family": "missing", "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "Snowy is very small.", "wrong": { "Snowy very small.": "be_missing", "Snowy are very small.": "be_agree" },
+            "zh": "Snowy 很小。",
+            "hints": [
+              "中文说“Snowy 很小”，没有“是”。英语里 small 前面要不要搭档？",
+              "像这样：Momo is grey. Momo 和 grey 中间有搭档 is。",
+              "先去掉没有搭档的那句。Snowy 是一只猫，找 is 还是 are？",
+              "答案是 Snowy is very small. small 前面不能丢搭档；Snowy 是一只猫，搭档是 is。"
+            ]
+          },
+          {
+            "id": "a03", "family": "extra", "kind": "fill",
+            "stem": "I ____ Momo very much.", "cue": "爱",
+            "answer": "love", "wrong": { "am love": "be_plus_verb", "is love": "be_plus_verb" },
+            "zh": "我非常爱 Momo。",
+            "hints": [
+              "括号里是“爱”，英语是动词 love。动词前面还要不要搭档？",
+              "像这样：I like cats. like 是动词，前面没有 am。",
+              "am 是给 small、happy、a student 这类词当搭档的。love 前面要加吗？",
+              "答案是 love。love 是动词，直接跟在 I 后面；不说 I am love。"
+            ]
+          }
+        ]
       },
       "questions": [
         {
@@ -1357,6 +1591,64 @@
         "num": { "name": "a 和 two 后面", "point": "g:plural" },
         "these": { "name": "these 和 those", "point": "g:plural" }
       },
+      "alt": {
+        "title": "先看前面的数，再看词的最后一个字母",
+        "rule": [
+          "先看名词前面：a、an、one、this 是一个，名词不变；two、three、many、these 是好几个，名词要变。",
+          "要变的时候看词的最后：s、x、ch、sh 加 es（boxes）；y 前面不是 a、e、i、o、u，变 ies（babies）；别的加 s（cats）。",
+          "几个要单独记：man 变 men，woman 变 women，child 变 children，mouse 变 mice。"
+        ],
+        "pairs": [
+          { "left": "a cat", "right": "two cats", "note": "一般加 s" },
+          { "left": "a box", "right": "three boxes", "note": "x 结尾加 es" },
+          { "left": "a baby", "right": "two babies", "note": "y 变 ies" },
+          { "left": "a child", "right": "many children", "note": "单独记" }
+        ],
+        "examples": [
+          { "en": "This cat is grey. These two cats are white.", "zh": "这只猫是灰色的。这两只猫是白色的。", "mark": ["cat", "cats"] },
+          { "en": "I have a watch. My father has two watches.", "zh": "我有一块手表。我爸爸有两块手表。", "mark": ["watch", "watches"] },
+          { "en": "The children give the cats some milk.", "zh": "孩子们给猫咪们一些牛奶。", "mark": ["children", "cats"] },
+          { "en": "Tom has three new books.", "zh": "Tom 有三本新书。", "mark": ["books"] },
+          { "en": "Two mice are in the garden. Momo can see them.", "zh": "花园里有两只老鼠。Momo 能看见它们。", "mark": ["mice"] }
+        ],
+        "questions": [
+          {
+            "id": "a01", "family": "s", "kind": "fill",
+            "stem": "Mia has three ____ in her schoolbag.", "cue": "pen",
+            "answer": "pens", "wrong": { "pen": "plural_missing", "penes": "plural_rule" },
+            "zh": "Mia 的书包里有三支钢笔。",
+            "hints": [
+              "先看名词前面的数：three，是好几个。pen 要变。",
+              "再看 pen 的最后一个字母 n，不是 s、x、ch、sh，也不是 y。像这样：cat 变 cats。",
+              "这种词一般加 s 还是加 es？",
+              "答案是 pens。前面是 three，要变复数；pen 最后是 n，直接加 s。"
+            ]
+          },
+          {
+            "id": "a02", "family": "es", "kind": "fill",
+            "stem": "There are two ____ under Mia's bed.", "cue": "box",
+            "answer": "boxes", "wrong": { "boxs": "plural_rule", "box": "plural_missing" },
+            "zh": "Mia 的床底下有两个盒子。",
+            "hints": [
+              "先看名词前面的数：two，是两个。box 要变。",
+              "再看 box 的最后一个字母：x。像这样：watch 变 watches。",
+              "s、x、ch、sh 结尾加 es。box 最后是 x，加 s 还是加 es？",
+              "答案是 boxes。前面是 two，要变复数；box 最后是 x，加 es。"
+            ]
+          },
+          {
+            "id": "a03", "family": "num", "kind": "pick", "ask": "“一只猫和两只老鼠”英语怎么说？",
+            "answer": "a cat and two mice", "wrong": { "a cats and two mice": "a_plural", "a cat and two mouses": "plural_irregular", "a cat and two mouse": "plural_missing" },
+            "zh": "一只猫和两只老鼠",
+            "hints": [
+              "先看每个名词前面的数：a 是一个，two 是两个。",
+              "a 后面不变，two 后面要变。像这样：a box and two boxes。",
+              "mouse 是要单独记的词。两只老鼠是 mouses 还是 mice？",
+              "答案是 a cat and two mice。a 后面用单数 cat；two 后面要变，mouse 单独记，变成 mice。"
+            ]
+          }
+        ]
+      },
       "questions": [
         {
           "id": "q01", "part": 1, "family": "s", "kind": "fill",
@@ -1675,6 +1967,65 @@
         "spell": { "name": "加 s 还是 es", "point": "g:third_s" },
         "neg": { "name": "don't 和 doesn't", "point": "g:do_does_q" },
         "q": { "name": "Do 和 Does 问句", "point": "g:do_does_q" }
+      },
+      "alt": {
+        "title": "s 只有一个：要么在动词上，要么在 does 上",
+        "rule": [
+          "主语是一个人或一只猫（he、she、it、Mia、Momo），动词带一个 s：Momo sleeps。",
+          "主语是 I、you、we、they 或两个以上，动词不带 s：I sleep. The cats sleep.",
+          "否定和问句里，s 跑到 does 上：Momo doesn't sleep. Does Momo sleep? 动词就不再带 s。",
+          "一句话里只要一个 s：不说 Does Momo sleeps。"
+        ],
+        "pairs": [
+          { "left": "Momo", "right": "sleeps", "note": "Momo sleeps on Mia's bed." },
+          { "left": "Does Momo", "right": "sleep", "note": "Does Momo sleep on Mia's bed?" },
+          { "left": "Momo doesn't", "right": "sleep", "note": "Momo doesn't sleep at night." }
+        ],
+        "examples": [
+          { "en": "Momo sleeps on Mia's bed.", "zh": "Momo 睡在 Mia 的床上。", "mark": ["sleeps"] },
+          { "en": "Snowy likes milk, but she doesn't like water.", "zh": "Snowy 喜欢牛奶，可是不喜欢水。", "mark": ["likes", "doesn't like"] },
+          { "en": "Does Lucy have a cat? No, she doesn't.", "zh": "Lucy 有猫吗？没有。", "mark": ["Does", "have", "doesn't"] },
+          { "en": "Mia and Lucy walk to school every day.", "zh": "Mia 和 Lucy 每天走路上学。", "mark": ["walk"] },
+          { "en": "Grandma Li gives Snowy milk every day.", "zh": "李奶奶每天给 Snowy 牛奶。", "mark": ["gives"] }
+        ],
+        "questions": [
+          {
+            "id": "a01", "family": "s", "kind": "fill",
+            "stem": "Momo ____ in a box every afternoon.", "cue": "sleep",
+            "answer": "sleeps", "wrong": { "sleep": "third_s_missing", "is sleep": "be_plus_verb" },
+            "zh": "Momo 每天下午都在盒子里睡觉。",
+            "hints": [
+              "先找主语：Momo，一只猫。",
+              "一只猫，动词带一个 s。像这样：Snowy likes milk.",
+              "这句里有没有 does？没有。那 s 放在哪里？",
+              "答案是 sleeps。主语 Momo 是一只猫，句子里没有 does，s 就在动词上：sleeps。"
+            ]
+          },
+          {
+            "id": "a02", "family": "base", "kind": "fill",
+            "stem": "Does Snowy ____ fish?", "cue": "eat",
+            "answer": "eat", "wrong": { "eats": "does_verb_s", "eates": "third_s_spelling" },
+            "zh": "Snowy 吃鱼吗？",
+            "hints": [
+              "这是问句，开头已经有 Does。",
+              "s 跑到 does 上了。像这样：Does Momo sleep? sleep 没带 s。",
+              "一句话里只要一个 s。Does 已经带了 s，eat 还要带吗？",
+              "答案是 eat。Does 已经拿走了 s，后面的动词回到原样 eat。"
+            ]
+          },
+          {
+            "id": "a03", "family": "neg", "kind": "fill",
+            "stem": "Momo ____ like water.",
+            "answer": "doesn't", "wrong": { "don't": "do_does", "isn't": "be_do_mix" },
+            "zh": "Momo 不喜欢水。",
+            "hints": [
+              "这句是“不喜欢”，like 是动词，否定要借 do 或 does。",
+              "像这样：Momo doesn't sleep at night. 一只猫，借 doesn't。",
+              "主语 Momo 是一只猫，s 要放在 does 上。用 don't 还是 doesn't？",
+              "答案是 doesn't。主语 Momo 是一只猫，s 跑到 doesn't 上，like 回到原样。"
+            ]
+          }
+        ]
       },
       "questions": [
         {
@@ -1999,6 +2350,64 @@
         "q": { "name": "Can 问句和回答", "point": "g:can" },
         "ask": { "name": "Can I 和 Can you", "point": "g:can" }
       },
+      "alt": {
+        "title": "can 是个帮手：它不变，后面的动词也不变",
+        "rule": [
+          "can 像一个帮手，站在动词前面：can + 动词原样。",
+          "帮手不变：谁来都是 can，不说 cans；动词也不变，不加 s，不加 to。",
+          "说“不会、不能”，帮手加上 n't：can't swim。",
+          "问“会不会”，帮手跑到最前面：Can Momo swim? 回答也用它：No, she can't."
+        ],
+        "pairs": [
+          { "left": "会、能", "right": "can + 动词原样", "note": "Momo can jump." },
+          { "left": "不会、不能", "right": "can't + 动词原样", "note": "Momo can't swim." },
+          { "left": "问", "right": "Can 放到最前面", "note": "Can Snowy jump?" }
+        ],
+        "examples": [
+          { "en": "Momo can jump very high.", "zh": "Momo 能跳得很高。", "mark": ["can jump"] },
+          { "en": "Snowy can't open the door.", "zh": "Snowy 打不开门。", "mark": ["can't open"] },
+          { "en": "Can Lucy come to my home? Yes, she can.", "zh": "Lucy 能来我家吗？能。", "mark": ["Can", "can"] },
+          { "en": "Mia can put Snowy's photos online.", "zh": "Mia 能把 Snowy 的照片放到网上。", "mark": ["can put"] },
+          { "en": "Grandma Li can't keep Snowy.", "zh": "李奶奶不能养 Snowy。", "mark": ["can't keep"] }
+        ],
+        "questions": [
+          {
+            "id": "a01", "family": "base", "kind": "fill",
+            "stem": "Snowy can ____ very fast.", "cue": "run",
+            "answer": "run", "wrong": { "runs": "modal_s", "to run": "modal_to" },
+            "zh": "Snowy 能跑得很快。",
+            "hints": [
+              "空前面是帮手 can。帮手后面的动词是什么样子？",
+              "像这样：Momo can jump very high. jump 没加 s，也没加 to。",
+              "主语 Snowy 是一只猫，run 要不要加 s？要不要加 to？",
+              "答案是 run。can 后面的动词保持原样：不加 s，不加 to。"
+            ]
+          },
+          {
+            "id": "a02", "family": "neg", "kind": "fill",
+            "stem": "Momo ____ swim. She doesn't like water.",
+            "answer": "can't", "wrong": { "doesn't can": "modal_do", "not can": "not_order" },
+            "zh": "Momo 不会游泳。它不喜欢水。",
+            "hints": [
+              "这句是“不会游泳”。“不会”要用帮手 can 来说。",
+              "像这样：Snowy can't open the door. 帮手加上 n't。",
+              "can 自己就能变否定，不用借 doesn't。not 放在 can 前面对吗？",
+              "答案是 can't。“不会”就是帮手 can 加 n't；不借 doesn't，也不说 not can。"
+            ]
+          },
+          {
+            "id": "a03", "family": "q", "kind": "pick", "ask": "选出正确的问句。",
+            "answer": "Can Snowy jump high?", "wrong": { "Does Snowy can jump high?": "modal_do", "Can Snowy jumps high?": "modal_s", "Snowy can jump high?": "q_order" },
+            "zh": "Snowy 能跳得高吗？",
+            "hints": [
+              "问“会不会”，帮手 can 要放在哪里？",
+              "像这样：Can Lucy come to my home? Can 在最前面。",
+              "有了 Can 就不用再借 Does。Can 后面的 jump 要不要加 s？",
+              "答案是 Can Snowy jump high? 帮手 Can 跑到最前面，jump 保持原样，不借 does。"
+            ]
+          }
+        ]
+      },
       "questions": [
         {
           "id": "q01", "part": 1, "family": "base", "kind": "fill",
@@ -2315,6 +2724,66 @@
         "be": { "name": "放在 be 动词后面", "point": "g:freq_adverb" },
         "s": { "name": "频度副词和三单", "point": "g:third_s" },
         "howoften": { "name": "How often", "point": "g:freq_adverb" }
+      },
+      "alt": {
+        "title": "爬梯子：从“每次都”到“一次也没有”",
+        "rule": [
+          "把这几个词排成一架梯子，从上往下越来越少：always、usually、often、sometimes、seldom、never。",
+          "最上面 always 是每次都，最下面 never 是一次也没有，sometimes 在中间。",
+          "站位口诀：站在动词前面（Momo always sleeps），站在 am、is、are 后面（Momo is always hungry）。"
+        ],
+        "pairs": [
+          { "left": "always", "right": "总是，每次都" },
+          { "left": "usually", "right": "通常" },
+          { "left": "often", "right": "经常" },
+          { "left": "sometimes", "right": "有时" },
+          { "left": "seldom", "right": "很少" },
+          { "left": "never", "right": "从不，一次也没有" }
+        ],
+        "examples": [
+          { "en": "Momo always sleeps on Mia's bed.", "zh": "Momo 总是睡在 Mia 的床上。", "mark": ["always"] },
+          { "en": "Mia is always happy with Momo.", "zh": "Mia 和 Momo 在一起总是很开心。", "mark": ["is always"] },
+          { "en": "Tom often takes photos after school.", "zh": "Tom 放学后经常拍照。", "mark": ["often"] },
+          { "en": "Lucy sometimes walks to school with Mia.", "zh": "Lucy 有时和 Mia 一起走路上学。", "mark": ["sometimes"] },
+          { "en": "Ms Wang is never late.", "zh": "王老师从不迟到。", "mark": ["is never"] }
+        ],
+        "questions": [
+          {
+            "id": "a01", "family": "meaning", "kind": "fill",
+            "stem": "Tom takes photos every day. He ____ takes photos.",
+            "answer": "always", "wrong": { "never": "adv_meaning", "seldom": "adv_meaning" },
+            "zh": "Tom 每天都拍照。他总是在拍照。",
+            "hints": [
+              "前一句说 every day，每天都拍。在梯子上是哪一层？",
+              "像这样：Momo always sleeps on Mia's bed. 每次都这样，用 always。",
+              "每天都拍，是梯子最上面那一层，还是最下面那一层？",
+              "答案是 always。每天都拍是“每次都”，在梯子最上面：always；never 是一次也没有。"
+            ]
+          },
+          {
+            "id": "a02", "family": "be", "kind": "pick", "ask": "选出正确的句子。",
+            "answer": "Snowy is usually hungry.", "wrong": { "Snowy usually is hungry.": "adv_position", "Snowy usually hungry.": "be_missing" },
+            "zh": "Snowy 通常很饿。",
+            "hints": [
+              "这句有 is。看 usually 站在 is 的前面还是后面。",
+              "站位口诀：站在 am、is、are 后面。像这样：Ms Wang is never late.",
+              "先去掉没有 is 的那句。剩下两句，usually 在 is 后面的是哪一句？",
+              "答案是 Snowy is usually hungry. 有 is 的时候，usually 站在 is 后面；“很饿”也要有 is。"
+            ]
+          },
+          {
+            "id": "a03", "family": "verb", "kind": "fill",
+            "stem": "Mia and Lucy ____ to school together.",
+            "answer": "often walk", "wrong": { "walk often": "adv_position", "often walks": "third_s_extra" },
+            "zh": "Mia 和 Lucy 经常一起走路上学。",
+            "hints": [
+              "空里是两个词：often 和 walk。看谁站在前面。",
+              "站位口诀：站在动词前面。像这样：Tom often takes photos after school.",
+              "often 站在 walk 前面还是后面？主语是两个人，walk 加不加 s？",
+              "答案是 often walk。often 站在动词 walk 前面；主语是两个人，walk 不加 s。"
+            ]
+          }
+        ]
       },
       "questions": [
         {

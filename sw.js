@@ -2,7 +2,7 @@
 // Keep VERSION identical to VERSION in js/config.js and bump both on every release, or the iPad keeps the old files.
 // Same origin as Wei's dictionary (its own scope and caches): every cache here starts with "emma-" and only "emma-" caches are ever
 // deleted, so neither app touches the other's. The check page (check/) has its own worker and "emma-check-" caches.
-const VERSION = '0.5.1';
+const VERSION = '0.6.0';
 const CACHE = 'emma-' + VERSION;
 // The offline dictionary (data/, about 4.6 MB, 2 MB gzipped) changes rarely, so it lives in its own cache that
 // survives app updates and is only downloaded when missing. Bump DATA_VERSION whenever a file in data/ changes.
@@ -24,13 +24,17 @@ const SHELL = [
   'js/reader.js', 'js/ui-reader.js', 'js/modes/order.js',
   // 0.5.0: 课文陪读, 老师的笔记本 and 每周想一次, 地基探针 and 505 摸底 (ui-lesson / ui-chat / ui-parent import() them)
   'js/textread.js', 'js/ui-textread.js', 'js/teacher.js', 'js/ui-teacher.js', 'js/screen.js', 'js/ui-screen.js', 'js/modes/verb.js',
+  // 0.6.0: 句子里回想 and 变形配对 (ui-lesson import()s them), 豆包流式 (voice-input imports voice-stream; the worklet is
+  // loaded by URL because the CSP blocks blob: workers)
+  'js/modes/cloze.js', 'js/modes/forms.js', 'js/voice-stream.js', 'js/pcm-tap-worklet.js',
   'css/home.css', 'css/lesson.css', 'css/dictation.css', 'css/choice.css', 'css/parent.css', 'css/onboard.css',
   'css/spell.css', 'css/grammar.css', 'css/phonics.css', 'css/weekly.css', 'css/capture.css', 'css/chat.css', 'css/reader.css', 'css/order.css',
-  'css/textread.css', 'css/teacher.css', 'css/screen.css', 'css/verb.css',
+  'css/textread.css', 'css/teacher.css', 'css/screen.css', 'css/verb.css', 'css/cloze.css',
   'curriculum/standard-words.json', 'curriculum/prereq.json', 'curriculum/tags.json', 'curriculum/lines.json',
   'curriculum/questions.json', 'curriculum/intake.json', 'curriculum/kebiao.json', 'curriculum/grammar.json', 'curriculum/phonics.json',
   'curriculum/stories.json', 'curriculum/order.json',
   'curriculum/exam-reading.json', 'curriculum/probes.json', 'curriculum/transform.json',
+  'curriculum/forms.json', 'curriculum/contrast.json',
   'data/dict.txt', 'data/lemma.txt', 'data/ECDICT-LICENSE.txt',
 ];
 const isData = u => u.startsWith('data/');

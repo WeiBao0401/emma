@@ -74,6 +74,17 @@
 //     readTune?,          { hard: 'words' | 'sentences' | 'find' | 'ok' | '', main: 'word' | 'sentence' | 'method' | '' }：她最近自己说的
 //                         “今天哪里最难”（两天以内）和读的求助分诊最多的一类（reader.js triageSummary），用来调上面两样的量
 //     examPassages?, examReading?   sprint.js quizPassage：小卷里的期中阅读小篇
+//     // 0.6.0 加的（都可以不给；第 4 批，design/teacher-next.md 4.3、5）
+//     clozeReady?,        modes/cloze.js clozeReady：能出“句子里回想”的词 [slug]（必会词、找得到句子）。热身单词卡里挑 2 到 3 张
+//                         （期中季 3 张，轻松版 1 张、期中季 2 张）换成 mode 'cloze'：不挑新词、第一张、读前见一面和问过的词；
+//                         期中季先挑复习提纲重点词，别的日子先挑开了“写得出”线的、复习次数多的。第一节课、小卷日、考前一天不出
+//     formsItem?,         modes/forms.js formsItems：今天这组变形配对 { kind: 'match' | 'mc4', items: [pair id] } | null。每天 1 组，
+//                         放在找动词后面、连词成句前面；第一节课、小卷日、考前一天、轻松版不放
+//     contrastItems?,     grammar.js contrastItems：她这几天犯得多的误解对应的对比小卡（ContrastItem），每天最多 1 张，放在语法题后面；
+//                         第一节课、小卷日、考前一天、轻松版不放
+//     picked?,            modes/cloze.js pickedSlugs：她自己点过、问过的词 [slug]（阅读里点开的、问老师里出现的课本词）。像 boost
+//                         一样在同一档里排前面（家长说的错词在它前面），不跨档、不超封顶；没到期的也补进热身，最多 2 个（轻松版 1 个），
+//                         今天复习过的、新词不补；第一节课、小卷日、考前一天不补
 //     // 也认任务稿里的写法：{ entries, curriculum, settings, history, now }：entries 自动过 wordsForPlan，
 //     // settings.newPerDay 当 newPerDay，history 是事件数组（session_end）或 { lessonDays }，now 覆盖第二个参数
 //   }
@@ -122,6 +133,11 @@
 //         { type: 'verb', id, item: id, mode: 'verb' }（摸底后面）。read 格在小卷日放期中阅读小篇：status 'ready'、mode 'passage'、
 //         passageId、note '期中阅读'。write 格多 mode 'transform'（句型转换，items 是 3 个句子 id）。
 //         Plan 多 tune: [{ id: 'screen' | 'verb', why }]（这节课按她说的和读的求助多调了哪样，家长区看）
+//     0.6.0：warmup 另有 cloze: [slug]（换成句子里回想的词）、forms: [{ kind, items }]（0-1 组）、contrast: [ContrastItem]（0-1 张）、
+//         picked: [slug]（热身里她自己点过、问过的词）；cards 里单词卡多 mode 'cloze'，多
+//         { type: 'contrast', id, item: 'gc:<id>', mode: 'contrast', title, tags }（和语法题、探针一起铺开，排在它们后面）、
+//         { type: 'forms', id: 'forms', item: 'forms', mode: 'forms', kind, items }（找动词后面、连词成句前面）。
+//         counts 多 cloze、forms、contrast、picked；spell 算上 cloze。语法题里 intro 为真的换个讲法题多算 40 秒（那一屏）
 //
 // 出卡规则（DESIGN 5.1）
 //   1. 封顶：上学日 20 张，周末 30 张，轻松版 12 张，第一节课 15 张，小卷日 5 张。
@@ -176,6 +192,10 @@ export const PROBE_WARM = { standard: 2, light: 1 };
 export const SCREEN_WARM = { standard: 12, season: 6, words: 15, tight: 6 };
 export const VERB_WARM = { standard: 1, sentences: 2 };
 export const ASKED_WORDS = { standard: 2, light: 1 };
+// 0.6.0 热身里的新东西（design/teacher-next.md 4.3、5）
+export const CLOZE_WARM = { standard: 2, season: 3, light: 1, lightSeason: 2 };
+export const PICKED_WORDS = { standard: 2, light: 1 };
+export const CONTRAST_WARM = 1;
 
 export const isWeekend = d => d.getDay() === 0 || d.getDay() === 6;
 
@@ -295,9 +315,12 @@ export function planToday(state = {}, now = new Date()) {
     return 4;
   };
   const sub = w => (isKey(w) ? 0 : w.write ? 1 : 2);        // inside the top band: key words, then the write line, then the rest
-  // words the parent named as recent mistakes (intake.js review.slugs): first inside their own band, never across bands
+  // words the parent named as recent mistakes (intake.js review.slugs): first inside their own band, never across bands;
+  // 0.6.0: then the words she tapped or asked about herself (modes/cloze.js pickedSlugs), the same way
   const boostSet = new Set(Array.isArray(state.boost) ? state.boost : []);
-  const boosted = w => (boostSet.has(w.slug) ? 0 : 1);
+  const pickedList = Array.isArray(state.picked) ? state.picked.filter(Boolean) : [];
+  const pickedSet = new Set(pickedList);
+  const boosted = w => (boostSet.has(w.slug) ? 0 : pickedSet.has(w.slug) ? 1 : 2);
   const dueNow = w => !w.due || new Date(w.due) <= eod;
   const reviewedToday = w => !!w.last && dayOf(new Date(w.last)) === today;
   const yesterday = dayOf(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
@@ -362,6 +385,9 @@ export function planToday(state = {}, now = new Date()) {
   }
   const readTargets = new Set(Array.isArray(state.readTargets) ? state.readTargets : []);
   const askedWords = new Set(Array.isArray(state.askedWords) ? state.askedWords : []);
+  const clozeOk = new Set(Array.isArray(state.clozeReady) ? state.clozeReady : []);
+  const formsSpec = state.formsItem && typeof state.formsItem === 'object' && Array.isArray(state.formsItem.items) && state.formsItem.items.length
+    ? { kind: state.formsItem.kind === 'mc4' ? 'mc4' : 'match', items: state.formsItem.items.slice() } : null;
   // what she said was hardest lately, and where reading got stuck most (reader.js triageSummary): more of the matching help
   const tune = state.readTune && typeof state.readTune === 'object' ? state.readTune : {};
   const tuneWords = tune.hard === 'words' || tune.main === 'word';
@@ -412,9 +438,11 @@ export function planToday(state = {}, now = new Date()) {
     // words that must be in the warm-up (this episode's targets, words 问老师 explained): room first, then in place of the
     // last review cards (lowest band, surest), never the first card, a new word or another word that must be there
     const keepSet = new Set();
-    const bring = (set, max) => {
+    const bring = (set, max, { order = null, skipNew = false } = {}) => {
       const inWarm = new Set(cards.map(w => w.slug));
-      const add = words.filter(w => w && set.has(w.slug) && !inWarm.has(w.slug) && !reviewedToday(w) && !future(w)).slice(0, max);
+      let cand = words.filter(w => w && set.has(w.slug) && !inWarm.has(w.slug) && !reviewedToday(w) && !future(w) && !(skipNew && w.isNew));
+      if (order) { const at = new Map(order.map((x, i) => [x, i])); cand = cand.sort((a, b) => at.get(a.slug) - at.get(b.slug)); }
+      const add = cand.slice(0, max);
       for (const w of cards) if (set.has(w.slug)) keepSet.add(w.slug);
       for (const w of add) keepSet.add(w.slug);
       if (!add.length) return;
@@ -435,6 +463,8 @@ export function planToday(state = {}, now = new Date()) {
       bring(askedWords, isLight ? ASKED_WORDS.light : ASKED_WORDS.standard);
       asked = cards.filter(w => askedWords.has(w.slug)).map(w => w.slug);
     }
+    // 0.6.0: the words she tapped or asked about herself come in even when not due (her own order: stuck most days first)
+    if (!noExtras && pickedSet.size && cards.length) bring(pickedSet, isLight ? PICKED_WORDS.light : PICKED_WORDS.standard, { order: pickedList, skipNew: true });
 
     // ---- what kind of card each one is (DESIGN 2.2, 5.1)
     const spellDay = !isLight && !first && !quizDay && WRITE_ROTATION[now.getDay()] === 'spell';
@@ -451,6 +481,17 @@ export function planToday(state = {}, now = new Date()) {
     if (season && spellDay && write.mode !== 'spell') am = assignModes(cards, { first, tilesMax: SPELL_PER_DAY, eligible });
     cards = am.cards;
     const modes = am.modes;
+    // ---- 0.6.0 句子里回想 (modes/cloze.js): a few of the word cards are spelled inside a sentence she has read. Not the
+    // first card, a new word, a target word before the story or a word 问老师 explained; the exam season takes the outline's
+    // key words first, other days the words on the 写得出 line (a tiles card before a four-choice one), then the most reviewed
+    const clozeMax = !clozeOk.size || !tilesMax ? 0
+      : isLight ? (season ? CLOZE_WARM.lightSeason : CLOZE_WARM.light) : season ? CLOZE_WARM.season : CLOZE_WARM.standard;
+    if (clozeMax) {
+      const score = (w, i) => (season ? (isKey(w) ? 0 : 4) : 0) + (w.write ? 0 : 2) + (modes[i] === 'tiles' ? 0 : 1);
+      cards.map((w, i) => ({ w, i })).filter(({ w, i }) => i > 0 && !w.isNew && clozeOk.has(w.slug) && !preSet.has(w.slug))
+        .sort((a, b) => score(a.w, a.i) - score(b.w, b.i) || (b.w.reps || 0) - (a.w.reps || 0) || a.i - b.i)
+        .slice(0, clozeMax).forEach(({ i }) => { modes[i] = 'cloze'; });
+    }
 
     // ---- grammar in the warm-up: 1-2 a day; the quiz day brings its 5
     const gN = first || examEve || quizDay || !cards.length ? 0 : isLight ? GRAMMAR_WARM.light : GRAMMAR_WARM.standard;
@@ -467,51 +508,69 @@ export function planToday(state = {}, now = new Date()) {
     const screenMax = season ? SCREEN_WARM.season : tuneWords ? SCREEN_WARM.words : SCREEN_WARM.standard;
     let screen = noExtras || isLight || examDay || !Array.isArray(state.screenItems) ? [] : state.screenItems.filter(Boolean).slice(0, screenMax);
     let verb = noExtras || isLight || !Array.isArray(state.verbItems) ? [] : state.verbItems.filter(Boolean).slice(0, tuneSentences ? VERB_WARM.sentences : VERB_WARM.standard);
+    // ---- 0.6.0: one 变形配对 group, one 对比小卡 (the misconception she hit most lately); neither on a light lesson
+    let forms = noExtras || isLight || !formsSpec ? [] : [formsSpec];
+    let contrast = noExtras || isLight || !Array.isArray(state.contrastItems) ? []
+      : state.contrastItems.filter(x => x && x.id).slice(0, CONTRAST_WARM);
 
     // ---- keep to time (DESIGN 2.3): on a story day some recognition cards wait for tomorrow first; then the 连词成句 extra
     // goes, then tiles back to multiple choice, then fewer grammar questions. A school day with the story is about 13-15 minutes.
     const limit = read.status === 'ready' && !isLight && !weekend ? LIMITS.withRead : limitFor(isLight);
     const warmSec = () => modes.reduce((a, m) => a + secOf(m), 0) + grammar.length * secOf('grammar') + order.length * secOf('order')
-      + probe.length * secOf('probe') + screen.length * secOf('screen') + verb.length * secOf('verb');
+      + probe.length * secOf('probe') + screen.length * secOf('screen') + verb.length * secOf('verb')
+      + forms.length * secOf('forms') + contrast.length * secOf('contrast')
+      + grammar.filter(g => g && g.intro).length * secOf('alt_intro');
     const total = () => minOf(warmSec()) + (read.status === 'ready' ? read.minutes : 0) + (write.status === 'ready' ? write.minutes : 0) + WRAP_MINUTES;
     // a story day: recognition cards from the end of the list (lowest band, put off to tomorrow) go first, before the
     // 连词成句 sentence and before the spelling, so the key words are still written and one sentence is still ordered;
-    // never below WARM_MIN cards, never the first card, a new word or a target word
+    // never below WARM_MIN cards, never the first card, a new word, a target word, a word 问老师 explained or one she picked
     let trimmed = 0;
     if (read.status === 'ready') {
       const preSet2 = new Set(preteach);
       for (let i = cards.length - 1; i > 0 && total() > limit && cards.length > WARM_MIN; i--) {
-        if (modes[i] === 'tiles' || cards[i].isNew || preSet2.has(cards[i].slug) || asked.includes(cards[i].slug)) continue;
+        if (modes[i] === 'tiles' || modes[i] === 'cloze' || cards[i].isNew || preSet2.has(cards[i].slug) || asked.includes(cards[i].slug) || pickedSet.has(cards[i].slug)) continue;
         cards.splice(i, 1); modes.splice(i, 1); trimmed++;
       }
     }
     if (total() > limit) order = [];
     // 0.5.0: then fewer 摸底 words (none in the exam season, where spelling the key words matters more), tiles back to
     // multiple choice, one grammar question besides the probes, no 摸底, one probe, no grammar, no 找动词, no probe
+    // 0.6.0 adds, in this fixed order: after the tiles, 句子里回想 down to one card; the 对比小卡 counts like a probe (one
+    // grammar question is enough beside it); after the second probe, no 变形配对, then no 对比小卡, then no 句子里回想,
+    // all before the last grammar question goes (变形配对 helps her read saw / children, so it stays longer than the 摸底)
     if (total() > limit && screen.length > SCREEN_WARM.tight) screen = screen.slice(0, SCREEN_WARM.tight);
     if (total() > limit && season) screen = [];
     while (total() > limit && modes.includes('tiles')) modes[modes.lastIndexOf('tiles')] = 'mc4';
+    while (total() > limit && modes.filter(x => x === 'cloze').length > 1) modes[modes.lastIndexOf('cloze')] = 'mc4';
     // the probes are grammar questions too: with them in, one grammar question is enough (the first one stays: 我问过的)
-    if (total() > limit && probe.length && grammar.length > 1 && !quizDay) grammar = grammar.slice(0, 1);
+    if (total() > limit && (probe.length || contrast.length) && grammar.length > 1 && !quizDay) grammar = grammar.slice(0, 1);
     if (total() > limit) screen = [];
     if (total() > limit && probe.length > 1) probe = probe.slice(0, 1);
+    if (total() > limit) forms = [];
+    if (total() > limit) contrast = [];
+    while (total() > limit && modes.includes('cloze')) modes[modes.lastIndexOf('cloze')] = 'mc4';
     while (total() > limit && grammar.length && !quizDay) grammar = grammar.slice(0, -1);
     if (total() > limit) verb = [];
     if (total() > limit) probe = [];
 
     const wcards = cards.map((w, i) => ({ type: 'word', slug: w.slug, mode: modes[i] }));
     // grammar questions and probes spread through the word cards together (probes after the grammar ones)
-    const gp = [...grammar.map(g => ({ type: 'grammar', id: g.id || g.item, item: g.item || g.id, point: g.point || null, card: g.card || null, mode: 'grammar' })),
-      ...probe.map(x => ({ type: 'probe', id: x.id, item: x.item, block: x.block || null, point: x.point || null, card: x.card || null, mode: 'grammar' }))];
+    const gp = [...grammar.map(g => ({ type: 'grammar', id: g.id || g.item, item: g.item || g.id, point: g.point || null, card: g.card || null, mode: 'grammar',
+      ...(g.kind === 'alt' ? { kind: 'alt' } : {}), ...(g.intro ? { intro: true } : {}) })),
+      ...probe.map(x => ({ type: 'probe', id: x.id, item: x.item, block: x.block || null, point: x.point || null, card: x.card || null, mode: 'grammar' })),
+      ...contrast.map(x => ({ type: 'contrast', id: x.id, item: x.item || 'gc:' + x.id, title: x.title || '', tags: Array.isArray(x.tags) ? x.tags.slice() : [], mode: 'contrast' }))];
     const at = grammarSlots(cards.length, gp.length);
     for (let i = gp.length - 1; i >= 0; i--) wcards.splice(at[i], 0, gp[i]);
     for (const x of screen) wcards.push({ type: 'screen', id: x.id });
     for (const id of verb) wcards.push({ type: 'verb', id, item: id, mode: 'verb' });
+    for (const f of forms) wcards.push({ type: 'forms', id: 'forms', item: 'forms', mode: 'forms', kind: f.kind, items: f.items.slice() });
     for (const id of order) wcards.push({ type: 'order', id, item: 'o:' + id, mode: 'order' });
     const tuned = [];
     if (tuneWords && screen.length > SCREEN_WARM.standard) tuned.push({ id: 'screen', why: `${tune.hard === 'words' ? '她说生词太多' : '读的时候多卡在词上'}：今天多认几个小学词（${screen.length} 个）。` });
     if (tuneSentences && verb.length > VERB_WARM.standard) tuned.push({ id: 'verb', why: `${tune.hard === 'sentences' ? '她说句子看不懂' : '读的时候多卡在句子上'}：今天多找一句的动词。` });
-    return { cards, modes, grammar, order, preteach, asked, probe, screen, verb, tuned, wcards, write, read, pick, pulled, quizDay, R, I, Fp, trimmed, warmMin: minOf(warmSec()) };
+    const cloze = cards.filter((w, i) => modes[i] === 'cloze').map(w => w.slug);
+    const picked = cards.filter(w => pickedSet.has(w.slug)).map(w => w.slug);
+    return { cards, modes, grammar, order, preteach, asked, probe, screen, verb, forms, contrast, cloze, picked, tuned, wcards, write, read, pick, pulled, quizDay, R, I, Fp, trimmed, warmMin: minOf(warmSec()) };
   }
 
   const m = build(light);
@@ -528,7 +587,7 @@ export function planToday(state = {}, now = new Date()) {
   const r = m.read;
   const readExtra = { mode: r.mode || 'story', note: r.note || '' };
   for (const k of ['episodeId', 'passageId', 'n', 'of', 'title', 'titleZh', 'short', 'again', 'resume']) if (r[k] !== undefined) readExtra[k] = r[k];
-  const extras = m.probe.length + m.screen.length + m.verb.length;
+  const extras = m.probe.length + m.screen.length + m.verb.length + m.forms.length + m.contrast.length;
   const cells = [
     cell('warmup', items.length || m.grammar.length || extras ? 'ready' : 'skip', m.warmMin, items, {
       mode: 'mc4',
@@ -541,6 +600,10 @@ export function planToday(state = {}, now = new Date()) {
       screen: m.screen,
       verb: m.verb,
       asked: m.asked,
+      cloze: m.cloze,
+      forms: m.forms,
+      contrast: m.contrast,
+      picked: m.picked,
     }),
     cell('read', r.status, r.minutes, [], readExtra),
     cell('write', w.status, w.minutes, w.items, writeExtra),
@@ -561,7 +624,7 @@ export function planToday(state = {}, now = new Date()) {
     : (lessonDays || []).filter(d => d >= mondayOf(now) && d <= today).length;
   const newIn = m.cards.filter(x => x.isNew).length;
   const gains = state.gains || (Array.isArray(state.history) ? weeklyGains(state.history, now) : null);
-  const spellN = m.modes.filter(x => x === 'tiles').length + (w.status === 'ready' && w.mode === 'spell' ? w.items.length : 0);
+  const spellN = m.modes.filter(x => x === 'tiles' || x === 'cloze').length + (w.status === 'ready' && w.mode === 'spell' ? w.items.length : 0);
   return {
     date: today,
     light,
@@ -588,6 +651,10 @@ export function planToday(state = {}, now = new Date()) {
       screen: m.screen.length,
       verb: m.verb.length,
       asked: m.asked.length,
+      cloze: m.cloze.length,
+      forms: m.forms.length,
+      contrast: m.contrast.length,
+      picked: m.picked.length,
     },
     tune: m.tuned,
     kind: light ? 'easy' : weekend ? 'weekend' : 'standard',

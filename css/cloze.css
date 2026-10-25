@@ -1,0 +1,111 @@
+/* 句子里回想（modes/cloze.js，类名 cloze-）和变形配对（modes/forms.js，类名 forms-）. Owner: 单词从认得到会用（第 4 批）.
+   Colours only from index.html :root. iPad: one column up to 720px, tiles and chips at least 64px high. The sentence is
+   big serif text with one blank in it; the meaning sits in brackets right after the blank. Quiet feedback: a colour and one line. */
+
+/* ---------------------------------------------------------------- 句子里回想 */
+.cloze{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:24px 0 48px}
+.cloze-q{display:flex;flex-direction:column;gap:10px}
+.cloze-title{color:var(--muted)}
+.cloze-line{font:500 30px/1.6 var(--serif);color:var(--ink);overflow-wrap:anywhere}
+.cloze-blank{display:inline-flex;align-items:baseline;min-width:5.2em;padding:0 4px 2px;margin:0 2px;border-bottom:2px solid var(--accent);
+  color:var(--accent);font-weight:600;white-space:nowrap}
+.cloze-given{color:var(--ink)}
+.cloze-fill{color:var(--accent)}
+.cloze-blank.right,.cloze-blank.right .cloze-given,.cloze-blank.right .cloze-fill{border-bottom-color:var(--good);color:var(--good)}
+.cloze-blank.reveal,.cloze-blank.reveal .cloze-given,.cloze-blank.reveal .cloze-fill{border-bottom-color:var(--good);color:var(--good)}
+.cloze-cue{font:500 20px/1.4 var(--sans);color:var(--muted);margin:0 2px}
+.cloze-ask{color:var(--muted)}
+.cloze-zh{display:flex;align-items:center;gap:10px;font:18px/1.55 var(--sans);color:var(--ink);padding:8px 12px;background:var(--tag-bg);border-radius:8px}
+.cloze-zh .say{width:40px;height:40px;flex:none}
+.cloze-zh .say .icon{width:22px;height:22px}
+
+/* tiles: her word on one line of slots, the bank under it (same look as 字母块拼写) */
+.cloze-answer{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:84px;padding:10px 0 14px;border-bottom:1px solid var(--rule-strong)}
+.cloze-slot{display:inline-block;min-width:56px;height:64px;border-radius:10px;border:1px dashed var(--rule-strong);opacity:.6}
+.cloze-syllable .cloze-slot{min-width:84px}
+.cloze-bank{display:flex;flex-wrap:wrap;gap:12px}
+.cloze-tile{display:inline-flex;align-items:center;justify-content:center;min-width:64px;min-height:64px;padding:0 16px;
+  font:500 30px/1 var(--serif);color:var(--ink);background:var(--paper);border:1px solid var(--rule-strong);border-radius:10px;
+  -webkit-user-select:none;user-select:none;touch-action:manipulation;
+  transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease),opacity .15s var(--ease)}
+.cloze-syllable .cloze-tile{min-width:84px;padding:0 20px}
+.cloze-tile:active:not(:disabled){background:var(--tag-bg)}
+.cloze-tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cloze-bank .cloze-tile.used{visibility:hidden}
+.cloze-bank .cloze-tile:disabled{cursor:default}
+.cloze-placed{background:color-mix(in srgb,var(--accent) 7%,var(--paper));border-color:var(--accent)}
+.cloze-placed:disabled{opacity:1}
+.cloze-fixed{color:var(--muted);border-style:dashed;background:var(--paper)}
+.cloze-placed.right,.cloze-placed.reveal{border-color:var(--good);color:var(--good);font-weight:650;background:var(--tag-bg);box-shadow:inset 0 0 0 1px var(--good)}
+.cloze-placed.wrong{border-color:var(--danger);color:var(--danger);background:var(--paper)}
+.cloze.is-right .cloze-answer,.cloze.is-revealed .cloze-answer{border-bottom-color:var(--good)}
+.cloze.is-right .cloze-bank .cloze-tile,.cloze.is-revealed .cloze-bank .cloze-tile{opacity:.35}
+
+/* keyboard: the given letter, then a wide box she types the rest into */
+.cloze-keys{display:flex;align-items:center;gap:10px;padding:8px 0 14px;border-bottom:1px solid var(--rule-strong)}
+.cloze-keys-given{font:600 32px/1 var(--serif);color:var(--ink);min-width:28px;text-align:right}
+.cloze-input{flex:1;min-width:0;min-height:64px;padding:0 14px;font:500 30px/1 var(--serif);color:var(--ink);background:var(--paper);
+  border:1px solid var(--rule-strong);border-radius:10px;-webkit-appearance:none;appearance:none}
+.cloze-input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.cloze-input:disabled{color:var(--good);border-color:var(--good);opacity:1}
+.cloze-keys .btn{flex:none;min-width:112px}
+
+.cloze-hint{border-left:2px solid var(--accent);padding:2px 0 2px 14px;font:18px/1.55 var(--sans);color:var(--ink)}
+.cloze-feedback{min-height:1.5em;font:17px/1.55 var(--sans);color:var(--ink)}
+.cloze.is-right .cloze-feedback{color:var(--good);font-weight:600}
+.cloze-actions{display:flex;align-items:center;gap:18px;min-height:var(--btn-h)}
+.cloze-actions .btn{margin-left:auto;min-width:140px}
+
+/* ---------------------------------------------------------------- 变形配对 */
+.forms{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:24px 0 40px}
+.forms-title,.forms-how{color:var(--muted)}
+.forms-ask{font:600 22px/1.45 var(--sans);color:var(--ink)}
+.forms-big{font:600 44px/1.2 var(--serif);color:var(--ink)}
+
+/* 连线: two columns, the words she started from on the left, the changed ones on the right */
+.forms-board{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;padding:6px 0 12px;border-bottom:1px solid var(--rule)}
+.forms-col{display:flex;flex-direction:column;gap:12px}
+.forms-chip{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;min-height:72px;padding:8px 16px;text-align:left;
+  background:var(--paper);border:1px solid var(--rule-strong);border-radius:10px;color:var(--ink);
+  -webkit-user-select:none;user-select:none;touch-action:manipulation;transition:background-color .15s var(--ease),border-color .15s var(--ease)}
+.forms-chip .forms-w{font:500 28px/1.15 var(--serif)}
+.forms-chip .forms-zh{font:15px/1.3 var(--sans);color:var(--muted)}
+.forms-chip:active:not(:disabled){background:var(--tag-bg)}
+.forms-chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.forms-chip.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--paper))}
+.forms-chip.wrong{border-color:var(--danger)}
+.forms-chip.wrong .forms-w{color:var(--danger)}
+.forms-chip.right,.forms-chip.reveal{border-color:var(--good);background:var(--tag-bg);opacity:1}
+.forms-chip.right .forms-w,.forms-chip.reveal .forms-w{color:var(--good);font-weight:600}
+.forms-chip:disabled{cursor:default}
+.forms-tag{display:inline-block;font:600 14px/1.3 var(--sans);color:var(--accent);padding:1px 8px;border-radius:999px;background:var(--tag-bg);margin-left:8px;vertical-align:2px}
+.forms-chip .forms-tag{margin-left:0}
+
+/* 四选一: four big words, two by two on an iPad */
+.forms-options{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:600px){.forms-options{grid-template-columns:1fr 1fr;gap:14px}}
+.forms-opt{min-height:76px;padding:0 18px;font:500 30px/1 var(--serif);color:var(--ink);background:var(--paper);border:1px solid var(--rule-strong);
+  border-radius:10px;touch-action:manipulation;transition:background-color .15s var(--ease),border-color .15s var(--ease)}
+.forms-opt:active:not(:disabled){background:var(--tag-bg)}
+.forms-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.forms-opt.wrong{color:var(--danger);border-color:var(--danger);text-decoration:line-through}
+.forms-opt.right,.forms-opt.reveal{color:var(--good);border-color:var(--good);background:var(--tag-bg);font-weight:600}
+.forms-opt:disabled{cursor:default;opacity:1}
+
+.forms-hint{font:500 18px/1.55 var(--sans);color:var(--ink);padding-left:12px;border-left:3px solid var(--marker)}
+.forms-feedback{min-height:1.5em;font:600 18px/1.5 var(--sans);color:var(--good)}
+.forms-review,.forms-more{display:flex;flex-direction:column;gap:14px}
+.forms-row{display:flex;flex-direction:column;gap:4px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.forms-pair{font:600 24px/1.3 var(--serif);color:var(--ink)}
+.forms-rule{font:17px/1.55 var(--sans);color:var(--ink)}
+.forms-ex{display:flex;align-items:center;gap:8px;font:20px/1.45 var(--serif);color:var(--ink)}
+.forms-ex .say{width:40px;height:40px;flex:none}
+.forms-ex .say .icon{width:22px;height:22px}
+.forms-ex-zh{color:var(--muted)}
+
+@media (max-width:600px){
+  .cloze-line{font-size:26px}
+  .forms-chip .forms-w,.forms-opt{font-size:24px}
+  .forms-big{font-size:36px}
+}
+@media (prefers-reduced-motion:reduce){.cloze-tile,.forms-chip,.forms-opt{transition:none}}

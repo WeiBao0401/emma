@@ -19,6 +19,10 @@
 //          写几个词多 'transform' 句型转换（modes/order.js renderTransforms）。小卷日读一段格是期中阅读小篇（mode 'passage'，
 //          ui-reader.js renderPassage，只做题、原文一直开着；做完写 kv 'exam.reading'）。开课后在后台调 teacher.js maybeThinkWeek
 //          （每周第一次开课时想上一周），收尾调 syncAsked（对账“我问过的”），讲过又错了的点给一行“老师想换个讲法再说一遍”。
+//   0.6.0（第 4 批）：热身的单词卡多一种 mode 'cloze' 句子里回想（modes/cloze.js clozeMode，找不到句子退回字母块、四选一、闪卡；
+//          设置 spellMode 'keys' 用键盘），算“写对了”；热身格的 forms（变形配对，modes/forms.js renderForms，找动词后面、连词成句前面）
+//          和 contrast（对比小卡，ui-grammar.js renderContrast，和语法题一起铺开、排在最后）。语法卡的换个讲法（kind 'alt'、intro）
+//          由 renderGrammarItem 自己画。
 //   收尾   老师夸一句（lines 'praise'，填今天写对的一个具体的词，带 spelled；没写对的就填认出的），
 //          “今天写对了 N 个”加最多 3 个词（DESIGN 2.2），再见用 'close'，期中季用 'exam'（没有就退回 'close'）。
 //          轻松版开头老师先说一句 'easy' 场景的话。考前一天加一句“今天早点睡。”
@@ -81,6 +85,8 @@ const round2 = x => Math.round(x * 100) / 100;
 const GUESS = { mc4: 0.25, listen: 0.25 };
 // 没有记录的语法题：0.5 加上蒙对的那一份（四个选项 0.63，三个 0.67）。GRAMMAR_PRIOR 是不知道几个选项时的值
 const GRAMMAR_PRIOR = 0.63;
+// 对比小卡 (0.6.0): each quick judgment has two options, 0.5 + 0.25
+const CONTRAST_PRIOR = 0.75;
 // 0.5 plus the share she could guess: 3 options 0.67, 4 options 0.63
 export const grammarPrior = q => round2(0.5 + 0.5 / Math.max(2, (q && q.options && q.options.length) || 4));
 
@@ -102,6 +108,9 @@ export const V1_MODULES = {
   screenUI: './ui-screen.js',
   verb: './modes/verb.js',
   teacher: './teacher.js',
+  // 0.6.0: 句子里回想 and 变形配对 (单词从认得到会用)
+  cloze: './modes/cloze.js',
+  forms: './modes/forms.js',
 };
 // loadV1() -> Promise<{ listen, spell, grammar, grammarUI, phonics, sprint }>; a module that is missing or throws is null.
 // The browser's import is cached for the page's life; tests pass their own importer and get a fresh load.
@@ -127,9 +136,12 @@ const modeOf = (mod, ...names) => {
 };
 const listenModeOf = mods => modeOf(mods && mods.listen, 'listenMode', 'mode');
 const spellModeOf = mods => modeOf(mods && mods.spell, 'spellMode', 'tilesMode', 'mode');
+const clozeModeOf = mods => modeOf(mods && mods.cloze, 'clozeMode');
 const fnOf = (mod, ...names) => { if (!mod) return null; for (const n of names) if (typeof mod[n] === 'function') return mod[n]; return null; };
 // the events name of what a mode drew: spellMode says modeId 'spell' / eventMode 'tiles', or 'mc4' when it fell back
-const EVENT_MODE = { spell: 'tiles', tiles: 'tiles', listen: 'listen', mc4: 'mc4', card: 'card', keys: 'keys' };
+const EVENT_MODE = { spell: 'tiles', tiles: 'tiles', listen: 'listen', mc4: 'mc4', card: 'card', keys: 'keys', cloze: 'cloze' };
+// the modes that count as writing the word (the praise's “spelled”, the review's line 'write')
+const WRITE_MODES = new Set(['tiles', 'cloze']);
 export function eventModeOf(v, asked) {
   const id = v && (v.eventMode && v.modeId !== 'mc4' ? v.eventMode : v.modeId);
   return EVENT_MODE[id] || EVENT_MODE[asked] || 'mc4';
@@ -162,7 +174,7 @@ export function praisePick(results, spelled = new Map()) {
   return { slug, spelled: !!s, heard: !s && rec.mode === 'listen', firstTry: true, hard: Number.isFinite(rec.p) && rec.p < 0.5 };
 }
 
-const MODE_ALIAS = { mc4: 'mc4', choice: 'mc4', listen: 'listen', tiles: 'tiles', tile: 'tiles', spell: 'tiles', card: 'card', flashcard: 'card' };
+const MODE_ALIAS = { mc4: 'mc4', choice: 'mc4', listen: 'listen', tiles: 'tiles', tile: 'tiles', spell: 'tiles', card: 'card', flashcard: 'card', cloze: 'cloze' };
 export function cardModeOf(cell, slug, i = -1) {
   if (!cell) return 'mc4';
   let m = null;
@@ -275,9 +287,14 @@ export function readKind(cell, mods = {}) {
   return fnOf(mods.reader, 'renderEpisode') ? 'story' : null;
 }
 // the warm-up's 0.5.0 extras the plan put in: probes, 505 words, 找动词 sentences, the words 问老师 explained
+// 0.6.0: the 变形配对 group ({ kind, items }) and the 对比小卡 (ContrastItem), from cell.forms / cell.contrast or the cards
 export function warmExtras(cell) {
   const list = k => (cell && Array.isArray(cell[k]) ? cell[k].filter(Boolean) : []);
-  return { probe: list('probe'), screen: list('screen'), verb: list('verb').filter(x => typeof x === 'string'), asked: list('asked') };
+  const cards = t => (cell && Array.isArray(cell.cards) ? cell.cards.filter(c => c && c.type === t) : []);
+  const forms = (list('forms').length ? list('forms') : cards('forms')).filter(f => Array.isArray(f.items) && f.items.length)
+    .map(f => ({ kind: f.kind === 'mc4' ? 'mc4' : 'match', items: f.items.slice() })).slice(0, 1);
+  const contrast = (list('contrast').length ? list('contrast') : cards('contrast')).filter(x => x && x.id).slice(0, 1);
+  return { probe: list('probe'), screen: list('screen'), verb: list('verb').filter(x => typeof x === 'string'), asked: list('asked'), forms, contrast };
 }
 // the 连词成句 sentence the plan put at the end of the warm-up (cell.order, or { type: 'order' } cards)
 export function orderRefs(cell) {
@@ -476,6 +493,8 @@ export function createLessonView(ctx) {
   let verbRight = 0;        // 找动词 sentences found first time (0.5.0)
   let sQueue = [];          // the warm-up's 505 words, one batch after the word cards (0.5.0)
   let vQueue = [];          // 找动词 sentence ids, after the 505 words (0.5.0)
+  let fQueue = [];          // the 变形配对 group, after 找动词 (0.6.0): [{ kind, items }]
+  let formsRight = 0;       // 变形配对 pairs matched first time (0.6.0)
   let askedSet = new Set(); // word slugs 问老师 explained, in today's warm-up (0.5.0)
   let examCache = null;     // reader.js loadPassages, once per page
   let wq = null;            // 写几个词 spelling / quiz: { queue: [{ kind, slug | q }], retried: Set, done, total }
@@ -603,6 +622,8 @@ export function createLessonView(ctx) {
     orderRight = 0;
     transformRight = 0;
     verbRight = 0;
+    formsRight = 0;
+    fQueue = [];
     wq = null;
     writeK = '';
     view = null;
@@ -692,6 +713,8 @@ export function createLessonView(ctx) {
     list = list.filter(x => !seen.has(x.item) && seen.add(x.item));
     // 0.5.0: the foundation probes spread through the round with the grammar questions (after them)
     if (fnOf(mods.screenUI, 'renderProbe')) for (const p of warmExtras(cell).probe) if (p && p.item && !seen.has(p.item)) { seen.add(p.item); list.push({ probe: p, item: p.item }); }
+    // 0.6.0: the 对比小卡 after them all
+    if (fnOf(mods.grammarUI, 'renderContrast')) for (const x of warmExtras(cell).contrast) { const item = x.item || 'gc:' + x.id; if (!seen.has(item)) { seen.add(item); list.push({ contrast: x, item }); } }
     const at = grammarSlots(nCards, list.length);
     return list.map((x, i) => ({ ...x, at: at[i] }));
   }
@@ -708,8 +731,9 @@ export function createLessonView(ctx) {
     const ex = warmExtras(ready ? warm : null);
     sQueue = fnOf(mods.screenUI, 'renderScreen') ? ex.screen : [];
     vQueue = fnOf(mods.verb, 'renderVerb') ? ex.verb : [];
+    fQueue = fnOf(mods.forms, 'renderForms') ? ex.forms : [];
     askedSet = new Set(ex.asked);
-    if (!queue.length && !gQueue.length && !oQueue.length && !sQueue.length && !vQueue.length) { afterWarmup(); return; }
+    if (!queue.length && !gQueue.length && !oQueue.length && !sQueue.length && !vQueue.length && !fQueue.length) { afterWarmup(); return; }
     pool = buildPool(queue);
     session = queue.length ? createSession({
       queue,
@@ -737,10 +761,11 @@ export function createLessonView(ctx) {
     const s = session;
     const slug = s && s.current();
     const doneN = s ? s.done : 0;
-    if (gQueue.length && (!slug || doneN >= gQueue[0].at)) { if (gQueue[0].probe) drawProbe(gQueue[0]); else drawGrammar(gQueue[0]); return; }
-    // after the words and the grammar: the 505 words in one batch, then 找动词, then the one 连词成句 sentence
+    if (gQueue.length && (!slug || doneN >= gQueue[0].at)) { if (gQueue[0].probe) drawProbe(gQueue[0]); else if (gQueue[0].contrast) drawContrast(gQueue[0]); else drawGrammar(gQueue[0]); return; }
+    // after the words and the grammar: the 505 words in one batch, then 找动词, then 变形配对, then the one 连词成句 sentence
     if (!slug && sQueue.length) { drawScreen(sQueue.splice(0)); return; }
     if (!slug && vQueue.length) { drawVerb(vQueue.splice(0)); return; }
+    if (!slug && fQueue.length) { drawForms(fQueue.splice(0, 1)[0]); return; }
     if (!slug && oQueue.length) { drawOrder(oQueue.splice(0, 1), 'warmup'); return; }
     if (!slug) { endWarmup(); return; }
     drawWord(slug);
@@ -748,7 +773,7 @@ export function createLessonView(ctx) {
 
   // one word card in the mode the plan asked for, falling back to an easier one when it cannot be made
   function renderWord(e, want, base) {
-    const tries = want === 'tiles' ? ['tiles', 'mc4', 'card'] : want === 'listen' ? ['listen', 'mc4', 'card'] : want === 'card' ? ['card'] : ['mc4', 'card'];
+    const tries = want === 'cloze' ? ['cloze', 'tiles', 'mc4', 'card'] : want === 'tiles' ? ['tiles', 'mc4', 'card'] : want === 'listen' ? ['listen', 'mc4', 'card'] : want === 'card' ? ['card'] : ['mc4', 'card'];
     for (const m of tries) {
       let v = null;
       try {
@@ -758,7 +783,7 @@ export function createLessonView(ctx) {
             isTall: () => document.documentElement.scrollHeight > window.innerHeight + 4,
             busy: () => !!(session && session.busy) });
         } else {
-          const mode = m === 'mc4' ? Choice.choiceMode : m === 'listen' ? listenModeOf(mods) : spellModeOf(mods);
+          const mode = m === 'mc4' ? Choice.choiceMode : m === 'listen' ? listenModeOf(mods) : m === 'cloze' ? clozeModeOf(mods) : spellModeOf(mods);
           if (!mode) continue;
           v = mode.render(e, base);
         }
@@ -800,7 +825,8 @@ export function createLessonView(ctx) {
       cur.answered = true;
       wrongStreak = ev.correct ? 0 : wrongStreak + 1;
       if (stepNow === 'warmup' && !results.has(ev.slug)) results.set(ev.slug, { first: !!ev.correct, p: cur.p, mode: cur.mode });
-      if (cur.mode === 'tiles' && !spelled.has(ev.slug)) spelled.set(ev.slug, { first: !!ev.correct && ev.first_try !== false, p: cur.p });
+      // 句子里回想: an answer after 提示 (the sentence's Chinese was shown and read aloud) is not a clean first try
+      if (WRITE_MODES.has(cur.mode) && !spelled.has(ev.slug)) spelled.set(ev.slug, { first: !!ev.correct && ev.first_try !== false && !(ev.hint_level > 0), p: cur.p });
     }
   }
 
@@ -822,13 +848,13 @@ export function createLessonView(ctx) {
       c.answered = true;
       wrongStreak = g >= 2 ? 0 : wrongStreak + 1;
       if (!results.has(c.slug)) results.set(c.slug, { first: g >= 3, p: c.p, mode: c.mode });
-      if (c.mode === 'tiles' && !spelled.has(c.slug)) spelled.set(c.slug, { first: g >= 3, p: c.p });
+      if (WRITE_MODES.has(c.mode) && !spelled.has(c.slug)) spelled.set(c.slug, { first: g >= 3, p: c.p });
     }
     lastGrade = g;
     let r = null;
     try { r = await s.rate(g, { modeId: c.mode }); } catch (err) { toast('这一下没记上，再点一次。'); return; }
     if (!r) return;
-    log({ type: 'review', step: 'warmup', slug: c.slug, rating: g, line: c.mode === 'tiles' ? 'write' : 'recognize', p_fsrs: c.pf, mode: c.mode });
+    log({ type: 'review', step: 'warmup', slug: c.slug, rating: g, line: WRITE_MODES.has(c.mode) ? 'write' : 'recognize', p_fsrs: c.pf, mode: c.mode });
     if (session !== s) return;
     drawWarm();
   }
@@ -919,6 +945,57 @@ export function createLessonView(ctx) {
     } catch (err) { console.warn('lesson: verb:', (err && err.message) || err); done(null); }
   }
 
+  // ---- 0.6.0: 变形配对 (modes/forms.js): one group, 连线 or 四选一. Each pair's answers get a predict from watchCtx (0.5)
+  function drawForms(spec) {
+    const fn = fnOf(mods.forms, 'renderForms');
+    const box = h('article', { className: 'lesson-module lesson-module-forms' });
+    cur = { kind: 'forms', item: 'forms', mode: 'forms', t: Date.now(), answered: false };
+    view = null;
+    paint(LABELS.warmup, 'warmup', box);
+    let finished = false;
+    const done = res => {
+      if (finished) return;
+      finished = true;
+      cur = null;
+      for (const r of (res && res.results) || []) {
+        const item = r.item || ('f:' + r.id);
+        if (!gResults.has(item)) gResults.set(item, { first: !!r.clean });
+        if (r.clean) formsRight++;
+        wrongStreak = r.clean ? 0 : wrongStreak + 1;
+      }
+      if (step === 'warmup') drawWarm();
+    };
+    if (!fn || !spec) { done(null); return; }
+    try {
+      const r = fn(box, watchCtx('warmup'), { items: { kind: spec.kind, items: spec.items }, sid, step: 'warmup', onDone: done });
+      if (r && typeof r.onKey === 'function') view = { onKey: r.onKey, stop: r.stop };
+      if (!r) done(null);
+    } catch (err) { console.warn('lesson: forms:', (err && err.message) || err); done(null); }
+  }
+
+  // ---- 0.6.0: 对比小卡 (ui-grammar.js renderContrast): one screen, two columns, 3 quick judgments (answers 'gc:<id>:<q>')
+  function drawContrast(g) {
+    const fn = fnOf(mods.grammarUI, 'renderContrast');
+    const item = g.item;
+    cur = { kind: 'grammar', item, mode: 'grammar', p: CONTRAST_PRIOR, t: Date.now(), answered: false, g };
+    if (!fn) { afterGrammar(g, null); return; }
+    const box = h('article', { className: 'lesson-gq-box lesson-contrast-box' });
+    let v = null;
+    const onDone = res => {
+      for (const r of (res && res.results) || []) {
+        const k = r.item || (item + ':' + r.qid);
+        if (!gResults.has(k)) gResults.set(k, { first: !!r.correct });
+        wrongStreak = r.correct ? 0 : wrongStreak + 1;
+      }
+      afterGrammar(g, res);
+    };
+    try { v = fn(box, watchCtx('warmup'), { item: g.contrast, sid, step: 'warmup', onDone }); }
+    catch (err) { console.warn('lesson: contrast:', (err && err.message) || err); v = null; }
+    if (!v) { afterGrammar(g, null); return; }
+    view = v;
+    paint(LABELS.warmup, 'warmup', box);
+  }
+
   // first answer per grammar item: for the wrap's count and the wrong streak
   function noteGrammar(ev) {
     const item = ev && ev.item;
@@ -939,7 +1016,9 @@ export function createLessonView(ctx) {
             if (!announced.has(ev.item)) {
               announced.add(ev.item);
               // 连词成句, 句型转换 and 找动词 cannot be guessed (0.5); a reading question has four options (0.63, like grammar)
-              const p = ev.mode === 'order' || ev.mode === 'transform' || ev.mode === 'verb' ? 0.5 : GRAMMAR_PRIOR;
+              // 0.6.0: 变形配对 0.5 (a match cannot be guessed well), a 对比小卡 judgment has two options (0.75)
+              const p = ev.mode === 'order' || ev.mode === 'transform' || ev.mode === 'verb' || ev.mode === 'forms' ? 0.5
+                : ev.kind === 'contrast' || /^gc:/.test(String(ev.item)) ? CONTRAST_PRIOR : GRAMMAR_PRIOR;
               base.log({ type: 'predict', sid, step: ev.step || stepName || step, item: ev.item, mode: ev.mode, p_base: p, p_teacher: p });
             }
             if (/^g:/.test(ev.item)) noteGrammar(ev);
@@ -1423,11 +1502,12 @@ export function createLessonView(ctx) {
     } else {
       out.push(h('p', { className: 'lede', text: sprint ? '小卷做完了' : results.size || spelled.size ? `今天练了 ${results.size || spelled.size} 个词` : '今天的课上完了' }));
     }
-    const gOnly = firstOf(gResults).filter(([k]) => !/^[otv]:/.test(k)).length;
+    const gOnly = firstOf(gResults).filter(([k]) => !/^[otvf]:/.test(k)).length;
     if (gOnly) out.push(h('p', { className: 'small', text: `语法题做对了 ${gOnly} 道。` }));
     if (orderRight) out.push(h('p', { className: 'small', text: `自己排对了 ${orderRight} 个句子。` }));
     if (transformRight) out.push(h('p', { className: 'small', text: `自己转对了 ${transformRight} 个句子。` }));
     if (verbRight) out.push(h('p', { className: 'small', text: `一下就找到了 ${verbRight} 句话的动词。` }));
+    if (formsRight) out.push(h('p', { className: 'small', text: `一下就配对了 ${formsRight} 对变形词。` }));
     if (readRes && readRes.done && readRes.passage) out.push(h('p', { className: 'small', text: '做完了一篇期中阅读。' }));
     else if (readRes && readRes.done) {
       const n = readRes.n || ((cellOf('read') || {}).n);
@@ -1446,6 +1526,7 @@ export function createLessonView(ctx) {
     oQueue = [];
     sQueue = [];
     vQueue = [];
+    fQueue = [];
     wq = null;
     cur = null;
     view = null;
@@ -1519,6 +1600,7 @@ export function createLessonView(ctx) {
     oQueue = [];
     sQueue = [];
     vQueue = [];
+    fQueue = [];
     wq = null;
     cur = null;
     view = null;

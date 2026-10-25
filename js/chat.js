@@ -33,6 +33,9 @@
 //       focus：这次问到的语法点（focusPoints），对应语法卡的规则原文放进提示词（focusCards）；另带 teacher.js askedLines（“我问过的”）
 //   focusPoints(user, history) -> ['there_be', ...]   这次问的、这个问题线上老师刚讲的、读句子时句子里的语法点
 //   focusCards(points, content?) -> [{ title, unit, rule, table, examples }]   最多 2 张
+//   contrastRefs({ text, points, events, contrast?, content? }) -> [{ title, zh, left: { head, note, examples }, right }]   0.6.0：
+//       她问到容易混的点时附上的对比小卡（grammar.js contrastFor，最多 1 张）：她最近选错的误解标签对上这次问到的语法卡、或者问题里
+//       有这张卡的词；问题里同时写了一张卡的两个词（“my 和 mine 有什么区别”）也算。gatherContext 的 text 是她这次问的话
 //   讲对（design/teacher-next.md 6.4）：老师答完，程序查英文例句里她不认识的词（knownChecker、offList）；超过 OFF_MAX（2）个，
 //       带着这几个词请老师整段重写一次（simplifyAsk），重写的替换原来的（消息上记 simplified: [词]）；重写失败就留原来的。
 //       带照片的那一轮、模拟模式、课标词表没读到时不查。
@@ -709,7 +712,33 @@ export const simplifyAsk = words => `（这条是 App 写给老师的，不是�
 const herWords = history => (history || []).filter(m => m && m.role === 'user').map(m => String(m.send || m.text || '')).join(' ');
 const focusWords = focus => (focus || []).map(g => [...(g.examples || []).map(e => e.en), ...(g.rule || [])].join(' ')).join(' ');
 
-export async function gatherContext(app, { now = new Date(), exclude = '', events = null, focus = [] } = {}) {
+// 0.6.0 对比小卡 for 问老师: the pair she mixes up, as a reference the teacher can explain from
+export function contrastRefs({ text = '', points = [], events = [], contrast = null, content = null } = {}) {
+  const cc = contrast || safe(() => G.contrastContent());
+  if (!cc || !Array.isArray(cc.contrasts) || !cc.contrasts.length) return [];
+  const ct = content || safe(() => G.content());
+  const words = new Set(String(text || '').toLowerCase().replace(/[’‘]/g, "'").split(/[^a-z']+/).filter(Boolean));
+  const cardIds = new Set();
+  for (const p of points || []) { const pc = safe(() => T.pointCard(p, ct)); if (pc && pc.card) cardIds.add(pc.card.id); }
+  const n = new Map();
+  for (const e of events || []) {
+    if (!e || e.type !== 'answer' || e.correct !== false || !e.misconception || WORD_TAGS.has(e.misconception)) continue;
+    n.set(e.misconception, (n.get(e.misconception) || 0) + 1);
+  }
+  const hit = x => !!x && (x.cards.some(id => cardIds.has(id)) || x.words.some(w => words.has(w)));
+  let pick = null;
+  for (const [tag] of [...n.entries()].sort((a, b) => b[1] - a[1])) {
+    const x = safe(() => G.contrastFor(tag, { text, contrast: cc }));
+    if (hit(x)) { pick = x; break; }
+  }
+  // she asked about the two of them side by side (“my 和 mine 有什么区别？”)
+  if (!pick) pick = cc.contrasts.find(x => x.words.length >= 2 && x.words.filter(w => words.has(w)).length >= 2 && (!cardIds.size || x.cards.some(id => cardIds.has(id)))) || null;
+  if (!pick) return [];
+  const side = s => ({ head: (s && s.head) || '', note: (s && s.note) || '', examples: ((s && s.examples) || []).slice(0, 2).map(e => ({ en: e.en, zh: e.zh || '' })) });
+  return [{ title: pick.title, zh: pick.zh, left: side(pick.left), right: side(pick.right) }];
+}
+
+export async function gatherContext(app, { now = new Date(), exclude = '', events = null, focus = [], text = '' } = {}) {
   const kv = app.kv;
   const peek = (k, d) => { try { return kv.peek(k, d); } catch (e) { return d; } };
   const profile = peek('profile', {}) || {};
@@ -763,6 +792,7 @@ export async function gatherContext(app, { now = new Date(), exclude = '', event
     stuck: stuckLines(peek('teacher.stuck', null)),
     asked: safe(() => T.askedLines(T.readAsked(kv), now), []),
     focus: safe(() => focusCards(focus), []),
+    contrast: safe(() => contrastRefs({ text, points: focus, events: evs || [] }), []),
   };
 }
 
@@ -909,7 +939,7 @@ export function createChat(app, { fetchImpl = null, now = () => new Date(), slee
         const why = app.budget && app.budget.blockReason ? app.budget.blockReason(BUDGET_KIND) : '';
         if (why === 'month') throw new AIError('今天已经收到过百炼的“预算用完”（429），App 今天不再发请求。', 'budget');
         if (why) throw new AIError(why === 'kind' ? '今天问老师的花费到了上限（每天 5 元），明天恢复。' : '今天的花费到了 App 里设的上限，明天恢复。可以在家长区调高上限。', 'budget-day');
-        const ctx = await gatherContext(app, { now: now(), exclude: user.id, focus: focusPoints(user, history) });
+        const ctx = await gatherContext(app, { now: now(), exclude: user.id, focus: focusPoints(user, history), text: user.send || user.text || '' });
         messages = buildMessages(buildSystemPrompt(ctx), history, images);
         res = await streamChat({ route, messages, fetchImpl, signal, onDelta, budget: app.budget, sleep });
         teacher.model = res.model || route.model;

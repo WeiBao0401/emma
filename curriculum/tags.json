@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "误解标签表（teacher-memory 2.2）。标签只增不改名。单词题干扰项用 form / category / meaning / sound。0.4.0 并进了语法卡的 20 个标签和连词成句的 5 个顺序标签；0.5.0 并进了句型转换的 5 个标签。",
+  "source": "误解标签表（teacher-memory 2.2）。标签只增不改名。单词题干扰项用 form / category / meaning / sound。0.4.0 并进了语法卡的 20 个标签和连词成句的 5 个顺序标签；0.5.0 并进了句型转换的 5 个标签；0.6.0 并进了对比小卡的 a_an、can_cant。",
   "tags": {
     "form": { "zh": "形近", "kind": "word" },
     "category": { "zh": "同类", "kind": "word" },
@@ -49,6 +49,8 @@
     "poss_person": { "zh": "物主代词没跟着换（问对方还用 my，She likes my cat）", "kind": "grammar" },
     "some_any": { "zh": "否定句和问句里 some 没换成 any", "kind": "grammar" },
     "wh_word": { "zh": "问词用错了（What / Where / How many）", "kind": "grammar" },
-    "wh_keep": { "zh": "对划线部分提问时，划线部分还留在句子里", "kind": "grammar" }
+    "wh_keep": { "zh": "对划线部分提问时，划线部分还留在句子里", "kind": "grammar" },
+    "a_an": { "zh": "a 和 an 用反了（a apple / an cat）", "kind": "grammar" },
+    "can_cant": { "zh": "can 和 can't 弄反了（会 / 不会）", "kind": "grammar" }
   }
 }

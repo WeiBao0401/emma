@@ -2,7 +2,7 @@
  "version": 1,
  "id": "exam-reading",
  "title": "期中阅读小篇",
- "about_zh": "照北京初一期中的阅读题型写的 3 篇短文（细节、推断、主旨、猜词义），每篇 5 道题。只用小学词和 Starter 到 Unit 3 的词，生词加注；猜词义题考的那个词（guess: true）读完题再给中文。",
+ "about_zh": "照北京初一期中的阅读题型写的 6 篇短文（细节、推断、主旨、猜词义），每篇 5 道题。只用小学词和 Starter 到 Unit 3 的词，生词加注；猜词义题考的那个词（guess: true）读完题再给中文。",
  "rules": {
   "words": [
    150,
@@ -2410,6 +2410,2672 @@
        19
       ],
       "explain": "故事从比赛开始：公园里拍的她都不喜欢；下雨在家，她给窗边的 Snowy 拍了一张（第 13、17 句），这张得了一等奖（第 19 句）。讲的就是她在家里找到了好照片。"
+     }
+    }
+   ]
+  },
+  {
+   "id": "r4",
+   "n": 4,
+   "kind": "story",
+   "title": "",
+   "title_zh": "记叙文",
+   "label": "期中阅读 · 第 4 篇",
+   "tip": {
+    "title": "推断题：把几句连起来想",
+    "lines": [
+     "推断题的答案，原文里不会直接写出来。",
+     "找到说这个人的几句，连起来想：他说了什么，又做了什么。"
+    ],
+    "preview": true,
+    "q": "q4"
+   },
+   "names": [
+    {
+     "en": "Amy",
+     "zh": "初一新生，音乐社团的",
+     "key": "amy",
+     "replaceable": false
+    },
+    {
+     "en": "Ben",
+     "zh": "Amy 的朋友",
+     "key": "ben",
+     "replaceable": false
+    },
+    {
+     "en": "Rocky",
+     "zh": "小灰猫的名字",
+     "key": "rocky",
+     "replaceable": false
+    },
+    {
+     "en": "Mr Black",
+     "zh": "音乐老师 Black 先生",
+     "key": "black",
+     "replaceable": false
+    }
+   ],
+   "glossary": [
+    {
+     "w": "drums",
+     "zh": "鼓（复数）"
+    },
+    {
+     "w": "meow",
+     "zh": "喵（猫叫声）"
+    },
+    {
+     "w": "listener",
+     "zh": "听众，听的人"
+    },
+    {
+     "w": "title",
+     "zh": "标题，题目"
+    },
+    {
+     "w": "members",
+     "zh": "成员",
+     "guess": true
+    }
+   ],
+   "sentences": [
+    {
+     "id": 1,
+     "para": 1,
+     "en": "Amy is a new student at a junior high school.",
+     "zh": "Amy 是一所初中的新生。",
+     "chunks": "Amy is / a new student / at a junior high school.",
+     "trunk": {
+      "subject": "Amy",
+      "verb": "is",
+      "note": "谁 = Amy，是什么 = is a new student（是新生）"
+     },
+     "keys": [
+      {
+       "w": "new student",
+       "zh": "新生"
+      },
+      {
+       "w": "junior high school",
+       "zh": "初中"
+      }
+     ],
+     "tags": [
+      "be_verb"
+     ]
+    },
+    {
+     "id": 2,
+     "para": 1,
+     "en": "She is in the music club.",
+     "zh": "她在音乐社团。",
+     "chunks": "She is / in the music club.",
+     "trunk": {
+      "subject": "She",
+      "verb": "is",
+      "note": "谁 = She（Amy），在哪 = is in the music club（在音乐社团）"
+     },
+     "keys": [
+      {
+       "w": "music",
+       "zh": "音乐"
+      },
+      {
+       "w": "club",
+       "zh": "社团"
+      }
+     ],
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 3,
+     "para": 1,
+     "en": "The club meets in Room 105 every Friday afternoon.",
+     "zh": "社团每个星期五下午在 105 教室活动。",
+     "chunks": "The club meets / in Room 105 / every Friday afternoon.",
+     "trunk": {
+      "subject": "The club",
+      "verb": "meets",
+      "note": "谁 = The club（社团），干什么 = meets（聚在一起活动）"
+     },
+     "keys": [
+      {
+       "w": "meets",
+       "zh": "聚在一起，活动"
+      },
+      {
+       "w": "Friday afternoon",
+       "zh": "星期五下午"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 4,
+     "para": 1,
+     "en": "There are eight members in the club.",
+     "zh": "社团里有八个成员。",
+     "chunks": "There are eight members / in the club.",
+     "trunk": {
+      "subject": "eight members",
+      "verb": "There are",
+      "note": "有什么 = There are eight members（有八个 members，这个词自己猜猜）"
+     },
+     "keys": [
+      {
+       "w": "There are",
+       "zh": "有"
+      },
+      {
+       "w": "eight",
+       "zh": "八"
+      }
+     ],
+     "tags": [
+      "there_be",
+      "plural"
+     ]
+    },
+    {
+     "id": 5,
+     "para": 1,
+     "en": "Amy plays the guitar, and her friend Ben plays the drums.",
+     "zh": "Amy 弹吉他，她的朋友 Ben 打鼓。",
+     "chunks": "Amy plays the guitar, / and her friend Ben / plays the drums.",
+     "trunk": {
+      "subject": "Amy",
+      "verb": "plays",
+      "note": "谁 = Amy，干什么 = plays the guitar（弹吉他）；后半句 Ben plays the drums（Ben 打鼓）",
+      "also": [
+       {
+        "subject": "her friend Ben",
+        "verb": "plays"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "guitar",
+       "zh": "吉他"
+      },
+      {
+       "w": "drums",
+       "zh": "鼓（复数）"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 6,
+     "para": 2,
+     "en": "One Friday, a little grey cat comes in through the window.",
+     "zh": "有一个星期五，一只灰色的小猫从窗户钻了进来。",
+     "chunks": "One Friday, / a little grey cat / comes in / through the window.",
+     "trunk": {
+      "subject": "a little grey cat",
+      "verb": "comes in",
+      "note": "谁 = a little grey cat（一只灰色的小猫），干什么 = comes in（进来）"
+     },
+     "keys": [
+      {
+       "w": "grey",
+       "zh": "灰色的"
+      },
+      {
+       "w": "through the window",
+       "zh": "从窗户"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 7,
+     "para": 2,
+     "en": "She sits on the piano and looks at the students.",
+     "zh": "她坐在钢琴上，看着同学们。",
+     "chunks": "She sits on the piano / and looks at the students.",
+     "trunk": {
+      "subject": "She",
+      "verb": "sits",
+      "note": "谁 = She（小猫），干什么 = sits（坐）and looks at（看着）",
+      "also": [
+       {
+        "verb": "looks at"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "piano",
+       "zh": "钢琴"
+      },
+      {
+       "w": "looks at",
+       "zh": "看着"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 8,
+     "para": 2,
+     "en": "The band plays rock music, but the cat does not run away.",
+     "zh": "乐队在演奏摇滚乐，可小猫没有跑开。",
+     "chunks": "The band plays rock music, / but the cat / does not run away.",
+     "trunk": {
+      "subject": "The band",
+      "verb": "plays",
+      "note": "谁 = The band（乐队），干什么 = plays rock music（演奏摇滚乐）；后半句 the cat does not run away（小猫没有跑开）",
+      "also": [
+       {
+        "subject": "the cat",
+        "verb": "does not run away"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "rock music",
+       "zh": "摇滚乐"
+      },
+      {
+       "w": "run away",
+       "zh": "跑开"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 9,
+     "para": 2,
+     "en": "She moves her tail and listens.",
+     "zh": "她摇着尾巴，听着。",
+     "chunks": "She moves her tail / and listens.",
+     "trunk": {
+      "subject": "She",
+      "verb": "moves",
+      "note": "谁 = She（小猫），干什么 = moves her tail（摇尾巴）and listens（听）",
+      "also": [
+       {
+        "verb": "listens"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "moves",
+       "zh": "动，摇"
+      },
+      {
+       "w": "tail",
+       "zh": "尾巴"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 10,
+     "para": 2,
+     "en": "When the music stops, she says, “Meow!”",
+     "zh": "音乐一停，她就叫：“喵！”",
+     "chunks": "When the music stops, / she says, / “Meow!”",
+     "trunk": {
+      "subject": "she",
+      "verb": "says",
+      "note": "谁 = she（小猫），干什么 = says（叫）；前半句 When the music stops（音乐一停）"
+     },
+     "keys": [
+      {
+       "w": "stops",
+       "zh": "停"
+      },
+      {
+       "w": "Meow",
+       "zh": "喵（猫叫声）"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 11,
+     "para": 3,
+     "en": "“She likes rock music,” Ben says.",
+     "zh": "“她喜欢摇滚乐，”Ben 说。",
+     "chunks": "“She likes rock music,” / Ben says.",
+     "trunk": {
+      "subject": "Ben",
+      "verb": "says",
+      "note": "谁 = Ben，干什么 = says（说）；他说的话里：She likes rock music（她喜欢摇滚乐）"
+     },
+     "keys": [
+      {
+       "w": "likes",
+       "zh": "喜欢"
+      },
+      {
+       "w": "says",
+       "zh": "说"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 12,
+     "para": 3,
+     "en": "“Let's call her Rocky.”",
+     "zh": "“我们就叫她 Rocky 吧。”",
+     "chunks": "“Let's call her Rocky.”",
+     "trunk": {
+      "subject": "",
+      "verb": "call",
+      "note": "Let's 是“我们一起……吧”，没有主语；动词 = call her Rocky（叫她 Rocky）",
+      "kind": "imperative"
+     },
+     "keys": [
+      {
+       "w": "Let's",
+       "zh": "我们……吧"
+      },
+      {
+       "w": "call",
+       "zh": "叫"
+      }
+     ],
+     "tags": [
+      "imperative",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 13,
+     "para": 4,
+     "en": "Mr Black is the music teacher.",
+     "zh": "Black 先生是音乐老师。",
+     "chunks": "Mr Black is / the music teacher.",
+     "trunk": {
+      "subject": "Mr Black",
+      "verb": "is",
+      "note": "谁 = Mr Black（Black 先生），是什么 = is the music teacher（是音乐老师）"
+     },
+     "keys": [
+      {
+       "w": "Mr",
+       "zh": "先生"
+      },
+      {
+       "w": "music teacher",
+       "zh": "音乐老师"
+      }
+     ],
+     "tags": [
+      "be_verb"
+     ]
+    },
+    {
+     "id": 14,
+     "para": 4,
+     "en": "He is very strict.",
+     "zh": "他很严格。",
+     "chunks": "He is very strict.",
+     "trunk": {
+      "subject": "He",
+      "verb": "is",
+      "note": "谁 = He（Black 先生），怎么样 = is very strict（很严格）"
+     },
+     "keys": [
+      {
+       "w": "strict",
+       "zh": "严格的"
+      }
+     ],
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 15,
+     "para": 4,
+     "en": "“No pets in the music room,” he says.",
+     "zh": "“音乐教室里不许有宠物，”他说。",
+     "chunks": "“No pets in the music room,” / he says.",
+     "trunk": {
+      "subject": "he",
+      "verb": "says",
+      "note": "谁 = he（Black 先生），干什么 = says（说）；他说的 No pets in the music room 是“音乐教室里不许有宠物”"
+     },
+     "keys": [
+      {
+       "w": "No pets",
+       "zh": "不许有宠物"
+      },
+      {
+       "w": "music room",
+       "zh": "音乐教室"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 16,
+     "para": 4,
+     "en": "But the next Friday, Rocky is at the window again.",
+     "zh": "可是下一个星期五，Rocky 又来到了窗边。",
+     "chunks": "But the next Friday, / Rocky is at the window / again.",
+     "trunk": {
+      "subject": "Rocky",
+      "verb": "is",
+      "note": "谁 = Rocky（小猫），在哪 = is at the window（在窗边）"
+     },
+     "keys": [
+      {
+       "w": "next Friday",
+       "zh": "下一个星期五"
+      },
+      {
+       "w": "again",
+       "zh": "又，再"
+      }
+     ],
+     "tags": [
+      "be_verb"
+     ]
+    },
+    {
+     "id": 17,
+     "para": 4,
+     "en": "Mr Black looks at her and smiles.",
+     "zh": "Black 先生看着她笑了。",
+     "chunks": "Mr Black looks at her / and smiles.",
+     "trunk": {
+      "subject": "Mr Black",
+      "verb": "looks at",
+      "note": "谁 = Mr Black，干什么 = looks at her（看着她）and smiles（笑了）",
+      "also": [
+       {
+        "verb": "smiles"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "looks at",
+       "zh": "看着"
+      },
+      {
+       "w": "smiles",
+       "zh": "笑"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 18,
+     "para": 4,
+     "en": "Then he opens the window for her.",
+     "zh": "然后他给她打开了窗户。",
+     "chunks": "Then he opens the window / for her.",
+     "trunk": {
+      "subject": "he",
+      "verb": "opens",
+      "note": "谁 = he（Black 先生），干什么 = opens the window（打开窗户）"
+     },
+     "keys": [
+      {
+       "w": "Then",
+       "zh": "然后"
+      },
+      {
+       "w": "opens",
+       "zh": "打开"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 19,
+     "para": 5,
+     "en": "Now Rocky comes to the club every Friday.",
+     "zh": "现在 Rocky 每个星期五都来社团。",
+     "chunks": "Now Rocky comes to the club / every Friday.",
+     "trunk": {
+      "subject": "Rocky",
+      "verb": "comes",
+      "note": "谁 = Rocky，干什么 = comes to the club（来社团）"
+     },
+     "keys": [
+      {
+       "w": "Now",
+       "zh": "现在"
+      },
+      {
+       "w": "every Friday",
+       "zh": "每个星期五"
+      }
+     ],
+     "tags": [
+      "third_s"
+     ]
+    },
+    {
+     "id": 20,
+     "para": 5,
+     "en": "The club has nine members: eight students and one cat!",
+     "zh": "社团有九个成员了：八个学生和一只猫！",
+     "chunks": "The club has nine members: / eight students and one cat!",
+     "trunk": {
+      "subject": "The club",
+      "verb": "has",
+      "note": "谁 = The club（社团），干什么 = has nine members（有九个 members）"
+     },
+     "keys": [
+      {
+       "w": "nine",
+       "zh": "九"
+      },
+      {
+       "w": "students",
+       "zh": "学生（复数）"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "plural"
+     ]
+    },
+    {
+     "id": 21,
+     "para": 5,
+     "en": "Rocky can't play the guitar, but she is the best listener in the room.",
+     "zh": "Rocky 不会弹吉他，可她是屋里最好的听众。",
+     "chunks": "Rocky can't play the guitar, / but she is / the best listener in the room.",
+     "trunk": {
+      "subject": "Rocky",
+      "verb": "can't play",
+      "note": "谁 = Rocky，干什么 = can't play the guitar（不会弹吉他）；后半句 she is the best listener（她是最好的听众）",
+      "also": [
+       {
+        "subject": "she",
+        "verb": "is"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "can't",
+       "zh": "不会，不能"
+      },
+      {
+       "w": "listener",
+       "zh": "听众，听的人"
+      }
+     ],
+     "tags": [
+      "can",
+      "be_verb",
+      "pronoun"
+     ]
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "When does the music club meet?",
+     "zh": "音乐社团什么时候活动？",
+     "options": [
+      "Every Monday morning.",
+      "Every Friday afternoon.",
+      "Every Friday evening.",
+      "Every day after school."
+     ],
+     "options_zh": [
+      "每个星期一上午。",
+      "每个星期五下午。",
+      "每个星期五晚上。",
+      "每天放学后。"
+     ],
+     "answer": "Every Friday afternoon.",
+     "evidence": [
+      3
+     ],
+     "drop": "Every day after school.",
+     "hints": [
+      "回到第 3 句，第 1 段讲社团的那几句。",
+      "题里的关键词是 meet（聚在一起活动）。在原文里找 meets，看它后面的时间。",
+      "排除“Every day after school”：原文没说每天都活动，第 3 句只说了星期几。",
+      "答案是“Every Friday afternoon”。第 3 句：The club meets in Room 105 every Friday afternoon（社团每个星期五下午在 105 教室活动）。"
+     ],
+     "variant": {
+      "ask": "Where does the music club meet?",
+      "zh": "音乐社团在哪儿活动？",
+      "options": [
+       "In Room 105.",
+       "In Room 150.",
+       "In the park.",
+       "At Amy's home."
+      ],
+      "options_zh": [
+       "在 105 教室。",
+       "在 150 教室。",
+       "在公园里。",
+       "在 Amy 家。"
+      ],
+      "answer": "In Room 105.",
+      "evidence": [
+       3
+      ],
+      "explain": "第 3 句：The club meets in Room 105 every Friday afternoon（社团每个星期五下午在 105 教室活动）。看清是 105，不是 150。"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "Why does Ben want to call the cat Rocky?",
+     "zh": "Ben 为什么想叫小猫 Rocky？",
+     "options": [
+      "She is grey.",
+      "She can play the piano.",
+      "She likes rock music.",
+      "She comes in through the window."
+     ],
+     "options_zh": [
+      "她是灰色的。",
+      "她会弹钢琴。",
+      "她喜欢摇滚乐。",
+      "她从窗户钻进来。"
+     ],
+     "answer": "She likes rock music.",
+     "evidence": [
+      11,
+      12
+     ],
+     "drop": "She can play the piano.",
+     "hints": [
+      "回到第 11、12 句，是 Ben 说的话。",
+      "第 12 句 Let's call her Rocky 前面，Ben 先说了一个原因。",
+      "排除“She can play the piano”：第 7 句只说小猫坐在钢琴上，没说她会弹。",
+      "答案是“She likes rock music”。第 11 句 Ben 说 She likes rock music（她喜欢摇滚乐），所以起名叫 Rocky，Rocky 和 rock 很像。"
+     ],
+     "variant": {
+      "ask": "Who plays the drums?",
+      "zh": "谁打鼓？",
+      "options": [
+       "Ben.",
+       "Amy.",
+       "Mr Black.",
+       "Rocky."
+      ],
+      "answer": "Ben.",
+      "evidence": [
+       5
+      ],
+      "explain": "第 5 句：her friend Ben plays the drums（她的朋友 Ben 打鼓）。弹吉他的是 Amy。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "meaning",
+     "skill": "word",
+     "skill_zh": "看前后句猜词义",
+     "word": "member",
+     "ask": "What is \"members\" in Chinese? (Sentence 4)",
+     "zh": "第 4 句里的 members 是什么意思？",
+     "options": [
+      "老师",
+      "房间",
+      "歌",
+      "成员"
+     ],
+     "answer": "成员",
+     "evidence": [
+      4,
+      20
+     ],
+     "drop": "老师",
+     "hints": [
+      "回到第 4 句，再看最后一段的第 20 句。",
+      "第 20 句说 nine members: eight students and one cat（九个 members：八个学生和一只猫）。",
+      "排除“老师”：社团只有一位老师 Mr Black，第 4 句说的 members 有八个。",
+      "答案是“成员”。members 就是社团里的人：八个学生，后来加上 Rocky 一共九个。"
+     ],
+     "variant": {
+      "ask": "What is the meaning of \"next\" in Sentence 16?",
+      "zh": "第 16 句里的 next 是什么意思？",
+      "options": [
+       "下一个",
+       "上一个",
+       "每一个",
+       "第一个"
+      ],
+      "answer": "下一个",
+      "evidence": [
+       6,
+       16
+      ],
+      "explain": "第 6 句小猫在一个星期五第一次来；第 16 句 the next Friday 是那以后的星期五，也就是下一个星期五。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "infer",
+     "skill": "infer",
+     "skill_zh": "把几句连起来想",
+     "ask": "What can we learn about Mr Black?",
+     "zh": "从文中可以知道 Black 先生是什么样的人？",
+     "options": [
+      "He is strict, but he is kind to Rocky.",
+      "He doesn't like music.",
+      "He plays the guitar in the band.",
+      "He is angry with Ben."
+     ],
+     "options_zh": [
+      "他很严格，可他对 Rocky 很好。",
+      "他不喜欢音乐。",
+      "他在乐队里弹吉他。",
+      "他在生 Ben 的气。"
+     ],
+     "answer": "He is strict, but he is kind to Rocky.",
+     "evidence": [
+      14,
+      15,
+      17,
+      18
+     ],
+     "drop": "He doesn't like music.",
+     "hints": [
+      "回到第 4 段，看第 14 句和第 18 句。",
+      "第 14、15 句他很严格，说音乐教室不许有宠物；第 17、18 句他看着小猫笑了，还给她开了窗。",
+      "排除“He doesn't like music”：他是音乐老师（第 13 句），原文没有一句说他不喜欢音乐。",
+      "答案是“He is strict, but he is kind to Rocky”。他嘴上说不许有宠物，可还是给 Rocky 开了窗。原文没有直接这么说，要把几句连起来想。"
+     ],
+     "variant": {
+      "ask": "How does Mr Black feel about Rocky?",
+      "zh": "最后 Black 先生对 Rocky 是什么态度？",
+      "options": [
+       "He likes her.",
+       "He is angry with her.",
+       "He wants her to go away.",
+       "He doesn't see her."
+      ],
+      "options_zh": [
+       "他喜欢她。",
+       "他生她的气。",
+       "他想让她走开。",
+       "他没看见她。"
+      ],
+      "answer": "He likes her.",
+      "evidence": [
+       17,
+       18
+      ],
+      "explain": "第 17 句他看着 Rocky 笑了，第 18 句还给她打开窗户。他嘴上说不许有宠物，心里是喜欢她的。"
+     }
+    },
+    {
+     "id": "q5",
+     "type": "main",
+     "skill": "main",
+     "skill_zh": "主旨题看开头和结尾",
+     "ask": "What is the best title for the passage?",
+     "zh": "这篇短文最好的标题是哪个？",
+     "options": [
+      "Amy's New School",
+      "A Cat in the Music Club",
+      "How to Play the Guitar",
+      "Mr Black's Rules"
+     ],
+     "options_zh": [
+      "Amy 的新学校",
+      "音乐社团里的猫",
+      "怎样弹吉他",
+      "Black 先生的规定"
+     ],
+     "answer": "A Cat in the Music Club",
+     "evidence": [
+      6,
+      19
+     ],
+     "drop": "How to Play the Guitar",
+     "hints": [
+      "主旨题先看开头和结尾：读第 6 句，再读最后一段的第 19 句。",
+      "从第 2 段起，每一段都在说那只小猫：她来了，有了名字，老师给她开窗，她每周都来。",
+      "排除“How to Play the Guitar”：弹吉他只在第 5 句提了一下，文章没有教怎么弹。",
+      "答案是“A Cat in the Music Club”（音乐社团里的猫）。整篇都在讲小猫 Rocky 和音乐社团。“Amy's New School”和“Mr Black's Rules”都只说到了一小部分。"
+     ],
+     "variant": {
+      "ask": "What is the passage about?",
+      "zh": "这篇短文主要讲了什么？",
+      "options": [
+       "A cat comes to the music club.",
+       "Amy learns the guitar.",
+       "Mr Black is a strict teacher.",
+       "The club has a new room."
+      ],
+      "options_zh": [
+       "一只猫来到了音乐社团。",
+       "Amy 学吉他。",
+       "Black 先生是个严格的老师。",
+       "社团有了新教室。"
+      ],
+      "answer": "A cat comes to the music club.",
+      "evidence": [
+       6,
+       19
+      ],
+      "explain": "开头第 6 句小猫从窗户进了社团，结尾第 19、20 句它每个星期五都来，成了社团的一员。全文都在讲这只猫。"
+     }
+    }
+   ]
+  },
+  {
+   "id": "r5",
+   "n": 5,
+   "kind": "letter",
+   "title": "",
+   "title_zh": "书信",
+   "label": "期中阅读 · 第 5 篇",
+   "tip": {
+    "title": "书信：先看写给谁、谁写的",
+    "lines": [
+     "信的开头 Dear 后面是收信人，最后一行是写信人。",
+     "中间一段讲一件事：先讲家人，再讲小猫，最后问对方。"
+    ],
+    "preview": true,
+    "q": "q5"
+   },
+   "names": [
+    {
+     "en": "Kate",
+     "zh": "收信人，Lin Tao 的笔友",
+     "key": "kate",
+     "replaceable": false
+    },
+    {
+     "en": "Lin Tao",
+     "zh": "写信的人",
+     "key": "lintao",
+     "replaceable": false
+    },
+    {
+     "en": "Sam",
+     "zh": "Lin Tao 的弟弟",
+     "key": "sam",
+     "replaceable": false
+    },
+    {
+     "en": "Mimi",
+     "zh": "家里的小白猫",
+     "key": "mimi",
+     "replaceable": false
+    }
+   ],
+   "glossary": [
+    {
+     "w": "clever",
+     "zh": "聪明的",
+     "guess": true
+    }
+   ],
+   "sentences": [
+    {
+     "id": 1,
+     "para": 1,
+     "en": "Dear Kate,",
+     "zh": "亲爱的 Kate：",
+     "chunks": "Dear Kate,",
+     "keys": [
+      {
+       "w": "Dear",
+       "zh": "亲爱的"
+      }
+     ],
+     "tags": []
+    },
+    {
+     "id": 2,
+     "para": 1,
+     "en": "Thank you for your letter.",
+     "zh": "谢谢你的来信。",
+     "chunks": "Thank you / for your letter.",
+     "trunk": {
+      "subject": "",
+      "verb": "Thank",
+      "note": "固定说法：Thank you for……（谢谢你的……）",
+      "kind": "phrase"
+     },
+     "keys": [
+      {
+       "w": "Thank you",
+       "zh": "谢谢你"
+      },
+      {
+       "w": "letter",
+       "zh": "信"
+      }
+     ],
+     "tags": [
+      "pronoun"
+     ]
+    },
+    {
+     "id": 3,
+     "para": 1,
+     "en": "Let me tell you about my family and my cat.",
+     "zh": "我来跟你说说我的家人和我的猫。",
+     "chunks": "Let me tell you / about my family and my cat.",
+     "trunk": {
+      "subject": "",
+      "verb": "Let ... tell",
+      "note": "Let me 是“让我……”，没有主语；动词 = tell you about（跟你说说）",
+      "kind": "imperative"
+     },
+     "keys": [
+      {
+       "w": "Let me",
+       "zh": "让我"
+      },
+      {
+       "w": "tell you about",
+       "zh": "跟你说说"
+      }
+     ],
+     "tags": [
+      "imperative",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 4,
+     "para": 2,
+     "en": "There are four people in my family: my parents, my little brother and me.",
+     "zh": "我家有四口人：爸爸妈妈、弟弟和我。",
+     "chunks": "There are four people / in my family: / my parents, my little brother and me.",
+     "trunk": {
+      "subject": "four people",
+      "verb": "There are",
+      "note": "有什么 = There are four people（有四口人）"
+     },
+     "keys": [
+      {
+       "w": "four people",
+       "zh": "四口人"
+      },
+      {
+       "w": "little brother",
+       "zh": "弟弟"
+      }
+     ],
+     "tags": [
+      "there_be",
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 5,
+     "para": 2,
+     "en": "My dad is a doctor.",
+     "zh": "我爸爸是医生。",
+     "chunks": "My dad is a doctor.",
+     "trunk": {
+      "subject": "My dad",
+      "verb": "is",
+      "note": "谁 = My dad（我爸爸），是什么 = is a doctor（是医生）"
+     },
+     "keys": [
+      {
+       "w": "dad",
+       "zh": "爸爸"
+      },
+      {
+       "w": "doctor",
+       "zh": "医生"
+      }
+     ],
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 6,
+     "para": 2,
+     "en": "He is very busy, but he always has dinner with us.",
+     "zh": "他很忙，可他总是和我们一起吃晚饭。",
+     "chunks": "He is very busy, / but he always has dinner / with us.",
+     "trunk": {
+      "subject": "He",
+      "verb": "is",
+      "note": "谁 = He（爸爸），怎么样 = is very busy（很忙）；后半句 he always has dinner（他总是吃晚饭）",
+      "also": [
+       {
+        "subject": "he",
+        "verb": "has"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "busy",
+       "zh": "忙的"
+      },
+      {
+       "w": "always",
+       "zh": "总是"
+      }
+     ],
+     "tags": [
+      "be_adj",
+      "freq_adv",
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 7,
+     "para": 2,
+     "en": "My mum is a music teacher.",
+     "zh": "我妈妈是音乐老师。",
+     "chunks": "My mum is / a music teacher.",
+     "trunk": {
+      "subject": "My mum",
+      "verb": "is",
+      "note": "谁 = My mum（我妈妈），是什么 = is a music teacher（是音乐老师）"
+     },
+     "keys": [
+      {
+       "w": "mum",
+       "zh": "妈妈"
+      },
+      {
+       "w": "music teacher",
+       "zh": "音乐老师"
+      }
+     ],
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 8,
+     "para": 2,
+     "en": "She is strict with me, but she is very kind.",
+     "zh": "她对我很严格，可她人很好。",
+     "chunks": "She is strict with me, / but she is very kind.",
+     "trunk": {
+      "subject": "She",
+      "verb": "is",
+      "note": "谁 = She（妈妈），怎么样 = is strict with me（对我严格）；后半句 she is very kind（她人很好）",
+      "also": [
+       {
+        "subject": "she",
+        "verb": "is"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "strict with",
+       "zh": "对……严格"
+      },
+      {
+       "w": "kind",
+       "zh": "和善的"
+      }
+     ],
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 9,
+     "para": 2,
+     "en": "My brother Sam is only five.",
+     "zh": "我弟弟 Sam 才五岁。",
+     "chunks": "My brother Sam / is only five.",
+     "trunk": {
+      "subject": "My brother Sam",
+      "verb": "is",
+      "note": "谁 = My brother Sam（我弟弟 Sam），怎么样 = is only five（才五岁）"
+     },
+     "keys": [
+      {
+       "w": "brother",
+       "zh": "兄弟，这里是弟弟"
+      },
+      {
+       "w": "only",
+       "zh": "只，才"
+      }
+     ],
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 10,
+     "para": 2,
+     "en": "He likes to ask a lot of questions.",
+     "zh": "他喜欢问很多问题。",
+     "chunks": "He likes / to ask a lot of questions.",
+     "trunk": {
+      "subject": "He",
+      "verb": "likes",
+      "note": "谁 = He（Sam），干什么 = likes to ask（喜欢问）"
+     },
+     "keys": [
+      {
+       "w": "a lot of",
+       "zh": "很多"
+      },
+      {
+       "w": "questions",
+       "zh": "问题"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 11,
+     "para": 3,
+     "en": "We have a white cat.",
+     "zh": "我们家有一只白猫。",
+     "chunks": "We have a white cat.",
+     "trunk": {
+      "subject": "We",
+      "verb": "have",
+      "note": "谁 = We（我们家），干什么 = have a white cat（有一只白猫）"
+     },
+     "keys": [
+      {
+       "w": "have",
+       "zh": "有"
+      },
+      {
+       "w": "white",
+       "zh": "白色的"
+      }
+     ],
+     "tags": [
+      "pronoun"
+     ]
+    },
+    {
+     "id": 12,
+     "para": 3,
+     "en": "Her name is Mimi.",
+     "zh": "她叫 Mimi。",
+     "chunks": "Her name is Mimi.",
+     "trunk": {
+      "subject": "Her name",
+      "verb": "is",
+      "note": "谁 = Her name（她的名字），是什么 = is Mimi"
+     },
+     "keys": [
+      {
+       "w": "name",
+       "zh": "名字"
+      }
+     ],
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 13,
+     "para": 3,
+     "en": "She has blue eyes and a long tail.",
+     "zh": "她有蓝眼睛和长尾巴。",
+     "chunks": "She has / blue eyes and a long tail.",
+     "trunk": {
+      "subject": "She",
+      "verb": "has",
+      "note": "谁 = She（Mimi），干什么 = has（有）blue eyes and a long tail"
+     },
+     "keys": [
+      {
+       "w": "blue eyes",
+       "zh": "蓝眼睛"
+      },
+      {
+       "w": "tail",
+       "zh": "尾巴"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 14,
+     "para": 3,
+     "en": "Mimi is very clever.",
+     "zh": "Mimi 很聪明。",
+     "chunks": "Mimi is very clever.",
+     "trunk": {
+      "subject": "Mimi",
+      "verb": "is",
+      "note": "谁 = Mimi，怎么样 = is very clever（clever 的意思留给你猜）"
+     },
+     "keys": [
+      {
+       "w": "very",
+       "zh": "很"
+      }
+     ],
+     "tags": [
+      "be_adj"
+     ]
+    },
+    {
+     "id": 15,
+     "para": 3,
+     "en": "Every morning at seven, she jumps on my bed and puts her nose on my face.",
+     "zh": "每天早上七点，她跳到我床上，把鼻子贴在我脸上。",
+     "chunks": "Every morning at seven, / she jumps on my bed / and puts her nose / on my face.",
+     "trunk": {
+      "subject": "she",
+      "verb": "jumps",
+      "note": "谁 = she（Mimi），干什么 = jumps on my bed（跳到我床上）and puts her nose（把鼻子贴过来）",
+      "also": [
+       {
+        "verb": "puts"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "jumps",
+       "zh": "跳"
+      },
+      {
+       "w": "nose",
+       "zh": "鼻子"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 16,
+     "para": 3,
+     "en": "Then I wake up.",
+     "zh": "我就醒了。",
+     "chunks": "Then I wake up.",
+     "trunk": {
+      "subject": "I",
+      "verb": "wake up",
+      "note": "谁 = I（Lin Tao），干什么 = wake up（醒来）"
+     },
+     "keys": [
+      {
+       "w": "Then",
+       "zh": "然后，于是"
+      },
+      {
+       "w": "wake up",
+       "zh": "醒来"
+      }
+     ],
+     "tags": [
+      "pronoun"
+     ]
+    },
+    {
+     "id": 17,
+     "para": 3,
+     "en": "She is better than my clock!",
+     "zh": "她比我的闹钟还管用！",
+     "chunks": "She is better / than my clock!",
+     "trunk": {
+      "subject": "She",
+      "verb": "is",
+      "note": "谁 = She（Mimi），怎么样 = is better than my clock（比我的闹钟还好）"
+     },
+     "keys": [
+      {
+       "w": "better than",
+       "zh": "比……好"
+      },
+      {
+       "w": "clock",
+       "zh": "钟，闹钟"
+      }
+     ],
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 18,
+     "para": 3,
+     "en": "In the evening, she sits on my desk when I read and write.",
+     "zh": "晚上我读书写字的时候，她就坐在我的书桌上。",
+     "chunks": "In the evening, / she sits on my desk / when I read and write.",
+     "trunk": {
+      "subject": "she",
+      "verb": "sits",
+      "note": "谁 = she（Mimi），干什么 = sits on my desk（坐在我的书桌上）"
+     },
+     "keys": [
+      {
+       "w": "desk",
+       "zh": "书桌"
+      },
+      {
+       "w": "when",
+       "zh": "当……的时候"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 19,
+     "para": 3,
+     "en": "Sometimes she sleeps on my books, and I can't do my work.",
+     "zh": "有时候她睡在我的书上，我就没法写作业了。",
+     "chunks": "Sometimes she sleeps on my books, / and I can't do my work.",
+     "trunk": {
+      "subject": "she",
+      "verb": "sleeps",
+      "note": "谁 = she（Mimi），干什么 = sleeps on my books（睡在我的书上）；后半句 I can't do my work（我没法写作业）",
+      "also": [
+       {
+        "subject": "I",
+        "verb": "can't do"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "Sometimes",
+       "zh": "有时候"
+      },
+      {
+       "w": "can't do my work",
+       "zh": "没法写作业"
+      }
+     ],
+     "tags": [
+      "freq_adv",
+      "third_s",
+      "can",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 20,
+     "para": 3,
+     "en": "Mimi is a good friend to all of us.",
+     "zh": "Mimi 是我们全家的好朋友。",
+     "chunks": "Mimi is a good friend / to all of us.",
+     "trunk": {
+      "subject": "Mimi",
+      "verb": "is",
+      "note": "谁 = Mimi，是什么 = is a good friend（是好朋友）"
+     },
+     "keys": [
+      {
+       "w": "good friend",
+       "zh": "好朋友"
+      },
+      {
+       "w": "all of us",
+       "zh": "我们大家"
+      }
+     ],
+     "tags": [
+      "be_verb",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 21,
+     "para": 4,
+     "en": "Do you have a pet?",
+     "zh": "你有宠物吗？",
+     "chunks": "Do you have a pet?",
+     "trunk": {
+      "subject": "you",
+      "verb": "Do ... have",
+      "note": "问句：谁 = you（你），干什么 = Do ... have（有没有）"
+     },
+     "keys": [
+      {
+       "w": "Do you have",
+       "zh": "你有……吗"
+      },
+      {
+       "w": "pet",
+       "zh": "宠物"
+      }
+     ],
+     "tags": [
+      "do_q",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 22,
+     "para": 4,
+     "en": "Please write back and tell me about it.",
+     "zh": "请回信告诉我它的事。",
+     "chunks": "Please write back / and tell me about it.",
+     "trunk": {
+      "subject": "",
+      "verb": "write back",
+      "note": "请对方做的事，没有主语：write back（回信）and tell me（告诉我）",
+      "kind": "imperative",
+      "also": [
+       {
+        "verb": "tell"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "write back",
+       "zh": "回信"
+      },
+      {
+       "w": "tell me about it",
+       "zh": "告诉我它的事"
+      }
+     ],
+     "tags": [
+      "imperative",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 23,
+     "para": 5,
+     "en": "Yours,",
+     "zh": "你的朋友",
+     "chunks": "Yours,",
+     "keys": [
+      {
+       "w": "Yours",
+       "zh": "你的（朋友）"
+      }
+     ],
+     "tags": [
+      "pronoun"
+     ]
+    },
+    {
+     "id": 24,
+     "para": 5,
+     "en": "Lin Tao",
+     "zh": "Lin Tao（写信人的名字）",
+     "chunks": "Lin Tao",
+     "keys": [
+      {
+       "w": "Lin Tao",
+       "zh": "写信人的名字"
+      }
+     ],
+     "tags": []
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "How many people are there in Lin Tao's family?",
+     "zh": "Lin Tao 家有几口人？",
+     "options": [
+      "Three.",
+      "Four.",
+      "Five.",
+      "Six."
+     ],
+     "options_zh": [
+      "三口。",
+      "四口。",
+      "五口。",
+      "六口。"
+     ],
+     "answer": "Four.",
+     "evidence": [
+      4
+     ],
+     "drop": "Five.",
+     "hints": [
+      "回到第 4 句，第 2 段的第一句。",
+      "题里的关键词是 How many people（几个人）。第 4 句冒号后面列出了是谁：my parents, my little brother and me。",
+      "排除“Five”：Mimi 是一只猫，不算 people（人）。",
+      "答案是“Four”。第 4 句：There are four people in my family（我家有四口人）：爸爸、妈妈、弟弟和我。"
+     ],
+     "variant": {
+      "ask": "What does Lin Tao's dad do?",
+      "zh": "Lin Tao 的爸爸是做什么的？",
+      "options": [
+       "He is a doctor.",
+       "He is a music teacher.",
+       "He is a student.",
+       "He is a driver."
+      ],
+      "options_zh": [
+       "他是医生。",
+       "他是音乐老师。",
+       "他是学生。",
+       "他是司机。"
+      ],
+      "answer": "He is a doctor.",
+      "evidence": [
+       5
+      ],
+      "explain": "第 5 句：My dad is a doctor（我爸爸是医生）。音乐老师是妈妈（第 7 句）。"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "What does Mimi do every morning?",
+     "zh": "Mimi 每天早上做什么？",
+     "options": [
+      "She sleeps on the books.",
+      "She sits on the desk.",
+      "She jumps on Lin Tao's bed.",
+      "She plays with Sam."
+     ],
+     "options_zh": [
+      "她睡在书上。",
+      "她坐在书桌上。",
+      "她跳到 Lin Tao 的床上。",
+      "她和 Sam 一起玩。"
+     ],
+     "answer": "She jumps on Lin Tao's bed.",
+     "evidence": [
+      15
+     ],
+     "drop": "She sits on the desk.",
+     "hints": [
+      "回到第 15 句，第 3 段讲 Mimi 的那几句。",
+      "题里的关键词是 every morning（每天早上）。在原文里找到它，看后面说她做了什么。",
+      "排除“She sits on the desk”：第 18 句说她坐在书桌上，可那是 In the evening（晚上），不是早上。",
+      "答案是“She jumps on Lin Tao's bed”。第 15 句：Every morning at seven, she jumps on my bed（每天早上七点，她跳到我床上）。"
+     ],
+     "variant": {
+      "ask": "Where does Mimi sit in the evening?",
+      "zh": "晚上 Mimi 坐在哪儿？",
+      "options": [
+       "On Lin Tao's desk.",
+       "On Lin Tao's bed.",
+       "On the window.",
+       "On Sam's chair."
+      ],
+      "options_zh": [
+       "在 Lin Tao 的书桌上。",
+       "在 Lin Tao 的床上。",
+       "在窗户上。",
+       "在 Sam 的椅子上。"
+      ],
+      "answer": "On Lin Tao's desk.",
+      "evidence": [
+       18
+      ],
+      "explain": "第 18 句：In the evening, she sits on my desk（晚上她坐在我的书桌上）。早上跳上去的是床（第 15 句）。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "infer",
+     "skill": "infer",
+     "skill_zh": "把几句连起来想",
+     "ask": "Why does Lin Tao say \"She is better than my clock\"?",
+     "zh": "Lin Tao 为什么说“她比我的闹钟还管用”？",
+     "options": [
+      "Mimi wakes Lin Tao up every morning.",
+      "Mimi can tell the time.",
+      "The clock is very old.",
+      "Mimi likes the clock."
+     ],
+     "options_zh": [
+      "Mimi 每天早上把 Lin Tao 叫醒。",
+      "Mimi 会看时间。",
+      "闹钟很旧了。",
+      "Mimi 喜欢那个闹钟。"
+     ],
+     "answer": "Mimi wakes Lin Tao up every morning.",
+     "evidence": [
+      15,
+      16,
+      17
+     ],
+     "drop": "Mimi can tell the time.",
+     "hints": [
+      "回到第 17 句，再看它前面的第 15、16 句。",
+      "clock 是钟，这里说的是叫人起床的闹钟。第 15、16 句说 Mimi 每天早上七点做了什么，然后 I wake up。",
+      "排除“Mimi can tell the time”：原文没有说猫会看时间。",
+      "答案是“Mimi wakes Lin Tao up every morning”。每天早上七点 Mimi 跳上床，把鼻子贴在脸上，Lin Tao 就醒了（第 15、16 句）。她比闹钟还管用，所以说 better than my clock。"
+     ],
+     "variant": {
+      "ask": "Why can't Lin Tao do the work sometimes?",
+      "zh": "Lin Tao 为什么有时候没法写作业？",
+      "options": [
+       "Mimi sleeps on the books.",
+       "Sam asks a lot of questions.",
+       "The desk is too small.",
+       "Lin Tao is very busy."
+      ],
+      "options_zh": [
+       "Mimi 睡在书上。",
+       "Sam 问了很多问题。",
+       "书桌太小了。",
+       "Lin Tao 很忙。"
+      ],
+      "answer": "Mimi sleeps on the books.",
+      "evidence": [
+       19
+      ],
+      "explain": "第 19 句：Sometimes she sleeps on my books, and I can't do my work（有时候 Mimi 睡在我的书上，我就没法写作业了）。前半句是原因，后半句是结果。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "meaning",
+     "skill": "word",
+     "skill_zh": "看前后句猜词义",
+     "word": "clever",
+     "ask": "What is \"clever\" in Chinese? (Sentence 14)",
+     "zh": "第 14 句里的 clever 是什么意思？",
+     "options": [
+      "懒的",
+      "安静的",
+      "害怕的",
+      "聪明的"
+     ],
+     "answer": "聪明的",
+     "evidence": [
+      14,
+      15
+     ],
+     "drop": "懒的",
+     "hints": [
+      "回到第 14 句，再往下看第 15 句。",
+      "第 14 句说 Mimi is very clever，后面说她每天早上七点准时来叫醒 Lin Tao。",
+      "排除“懒的”：一只懒猫不会每天早上七点准时来叫人起床。",
+      "答案是“聪明的”。clever = 聪明的：Mimi 知道每天七点该叫醒 Lin Tao，所以说她很聪明。"
+     ],
+     "variant": {
+      "ask": "What is the meaning of \"busy\" in Sentence 6?",
+      "zh": "第 6 句里的 busy 是什么意思？",
+      "options": [
+       "忙的",
+       "高的",
+       "新的",
+       "饿的"
+      ],
+      "answer": "忙的",
+      "evidence": [
+       5,
+       6
+      ],
+      "explain": "第 5 句爸爸是医生；第 6 句 He is very busy, but he always has dinner with us：but（可是）前后意思相反，很忙，可还是天天和家人吃晚饭。"
+     }
+    },
+    {
+     "id": "q5",
+     "type": "main",
+     "skill": "main",
+     "skill_zh": "主旨题看开头",
+     "ask": "What is the letter about?",
+     "zh": "这封信主要讲了什么？",
+     "options": [
+      "Lin Tao's family and the cat Mimi.",
+      "Lin Tao's new school.",
+      "How to look after a cat.",
+      "Lin Tao's work in the evening."
+     ],
+     "options_zh": [
+      "Lin Tao 的家人和小猫 Mimi。",
+      "Lin Tao 的新学校。",
+      "怎样照顾猫。",
+      "Lin Tao 晚上的作业。"
+     ],
+     "answer": "Lin Tao's family and the cat Mimi.",
+     "evidence": [
+      3
+     ],
+     "drop": "How to look after a cat.",
+     "hints": [
+      "主旨题先看开头：第 3 句 Lin Tao 说了这封信要讲什么。",
+      "第 3 句 Let me tell you about my family and my cat，后面第 2 段讲家人，第 3 段讲猫。",
+      "排除“How to look after a cat”：信里只说 Mimi 做了什么，没有教怎么养猫。",
+      "答案是“Lin Tao's family and the cat Mimi”。第 3 句已经说了：讲讲我的家人和我的猫，后面两段正好一段讲家人，一段讲猫。"
+     ],
+     "variant": {
+      "ask": "Who is the letter to?",
+      "zh": "这封信是写给谁的？",
+      "options": [
+       "Kate.",
+       "Sam.",
+       "Mimi.",
+       "Lin Tao's mum."
+      ],
+      "options_zh": [
+       "Kate。",
+       "Sam。",
+       "Mimi。",
+       "Lin Tao 的妈妈。"
+      ],
+      "answer": "Kate.",
+      "evidence": [
+       1
+      ],
+      "explain": "第 1 句 Dear Kate：信的开头写给谁。最后一行的 Lin Tao 是写信的人。"
+     }
+    }
+   ]
+  },
+  {
+   "id": "r6",
+   "n": 6,
+   "kind": "info",
+   "title": "",
+   "title_zh": "说明文",
+   "label": "期中阅读 · 第 6 篇",
+   "tip": {
+    "title": "说明文：一段讲一个人",
+    "lines": [
+     "先看第 2 句：这篇要讲几个人。",
+     "问到谁，就回讲他的那一段找，别的段先不看。"
+    ],
+    "preview": true,
+    "q": "q2"
+   },
+   "names": [
+    {
+     "en": "Li Ming",
+     "zh": "新同学李明",
+     "key": "liming",
+     "replaceable": false
+    },
+    {
+     "en": "Wang Fang",
+     "zh": "新同学王芳",
+     "key": "wangfang",
+     "replaceable": false
+    },
+    {
+     "en": "David",
+     "zh": "从加拿大来的新同学",
+     "key": "david",
+     "replaceable": false
+    }
+   ],
+   "glossary": [
+    {
+     "w": "animal home",
+     "zh": "动物之家（收养小动物的地方）",
+     "known": true
+    },
+    {
+     "w": "hopes",
+     "zh": "希望",
+     "guess": true
+    }
+   ],
+   "sentences": [
+    {
+     "id": 1,
+     "para": 1,
+     "en": "Our school has a lot of clubs.",
+     "zh": "我们学校有很多社团。",
+     "chunks": "Our school has / a lot of clubs.",
+     "trunk": {
+      "subject": "Our school",
+      "verb": "has",
+      "note": "谁 = Our school（我们学校），干什么 = has a lot of clubs（有很多社团）"
+     },
+     "keys": [
+      {
+       "w": "a lot of",
+       "zh": "很多"
+      },
+      {
+       "w": "clubs",
+       "zh": "社团（复数）"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 2,
+     "para": 1,
+     "en": "Here are three new students and their clubs.",
+     "zh": "下面是三个新同学和他们的社团。",
+     "chunks": "Here are / three new students and their clubs.",
+     "trunk": {
+      "subject": "three new students and their clubs",
+      "verb": "are",
+      "note": "Here are 是“下面是”：three new students and their clubs（三个新同学和他们的社团）"
+     },
+     "keys": [
+      {
+       "w": "Here are",
+       "zh": "下面是"
+      },
+      {
+       "w": "their",
+       "zh": "他们的"
+      }
+     ],
+     "tags": [
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 3,
+     "para": 2,
+     "en": "Li Ming is twelve.",
+     "zh": "李明十二岁。",
+     "chunks": "Li Ming is twelve.",
+     "trunk": {
+      "subject": "Li Ming",
+      "verb": "is",
+      "note": "谁 = Li Ming（李明），怎么样 = is twelve（十二岁）"
+     },
+     "keys": [
+      {
+       "w": "twelve",
+       "zh": "十二"
+      }
+     ],
+     "tags": [
+      "be_verb"
+     ]
+    },
+    {
+     "id": 4,
+     "para": 2,
+     "en": "He is good at drawing.",
+     "zh": "他很会画画。",
+     "chunks": "He is good at drawing.",
+     "trunk": {
+      "subject": "He",
+      "verb": "is",
+      "note": "谁 = He（李明），怎么样 = is good at drawing（很会画画）"
+     },
+     "keys": [
+      {
+       "w": "good at",
+       "zh": "擅长"
+      },
+      {
+       "w": "drawing",
+       "zh": "画画"
+      }
+     ],
+     "tags": [
+      "be_adj",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 5,
+     "para": 2,
+     "en": "He often draws cats and dogs in his notebook.",
+     "zh": "他常在本子上画猫和狗。",
+     "chunks": "He often draws cats and dogs / in his notebook.",
+     "trunk": {
+      "subject": "He",
+      "verb": "draws",
+      "note": "谁 = He（李明），干什么 = draws（画）cats and dogs"
+     },
+     "keys": [
+      {
+       "w": "often",
+       "zh": "常常"
+      },
+      {
+       "w": "notebook",
+       "zh": "本子"
+      }
+     ],
+     "tags": [
+      "freq_adv",
+      "third_s",
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 6,
+     "para": 2,
+     "en": "He joins the art club.",
+     "zh": "他参加了美术社团。",
+     "chunks": "He joins the art club.",
+     "trunk": {
+      "subject": "He",
+      "verb": "joins",
+      "note": "谁 = He（李明），干什么 = joins（参加）the art club"
+     },
+     "keys": [
+      {
+       "w": "joins",
+       "zh": "参加"
+      },
+      {
+       "w": "art club",
+       "zh": "美术社团"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 7,
+     "para": 2,
+     "en": "“I want to paint a big picture of our school,” he says.",
+     "zh": "“我想给我们学校画一张大画，”他说。",
+     "chunks": "“I want to paint a big picture of our school,” / he says.",
+     "trunk": {
+      "subject": "he",
+      "verb": "says",
+      "note": "谁 = he（李明），干什么 = says（说）；他说的话里：I want to paint（我想画）"
+     },
+     "keys": [
+      {
+       "w": "paint",
+       "zh": "画（用颜料画）"
+      },
+      {
+       "w": "picture",
+       "zh": "画，图画"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 8,
+     "para": 3,
+     "en": "Wang Fang can play the guitar, and she can sing well.",
+     "zh": "王芳会弹吉他，歌也唱得好。",
+     "chunks": "Wang Fang can play the guitar, / and she can sing well.",
+     "trunk": {
+      "subject": "Wang Fang",
+      "verb": "can play",
+      "note": "谁 = Wang Fang（王芳），干什么 = can play the guitar（会弹吉他）；后半句 she can sing well（她歌唱得好）",
+      "also": [
+       {
+        "subject": "she",
+        "verb": "can sing"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "guitar",
+       "zh": "吉他"
+      },
+      {
+       "w": "sing well",
+       "zh": "唱得好"
+      }
+     ],
+     "tags": [
+      "can",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 9,
+     "para": 3,
+     "en": "She joins the music club.",
+     "zh": "她参加了音乐社团。",
+     "chunks": "She joins the music club.",
+     "trunk": {
+      "subject": "She",
+      "verb": "joins",
+      "note": "谁 = She（王芳），干什么 = joins the music club（参加音乐社团）"
+     },
+     "keys": [
+      {
+       "w": "joins",
+       "zh": "参加"
+      },
+      {
+       "w": "music club",
+       "zh": "音乐社团"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 10,
+     "para": 3,
+     "en": "Every Friday, she sings with the other club members.",
+     "zh": "每个星期五，她和社团的其他成员一起唱歌。",
+     "chunks": "Every Friday, / she sings / with the other club members.",
+     "trunk": {
+      "subject": "she",
+      "verb": "sings",
+      "note": "谁 = she（王芳），干什么 = sings（唱歌）"
+     },
+     "keys": [
+      {
+       "w": "Every Friday",
+       "zh": "每个星期五"
+      },
+      {
+       "w": "other",
+       "zh": "别的，其他的"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 11,
+     "para": 3,
+     "en": "She hopes to sing at the New Year party.",
+     "zh": "她希望在新年晚会上唱歌。",
+     "chunks": "She hopes to sing / at the New Year party.",
+     "trunk": {
+      "subject": "She",
+      "verb": "hopes",
+      "note": "谁 = She（王芳），动词 = hopes（意思留给你猜），后面 to sing（唱歌）"
+     },
+     "keys": [
+      {
+       "w": "sing",
+       "zh": "唱歌"
+      },
+      {
+       "w": "New Year party",
+       "zh": "新年晚会"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 12,
+     "para": 4,
+     "en": "David is from Canada.",
+     "zh": "David 是加拿大人。",
+     "chunks": "David is from Canada.",
+     "trunk": {
+      "subject": "David",
+      "verb": "is",
+      "note": "谁 = David，从哪来 = is from Canada（是加拿大来的）"
+     },
+     "keys": [
+      {
+       "w": "from",
+       "zh": "来自"
+      },
+      {
+       "w": "Canada",
+       "zh": "加拿大"
+      }
+     ],
+     "tags": [
+      "be_verb"
+     ]
+    },
+    {
+     "id": 13,
+     "para": 4,
+     "en": "He loves animals.",
+     "zh": "他很喜欢动物。",
+     "chunks": "He loves animals.",
+     "trunk": {
+      "subject": "He",
+      "verb": "loves",
+      "note": "谁 = He（David），干什么 = loves animals（很喜欢动物）"
+     },
+     "keys": [
+      {
+       "w": "loves",
+       "zh": "很喜欢"
+      },
+      {
+       "w": "animals",
+       "zh": "动物"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 14,
+     "para": 4,
+     "en": "He joins the volunteer club.",
+     "zh": "他参加了志愿者社团。",
+     "chunks": "He joins the volunteer club.",
+     "trunk": {
+      "subject": "He",
+      "verb": "joins",
+      "note": "谁 = He（David），干什么 = joins the volunteer club（参加志愿者社团）"
+     },
+     "keys": [
+      {
+       "w": "volunteer",
+       "zh": "志愿者"
+      },
+      {
+       "w": "club",
+       "zh": "社团"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 15,
+     "para": 4,
+     "en": "On Saturdays, he and other volunteers go to an animal home near the school.",
+     "zh": "每个星期六，他和其他志愿者去学校附近的一个动物之家。",
+     "chunks": "On Saturdays, / he and other volunteers / go to an animal home / near the school.",
+     "trunk": {
+      "subject": "he and other volunteers",
+      "verb": "go",
+      "note": "谁 = he and other volunteers（他和其他志愿者），干什么 = go to an animal home（去动物之家）"
+     },
+     "keys": [
+      {
+       "w": "On Saturdays",
+       "zh": "每个星期六"
+      },
+      {
+       "w": "animal home",
+       "zh": "动物之家"
+      }
+     ],
+     "tags": [
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 16,
+     "para": 4,
+     "en": "They clean the rooms and play with the cats and dogs there.",
+     "zh": "他们打扫房间，陪那里的猫和狗玩。",
+     "chunks": "They clean the rooms / and play with the cats and dogs there.",
+     "trunk": {
+      "subject": "They",
+      "verb": "clean",
+      "note": "谁 = They（志愿者们），干什么 = clean the rooms（打扫房间）and play with（陪……玩）",
+      "also": [
+       {
+        "verb": "play with"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "clean",
+       "zh": "打扫"
+      },
+      {
+       "w": "play with",
+       "zh": "和……玩"
+      }
+     ],
+     "tags": [
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 17,
+     "para": 4,
+     "en": "Some cats do not like people at first, but now they are happy when the volunteers come.",
+     "zh": "有些猫一开始不喜欢人，可现在志愿者一来，它们就很高兴。",
+     "chunks": "Some cats do not like people / at first, / but now they are happy / when the volunteers come.",
+     "trunk": {
+      "subject": "Some cats",
+      "verb": "do not like",
+      "note": "谁 = Some cats（有些猫），干什么 = do not like people（不喜欢人）；后半句 they are happy（它们很高兴）",
+      "also": [
+       {
+        "subject": "they",
+        "verb": "are"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "people",
+       "zh": "人，人们"
+      },
+      {
+       "w": "happy",
+       "zh": "高兴的"
+      }
+     ],
+     "tags": [
+      "do_q",
+      "plural",
+      "be_adj",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 18,
+     "para": 4,
+     "en": "“The cats are my friends,” David says.",
+     "zh": "“这些猫是我的朋友，”David 说。",
+     "chunks": "“The cats are my friends,” / David says.",
+     "trunk": {
+      "subject": "David",
+      "verb": "says",
+      "note": "谁 = David，干什么 = says（说）；他说的话里：The cats are my friends（这些猫是我的朋友）"
+     },
+     "keys": [
+      {
+       "w": "friends",
+       "zh": "朋友"
+      },
+      {
+       "w": "says",
+       "zh": "说"
+      }
+     ],
+     "tags": [
+      "third_s",
+      "plural",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 19,
+     "para": 5,
+     "en": "Which club do you want to join?",
+     "zh": "你想参加哪个社团？",
+     "chunks": "Which club / do you want to join?",
+     "trunk": {
+      "subject": "you",
+      "verb": "do ... want",
+      "note": "问句：谁 = you（你），干什么 = do ... want to join（想参加）"
+     },
+     "keys": [
+      {
+       "w": "Which",
+       "zh": "哪个"
+      },
+      {
+       "w": "join",
+       "zh": "参加"
+      }
+     ],
+     "tags": [
+      "wh_q",
+      "do_q",
+      "pronoun"
+     ]
+    },
+    {
+     "id": 20,
+     "para": 5,
+     "en": "Come and tell us!",
+     "zh": "来告诉我们吧！",
+     "chunks": "Come and tell us!",
+     "trunk": {
+      "subject": "",
+      "verb": "Come",
+      "note": "叫你做的事，没有主语：Come（来）and tell us（告诉我们）",
+      "kind": "imperative",
+      "also": [
+       {
+        "verb": "tell"
+       }
+      ]
+     },
+     "keys": [
+      {
+       "w": "Come",
+       "zh": "来"
+      },
+      {
+       "w": "tell us",
+       "zh": "告诉我们"
+      }
+     ],
+     "tags": [
+      "imperative",
+      "pronoun"
+     ]
+    }
+   ],
+   "questions": [
+    {
+     "id": "q1",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "What does Li Ming often draw?",
+     "zh": "李明常常画什么？",
+     "options": [
+      "Flowers and trees.",
+      "His school.",
+      "Cats and dogs.",
+      "His friends."
+     ],
+     "options_zh": [
+      "花和树。",
+      "他的学校。",
+      "猫和狗。",
+      "他的朋友。"
+     ],
+     "answer": "Cats and dogs.",
+     "evidence": [
+      5
+     ],
+     "drop": "His school.",
+     "hints": [
+      "回到第 5 句，第 2 段讲李明的那几句。",
+      "题里的关键词是 often draw（常常画）。找到 often draws，看后面画的是什么。",
+      "排除“His school”：第 7 句说他想给学校画一张大画，那是他想做的事，不是他常常画的。",
+      "答案是“Cats and dogs”。第 5 句：He often draws cats and dogs in his notebook（他常在本子上画猫和狗）。"
+     ],
+     "variant": {
+      "ask": "Which club does Li Ming join?",
+      "zh": "李明参加了哪个社团？",
+      "options": [
+       "The art club.",
+       "The music club.",
+       "The volunteer club.",
+       "The English club."
+      ],
+      "options_zh": [
+       "美术社团。",
+       "音乐社团。",
+       "志愿者社团。",
+       "英语社团。"
+      ],
+      "answer": "The art club.",
+      "evidence": [
+       6
+      ],
+      "explain": "第 6 句：He joins the art club（他参加了美术社团）。音乐社团是王芳的，志愿者社团是 David 的。"
+     }
+    },
+    {
+     "id": "q2",
+     "type": "detail",
+     "skill": "detail",
+     "skill_zh": "找细节",
+     "ask": "Who can play the guitar?",
+     "zh": "谁会弹吉他？",
+     "options": [
+      "Li Ming.",
+      "Wang Fang.",
+      "David.",
+      "Li Ming and David."
+     ],
+     "options_zh": [
+      "李明。",
+      "王芳。",
+      "David。",
+      "李明和 David。"
+     ],
+     "answer": "Wang Fang.",
+     "evidence": [
+      8
+     ],
+     "drop": "Li Ming.",
+     "hints": [
+      "回到第 8 句，第 3 段的第一句。",
+      "题里的关键词是 play the guitar（弹吉他）。在原文里找到它，看这句说的是谁。",
+      "排除“Li Ming”：李明会画画，参加的是美术社团（第 4、6 句），没说他会弹吉他。",
+      "答案是“Wang Fang”。第 8 句：Wang Fang can play the guitar, and she can sing well（王芳会弹吉他，歌也唱得好）。"
+     ],
+     "variant": {
+      "ask": "Where is David from?",
+      "zh": "David 是从哪儿来的？",
+      "options": [
+       "Canada.",
+       "China.",
+       "The animal home.",
+       "The music club."
+      ],
+      "options_zh": [
+       "加拿大。",
+       "中国。",
+       "动物之家。",
+       "音乐社团。"
+      ],
+      "answer": "Canada.",
+      "evidence": [
+       12
+      ],
+      "explain": "第 12 句：David is from Canada（David 是从加拿大来的）。"
+     }
+    },
+    {
+     "id": "q3",
+     "type": "infer",
+     "skill": "infer",
+     "skill_zh": "把几句连起来想",
+     "ask": "What can we learn about David?",
+     "zh": "从文中可以知道 David 是什么样的人？",
+     "options": [
+      "He is from China.",
+      "He doesn't like cats.",
+      "He is good at singing.",
+      "He likes helping animals."
+     ],
+     "options_zh": [
+      "他是中国人。",
+      "他不喜欢猫。",
+      "他很会唱歌。",
+      "他喜欢帮助小动物。"
+     ],
+     "answer": "He likes helping animals.",
+     "evidence": [
+      13,
+      15,
+      16,
+      18
+     ],
+     "drop": "He doesn't like cats.",
+     "hints": [
+      "回到第 4 段，看第 13 句和第 16 句。",
+      "第 13 句 He loves animals；第 15、16 句他每个星期六去动物之家打扫、陪猫和狗玩。",
+      "排除“He doesn't like cats”：第 18 句他说 The cats are my friends（这些猫是我的朋友）。",
+      "答案是“He likes helping animals”。他喜欢动物，参加了志愿者社团，每个星期六去帮小动物。原文没有直接这么说，要把几句连起来想。"
+     ],
+     "variant": {
+      "ask": "How do the cats feel now when the volunteers come?",
+      "zh": "现在志愿者一来，那些猫感觉怎么样？",
+      "options": [
+       "Happy.",
+       "Angry.",
+       "Sad.",
+       "Tired."
+      ],
+      "options_zh": [
+       "高兴。",
+       "生气。",
+       "难过。",
+       "累。"
+      ],
+      "answer": "Happy.",
+      "evidence": [
+       17
+      ],
+      "explain": "第 17 句：now they are happy when the volunteers come（现在志愿者一来，它们就很高兴）。一开始不喜欢人，后来变了。"
+     }
+    },
+    {
+     "id": "q4",
+     "type": "meaning",
+     "skill": "word",
+     "skill_zh": "看前后句猜词义",
+     "word": "hope",
+     "ask": "What is \"hopes\" in Chinese? (Sentence 11)",
+     "zh": "第 11 句里的 hopes 是什么意思？",
+     "options": [
+      "希望",
+      "忘记",
+      "害怕",
+      "不想"
+     ],
+     "answer": "希望",
+     "evidence": [
+      11
+     ],
+     "drop": "不想",
+     "hints": [
+      "回到第 11 句，第 3 段的最后一句。",
+      "前面说王芳会唱歌，每个星期五和社团的同学一起唱。她对在新年晚会上唱歌是什么心情？",
+      "排除“不想”：她那么喜欢唱歌，不会不想在晚会上唱。",
+      "答案是“希望”。hope = 希望：She hopes to sing at the New Year party，她希望在新年晚会上唱歌。"
+     ],
+     "variant": {
+      "ask": "What is the meaning of \"at first\" in Sentence 17?",
+      "zh": "第 17 句里的 at first 是什么意思？",
+      "options": [
+       "一开始",
+       "最后",
+       "每天",
+       "从来不"
+      ],
+      "answer": "一开始",
+      "evidence": [
+       17
+      ],
+      "explain": "第 17 句 at first 和后面的 but now（可是现在）对着说：现在高兴了，以前，也就是一开始，不喜欢人。"
+     }
+    },
+    {
+     "id": "q5",
+     "type": "main",
+     "skill": "main",
+     "skill_zh": "主旨题看开头",
+     "ask": "What is the passage about?",
+     "zh": "这篇短文主要讲了什么？",
+     "options": [
+      "How to make friends.",
+      "An animal home near the school.",
+      "A New Year party.",
+      "Three students and their clubs."
+     ],
+     "options_zh": [
+      "怎样交朋友。",
+      "学校附近的动物之家。",
+      "一场新年晚会。",
+      "三个同学和他们的社团。"
+     ],
+     "answer": "Three students and their clubs.",
+     "evidence": [
+      2
+     ],
+     "drop": "An animal home near the school.",
+     "hints": [
+      "主旨题先看开头：第 2 句说了这篇要讲什么。",
+      "第 2 句 Here are three new students and their clubs，后面三段，一段讲一个同学。",
+      "排除“An animal home near the school”：动物之家只在第 4 段讲 David 时说到，管不住整篇。",
+      "答案是“Three students and their clubs”。第 2 句已经说了：三个新同学和他们的社团，后面三段一人一段。"
+     ],
+     "variant": {
+      "ask": "How many new students does the passage talk about?",
+      "zh": "这篇短文讲了几个新同学？",
+      "options": [
+       "Three.",
+       "Two.",
+       "Four.",
+       "Five."
+      ],
+      "options_zh": [
+       "三个。",
+       "两个。",
+       "四个。",
+       "五个。"
+      ],
+      "answer": "Three.",
+      "evidence": [
+       2
+      ],
+      "explain": "第 2 句：Here are three new students and their clubs（下面是三个新同学和他们的社团）。后面三段一段讲一个：李明、王芳、David。"
      }
     }
    ]

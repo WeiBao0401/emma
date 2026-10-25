@@ -322,7 +322,7 @@ function evidenceFor(e, { events, gs, c, from }) {
   }
   const hit = list.find(x => x.slug === e.slug && ((x.type === 'answer' && x.first_try !== false && (!x.mode || WORD_MODES.has(x.mode))) || x.type === 'dictation'));
   if (!hit) return null;
-  return { day: evDay(hit), ok: !!hit.correct, item: hit.item || 'w:' + e.slug, choice: hit.correct ? '' : str(hit.choice, 60), stem: '',
+  return { day: evDay(hit), ok: cleanRight(hit), item: hit.item || 'w:' + e.slug, choice: hit.correct ? '' : str(hit.choice, 60), stem: '',
     answer: '', word: e.word };
 }
 
@@ -397,8 +397,15 @@ export function retellAsk(e) {
       '给一个新的、只用我学过的词的例句；讲完再出一道小题考我。';
   }
   const miss = r.stem ? `题目是 ${r.stem}` + (r.choice ? `，我选了 ${r.choice}` : '') + (r.answer ? `，正确答案是 ${r.answer}` : '') : '';
+  // 0.6.0: the card's second explanation (grammar.json alt), so the teacher's 换个讲法 matches what the App shows
+  let alt = '';
+  try {
+    const pc = e.point ? pointCard(e.point) : null;
+    const a = pc && pc.card && pc.card.alt;
+    if (a && Array.isArray(a.rule) && a.rule.length) alt = `App 里这张语法卡的第二种讲法是“${a.title || ''}”：${a.rule.slice(0, 4).join(' ')} 可以照这个角度讲。`;
+  } catch (err) { alt = ''; }
   return `上次你给我讲过“${e.label}”${asked}。这几天热身里又考到这个点，我做错了${miss ? '：' + miss : ''}。` +
-    '请换一种讲法再讲一遍：不要重复上次的说法；把对的和错的放在一起对比，说清楚区别在哪；举两个新的例子，只用我学过的词；讲完再出一道小题考我。';
+    '请换一种讲法再讲一遍：不要重复上次的说法；把对的和错的放在一起对比，说清楚区别在哪；举两个新的例子，只用我学过的词；讲完再出一道小题考我。' + alt;
 }
 
 export function applyRetell(state, key, { accepted = true, now = new Date() } = {}) {
@@ -472,8 +479,10 @@ export function lessonDaysIn(kv, from, to) {
   }).sort();
 }
 
-const MODE_ZH = { mc4: '认词四选一', tiles: '字母块拼写', listen: '听音选词', keys: '键盘拼写', cloze: '填空', grammar: '语法题', read: '读后题',
-  order: '连词成句', card: '闪卡', paper: '纸笔', transform: '句型转换', verb: '找动词' };
+const MODE_ZH = { mc4: '认词四选一', tiles: '字母块拼写', listen: '听音选词', keys: '键盘拼写', cloze: '句子里回想', grammar: '语法题', read: '读后题',
+  order: '连词成句', card: '闪卡', paper: '纸笔', transform: '句型转换', verb: '找动词', forms: '变形配对' };
+// 0.6.0 句子里回想: 提示 shows the sentence's Chinese and reads it aloud, so a right answer after it is not a clean one
+const cleanRight = x => !!(x && x.correct && !(x.mode === 'cloze' && x.hint_level > 0));
 const WORD_TAGS = new Set(['form', 'category', 'meaning', 'sound']);
 // 0.5.0: on a sentence with a trunk the first tap of 看不懂 shows the trunk, the second the chunks and key words
 const HELP_ZH = { 1: '要看主干或断句', 2: '要看断句或关键词', 3: '要看整句中文' };
@@ -502,7 +511,7 @@ export function summarizeWeek(events = [], { kv = null, from = '', to = '', now 
     if (e.type !== 'answer' || e.first_try === false) continue;
     const m = e.mode || 'mc4';
     bump(byMode, m);
-    if (e.correct) bump(right, m);
+    if (cleanRight(e)) bump(right, m);
     if (!e.correct && e.misconception && !WORD_TAGS.has(e.misconception)) bump(tags, e.misconception);
     if (m === 'grammar' && e.point) { bump(pts, e.point); if (!e.correct) bump(ptsWrong, e.point); }
     if (!e.correct && e.slug && WORD_MODES.has(m)) bump(wrongWords, e.slug);

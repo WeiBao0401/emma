@@ -83,9 +83,67 @@
 
 .gram-end .lede{font-size:30px}
 
+/* 0.5.2 换个讲法 (the card's alt): the small tag, the pairs (I → am) and the steps (说的是“谁的”吗？) */
+.gram-tag.alt,.gram-tag.cmp{background:var(--btn-bg);color:var(--btn-ink)}
+.gram-pairs{list-style:none;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.gram-pair{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:baseline;column-gap:14px;row-gap:2px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.gram-pair-l{font:500 19px/1.35 var(--sans);color:var(--ink);text-align:right}
+.gram-pair-l:lang(en),.gram-pair-r:lang(en){font-family:var(--serif)}
+.gram-pair-arrow{color:var(--faint);font:400 18px/1 var(--sans)}
+.gram-pair-r{font:600 22px/1.3 var(--serif);color:var(--accent)}
+.gram-pair-note{grid-column:3;font:400 16px/1.45 var(--serif);color:var(--muted)}
+.gram-pair-note:lang(zh-CN){font-family:var(--sans);font-size:15px}
+.gram-steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:14px}
+.gram-step{padding:14px 16px;border:1px solid var(--rule-strong);border-radius:12px;background:var(--paper)}
+.gram-step-ask{display:flex;gap:10px;align-items:flex-start;font:600 19px/1.45 var(--sans);color:var(--ink)}
+.gram-branches{list-style:none;padding:8px 0 0 32px;display:flex;flex-direction:column;gap:8px}
+.gram-branch{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font:17px/1.5 var(--sans);color:var(--ink)}
+.gram-branch-if{flex:none;min-width:4.5em;padding:1px 8px;border-radius:4px;background:var(--tag-bg);font-weight:600;text-align:center}
+.gram-branch-then{flex:1 1 14em}
+
+/* 对比小卡: one sentence, two columns side by side (stacked on a phone), three quick judgments */
+.gram-cmp{display:flex;flex-direction:column;gap:14px}
+.gram-cmp.mini{gap:10px;padding-top:16px;border-top:1px solid var(--rule)}
+.gram-cmp-kicker{font:600 15px/1.3 var(--sans);color:var(--accent)}
+.gram-cmp-zh{font:500 18px/1.55 var(--sans);color:var(--ink)}
+.gram-cmp-zh.big{font-size:21px}
+.gram-cmp-cols{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:600px){.gram-cmp-cols{grid-template-columns:1fr 1fr;gap:14px}}
+.gram-cmp-col{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border:1px solid var(--rule-strong);border-radius:12px;background:var(--paper)}
+.gram-cmp-col.r{border-style:dashed}
+.gram-cmp-head{font:600 28px/1.2 var(--serif);color:var(--accent)}
+.gram-cmp-head:lang(zh-CN){font:600 22px/1.3 var(--sans)}
+.gram-cmp-note{font-size:15px;line-height:1.4;color:var(--muted)}
+.gram-cmp-ex{list-style:none;padding:0;display:flex;flex-direction:column;gap:10px}
+.gram-cmp-ex .gram-en{font-size:20px}
+.gram-cmp.mini .gram-cmp-head{font-size:22px}
+.gram-cmp.mini .gram-cmp-ex .gram-en{font-size:18px}
+
+.gram-qz{list-style:none;padding:0;display:flex;flex-direction:column;gap:18px}
+.gram-qz-item{display:flex;flex-direction:column;gap:10px;padding-bottom:16px;border-bottom:1px solid var(--rule)}
+.gram-qz-n{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font:600 14px/1.3 var(--sans);color:var(--faint)}
+.gram-qz-ask{font:500 17px/1.4 var(--sans);color:var(--ink)}
+.gram-qz-stem{font:500 26px/1.45 var(--serif);color:var(--ink);text-wrap:pretty}
+.gram-qz-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gram-qz-opts.one-col{grid-template-columns:1fr}
+.gram-qz-opt{display:flex;align-items:center;gap:14px;min-height:64px;padding:12px 18px;text-align:left;
+  border:1px solid var(--rule-strong);border-radius:12px;background:var(--paper);color:var(--ink);
+  transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease)}
+.gram-qz-opts.one-col .gram-text{font-size:21px}
+.gram-qz-opt:active:not(:disabled){background:var(--tag-bg)}
+.gram-qz-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.gram-qz-opt:disabled{cursor:default;opacity:.55}
+.gram-qz-opt.right,.gram-qz-opt.is-answer{opacity:1;border-color:var(--good);color:var(--good);box-shadow:inset 0 0 0 1px var(--good)}
+.gram-qz-opt.right{background:var(--tag-bg)}
+.gram-qz-opt.right .gram-letter,.gram-qz-opt.is-answer .gram-letter{color:var(--good)}
+.gram-qz-opt.wrong{opacity:1;border-color:var(--danger);color:var(--danger)}
+.gram-qz-opt.wrong .gram-text{text-decoration:line-through;text-decoration-thickness:1px}
+.gram-qz-explain{font:17px/1.55 var(--sans);color:var(--ink)}
+.gram-qz-explain.ok{color:var(--good)}
+
 @media (min-width:700px){
   .gram-title{font-size:38px}
   .gram-stem{font-size:34px}
   .gram-table{font-size:17px}
 }
-@media (prefers-reduced-motion:reduce){.gram-opt{transition:none}}
+@media (prefers-reduced-motion:reduce){.gram-opt,.gram-qz-opt{transition:none}}

@@ -11,6 +11,11 @@
 // askedReviewItems); 句型转换 joins the 写几个词 rotation (modes/order.js, curriculum/transform.json); the quiz reads one
 // 期中阅读小篇 (curriculum/exam-reading.json, reader.js loadPassages); 课文陪读 (ui-textread.js) lays its own full-screen
 // layer over the app (app.textread, opened from 今天 and 问老师); the weekly teacher (teacher.js) thinks in the background.
+// 0.6.0 (第 4 批, design/teacher-next.md 4.3 and 5): 句子里回想 (modes/cloze.js: a few warm-up words spelled inside a
+// sentence she has read), 变形配对 (modes/forms.js, curriculum/forms.json), the words she tapped or asked about come first
+// in their band (cloze.js pickedSlugs over kv and the last 14 days of lookup / read_help / ask events), one 对比小卡 for the
+// misconception she hits most (grammar.js contrastItems, curriculum/contrast.json); the two modes are imported at boot
+// with a catch, so a failure there only leaves them out of the plan.
 // v1 (0.2.0): the grammar cards are loaded at boot (grammar.js) and their progress goes into the plan's state with the
 // parent's form (intake.js: busy days, recent mistakes) and the review outline (kv 'outline'); the spelling, listening,
 // grammar and phonics parts of a lesson are loaded by ui-lesson.js itself (import()).
@@ -128,6 +133,35 @@ let examPassages = [];
 const passageMinutes = ep => Math.max(4, Math.round((ep.words || 0) / 70 + (ep.questions || []).length * 0.7));
 const addDay = (day, n) => { const [y, m, d] = day.split('-').map(Number); return dayOf(new Date(y, m - 1, d + n, 12)); };
 
+// 0.6.0: 句子里回想 and 变形配对 (loaded in boot; null when they did not load)
+let Cz = null, Fm = null;
+// which words can be spelled in a sentence: worked out once a day (and again when the word book or the content changes),
+// over the review cards only, because it reads every sentence for every word
+let clozeMemo = { key: '', ready: [] };
+function clozeReadyNow(now) {
+  if (!Cz) return [];
+  const sources = Cz.defaultSources(app);
+  const favs = words.favorites();
+  const key = [dayOf(now), favs.length, sources.length, curriculumGen].join('|');
+  if (clozeMemo.key !== key) {
+    const list = favs.filter(e => e && e.fsrs && e.fsrs.state !== 0);
+    clozeMemo = { key, ready: Cz.clozeReady(list, sources, { curriculum }) };
+  }
+  return clozeMemo.ready;
+}
+// the last 14 days of the events pickedSlugs reads (lookups from 问老师 and reading, 看不懂, 问老师's questions): read at
+// boot, then again in the background when the plan is worked out and the copy is a minute old (so after each lesson)
+const PICK_TYPES = ['lookup', 'read_help', 'ask'];
+let recentEvents = [];
+let recentAt = 0;
+function refreshRecent() {
+  recentAt = Date.now();
+  const since = new Date(Date.now() - 14 * 864e5);
+  return events.query({ since, type: PICK_TYPES, limit: 20000 }).then(list => { recentEvents = Array.isArray(list) ? list : []; })
+    .catch(e => console.warn('recent events:', (e && e.message) || e));
+}
+let curriculumGen = 0;
+
 // The v1 fields of the plan's state (CONTRACTS.md 9.3). Each part is optional: whatever fails is left out and plan.js
 // falls back (sprint.js's own grammar questions and card order, no busy day, no boost).
 function v1State(now, progress) {
@@ -193,6 +227,24 @@ function v1State(now, progress) {
   } catch (e) { console.warn('plan state: reading:', (e && e.message) || e); }
   // the quiz's 期中阅读小篇
   if (examPassages.length) { out.examPassages = examPassages; out.examReading = kv.peek('exam.reading', null); }
+  // 0.6.0: 对比小卡 for the misconception she hit most lately ([] until contrast.json is there)
+  try { if (gs) out.contrastItems = G.contrastItems({ grammar: gs }, now) || []; } catch (e) { console.warn('plan state: contrast:', (e && e.message) || e); }
+  // 0.6.0: today's 变形配对 group (only the bases she has learned)
+  try { if (Fm && Fm.forms()) out.formsItem = Fm.formsItems(kv, now, { pool: Fm.poolFrom(app) }); } catch (e) { console.warn('plan state: forms:', (e && e.message) || e); }
+  // 0.6.0: 句子里回想 (which word cards can be spelled in a sentence) and the words she tapped or asked about herself
+  try {
+    if (Cz) {
+      out.clozeReady = clozeReadyNow(now);
+      if (Date.now() - recentAt > 60000) refreshRecent();
+      out.picked = Cz.pickedSlugs(kv, recentEvents, {
+        now,
+        has: slug => { const e = words.get(slug); return !!(e && e.favorited && e.fsrs); },
+        lemma: q => dict.lemma(q),
+        isBook: w => !!(curriculum && curriculum.unitOf && curriculum.unitOf(w)),
+        reviewed: slug => { const e = words.get(slug); return (e && e.fsrs && e.fsrs.last_review) || ''; },
+      });
+    }
+  } catch (e) { console.warn('plan state: cloze:', (e && e.message) || e); }
   // 连词成句: Wednesday's sentences and the odd one in the warm-up (modes/order.js)
   try {
     if (O.content()) {
@@ -221,7 +273,7 @@ const app = {
   // the parent's form as defaults for every module (intake.js), worked out on each call so a new answer or an import shows
   intake: () => intakeDefaults(kv, { entries: words.all(), curriculum, lemma: q => dict.lemma(q) }),
   // after the textbook import writes kv 'textbook' (CONTRACTS.md "课本导入")
-  async reloadCurriculum() { curriculum = await curriculumNow(); for (const v of [home, lib, chat]) if (v && v.onChange) v.onChange(); return curriculum; },
+  async reloadCurriculum() { curriculum = await curriculumNow(); curriculumGen++; for (const v of [home, lib, chat]) if (v && v.onChange) v.onChange(); return curriculum; },
   say: (text, button, opts) => voice.say(text, button, opts),
   // settings
   settings: () => settings,
@@ -522,6 +574,11 @@ async function boot() {
       O.loadTransform({ fetchJSON }).catch(e => console.warn('transform:', (e && e.message) || e)),
       R.loadPassages({ fetchJSON }).then(list => { examPassages = (list || []).map((ep, i) => ({ id: ep.id, label: ep.label || `期中阅读 · 第 ${i + 1} 篇`, minutes: passageMinutes(ep) })); })
         .catch(e => console.warn('exam reading:', (e && e.message) || e)),
+      // 0.6.0: 句子里回想 needs no file of its own (it reads the stories, grammar cards and 连词成句 loaded here);
+      // 变形配对 reads curriculum/forms.json. Either failing just leaves it out of the warm-up.
+      import('./modes/cloze.js').then(m => { Cz = m; }).catch(e => console.warn('cloze:', (e && e.message) || e)),
+      import('./modes/forms.js').then(m => { Fm = m; return m.loadForms({ fetchJSON }); }).catch(e => console.warn('forms:', (e && e.message) || e)),
+      refreshRecent(),
     ]);
   } catch (e) {
     console.error(e);

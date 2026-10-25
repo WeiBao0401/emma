@@ -226,7 +226,9 @@ function attemptOf(e) {
   if (e.type === 'answer') {
     if (!OBJECTIVE_MODES.includes(e.mode)) return null;
     const write = WRITE_MODES.includes(e.mode) || /^ep:/.test(String(e.item || ''));
-    return { slug: e.slug, day: evDay(e), at: e.at, correct: e.correct, write, first: e.first_try !== false };
+    // 0.6.0 句子里回想: 提示 shows the sentence's Chinese and reads it aloud, so a right answer after it is not clean
+    const correct = e.correct && !(e.mode === 'cloze' && e.hint_level > 0);
+    return { slug: e.slug, day: evDay(e), at: e.at, correct, write, first: e.first_try !== false };
   }
   if (e.type === 'dictation' || e.type === 'spell') return { slug: e.slug, day: evDay(e), at: e.at, correct: e.correct, write: true, first: true };
   return null;
