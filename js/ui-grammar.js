@@ -4,7 +4,10 @@
 // 负责：语法卡 agent。
 //
 // 导出
-//   renderGrammarCard(container, ctx, { cardId, part, onDone, sid?, step?, doneLabel? }) -> Controller
+//   renderGrammarCard(container, ctx, { cardId, part, onDone, sid?, step?, doneLabel?, tune? }) -> Controller
+//     tune（0.7.1）：kid-me knobs.grammar（不给就从 kv 'kid.level' 算）。难度低：altFirst 有第二讲法先讲它、fewer 少几道、
+//     autoHint 第 1 级提示更具体；难度高：跳过规则页直接做题、skipClean 换掉做对过的、variants 末尾多变式 / 备用题、提示少一级、
+//     contrast 做完接一张对比小卡（contrastItems 推的，没有就算了）
 //     把一张卡的一天（part 1 = 前 5 道，part 2 = 后 5 道）画进 container（会清空它）。先是规则页，点“开始做题”出题；
 //     上次没做完的接着做。做完显示今天的结果，点“接着上课”调用 onDone({ cardId, part, done: true, stats, state })。
 //     ctx 用到：kv（读写 'grammar:<cardId>'）、events.log、events.sessionId（没给 sid 时）、say（朗读，可以没有）。
@@ -28,6 +31,15 @@
 // “这题有问题” 'flag'（跳过、不记分、以后不再出）。
 import { h, icon } from './ui-dom.js';
 import * as G from './grammar.js';
+import { knobsFor } from './kid-me.js';
+
+// 0.7.1: the tune for this card (plan gives it on the cell; otherwise her 语法卡 difficulty from kv 'kid.level')
+export function tuneOf(ctx, tune) {
+  if (tune && typeof tune === 'object') return tune;
+  try { return ctx && ctx.kv ? knobsFor(ctx.kv).grammar : null; } catch (e) { return null; }
+}
+// 难度高：跳过讲解直接做题（换讲法那屏照旧要讲）；难度低：有第二讲法的先讲第二讲法
+export const skipRuleOf = t => !!(t && (t.skipRule || t.skipClean || Number(t.variants) > 0));
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 export const PART_LABEL = { 1: '第一天 · 前 5 道', 2: '第二天 · 后 5 道' };
@@ -410,7 +422,8 @@ export function renderContrast(container, ctx, { id = '', item = null, onDone = 
   return ctl;
 }
 
-export function renderGrammarCard(container, ctx, { cardId, part = 1, onDone = () => {}, sid = '', step = G.STEP, doneLabel = '接着上课', why = '' } = {}) {
+export function renderGrammarCard(container, ctx, { cardId, part = 1, onDone = () => {}, sid = '', step = G.STEP, doneLabel = '接着上课', why = '', tune = null } = {}) {
+  const t = tuneOf(ctx, tune);
   const shell = h('div', { className: 'gram-shell' }, h('p', { className: 'gram-wait small' }, '稍等……'));
   container.replaceChildren(shell);
   let qv = null, run = null, stopped = false;
@@ -422,19 +435,31 @@ export function renderGrammarCard(container, ctx, { cardId, part = 1, onDone = (
     if (!card) { shell.replaceChildren(h('p', { className: 'gram-wait small' }, '这张卡还没准备好。'), h('button', { type: 'button', className: 'btn', on: { click: () => onDone({ cardId, part, done: false }) } }, doneLabel)); return; }
     const state = G.normState(ctx && ctx.kv ? ctx.kv.peek(G.kvKey(cardId), null) : null, cardId);
     // 讲不通就换讲法: the same mistake twice (or a variant missed after hint 4) since the last time, so this time the other way
-    const due = card.alt ? G.altDue(state, new Date(), { content: c }) : null;
-    run = G.createRun({ content: c, cardId, part, state, now: () => new Date(), log: logger(ctx), save: saver(ctx), sid: sidOf(ctx, sid), step, alt: due || false });
+    const due = card.alt ? G.altDue(state, new Date(), { content: c }) || (t && t.altFirst ? { cardId, reason: 'easy' } : null) : null;
+    run = G.createRun({ content: c, cardId, part, state, now: () => new Date(), log: logger(ctx), save: saver(ctx), sid: sidOf(ctx, sid), step, alt: due || false, tune: t });
     const total = c.part(cardId, part).length;
-    const finish = () => onDone({ cardId, part, done: true, stats: run.stats, state: run.state });
+    const report = () => onDone({ cardId, part, done: true, stats: run.stats, state: run.state });
+    // 挑战：做完再接一张对比小卡（她最近混过的那对），没有就直接结束
+    const finish = () => {
+      if (!(t && t.contrast)) { report(); return; }
+      let next = null;
+      try { next = G.contrastItems({ grammar: G.grammarState(ctx.kv, c) }, new Date(), { content: c, max: 1 })[0] || null; } catch (e) { next = null; }
+      if (!next) { report(); return; }
+      renderContrast(shell, ctx, { id: next.id, sid, step, doneLabel, why: next.why, onDone: report });
+    };
     const end = () => { qv = null; shell.replaceChildren(endView(card, part, run.stats, { onDone: finish, label: doneLabel })); };
     const show = () => {
       const x = run.current();
       if (!x) { end(); return; }
-      const label = x.kind === 'alt' ? `换个讲法 · 第 ${run.index + 1} 题 / ${run.altCount}` : `第 ${total - (run.total - run.index) + 1} 题 / ${total}`;
+      const label = x.kind === 'alt' ? `换个讲法 · 第 ${run.index + 1} 题 / ${run.altCount}`
+        : x.extra ? '多一道 · 换个句子'
+        : run.tuned ? `第 ${run.index - run.altCount + 1} 题 / ${run.total - run.altCount}`
+        : `第 ${total - (run.total - run.index) + 1} 题 / ${total}`;
       qv = questionView(run, ctx, { label, onNext: nx => (nx ? show() : end()) });
       shell.replaceChildren(qv.el);
     };
     if (!run.total) { end(); return; }
+    if (!run.altCount && skipRuleOf(t)) { show(); return; }
     shell.replaceChildren(run.altCount
       ? altView(card, { onStart: show, ctx, startLabel: `开始做题 · ${run.total} 道` })
       : ruleView(card, part, { remaining: run.total, total, onStart: show, ctx, why: String(why || '') }));
@@ -445,7 +470,9 @@ export function renderGrammarCard(container, ctx, { cardId, part = 1, onDone = (
   return ctl;
 }
 
-export function renderGrammarItem(container, ctx, { item = null, items = null, onDone = () => {}, sid = '', step = 'warmup', autoNextMs = 1400 } = {}) {
+export function renderGrammarItem(container, ctx, { item = null, items = null, onDone = () => {}, sid = '', step = 'warmup', autoNextMs = 1400, tune = null } = {}) {
+  const t = tuneOf(ctx, tune);
+  const ht = t ? { autoHint: t.autoHint, lessHints: t.lessHints || t.skipClean || Number(t.variants) > 0 } : null;
   const shell = h('div', { className: 'gram-shell warm' }, h('p', { className: 'gram-wait small' }, '稍等……'));
   container.replaceChildren(shell);
   let qv = null, run = null, stopped = false;
@@ -455,7 +482,7 @@ export function renderGrammarItem(container, ctx, { item = null, items = null, o
   ensureContent(ctx).then(c => {
     if (stopped) return;
     const states = G.grammarState(ctx && ctx.kv, c).cards;
-    run = G.createRun({ content: c, items: list, states, now: () => new Date(), log: logger(ctx), save: saver(ctx), sid: sidOf(ctx, sid), step });
+    run = G.createRun({ content: c, items: list, states, now: () => new Date(), log: logger(ctx), save: saver(ctx), sid: sidOf(ctx, sid), step, tune: ht });
     const finish = () => { qv = null; onDone({ results: run.results, stats: run.stats }); };
     const show = () => {
       const x = run.current();

@@ -14,7 +14,9 @@
 //   canListen(entry) -> bool
 //   sameSound(a, b) -> bool                     同音（表里的一对，或英美拼法）
 //   nearWords(word, words, { limit }) -> [string]   words 里和 word 读音近或长得像的（不含同音和变化形式）
-//   makeListen(entry, pool, { rng, extra, unit, known }) -> ListenQuestion | null   纯函数
+//   makeListen(entry, pool, { rng, extra, unit, known, distractor }) -> ListenQuestion | null   纯函数
+//     distractor（0.7.1）：'near' 读音近、长得像之外，同单元、同词性的再加分；'far' 不放读音近、长得像的，挑长度和
+//     首字母都不一样的（凑不齐退回 'normal'）；'normal' 原来的做法
 //     pool / extra 同四选一（词条、{ w, cn }、{ word, cn } 都行）；known(word) -> bool 她认识的词加分
 //     ListenQuestion = { id: 'w:<slug>', slug, unit, say: 要读的英文,
 //                        options: [{ text, slug, correct, tag: null | 'form' | 'sound' | 'category' | 'meaning', meaning, src }],
@@ -31,7 +33,7 @@
 // 依赖：ui-dom.js（h、icon）、words.js（slugify）、modes/choice.js（形近、读音近、标签、意思、评分）。
 import { h, icon } from '../ui-dom.js';
 import { slugify } from '../words.js';
-import { meaningOf, formNear, soundNear, sameWord, tagOf, meaningRelation, gradeOf, isRetry, choiceMode, TAG_NOTE } from './choice.js';
+import { meaningOf, posOf, formNear, soundNear, sameWord, tagOf, meaningRelation, gradeOf, isRetry, choiceMode, TAG_NOTE } from './choice.js';
 
 export const MODE_ID = 'listen';
 
@@ -90,8 +92,15 @@ function shuffle(list, rng) {
 
 const lenClose = (a, b) => Math.abs(a.length - b.length) <= Math.max(1, Math.round(Math.max(a.length, b.length) * 0.3));
 
-export function makeListen(entry, pool = [], { rng = Math.random, extra = [], unit, known } = {}) {
+export function makeListen(entry, pool = [], { rng = Math.random, extra = [], unit, known, distractor = 'normal' } = {}) {
   if (!entry || !entry.slug || !canListen(entry)) return null;
+  if (distractor === 'far') {
+    const xs = typeof extra === 'function' ? extra() : extra;
+    const far = makeListen(entry, pool, { rng, extra: xs, unit, known, distractor: 'far-only' });
+    return far || makeListen(entry, pool, { rng, extra: xs, unit, known, distractor: 'normal' });
+  }
+  const dist = distractor === 'far-only' ? 'far' : distractor === 'near' ? 'near' : 'normal';
+  const tpos = posOf(entry);
   const target = headOf(entry);
   const u = unit || entry.unit || null;
   const seen = new Set([low(target)]);
@@ -107,8 +116,12 @@ export function makeListen(entry, pool = [], { rng = Math.random, extra = [], un
       const form = formNear(target, hw), sound = soundNear(target, hw);
       let isKnown = src === 'pool';
       try { isKnown = isKnown || (!!known && !!known(hw)); } catch (e) { /* optional */ }
-      const score = (form ? 6 : 0) + (sound ? 5 : 0) + (isKnown ? 2 : 0) + (u && x.unit === u ? 2 : 0)
-        + (low(hw)[0] === low(target)[0] ? 1 : 0) + (lenClose(hw, target) ? 1 : 0) + rng() * 0.9;
+      if (dist === 'far' && (form || sound)) continue;
+      const samePos = !!tpos && posOf(x) === tpos;
+      const score = dist === 'far'
+        ? (isKnown ? 3 : 0) + (u && x.unit && x.unit !== u ? 2 : 0) + (!samePos ? 1 : 0) + (low(hw)[0] !== low(target)[0] ? 1 : 0) + (!lenClose(hw, target) ? 2 : 0) + rng() * 0.9
+        : (form ? 6 : 0) + (sound ? 5 : 0) + (isKnown ? 2 : 0) + (u && x.unit === u ? (dist === 'near' ? 4 : 2) : 0) + (dist === 'near' && samePos ? 2 : 0)
+          + (low(hw)[0] === low(target)[0] ? 1 : 0) + (lenClose(hw, target) ? 1 : 0) + rng() * 0.9;
       scored.push({ x, hw, src, score, tag: tagOf(entry, x) });
     }
   };
@@ -130,6 +143,7 @@ export function makeListen(entry, pool = [], { rng = Math.random, extra = [], un
     slug: entry.slug,
     unit: u,
     say: target,
+    distractor: dist,
     options,
     answer: options.findIndex(o => o.correct),
     right: { headword: target, meaning },
@@ -280,7 +294,7 @@ export const listenMode = {
     const known = w => {
       try { return !!(cur && ((cur.isPrimary && cur.isPrimary(w)) || (cur.unitOf && cur.unitOf(w)))); } catch (err) { return false; }
     };
-    const q = makeListen(e, ctx.pool || [], { extra: ctx.extra || (() => listenFiller(e, app)), known });
+    const q = makeListen(e, ctx.pool || [], { extra: ctx.extra || (() => listenFiller(e, app)), known, distractor: ctx.distractor || 'normal' });
     if (!q) return { ...choiceMode.render(e, ctx), modeId: 'mc4', eventMode: 'mc4' };
     const el = h('article', { className: 'listen' });
     const view = renderListen(el, q, {

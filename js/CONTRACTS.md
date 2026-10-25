@@ -524,3 +524,10 @@ await run();
 - chat.js `addLocal({ user, assistant })`：存一对本地消息，不调模型；消息多可选字段 `action`、`feedback`、`local`
 - modes/spell.js `canSpell`：词条 `own: true` 或 history 里有 `source: 'self'` 也能拼
 - 各模块的完整清单在 `wip/b5/*-needs.md`；没接的：choice.js 干扰项远近、ui-grammar tune、screen skipSteady、阅读器 challenge / autoTrunk / selfFirst、家长区“她说的难度”
+
+## 13. 0.7.1 难度接到题里
+- `modes/choice.js` `makeQuestion(..., { distractor: 'far' | 'normal' | 'near' })`、`modes/listen.js` `makeListen(..., { distractor })`；Question 多 `distractor`。ui-lesson `distractorOf(cell, slug)` 读热身单词卡的 `distractor` 传给题型（`ctx.distractor`）
+- `grammar.js` `createRun({ tune })`（`tuneList`：fewer / skipClean / variants；`hintsOf`：autoHint 'more'、难度高 'less'）、`createAttempt(q, { hints })`；Run 多 `tuned`。`ui-grammar.js` `renderGrammarCard` / `renderGrammarItem` 多 `tune`（不给就 `knobsFor(kv).grammar`）：难度高跳过规则页、`contrast` 做完接对比小卡；难度低 `altFirst` 先讲第二讲法
+- `reader.js` `challengeQuestions(ep, n)`（id `<题>x`，`challenge: true`，不写进 `story:progress`）、`fewerQuestions(ep, list, n)`；`ui-reader.js` 认 `challenge`、`autoTrunk`（有挑战题时不按分诊自动标主干），`answer` 事件多 `challenge: true`。`selfFirst` 还没读
+- `kid-me.js` `setLevel(ctx, part, level, { from: 'me' | 'parent' })` 直接写 `kid.level` 并记 `feedback`（`from: 'me'`）；`levelReport(kv, now)`、`FEEDBACK_ZH`、`FROM_ZH`。孩子端“我”每部分四个等级按钮 + “全部恢复正好”；家长区“学得怎么样”多一行“她说的难度”（等级、最近 3 次反馈和时间、“全部重置为 0”）
+- 还没接：screen `skipSteady`、阅读 `selfFirst`

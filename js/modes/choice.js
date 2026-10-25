@@ -15,7 +15,9 @@
 //   posOf(entry) -> 'n' | 'v' | 'adj' | 'adv' | 'prep' | 'pron' | 'num' | 'conj' | 'int' | 'art' | 'phrase' | ''
 //   formNear(a, b) / soundNear(a, b) / categoriesOf(word) / meaningRelation(a, b) -> 'same' | 'near' | null
 //   tagOf(target, other) -> null | 'form' | 'sound' | 'category' | 'meaning'
-//   makeQuestion(entry, pool, { direction, rng, extra, unit, easy }) -> Question | null   纯函数
+//   makeQuestion(entry, pool, { direction, rng, extra, unit, easy, distractor }) -> Question | null   纯函数
+//     distractor（0.7.1，她说的热身难度，kid-me knobs）：'near' 同单元、同词性、长得像 / 读音近的先；'far' 别的单元、
+//     别的词性、长度差得多的先，不放形近、读音近、意思近；'normal' 原来的做法。'far' 凑不齐时退回 'normal'
 //     pool：可以当干扰项的词条（同一节课的词、单词本）；extra：补位用的词（课本单元词 { w, cn }、词典条目
 //     { word, cn }、词条都行），排在 pool 后面；easy：只用离得远的干扰项（答错后再考）
 //     三个干扰项凑不齐就返回 null（换闪卡或跳过）
@@ -235,8 +237,30 @@ function candidate(x, src) {
 const textOf = (c, direction) => (direction === 'en2zh' ? c.meaning : c.headword);
 const lenClose = (a, b) => Math.abs([...a].length - [...b].length) <= Math.max(2, Math.round(Math.max([...a].length, [...b].length) * 0.3));
 
-export function makeQuestion(entry, pool = [], { direction = 'en2zh', rng = Math.random, extra = [], unit, easy = false } = {}) {
+export const DISTRACTOR_LEVELS = ['far', 'normal', 'near'];
+// how much a candidate distractor is wanted at this distance (0.7.1); 'normal' keeps the old score
+export function distanceScore(target, c, { tag, u, text, right, distractor = 'normal' } = {}) {
+  if (distractor === 'near') {
+    return (u && c.unit === u ? 6 : 0) + (target.pos && c.pos === target.pos ? 3 : 0) + (tag === 'form' ? 5 : tag === 'sound' ? 4 : tag === 'category' ? 2 : 0)
+      + (low(c.headword)[0] === low(target.headword)[0] ? 1 : 0) + (lenClose(text, right) ? 1 : 0);
+  }
+  if (distractor === 'far') {
+    return (u && c.unit && c.unit !== u ? 4 : 0) + (target.pos && c.pos && c.pos !== target.pos ? 3 : 0) + (!lenClose(text, right) ? 2 : 0)
+      + (low(c.headword)[0] !== low(target.headword)[0] ? 1 : 0) + (tag ? -6 : 0);
+  }
+  return null;
+}
+
+export function makeQuestion(entry, pool = [], { direction = 'en2zh', rng = Math.random, extra = [], unit, easy = false, distractor = 'normal' } = {}) {
   if (!entry || !entry.slug) return null;
+  if (!DISTRACTOR_LEVELS.includes(distractor) && distractor !== 'far-only') distractor = 'normal';
+  if (distractor === 'far') {
+    const xs = typeof extra === 'function' ? extra() : extra;
+    const far = makeQuestion(entry, pool, { direction, rng, extra: xs, unit, easy: true, distractor: 'far-only' });
+    if (far) return { ...far, easy: !!easy, distractor: 'far' };
+    return makeQuestion(entry, pool, { direction, rng, extra: xs, unit, easy, distractor: 'normal' });
+  }
+  const dist = distractor === 'far-only' ? 'far' : distractor;
   if (!DIRECTIONS.includes(direction)) direction = 'en2zh';
   const target = candidate(entry, 'target');
   if (!target) return null;
@@ -261,8 +285,9 @@ export function makeQuestion(entry, pool = [], { direction = 'en2zh', rng = Math
       if (rel === 'same') continue;                    // a synonym would make two right answers
       const tag = tagOf(entry, x, rel);
       if (easy && (tag === 'form' || tag === 'sound' || tag === 'meaning')) continue;
-      const score = (u && c.unit === u ? 8 : 0) + (src === 'pool' ? 3 : 0) + (target.pos && c.pos === target.pos ? 2 : 0)
-        + (lenClose(text, right) ? 1 : 0) + rng() * 0.9;
+      const d = distanceScore(target, c, { tag, u, text, right, distractor: dist });
+      const score = d === null ? (u && c.unit === u ? 8 : 0) + (src === 'pool' ? 3 : 0) + (target.pos && c.pos === target.pos ? 2 : 0)
+        + (lenClose(text, right) ? 1 : 0) + rng() * 0.9 : d + (src === 'pool' ? 1 : 0) + rng() * 0.9;
       scored.push({ c, text, tag, score });
     }
   };
@@ -273,12 +298,14 @@ export function makeQuestion(entry, pool = [], { direction = 'en2zh', rng = Math
   // strict pass: at most one 形近 and one 意思近 next to the answer, and no two distractors that look alike or mean
   // the same; then a looser pass that only keeps the distractors apart from each other
   const picked = [];
-  const clash = s => picked.some(p => low(p.text) === low(s.text) || formNear(p.c.headword, s.c.headword) || meaningRelation(p.c.x, s.c.x) === 'same');
+  const clash = s => picked.some(p => low(p.text) === low(s.text) || (dist !== 'near' && formNear(p.c.headword, s.c.headword)) || meaningRelation(p.c.x, s.c.x) === 'same');
   for (const strict of [true, false]) {
     for (const s of scored) {
       if (picked.length === 3) break;
       if (picked.includes(s) || clash(s)) continue;
-      if (strict && (s.tag === 'form' || s.tag === 'meaning') && picked.some(p => p.tag === s.tag)) continue;
+      // 'near' lets two look-alike / sound-alike distractors in; the others keep one of each
+      if (strict && dist !== 'near' && (s.tag === 'form' || s.tag === 'meaning') && picked.some(p => p.tag === s.tag)) continue;
+      if (strict && dist === 'near' && s.tag === 'meaning' && picked.some(p => p.tag === 'meaning')) continue;
       picked.push(s);
     }
   }
@@ -291,6 +318,7 @@ export function makeQuestion(entry, pool = [], { direction = 'en2zh', rng = Math
     direction,
     unit: u,
     easy: !!easy,
+    distractor: dist,
     prompt: direction === 'en2zh' ? { text: target.headword, lang: 'en', say: target.headword } : { text: target.meaning, lang: 'zh-CN', say: '' },
     options,
     answer: options.findIndex(o => o.correct),
@@ -509,7 +537,7 @@ export const choiceMode = {
   render(e, ctx = {}) {
     const app = ctx.app || {};
     const retry = isRetry(e);
-    const q = makeChoice(e, ctx.pool || [], { direction: ctx.direction, extra: ctx.extra || (() => fillerFor(e, app)) });
+    const q = makeChoice(e, ctx.pool || [], { direction: ctx.direction, extra: ctx.extra || (() => fillerFor(e, app)), distractor: ctx.distractor || 'normal' });
     const el = h('article', { className: 'mc4' });
     const rate = g => ctx.rate && ctx.rate(g, { modeId: MODE_ID });
     if (!q) {

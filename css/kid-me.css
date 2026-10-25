@@ -67,3 +67,8 @@
 
 .km button:focus-visible,.km-fb button:focus-visible,.km-today button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.km-unit,.km-chip,.km-fb-btn{transition:none}}
+/* 0.7.1 难度能改：每部分四个按钮 */
+.km-level{flex-wrap:wrap;gap:6px 12px;padding:8px 0}
+.km-level-pick{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.km-lv-btn{min-height:44px;padding:0 12px;border:1px solid var(--rule);border-radius:22px;background:var(--paper);color:var(--ink);font:16px/1 var(--sans)}
+.km-lv-btn.on{border-color:var(--accent);color:var(--accent);font-weight:600}

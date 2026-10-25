@@ -3,7 +3,9 @@
 // 逻辑都在 reader.js，这里只画。样式 css/reader.css（类名 rd-）。负责：阅读器 agent。
 //
 // 导出
-//   renderEpisode(container, ctx, { episodeId, onDone, sid?, step = 'read', doneLabel = '接着上课', short?, again? }) -> Controller
+//   renderEpisode(container, ctx, { episodeId, onDone, sid?, step = 'read', doneLabel = '接着上课', short?, again?, challenge?, autoTrunk? }) -> Controller
+//     0.7.1（kid-me knobs.read）：challenge = 读完多几道挑战题（R.challengeQuestions，answer 事件带 challenge: true，不进这集的进度），
+//     有挑战题时不自动标主干；autoTrunk = 长句一开始就标主干，题少一道（R.fewerQuestions）。renderPassage 同样认这两个
 //     把一集画进 container（会清空它）。episodeId 不给就读 nextEpisode(kv)。short：轻松版，只做 2 道题（R.shortQuestions：点出答案句那道在前，再一道选择题）。
 //     again：已经读完的一集再读一遍（不给就看 kv：读完过的就是再读）。
 //     做完点 doneLabel 调用 onDone({ episodeId, n, done: true, again, stats, results, words, passedWords, helps, taps, hard, triage })；
@@ -117,7 +119,7 @@ function mount(sh, ctx, c, ep, cfg) {
   const { body, card, st } = sh;
   const { onDone = () => {}, sid: sid0 = '', step = R.STEP, doneLabel = '接着上课', short = false, again: againOpt = null,
     speak: speakHook = null, gap: gapHook = null, story = true, mode = 'read', listen: canListen = true, reopen = null,
-    onHelp = null, onAnswer = null } = cfg;
+    onHelp = null, onAnswer = null, challenge = 0, autoTrunk: trunkOpt = false } = cfg;
   const t00 = Date.now();
   const hook = (fn, ...args) => { if (typeof fn === 'function') { try { fn(...args); } catch (e) { /* the caller's problem */ } } };
   const kv = ctx && ctx.kv;
@@ -136,13 +138,18 @@ function mount(sh, ctx, c, ep, cfg) {
   const saveTriage = () => kvSet(R.TRIAGE_KEY, triage);
   const answered = story && !again ? ((prog.episodes[ep.id] || {}).answers || {}) : {};
   const flagged = new Set(story ? (prog.episodes[ep.id] || {}).flagged || [] : []);
-  const all = short ? R.shortQuestions(ep) : ep.questions;
+  // 0.7.1 她说的读一段难度：太难（autoTrunk）少一道；太简单（challenge）读完多 1-2 道挑战题
+  const all0 = short ? R.shortQuestions(ep) : ep.questions;
+  const all = trunkOpt && !short ? R.fewerQuestions(ep, all0, 1) : all0;
   const questions = all.filter(q => !answered[q.id] && !flagged.has(q.id));
+  const nChallenge = Math.max(0, Math.min(2, Math.floor(Number(challenge) || 0)));
+  if (nChallenge && questions.length) questions.push(...R.challengeQuestions(ep, nChallenge).filter(q => !flagged.has(q.id)));
   const focus = R.focusOf(ep, questions);
   const results = [];
   const helpLevel = new Map();
   let helps = 0, taps = 0, phase = 'intro', player = null, onPause = () => {}, resumeListen = null, hardAnswer = null;
-  let autoTrunk = R.readAdjust(triage, ep.id).trunkFirst;
+  // 难度低：主干一开始就标；难度高（有挑战题）：不自动标，她自己点“看不懂”
+  let autoTrunk = !!trunkOpt || (!nChallenge && R.readAdjust(triage, ep.id).trunkFirst);
   let methodShownAt = 0;
   let liveStory = null;   // the story view on screen: repainted when the trunk starts showing by itself
   const epLabel = () => (!story ? cfg.label || ep.label || '读一篇' : again ? `再读一遍 · 第 ${ep.n} 集` : `番外 · 第 ${ep.n} 集`);
@@ -150,7 +157,7 @@ function mount(sh, ctx, c, ep, cfg) {
   function noteStuck(entry) {
     triage = R.noteTriage(triage, ep.id, entry, new Date());
     saveTriage();
-    if (!autoTrunk && R.readAdjust(triage, ep.id).trunkFirst) {
+    if (!autoTrunk && !nChallenge && R.readAdjust(triage, ep.id).trunkFirst) {
       autoTrunk = true;
       if (liveStory) liveStory.repaint();
     }
@@ -629,7 +636,7 @@ function mount(sh, ctx, c, ep, cfg) {
     const refresh = x => { if (!x) return; x.view.repaint(); x.view.el.classList.toggle('rd-zoned', x.zone().length > 0); };
     function draw() {
       const top = h('div', { className: 'rd-top' },
-        h('span', { className: 'rd-pos' }, `第 ${k + 1} 题`, q.skillName ? h('span', { className: 'sub' }, ` · ${q.skillName}`) : null),
+        h('span', { className: 'rd-pos' }, q.challenge ? '挑战题' : `第 ${k + 1} 题`, q.skillName ? h('span', { className: 'sub' }, ` · ${q.skillName}`) : null),
         a.done ? null : h('button', { type: 'button', className: 'text-btn rd-flag', on: { click: flag } }, '这题有问题'));
       const zhBtn = (q.zh || q.stemZh) && !hasCJK(q.ask) && !zhOpen
         ? h('button', { type: 'button', className: 'text-btn rd-q-zh-btn', on: { click: () => { zhOpen = true; log({ type: 'read_help', item: q.item, mode: R.MODE, kind: 'question_zh', level: 1, phase }); draw(); } } }, '题目看中文')
@@ -781,12 +788,13 @@ function mount(sh, ctx, c, ep, cfg) {
       return h('div', { className: 'rd-variant' }, h('p', { className: 'rd-now' }, '现在你来：'), askLine(v), stemLine(v), vb);
     }
     function logAnswer(p, extra = {}) {
-      if (p && p.event) log({ type: 'answer', ...p.event, ...wordFields, ...extra });
+      if (p && p.event) log({ type: 'answer', ...p.event, ...wordFields, ...(q.challenge ? { challenge: true } : {}), ...extra });
     }
     function settle() {
       const r = a.result();
+      if (q.challenge) r.challenge = true;
       results.push(r);
-      if (story) { prog = R.noteAnswer(prog, ep.id, r, new Date()); save(); }
+      if (story && !q.challenge) { prog = R.noteAnswer(prog, ep.id, r, new Date()); save(); }
       hook(onAnswer, r.qid, r);
     }
     function pick(i) {

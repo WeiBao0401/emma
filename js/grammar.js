@@ -77,7 +77,8 @@
 //   variantFor(c, q, state) -> Question | null   第 4 级以后出的变式题：主题有自己的；备用题从同类里挑一道没出过的
 //   summary(gstate, now, { content, tags }) -> [每张卡的统计]   给家长区、周小结：状态、做了几道、对 / 模糊 / 没过、待复习、常见误解；
 //       0.5.2 多 alt: { shown: 最近一次换讲法的日子 | null, n: 换过几次, due: 下次要换讲法 }
-//   createRun({ content, cardId, part, items, state, now, log, save, sid, step, alt }) -> Run
+//   createRun({ content, cardId, part, items, state, now, log, save, sid, step, alt, tune }) -> Run
+//       tune（0.7.1，kid-me knobs.grammar）：{ fewer, skipClean, variants, autoHint, lessHints } 见 tuneList / hintsOf。Run.tuned = 题单改过
 //       alt（0.5.2）：给了（true 或 altDue 的返回值）而且这张卡有 alt，先出 alt 的 3 道（kind 'alt'），再出这一天的题；记下 alt 讲过了。
 //       items 里有 kind 'alt' 的，同样记下这张卡讲过了。Run.altCount = 开头几道是 alt 的题。
 //       界面用的一次“做题”：part 给了是一张卡的一天（5 道，跳过已经做过的）；items 给了是热身里的 1-2 道。
@@ -280,7 +281,8 @@ export function sentenceOf(q) {
   return q.answer;
 }
 
-export function createAttempt(q, { variant = null, now = () => Date.now() } = {}) {
+// hints（0.7.1，她说的语法难度）：'more' 第 1 级提示连着第 2 级一起说（更具体）；'less' 第一次答错不自动出提示（少给一级）
+export function createAttempt(q, { variant = null, now = () => Date.now(), hints: hintMode = '' } = {}) {
   const clock = typeof now === 'function' ? now : () => +toDate(now);
   const options = optionsOf(q);
   const vOptions = variant ? optionsOf(variant) : null;
@@ -302,13 +304,14 @@ export function createAttempt(q, { variant = null, now = () => Date.now() } = {}
       choice: opt.text, correct: !!opt.correct, ms: Math.max(0, Math.round(ms)), misconception: opt.correct ? null : opt.tag || null, ...extra };
   }
   // only the answer is left to tap (every wrong one picked and greyed out): that last tap would not be 改对了
+  const hintText = lv => (hintMode === 'more' && lv === 1 && q.hints[1] ? [q.hints[0], q.hints[1]].filter(Boolean).join(' ') : q.hints[lv - 1] || '');
   const onlyAnswerLeft = () => { const left = options.filter((o, i) => !picked.has(i)); return left.length === 1 && !!left[0].correct; };
   a.hint = () => {
     if (phase !== 'ask' && phase !== 'retry') return null;
     if (level >= HINT_MAX) return null;
     if (!wrongs) hintBeforeAnswer = true;
     level++;
-    const out = { level, text: q.hints[level - 1] || '', auto: false };
+    const out = { level, text: hintText(level), auto: false };
     if (level >= HINT_MAX) reveal();
     return out;
   };
@@ -332,11 +335,13 @@ export function createAttempt(q, { variant = null, now = () => Date.now() } = {}
     wrongs++;
     if (opt.tag) tags.push(opt.tag);
     phase = 'retry';
-    if (level < HINT_MAX) {
+    // 'less': the first miss gets no hint, she tries once more on her own
+    const holdHint = hintMode === 'less' && wrongs === 1 && level === 0 && !onlyAnswerLeft();
+    if (level < HINT_MAX && !holdHint) {
       level++;
       // the answer is all that is left: hint 4 (the answer and why) and the variant now, so only the variant can pass it
       if (level < HINT_MAX && onlyAnswerLeft()) level = HINT_MAX;
-      out.hintShown = { level, text: q.hints[level - 1] || '', auto: true };
+      out.hintShown = { level, text: hintText(level), auto: true };
       if (level >= HINT_MAX) reveal();
     }
     out.done = phase === 'done';
@@ -849,15 +854,51 @@ export function contrastItems(state, now = new Date(), { contrast: cc = null, co
 
 // ---------------------------------------------------------------- a run: one card part, or the warm-up items
 
+// 0.7.1: her 语法卡 difficulty (kid-me knobs.grammar) -> the hint mode of every question in the run
+export const hintsOf = t => (!t ? '' : t.autoHint ? 'more' : t.lessHints || t.skipClean || Number(t.variants) > 0 ? 'less' : '');
+// 0.7.1: tune one card day in place (list of { q, kind, of }); returns true when it changed anything.
+//   skipClean：第一次就干净做对过的练习题换成没做过的备用题（没有就不出）；fewer：从末尾少几道（至少留 2 道）；
+//   variants：末尾多几道备用题 / 变式题（kind 'practice'）。alt 的题不动
+export function tuneList(list, card, state, t) {
+  if (!t || !card || !Array.isArray(list)) return false;
+  const before = list.map(x => x.q.id).join(',');
+  const s = normState(state, card.id);
+  const used = () => list.map(x => x.q.id);
+  const isCard = x => x.kind === 'card';
+  if (t.skipClean) {
+    for (let i = list.length - 1; i >= 0; i--) {
+      const x = list[i];
+      if (!isCard(x) || !(s.items[x.q.id] && s.items[x.q.id].clean)) continue;
+      if (list.filter(isCard).length <= 1) break;
+      const sp = sparePick(card, s, x.q.family, used());
+      if (sp && !(s.items[sp.id] && s.items[sp.id].last) && !s.seen[sp.id]) list.splice(i, 1, { q: sp, kind: 'practice', of: null });
+      else list.splice(i, 1);
+    }
+  }
+  const fewer = Math.max(0, Math.floor(Number(t.fewer) || 0));
+  for (let k = 0; k < fewer; k++) {
+    const cards = list.filter(x => x.kind === 'card' || x.kind === 'practice');
+    if (cards.length <= 2) break;
+    list.splice(list.lastIndexOf(cards[cards.length - 1]), 1);
+  }
+  const more = Math.max(0, Math.floor(Number(t.variants) || 0));
+  for (let k = 0; k < more; k++) {
+    const sp = sparePick(card, s, null, used());
+    if (!sp) break;
+    list.push({ q: sp, kind: 'practice', of: null, extra: true });
+  }
+  return list.map(x => x.q.id).join(',') !== before;
+}
+
 export function createRun({ content: c = cached, cardId = '', part = 0, items = null, state = null, states = null,
-  now = () => new Date(), log = () => {}, save = () => {}, sid = '', step = STEP, alt = false } = {}) {
+  now = () => new Date(), log = () => {}, save = () => {}, sid = '', step = STEP, alt = false, tune = null } = {}) {
   const ct = c;
   const clock = typeof now === 'function' ? now : () => toDate(now);
   const cur = {};   // cardId -> state
   const getState = id => (cur[id] || (cur[id] = normState((states && states[id]) || (id === cardId ? state : null), id)));
   const list = [];
   const isCardRun = !(items && items.length) && !!(cardId && part);
-  let partLeft = 0, altCount = 0;
+  let partLeft = 0, altCount = 0, tuned = false;
   // the alt was used for this card today (the warm-up's alt items, or the card page explained the other way)
   const altShown = (id, why) => { cur[id] = markAlt(getState(id), { now: clock(), reason: why && why.reason, tag: why && why.tag }); };
   if (items && items.length) {
@@ -878,6 +919,7 @@ export function createRun({ content: c = cached, cardId = '', part = 0, items = 
     }
     for (const q of partQuestions(ct, s, cardId, part)) { list.push({ q, kind: 'card', of: null }); partLeft++; }
     cur[cardId] = startPart(s, part, { now: clock() });
+    tuned = tuneList(list, card, getState(cardId), tune);
   }
   const stats = { right: 0, fuzzy: 0, failed: 0, flagged: 0 };
   const results = [];   // one per finished question: { item, kind, grade, passed, clean }
@@ -887,7 +929,7 @@ export function createRun({ content: c = cached, cardId = '', part = 0, items = 
   function open() {
     if (index >= list.length) { attempt = null; return null; }
     const x = list[index];
-    attempt = createAttempt(x.q, { variant: variantFor(ct, x.q, getState(x.q.card)), now: () => +clock() });
+    attempt = createAttempt(x.q, { variant: variantFor(ct, x.q, getState(x.q.card)), now: () => +clock(), hints: hintsOf(tune) });
     return x;
   }
   async function finishQuestion() {
@@ -912,6 +954,7 @@ export function createRun({ content: c = cached, cardId = '', part = 0, items = 
     get index() { return index; },
     get total() { return list.length; },
     get altCount() { return altCount; },
+    get tuned() { return tuned; },
     get attempt() { return attempt; },
     get variant() { return attempt && attempt.variant; },
     get finished() { return finished; },

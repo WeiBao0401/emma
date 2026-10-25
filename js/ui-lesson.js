@@ -194,6 +194,13 @@ export function cardModeOf(cell, slug, i = -1) {
   return MODE_ALIAS[m] || 'mc4';
 }
 
+// 0.7.1: how far the distractors sit for this word card (plan's warm-up card distractor, from her 热身 difficulty)
+export function distractorOf(cell, slug) {
+  const c = cell && Array.isArray(cell.cards) ? cell.cards.find(x => x && x.slug === slug && x.distractor) : null;
+  const d = (c && c.distractor) || (cell && cell.distractor) || 'normal';
+  return d === 'far' || d === 'near' ? d : 'normal';
+}
+
 const isGrammarRef = x => !!x && typeof x === 'object' && (x.kind === 'grammar' || x.type === 'grammar' || x.mode === 'grammar' || Array.isArray(x.options));
 // what the plan put in the warm-up for grammar: an array of refs or questions, a count, or null (it said nothing)
 export function grammarRefs(cell) {
@@ -843,7 +850,7 @@ export function createLessonView(ctx) {
     const want = results.has(slug) ? 'mc4' : (modeBySlug.get(slug) || 'mc4');
     cur = { kind: 'word', slug, item: 'w:' + slug, mode: want, p: 0.5, pf, t: Date.now(), answered: false };
     const position = { n: s.done + 1, total: s.total, isNew: !e.fsrs || e.fsrs.state === State.New };
-    const base = { app: ctx, pool, say, position, rate: g => rate(g), onAnswer: ev => onAnswer(e, ev) };
+    const base = { app: ctx, pool, say, position, rate: g => rate(g), onAnswer: ev => onAnswer(e, ev), distractor: distractorOf(cellOf('warmup'), slug) };
     const r = renderWord(e, want, base);
     if (!r) { skipped.add(slug); drawWarm(); return; }
     view = r.v;
@@ -1206,6 +1213,7 @@ export function createLessonView(ctx) {
     try {
       reading = fnOf(mods.reader, 'renderEpisode')(box, watchCtx('read'), {
         episodeId: cell.episodeId, short: !!cell.short, again: cell.again ? true : null, sid, step: 'read', doneLabel: '接着上课', onDone: done,
+        challenge: Number(cell.challenge) || 0, autoTrunk: !!cell.autoTrunk, selfFirst: !!cell.selfFirst,
       });
       if (reading && typeof reading.onKey === 'function') view = { onKey: reading.onKey };
     } catch (err) {
@@ -1252,7 +1260,7 @@ export function createLessonView(ctx) {
       const ep = (list || []).find(p => p && p.id === cell.passageId);
       if (!ep) { done(null); return; }
       reading = fnOf(mods.reader, 'renderPassage')(box, watchCtx('read'), {
-        passage: ep, mode: 'questions', label: cell.note || ep.label || '期中阅读', sid, step: 'read', doneLabel: '接着上课', onDone: done,
+        passage: ep, mode: 'questions', label: cell.note || ep.label || '期中阅读', sid, step: 'read', doneLabel: '接着上课', onDone: done, challenge: Number(cell.challenge) || 0,
       });
       if (reading && typeof reading.onKey === 'function') view = { onKey: reading.onKey };
     }).catch(err => { console.warn('lesson: exam reading:', (err && err.message) || err); reading = null; done(null); });

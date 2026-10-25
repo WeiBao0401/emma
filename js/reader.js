@@ -713,6 +713,35 @@ export function shortQuestions(ep) {
   return out;
 }
 
+// 0.7.1 挑战题（她说读一段太简单）：这集推断 / 主旨题的变式，再不够用点出答案句那道的变式，最后用别的题的变式。
+// 挑战题 id '<题>x'、item 'ep:<集>:<题>x'，带 challenge: true，没有自己的变式；不算进这集读完
+export function challengeQuestions(ep, n = 1) {
+  const qs = (ep && ep.questions) || [];
+  const k = Math.max(0, Math.floor(Number(n) || 0));
+  if (!k) return [];
+  const rank = q => (q.qtype === 'infer' || q.qtype === 'main' ? 0 : q.kind === 'evidence' ? 1 : 2);
+  const src = qs.filter(q => q.variant).sort((a, b) => rank(a) - rank(b) || qs.indexOf(a) - qs.indexOf(b)).slice(0, k);
+  return src.map(q => {
+    const v = q.variant;
+    const ev = (v.evidence && v.evidence.length ? v.evidence : q.evidence) || [];
+    const hints = v.hints && v.hints.length ? v.hints.slice() : [ev.length ? `回到第 ${ev.join('、')} 句再读一遍。` : '回到故事里再读一遍。', ...(v.explain ? [v.explain] : [])];
+    return { ...v, id: q.id + 'x', item: `ep:${q.ep}:${q.id}x`, challenge: true, isVariant: false, of: null, variant: null,
+      hints, ladder: [], explain: v.explain || hints[hints.length - 1] || '', skillName: q.qtype === 'infer' ? '挑战 · 推断' : q.qtype === 'main' ? '挑战 · 主旨' : '挑战题' };
+  });
+}
+// 0.7.1 难度低：少一道（留下读前那道和点出答案句那道，从末尾减）
+export function fewerQuestions(ep, list, n = 1) {
+  const out = (list || []).slice();
+  const keep = new Set([focusOf(ep, out)].filter(Boolean));
+  for (let k = 0; k < n && out.length > 2; k++) {
+    let i = out.length - 1;
+    while (i >= 0 && (keep.has(out[i]) || out[i].kind === 'evidence')) i--;
+    if (i < 0) break;
+    out.splice(i, 1);
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------- 句子主干: who + does what, marked in the sentence
 
 // it's = it + 's, I'm = I + 'm, don't = do + n't: a subject and its verb can share one written word

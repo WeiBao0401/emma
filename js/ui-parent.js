@@ -52,6 +52,7 @@ import { intakeMethod } from './ui-dictation.js';
 import { optionalModule } from './ui-home.js';
 import { chatRoute, CHAT_DEFAULTS } from './chat.js';
 import * as R from './reader.js';
+import * as K from './kid-me.js';
 import * as G from './grammar.js';
 import * as O from './modes/order.js';
 import * as S from './screen.js';
@@ -577,6 +578,28 @@ export function createParentView(ctx) {
       h('p', { text: `${b.name}：${b.label}` }),
       b.n ? h('p', { className: 'small', text: `做了 ${b.n} 道，第一次就对 ${b.right} 道${b.tags && b.tags.length ? '。选错的：' + b.tags.slice(0, 2).map(t => safe(() => (ctx.curriculum.tags[t] || {}).zh) || t).join('；') : ''}` }) : null)));
   }
+  // 0.7.1 她说的难度（kv 'kid.level'，和孩子端“我”同一份）：各部分等级、最近几次反馈和时间，一键回到 0
+  const fbTime = at => { const d = new Date(at); return isNaN(d) ? '' : `${d.getMonth() + 1}-${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+  function levelPanel(kit) {
+    return () => {
+      const rep = safe(() => K.levelReport(ctx.kv, new Date(), { recent: 3 })) || [];
+      const any = rep.some(x => x.level !== 0);
+      return h('div', { className: 'parent-level' },
+        h('ul', { className: 'parent-hard' }, rep.map(x => h('li', { dataset: { part: x.part } },
+          h('p', { text: `${x.name}：${x.zh}（${x.level > 0 ? '+' : ''}${x.level}）` }),
+          h('p', { className: 'small', text: x.recent.length ? '最近：' + x.recent.map(e => `${fbTime(e.at)} ${K.FEEDBACK_ZH[e.choice] || e.choice}（${K.FROM_ZH[e.from] || e.from}）`).join('；') : '还没反馈过' })))),
+        h('p', { className: 'small', text: '一周不反馈，每部分慢慢回到 0。她在“我”里也能自己改。' }),
+        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'text-btn accent parent-level-reset', text: '全部重置为 0', disabled: !any, on: { click: async () => {
+          try { await K.resetLevels(ctx.kv, new Date()); toast('难度都回到 0 了，下节课按正好出题。'); } catch (e) { toast('没存上，再点一次。'); }
+          kit.render();
+        } } })));
+    };
+  }
+  function levelValue() {
+    const d = safe(() => K.difficulty(ctx.kv, new Date())) || {};
+    const off = K.PARTS.filter(p => d[p]);
+    return off.length ? off.map(p => `${K.PART_ZH[p]}${K.levelZh(d[p])}`).join('、') : '都是正好';
+  }
   function learnGroup(kit) {
     const now = new Date();
     const rs = safe(() => (R.content() ? R.readingSummary(ctx.kv) : null));
@@ -592,6 +615,7 @@ export function createParentView(ctx) {
         value: rs ? `${rs.done} / ${rs.of} 集` : '还没读', panel: readingPanel(rs) }),
       kit.row({ key: 'learn-grammar', label: '语法卡', sub: topTags.length ? '常错：' + topTags.join('；') : '先补地基：be 动词、名词复数，再跟课本单元',
         value: gs.length ? `${started.length} / ${gs.length} 张开始了` : '还没开始', panel: gs.length ? grammarPanel(gs) : null }),
+      kit.row({ key: 'learn-level', label: '她说的难度', sub: '每部分做完她点的“太简单 / 正好 / 太难”，和她在“我”里改的', value: levelValue(), panel: levelPanel(kit) }),
       kit.row({ label: '连词成句', sub: os && os.kinds.length ? '常错：' + os.kinds.slice(0, 2).map(k => k.name).join('、') : '星期三的“写几个词”和热身里会出',
         value: os && os.tried ? `排过 ${os.tried} 句，一次就对 ${os.clean} 句` : '还没排' }),
       ...extraRows(kit, now),

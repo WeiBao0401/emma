@@ -191,16 +191,26 @@ export function createKidMeView(ctx, { root = null } = {}) {
       h('div', { className: 'km-actions' }, h('button', { type: 'button', className: 'btn km-save', text: '就叫这个', on: { click: () => save(input.value) } })),
     ]);
   }
+  // 0.7.1 能改：每部分四个等级直接点，马上写进 kv 'kid.level'（feedback 事件 from 'me'），下一节课按新等级
   function levelGroup() {
     const d = K.difficulty(ctx.kv, new Date());
     const any = K.PARTS.some(p => d[p] !== 0);
-    return section('level', '老师现在给你的难度', '每做完一部分，点“太简单 / 正好 / 太难”，我就照着调。一周不说，慢慢回到正好。', [
+    const pick = async (p, n) => {
+      try { await K.setLevel(ctx, p, n, { now: new Date(), from: 'me' }); toast(`好，${K.PART_ZH[p]}改成“${K.levelZh(n)}”，下节课就这样。`); } catch (e) { toast('没存上，再点一次。'); }
+      render();
+    };
+    const steps = [];
+    for (let n = K.LEVEL_MIN; n <= K.LEVEL_MAX; n++) steps.push(n);
+    return section('level', '老师现在给你的难度', '觉得不对就直接点一个。每做完一部分点“太简单 / 正好 / 太难”也会调；一周不说，慢慢回到正好。', [
       h('ul', { className: 'km-levels' }, ...K.PARTS.map(p => h('li', { className: 'km-level', dataset: { part: p } },
-        h('span', { className: 'km-level-k', text: K.PART_ZH[p] }), h('span', { className: 'km-level-v lv' + d[p], text: K.levelZh(d[p]) })))),
-      any ? h('div', { className: 'km-actions' }, h('button', { type: 'button', className: 'text-btn km-reset', text: '都回到正好', on: { click: async () => {
+        h('span', { className: 'km-level-k', text: K.PART_ZH[p] }), h('span', { className: 'km-level-v lv' + d[p], text: K.levelZh(d[p]) }),
+        h('div', { className: 'km-level-pick', role: 'group', 'aria-label': K.PART_ZH[p] + '难度' }, ...steps.map(n => h('button', {
+          type: 'button', className: 'km-lv-btn' + (n === d[p] ? ' on' : ''), dataset: { level: String(n) }, 'aria-pressed': n === d[p] ? 'true' : 'false',
+          text: K.levelZh(n), on: { click: () => { if (n !== d[p]) pick(p, n); } } })))))),
+      h('div', { className: 'km-actions' }, h('button', { type: 'button', className: 'text-btn km-reset', text: '全部恢复正好', disabled: !any, on: { click: async () => {
         try { await K.resetLevels(ctx.kv, new Date()); toast('好，都回到正好。'); } catch (e) { toast('没存上，再点一次。'); }
         render();
-      } } })) : null,
+      } } })),
     ]);
   }
   function section(id, head, intro, body) {

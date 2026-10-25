@@ -24,6 +24,7 @@
 //   readLevels(kv)、levelOf(rec, now)、difficulty(kv, now) -> { warmup, read, write, grammar }、levelZh(n)、
 //   applyFeedback(rec, choice, { now, from })、recordFeedback(ctx, { part, choice, from, now, sid, item, mode, text })、
 //   resetLevels(kv, now)、knobs(levels)、knobsFor(kv, now)
+//   0.7.1：setLevel(ctx, part, level, { now, from: 'me' | 'parent' })、levelReport(kv, now, { recent })、FEEDBACK_ZH、FROM_ZH
 //   todayChoice(kv, now) -> choice id | ''、setTodayChoice(kv, choice, now)、needsTodayAsk(kv, now, { first })、
 //   todayMix(choice, { examSet })、shiftMinutes(cells, choice, { limit, ready, examSet })、todayEvent(choice, sid)
 //   parseFeedbackText(text) -> null | { choice, part, parts, reply, strength }、applyChatFeedback(ctx, text, now)
@@ -257,6 +258,37 @@ export async function recordFeedback(ctx, { part, choice, from = 'button', now =
   try { if (ctx.events && ctx.events.log) await ctx.events.log(ev); } catch (e) { /* 记录失败不卡她 */ }
   return { part, choice, prev: res.prev, level: res.level, changed: res.changed, event: ev };
 }
+// 0.7.1 她在“我”里（from 'me'）或家长在家长区直接选一个等级：马上写进 kv 'kid.level'，记一条 feedback（choice 按变的方向：
+// 往难调 'easy'、往简单调 'hard'、没变 'ok'），下一节课就按新等级。返回 { part, prev, level, changed, event } 或 null
+export async function setLevel(ctx, part, level, { now = new Date(), from = 'me', sid = '' } = {}) {
+  if (!PARTS.includes(part)) return null;
+  const kv = ctx && ctx.kv;
+  if (!kv) return null;
+  const L = readLevels(kv);
+  const r = L.parts[part];
+  const prev = levelOf(r, now);
+  const next = clampLevel(level);
+  const at = iso(now);
+  const choice = next > prev ? 'easy' : next < prev ? 'hard' : 'ok';
+  L.parts[part] = { ...r, level: next, run: { choice: '', n: 0 }, last: at, changed: next !== prev || prev !== r.level ? at : r.changed,
+    log: [...r.log, { at, choice, from, level: next }].slice(-LOG_MAX) };
+  L.updated = at;
+  await kv.set(LEVEL_KEY, L);
+  let s = sid;
+  if (!s) { try { s = ctx.events && ctx.events.sessionId ? ctx.events.sessionId() : ''; } catch (e) { s = ''; } }
+  const ev = { type: 'feedback', step: PART_STEP[part], part, choice, level: next, prev, changed: next !== prev, from, ...(s ? { sid: s } : {}) };
+  try { if (ctx.events && ctx.events.log) await ctx.events.log(ev); } catch (e) { /* 记录失败不卡她 */ }
+  return { part, prev, level: next, changed: next !== prev, event: ev };
+}
+// 家长区和“我”的难度行用的同一份数据：每部分现在的等级、最近几次反馈（新的在前）
+export function levelReport(kv, now = new Date(), { recent = 3 } = {}) {
+  const L = readLevels(kv);
+  return PARTS.map(p => ({ part: p, name: PART_ZH[p], level: levelOf(L.parts[p], now), zh: levelZh(levelOf(L.parts[p], now)),
+    recent: L.parts[p].log.slice(-recent).reverse() }));
+}
+export const FEEDBACK_ZH = { easy: '太简单', ok: '正好', hard: '太难' };
+export const FROM_ZH = { button: '做完点的', chat: '问老师里说的', me: '她在“我”里选的', parent: '家长改的' };
+
 export async function resetLevels(kv, now = new Date()) {
   const L = readLevels(kv);
   const at = iso(now);
