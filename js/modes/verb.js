@@ -6,8 +6,9 @@
 // 导出
 //   KV_KEY = 'verb.state'、MODE = 'verb'、FIRST_LINE、SECONDS = 20（plan 算时长）、RECENT_DAYS = 14
 //   candidates(content) -> [Cand]   Cand = { id: 'v:<集>:<句>', ep, n, i, en, zh, subject, verb, note, tags, be, answer: [token 下标], tokens }
-//       verb 是要点的那几个词（is not 里只算 is，there is 里只算 is）
+//       verb 是要点的那几个词（is not 里只算 is，there is 里只算 is，comes out 里只算 comes）；trunkVerb 是主干原文（反馈里显示它）
 //       只要陈述句（主语在前、动词跟在后面；问句和 there be 不出）：有主语、动词在句子里找得到、动词的几个词挨在一起、没有 it's 这类合在一个词里的、没有第二个分句，3 到 10 个词
+//       主干外面还有动词的不出（0.5.1）：带祈使的（Look, she is ...）、动词后面还有 to + 动词的（wants to protect、need volunteers to look after），见 SKIP
 //   readVerbState(kv | 值) -> { v: 1, items: { id: { n, last, ok, clean } }, first: 'YYYY-MM-DD' | '', updated }   坏数据读成空的
 //   verbItems(kv, now, { content, progress, n = 1 }) -> [id]   今天出哪几句：她读完的那几集里的句子先；没做过的先，
 //       隔天交替出 be 动词的句子和别的动词；最近 14 天第一次就点对的不再出。同一天、同样的进度，结果一样
@@ -17,7 +18,7 @@
 //       一句一句做。onDone({ results: [{ id, item, clean, grade }] })。ctx 用到 kv、events.log、say（可以没有）
 //
 // 事件：answer { item: 'v:<集>:<句>', mode: 'verb', step, sid, choice（她点的词）, correct, first_try, ms, hint_level,
-//   misconception（动词是 be 而她没点 be：'be_missing'，否则 null）, point: 'g:be' | '' , done?, grade? }；hint { item, mode: 'verb', level }
+//   misconception: null（0.5.1 起不带误解标签：点错一个词说明不了她漏 be）, point: 'g:be' | '' , done?, grade? }；hint { item, mode: 'verb', level }
 import { h } from '../ui-dom.js';
 import * as R from '../reader.js';
 
@@ -28,7 +29,14 @@ export const RECENT_DAYS = 14;
 export const FIRST_LINE = '英语每句话都要有一个动词，is 也算。';
 const BE = new Set(['am', 'is', 'are', 'was', 'were', "'m", "'s", "'re", 'be']);
 // words inside the trunk's verb that are not the verb itself (is not, there is): never the answer
-const NOT_VERB = new Set(['not', 'there', "n't", 'never']);
+// out / back / up / away / down after the verb (comes out, come back) are not the verb either: tapping them is a miss
+const NOT_VERB = new Set(['not', 'there', "n't", 'never', 'out', 'back', 'up', 'away', 'down']);
+// a sentence with another verb outside its trunk would mark that verb wrong (审稿 0.5.1): “Look, she is carrying ...”
+// (Look is a verb too, the way Help is), “She wants to protect ...”, “We need volunteers to look after her.”
+const SKIP = new Set(['v:ep3:4', 'v:ep5:18', 'v:ep6:7']);
+// after “to”, these start a place or a person (to the window, to her), not a second verb (to protect)
+const TO_NOT_VERB = new Set(['the', 'a', 'an', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'me', 'him', 'us', 'them', 'it', 'you',
+  'this', 'that', 'school', 'bed', 'home', 'class', 'work']);
 
 const pad = n => String(n).padStart(2, '0');
 const dayOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -40,6 +48,7 @@ const low = s => String(s || '').toLowerCase().replace(/[’‘]/g, "'");
 // one sentence -> a candidate, or null when its trunk is not a plain “who + verb” she can point at
 function candOf(ep, s) {
   if (!s || !s.trunk || !s.trunk.subject || !s.trunk.verb || s.trunk.kind || (s.trunk.also && s.trunk.also.length)) return null;
+  if (SKIP.has(`v:${ep.id}:${s.i}`) || (s.tags || []).includes('imperative')) return null;
   let t = null;
   try { t = R.trunkOf(s); } catch (e) { t = null; }
   if (!t || !t.found) return null;
@@ -51,13 +60,19 @@ function candOf(ep, s) {
   for (let a = vIdx[0]; a <= vIdx[vIdx.length - 1]; a++) if (t.tokens[a].word && t.tokens[a].role !== 'verb') return null;
   const answer = vIdx.filter(k => !NOT_VERB.has(low(t.tokens[k].text)));
   if (!answer.length) return null;
+  // to + a verb after the trunk's verb (wants to protect): a second verb she would be told is not one
+  const wIdx = t.tokens.map((x, k) => (x.word ? k : -1)).filter(k => k > vIdx[vIdx.length - 1]);
+  for (let j = 0; j + 1 < wIdx.length; j++) {
+    const w = t.tokens[wIdx[j + 1]].text;
+    if (low(t.tokens[wIdx[j]].text) === 'to' && !TO_NOT_VERB.has(low(w)) && !/^[A-Z]/.test(w)) return null;
+  }
   // “who” first, then the verb right after (the hint says so): no questions (Is your bag ...?), no there be
   const sIdx = t.tokens.map((x, k) => (x.word && x.role === 'subject' ? k : -1)).filter(k => k >= 0);
   if (!sIdx.length || sIdx[0] > answer[0] || (s.tags || []).includes('there_be')) return null;
   const verbWords = answer.map(k => low(t.tokens[k].text));
   return {
     id: `v:${ep.id}:${s.i}`, ep: ep.id, n: ep.n, i: s.i, en: s.en, zh: s.zh || '', subject: t.subject,
-    verb: answer.map(k => t.tokens[k].text).join(' '), note: t.note || '', tags: (s.tags || []).slice(),
+    verb: answer.map(k => t.tokens[k].text).join(' '), trunkVerb: t.verb || answer.map(k => t.tokens[k].text).join(' '), note: t.note || '', tags: (s.tags || []).slice(),
     be: verbWords.some(w => BE.has(w)), answer, tokens: t.tokens,
   };
 }
@@ -172,12 +187,12 @@ export function renderVerb(container, ctx = {}, { items = [], sid = '', step = '
       const ok = verbAt.has(k);
       const word = x.tokens[k].text;
       const ev = { type: 'answer', item: x.id, mode: MODE, choice: word, correct: ok, first_try: tries === 1, ms: Date.now() - t0, hint_level: level,
-        misconception: ok ? null : x.be && !BE.has(low(word)) ? 'be_missing' : null, point: x.be ? 'g:be' : '', episode: x.ep };
+        misconception: null, point: x.be ? 'g:be' : '', episode: x.ep };
       if (ok) {
         const grade = tries === 1 ? 3 : 2;
         log({ ...ev, done: true, grade });
         showVerb('right');
-        feedback.textContent = (tries === 1 ? '对了。' : '对了，找到了。') + `谁 = ${x.subject}，动词 = ${x.verb}。`;
+        feedback.textContent = (tries === 1 ? '对了。' : '对了，找到了。') + `谁 = ${x.subject}，动词 = ${x.trunkVerb}。`;
         end(tries === 1, grade);
         return;
       }
@@ -196,7 +211,7 @@ export function renderVerb(container, ctx = {}, { items = [], sid = '', step = '
       log({ ...ev, done: true, grade: 1 });
       log({ type: 'hint', item: x.id, mode: MODE, level: 2, hint_level: 2, auto: true });
       showVerb('reveal');
-      hint.textContent = `动词是 ${x.verb}。${x.note}`;
+      hint.textContent = `动词是 ${x.trunkVerb}。${x.note}`;
       feedback.textContent = '';
       end(false, 1);
     }

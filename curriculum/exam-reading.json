@@ -160,7 +160,7 @@
      "chunks": "She seldom smiles, / and she checks my homework / every evening.",
      "trunk": {
       "subject": "She",
-      "verb": "seldom smiles",
+      "verb": "smiles",
       "note": "谁 = She（奶奶），干什么 = seldom smiles（很少笑）；后半句 she checks（她检查）"
      },
      "keys": [
@@ -187,7 +187,7 @@
      "chunks": "When I make a mistake, / she points it out / and says, / \"Do it again.\"",
      "trunk": {
       "subject": "she",
-      "verb": "points it out",
+      "verb": "points ... out",
       "note": "谁 = she（奶奶），干什么 = points it out（把它指出来）and says（说）"
      },
      "keys": [
@@ -487,7 +487,7 @@
      "chunks": "She still seldom smiles, / but I know / she is happy.",
      "trunk": {
       "subject": "She",
-      "verb": "seldom smiles",
+      "verb": "smiles",
       "note": "谁 = She（奶奶），干什么 = still seldom smiles（还是很少笑）"
      },
      "keys": [

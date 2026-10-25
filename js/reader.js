@@ -54,6 +54,7 @@
 
 // ---------------------------------------------------------------- 导出
 //   FILE、KV_KEY = 'story:progress'、MODE = 'read'、STEP = 'read'、HINT_MAX = 4、HELP_MAX = 3、SHORT_QUESTIONS = 2
+//   shortQuestions(ep) -> [Question]   轻松版的 2 道题（0.5.1）：读前看的那道（focusOf，就是点出答案句 q5）在前，再补一道选择题（q1）
 //   SKILLS、DEFAULT_TIPS、FUNCTION_ZH、HELP_LABELS
 //   loadStories({ fetchJSON }) -> Promise<Content>；setContent(data)；content()；contentWith(names) -> 换上她起的名字的 Content
 //   NAMES_KEY = 'story:names'；nameList(data?)；cleanNames(names, data?) -> 只留能换、英文字母、不和别人重名的
@@ -698,6 +699,18 @@ export function focusOf(ep, list) {
   if (!qs.length) return null;
   const tq = ep && ep.tip && ep.tip.q;
   return qs.find(q => q.preview) || qs.find(q => tq && q.id === tq) || qs.find(q => q.kind === 'evidence') || qs[0];
+}
+
+// 轻松版 (0.5.1): the question she reads for (点出答案句, the one shown before reading) first, then one choice question.
+// The first two questions were 细节 + 推断, so a light day never had her go back and tap the sentence.
+export function shortQuestions(ep) {
+  const qs = (ep && ep.questions) || [];
+  const f = focusOf(ep, qs);
+  if (!f) return [];
+  const out = [f];
+  for (const q of qs) if (out.length < SHORT_QUESTIONS && q !== f && q.kind === 'choice') out.push(q);
+  for (const q of qs) if (out.length < SHORT_QUESTIONS && !out.includes(q)) out.push(q);
+  return out;
 }
 
 // ---------------------------------------------------------------- 句子主干: who + does what, marked in the sentence

@@ -4,7 +4,7 @@
 //
 // 导出
 //   renderEpisode(container, ctx, { episodeId, onDone, sid?, step = 'read', doneLabel = '接着上课', short?, again? }) -> Controller
-//     把一集画进 container（会清空它）。episodeId 不给就读 nextEpisode(kv)。short：轻松版，只做前 2 道题。
+//     把一集画进 container（会清空它）。episodeId 不给就读 nextEpisode(kv)。short：轻松版，只做 2 道题（R.shortQuestions：点出答案句那道在前，再一道选择题）。
 //     again：已经读完的一集再读一遍（不给就看 kv：读完过的就是再读）。
 //     做完点 doneLabel 调用 onDone({ episodeId, n, done: true, again, stats, results, words, passedWords, helps, taps, hard, triage })；
 //     这一集打不开时 onDone({ episodeId, done: false })。hard 是“今天哪里最难？”的回答 id（没答是 null），triage 是这集今天卡住的次数。
@@ -136,7 +136,7 @@ function mount(sh, ctx, c, ep, cfg) {
   const saveTriage = () => kvSet(R.TRIAGE_KEY, triage);
   const answered = story && !again ? ((prog.episodes[ep.id] || {}).answers || {}) : {};
   const flagged = new Set(story ? (prog.episodes[ep.id] || {}).flagged || [] : []);
-  const all = short ? ep.questions.slice(0, R.SHORT_QUESTIONS) : ep.questions;
+  const all = short ? R.shortQuestions(ep) : ep.questions;
   const questions = all.filter(q => !answered[q.id] && !flagged.has(q.id));
   const focus = R.focusOf(ep, questions);
   const results = [];
