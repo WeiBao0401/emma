@@ -51,6 +51,7 @@ function svgIcon(shapes) {
 const cameraIcon = () => svgIcon([['path', { d: 'M4.5 8.5A1.5 1.5 0 0 1 6 7h2.2l1.4-2h4.8l1.4 2H18a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 18 19H6a1.5 1.5 0 0 1-1.5-1.5z' }],
   ['circle', { cx: 12, cy: 12.75, r: 3.25 }]]);
 const micIcon = () => svgIcon([['rect', { x: 9, y: 3.5, width: 6, height: 11, rx: 3 }], ['path', { d: 'M6 11.5a6 6 0 0 0 12 0' }], ['path', { d: 'M12 17.5v3' }]]);
+const keyIcon = () => svgIcon([['rect', { x: 3, y: 6.5, width: 18, height: 11, rx: 2 }], ['path', { d: 'M7 10h.01M11 10h.01M15 10h.01M7 13.5h10' }]]);
 
 const shortUnit = id => (id === 'S' ? 'Starter' : /^U(\d+)$/.test(String(id)) ? 'Unit ' + String(id).slice(1) : '');
 // "n. 猫；猫科动物；v. 抓" -> the first two senses, short
@@ -86,11 +87,18 @@ export function createChatTab(ctx, { root = null } = {}) {
   const fileInput = h('input', { type: 'file', accept: 'image/*', capture: 'environment', hidden: true, on: { change: onFile } });
   const camBtn = h('button', { type: 'button', className: 'chat-tool-btn chat-cam', 'aria-label': '拍一道题', on: { click: openCamera } },
     cameraIcon(), h('span', { text: '拍题' }));
-  const micLabel = h('span', { text: '按住说话' });
-  const micBtn = h('button', { type: 'button', className: 'chat-tool-btn chat-mic', 'aria-label': '按住说话' }, micIcon(), micLabel);
+  // voice mode (Wei 10-25, like Doubao and WeChat): the box becomes one wide “按住 说话” bar; what she says shows above
+  // it as she talks, letting go sends it to the teacher, sliding up cancels. The small button switches voice / keyboard.
+  const MODE_KEY = 'emma.chat.mode';
+  let voiceMode = (() => { try { return localStorage.getItem(MODE_KEY) !== 'text'; } catch (e) { return true; } })();
+  const micLabel = h('span', { text: '按住 说话' });
+  const micBtn = h('button', { type: 'button', className: 'chat-hold', 'aria-label': '按住说话，松开发送' }, micLabel);
+  const live = h('div', { className: 'chat-live', hidden: true, 'aria-live': 'polite' });
+  const modeLabel = h('span', {});
+  const modeBtn = h('button', { type: 'button', className: 'chat-tool-btn chat-mode', on: { click: () => setVoiceMode(!voiceMode, true) } }, modeLabel);
   const sendBtn = h('button', { type: 'button', className: 'btn chat-send', on: { click: () => (chat.isBusy() ? chat.stop() : doSend()) } }, '发送');
-  const composer = h('div', { className: 'chat-composer' }, pop, photoBox,
-    h('div', { className: 'chat-bar' }, camBtn, input, micBtn, sendBtn), fileInput);
+  const composer = h('div', { className: 'chat-composer' }, pop, photoBox, live,
+    h('div', { className: 'chat-bar' }, modeBtn, camBtn, input, micBtn, sendBtn), fileInput);
   const page = h('div', { className: 'chat' },
     h('header', { className: 'runhead chat-head' }, h('span', { className: 'runhead-title', text: '问老师' }),
       h('span', { className: 'chat-head-end' }, olderBtn, newBtn)),
@@ -103,6 +111,7 @@ export function createChatTab(ctx, { root = null } = {}) {
     if (w) openWord(w.dataset.w || w.textContent || '');
   });
   setupMic();
+  setVoiceMode(voiceMode && !!voiceApi(), false);
 
   // ---------------------------------------------------------------- drawing
   const kidLine = code => CHAT_COPY[code] || (ctx.kidError ? ctx.kidError({ code }, { where: 'chat' }) : '') || '出了点小问题，再试一次。';
@@ -327,6 +336,7 @@ export function createChatTab(ctx, { root = null } = {}) {
     sendBtn.disabled = !busy && (preparing || (!input.value.trim() && !pendingImage));
     camBtn.disabled = busy;
     micBtn.disabled = busy;
+    if (voiceMode) sendBtn.hidden = !busy;
     newBtn.disabled = busy;
   }
   function grow() {
@@ -476,11 +486,27 @@ export function createChatTab(ctx, { root = null } = {}) {
     if (err && (err.code === 'network' || err.code === 'offline' || err.code === 'timeout')) return '语音这会儿连不上，先打字问吧。';
     return '没听清，再按住说一次。';
   }
+  function setVoiceMode(on, remember) {
+    voiceMode = !!on;
+    if (remember) { try { localStorage.setItem(MODE_KEY, voiceMode ? 'voice' : 'text'); } catch (e) { /* fine */ } }
+    input.hidden = voiceMode;
+    sendBtn.hidden = voiceMode && !chat.isBusy();
+    micBtn.hidden = !voiceMode;
+    modeLabel.textContent = voiceMode ? '打字' : '说话';
+    modeBtn.replaceChildren(voiceMode ? keyIcon() : micIcon(), modeLabel);
+    modeBtn.setAttribute('aria-label', voiceMode ? '改成打字' : '改成说话');
+    if (!voiceMode) { try { input.focus(); } catch (e) { /* fine */ } }
+  }
   function setMic(state) {
-    micBtn.classList.toggle('on', state === true);
+    micBtn.classList.toggle('on', state === true || state === 'cancel');
+    micBtn.classList.toggle('cancel', state === 'cancel');
     micBtn.classList.toggle('wait', state === 'wait');
-    micLabel.textContent = state === true ? '松开就好' : state === 'wait' ? '在听写…' : '按住说话';
-    input.placeholder = state === true ? '正在听你说…' : '问老师……';
+    micLabel.textContent = state === true ? '松开 发送' : state === 'cancel' ? '松开 取消' : state === 'wait' ? '在听写…' : '按住 说话';
+    live.hidden = !(state === true || state === 'cancel' || state === 'wait');
+    live.classList.toggle('cancel', state === 'cancel');
+    if (state === true && !live.textContent) live.textContent = '正在听你说…  往上滑可以取消';
+    if (!state) live.textContent = '';
+    input.placeholder = '问老师……';
   }
   function setupMic() {
     micBtn.addEventListener('contextmenu', e => e.preventDefault());
@@ -495,7 +521,8 @@ export function createChatTab(ctx, { root = null } = {}) {
       setMic(true);
       const start = api.start || api.startRecording;
       try {
-        r.started = Promise.resolve(start.call(api, { lang: 'zh-CN', onPartial: t => { if (rec === r) { input.value = joinText(r.base, String(t || '')); grow(); } } }));
+        r.y0 = e.clientY;
+        r.started = Promise.resolve(start.call(api, { lang: 'zh-CN', onPartial: t => { if (rec === r) { input.value = joinText(r.base, String(t || '')); live.textContent = input.value || '正在听你说…'; grow(); } } }));
         await r.started;
       } catch (err) {
         if (rec === r) { rec = null; setMic(false); input.value = r.base; toast(voiceError(err), 2500); }
@@ -521,6 +548,8 @@ export function createChatTab(ctx, { root = null } = {}) {
         const text = String((await stop.call(r.api)) || '').trim();
         if (text) input.value = joinText(r.base, text);
         else if (input.value === r.base) toast('没听清，再按住说一次。', 2000);
+        // voice mode: letting go sends it, like a voice message
+        if (voiceMode && input.value.trim() && input.value !== r.base) { setMic(false); doSend(); }
       } catch (err) {
         toast(voiceError(err), 2500);
       } finally {
@@ -529,7 +558,13 @@ export function createChatTab(ctx, { root = null } = {}) {
         updateComposer();
       }
     };
-    micBtn.addEventListener('pointerup', () => end(false));
+    micBtn.addEventListener('pointermove', e => {
+      const r = rec;
+      if (!r || r.y0 === undefined) return;
+      const up = r.y0 - e.clientY > 60;
+      if (up !== !!r.cancelArmed) { r.cancelArmed = up; setMic(up ? 'cancel' : true); }
+    });
+    micBtn.addEventListener('pointerup', () => end(!!(rec && rec.cancelArmed)));
     micBtn.addEventListener('pointercancel', () => end(true));
   }
 
