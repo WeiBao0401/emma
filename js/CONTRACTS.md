@@ -531,3 +531,14 @@ await run();
 - `reader.js` `challengeQuestions(ep, n)`（id `<题>x`，`challenge: true`，不写进 `story:progress`）、`fewerQuestions(ep, list, n)`；`ui-reader.js` 认 `challenge`、`autoTrunk`（有挑战题时不按分诊自动标主干），`answer` 事件多 `challenge: true`。`selfFirst` 还没读
 - `kid-me.js` `setLevel(ctx, part, level, { from: 'me' | 'parent' })` 直接写 `kid.level` 并记 `feedback`（`from: 'me'`）；`levelReport(kv, now)`、`FEEDBACK_ZH`、`FROM_ZH`。孩子端“我”每部分四个等级按钮 + “全部恢复正好”；家长区“学得怎么样”多一行“她说的难度”（等级、最近 3 次反馈和时间、“全部重置为 0”）
 - 还没接：screen `skipSteady`、阅读 `selfFirst`
+
+## 14. 第 6 批（0.8.0）接线记录
+各模块的接线清单原文在 `../../wip/b6/*.md`，这里只记接上以后的样子。
+- **新文件**（都进了 SHELL）：每日阅读 `daily-read.js`、`ui-daily-read.js`、`css/daily-read.css`（`dr-`）；接着练 `practice.js`、`ui-practice.js`、`css/practice.css`（`pr-`）；读出来 `rec.js`、`ui-readaloud.js`、`css/readaloud.css`（`ra-`）；进新单元 `unit-flow.js`、`ui-unit-flow.js`、`css/unit-flow.css`（`uf-`）；会写复查和遇见计数 `encounters.js`；接线写的 `teach-tune.js`（老师想到的落到课上）、`weekend.js`（周末课）
+- **ctx**：`practice`（Hub，`mount(el, { compact })`、`start`、`hide`、`inSession`、`onKey`）、`dailyRead`（`open({ more })`、`hide`、`inSession`）、`unitFlow`（`check()`、`open(unit)`、`hide`、`inSession`）。`voiceInput.transcribe(blob, { lang })`：整段识别（百炼优先，否则豆包录音文件极速版），`lang: 'en'` 不带上下文，记 `asr`
+- **plan state 新字段**：`grammarContent`（小卷语法题用卡的整题）、`dictWarm`、`recheck`（热身里一律拼写，减卡不减，第一节课不放）、`teacherTune`（`teach-tune.js` 的结果：`cards` 并进 `weakCards`，`points` 并进 `grammarFocus`，`read` 改 `knobs.read`；它的 `why` 接到 `plan.tune` 后面，家长区“今天的课调了什么”看）。Plan 的 warmup 格多 `dictWarm`、`recheck`，counts 同名
+- **kv 新键**（都随备份走）：`daily:<日期>`、`daily.fallback`、`practice:<日期>`（留 30 天）、`mistake.dictation`、`write.recheck`、`unit.flow`、`lines.talk`、`weekend:<周一>` = `{ v: 1, week, grammar, paper, wish, updated }`。`progress` 多 `nextFrom`、`nextFor`、`unitFrom`
+- **事件**：新类型 `read_aloud`；`ask` 新 qid `unit_intro`、`unit_order`、`weekend_next`（answer `read | words | grammar | speak`）；`line` 类型开始用（老师说 + 学一点）；step 新值 `practice`、`unit`；`dictation` 多 `pass: 'school'`
+- **ui-lesson**：读一段番外读完（`cell.again`）改读每日阅读；读完（不是轻松版、21:00 以前、不是期中小篇）接读出来 2 句；周末第一节不是句型转换的课，写几个词换成“本周语法 10 题”（`sprint.cardQuizItems`，quiz.kind `'weekend'`）；周末收尾多“本周 10 词纸上写”（`go('dictation', { week: true, words })`）和“下周想多练什么”；收尾的再见换成“老师说 + 学一点”，下面挂接着练
+- **ui-home**：招呼先用 `lines.talk`（下面一段“学一点”，`learnBlock` 也给收尾用）；没上完课时四格下面挂 `practice.mount(el, { compact: true })`，上完课换成整个接着练中心；读一段格番外读完写“今天的阅读”
+- 还没接：遇见计数的显示（`ui-entry` 词条页、单词本列表）、`wordbook.buildFacts` 的 `applyBack`、语法卡借故事句子（`reader.storyExamples`）、首页“进 Unit X 了”的再看入口

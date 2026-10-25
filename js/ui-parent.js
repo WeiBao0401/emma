@@ -60,6 +60,8 @@ import { renderTeacherWeek, teacherRow } from './ui-teacher.js';
 import { readPages } from './textread.js';
 import { asrRoute, ASR_DEFAULTS, DOUBAO_RESOURCE } from './voice-input.js';
 import { normalizePoeUrl } from './ai.js';
+import { renderNextFrom } from './ui-unit-flow.js';
+import { nextFromText } from './unit-flow.js';
 
 export const PARENT_NAMES = ['妈妈', '爸爸', '家长'];
 export const KIND_LABEL = { lookup: '查词', tts: '朗读', hint: '提示讲解', story: '故事', reflect: '每周反思', photo: '拍照识别',
@@ -528,6 +530,9 @@ export function createParentView(ctx) {
     return kit.group('学到哪', [
       kit.row({ key: 'unit', label: '课本进度', sub: '从已导入的单元里选', value: p.unit ? unitTitle(p.unit) : '还没设', panel: unitPanel(kit) }),
       kit.row({ key: 'exam', label: '期中', sub: '日期和范围', value: examValue(), panel: examPanel(kit) }),
+      // 0.8.0: when the next unit starts, so its grammar card can begin a week before (ui-unit-flow.js)
+      kit.row({ key: 'nextfrom', label: '下个单元哪天开始', sub: '填了，语法卡提前一周开始，到日子自动换单元', value: safe(() => nextFromText(ctx.kv.peek('progress', {}) || {})) || '还没设',
+        panel: () => { const box = h('div'); safe(() => renderNextFrom(box, ctx, { onSaved: () => kit.render() })); return box; } }),
       kit.row({ key: 'outline', label: '复习提纲重点词', sub: '从课本单元里点选，或粘贴一串词', value: outlineValue(), panel: outlinePanel(kit) }),
       pageRow(kit, 'capture', '拍课本', '拍一页词汇表，识别出来核对后再存。', '去拍', photoValue()),
     ]);
@@ -621,8 +626,20 @@ export function createParentView(ctx) {
       ...extraRows(kit, now),
     ], '看她卡在哪，好对着补。');
   }
+  function tuneList() { const p = safe(() => ctx.todayPlan()); return p && Array.isArray(p.tune) ? p.tune : []; }
+  const tuneText = () => tuneList().map(x => x.why).filter(Boolean).slice(0, 3).join('；');
+  const tuneCount = () => tuneList().length;
+  let readAloudN = null;
+  function countReadAloud() {
+    const since = new Date(Date.now() - 7 * 864e5);
+    Promise.resolve(ctx.events.query({ since, type: 'read_aloud', limit: 5000 })).then(list => {
+      const n = (Array.isArray(list) ? list : []).filter(e => e && e.recorded).length;
+      readAloudN = n;
+    }).catch(() => {});
+  }
   // 0.5.0 rows: 读的时候卡在哪, 老师这周的想法, 地基小题, 小学词摸底, 句型转换, 课文陪读
   function extraRows(kit, now) {
+    countReadAloud();
     const ts = safe(() => R.triageSummary(ctx.kv, { now, days: 14 }));
     const tw = safe(() => teacherRow(ctx, now)) || { label: '老师这周的想法', sub: '', value: '' };
     const blocks = safe(() => (S.content() ? S.probeSummary(ctx.kv) : [])) || [];
@@ -646,6 +663,11 @@ export function createParentView(ctx) {
         value: sc && sc.of ? `摸过 ${sc.done} / ${sc.of}` : '还没开始' }),
       kit.row({ label: '句型转换', sub: tsum && tsum.kinds.length ? '常错：' + tsum.kinds.slice(0, 2).map(k => k.name).join('、') : '星期六的“写几个词”（期中季星期四也有）',
         value: tsum && tsum.tried ? `做过 ${tsum.tried} 句，一次就对 ${tsum.clean} 句` : '还没做' }),
+      // 0.8.0: what today's lesson changed because of the teacher's plan and the reading triage (plan.tune)
+      kit.row({ key: 'learn-tune', label: '今天的课调了什么', sub: tuneText() || '老师每周想一次、她卡在哪、读的时候卡在哪，会改第二天的课',
+        value: tuneCount() ? `${tuneCount()} 处` : '照常' }),
+      // 0.8.0: 读出来 (ui-readaloud.js): the recordings stay on this iPad for 7 days
+      kit.row({ label: '读出来', sub: '读完故事挑 2 句读出声，录音只在这台 iPad 上，7 天自动删', value: readAloudN === null ? '' : readAloudN ? `这周读了 ${readAloudN} 句` : '这周还没读' }),
       kit.row({ label: '课文陪读', sub: pageText || '她在“今天”或问老师里拍一页课文，老师陪着一句一句读',
         value: pages && pages.pages ? `读过 ${pages.pages} 页` : '还没读' }),
     ];

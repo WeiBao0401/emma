@@ -334,10 +334,19 @@ function normSentence(s, i, speakers) {
     point: str(s.point ?? s.grammar), words: wordCount(en),
     trunk: normTrunk(s.trunk ?? null),
     tags: arr(s.tags ?? s.grammar_tags).map(str).filter(Boolean),
+    // 0.8（roadmap-gaps 7）：{ 标签: [要加底色的词] }，本周在练的语法点在句子里加底色；example: 可以借给语法卡当例句的标签
+    marks: normMarks(s.marks),
+    example: arr(s.example).map(str).filter(Boolean),
     para: num(s.para ?? s.paragraph) || null,
     // 课文陪读: the second check did not agree on this sentence's Chinese (这句问问老师)
     unsure: !!s.unsure,
   };
+}
+function normMarks(m) {
+  if (!m || typeof m !== 'object' || Array.isArray(m)) return {};
+  const out = {};
+  for (const [k, v] of Object.entries(m)) { const ws = arr(v).map(str).filter(Boolean); if (str(k) && ws.length) out[str(k)] = ws; }
+  return out;
 }
 // { subject, verb, note, kind?, also?: [{ subject, verb }] } (also [subject, verb] or 'subject | verb'); a note alone is kept
 // (Haha! has no subject and no verb, and the note says so)
@@ -1678,4 +1687,205 @@ export function checkEpisode(ep) {
     if (!q.evidence.length && q.skill !== 'main') out.push(`${where(q)}: no evidence sentence`);
   }
   return out;
+}
+
+// ---------------------------------------------------------------- 0.8 语法放进她读的句子里（roadmap-gaps 7、teacher-next 3.5）
+// 本周在练的语法点（她这 7 天做过的语法卡）在故事句子里加浅底色（sentence.marks），点底色出一句这张卡的规则；
+// 语法卡的例句借用她读过的故事句子（storyExamples）；问老师可以带上她的阅读进度和最吃力的句子（chatReading）。
+//   GRAMMAR_TAG_CARD { tag: 语法卡 id }（和 textread.js 的 TAG_CARD 同一张表，测试查）；GRAMMAR_TAG_ZH { tag: 短名 }
+//   GRAMMAR_RULE_ZH { tag: 一句规则 }（grammar.json 没读到时用）
+//   cardsOfTag(tag) -> [卡 id]；tagsOfCard(cardId) -> [tag]
+//   weekGrammar(kv, now, { days = 7, cards = [] }) -> { cards: [卡 id]（最近做的在前）, tags: [tag] }
+//     kv 'grammar:<卡>' 里这 days 天有动静的卡（开了头、做了题、热身练过、复习过）；cards 是另外要算上的（比如今天上的那张）
+//   findMarks(en, mark) -> [字符起点]（check_stories.mjs findMark 的规则：前后不能紧挨字母，'s 直接接在前一个词后面；出现几次都算）
+//   markTokens(tokens, S, tags) -> 新的 tokens：和 marks[tag] 的词重叠的 token 多 gram: tag（parts 的 token 整个词标）
+//   gramSentences(ep, tags) -> [句子 i]   这一集里有底色的句子
+//   gramRule(tag, word, card?) -> { tag, card: 卡 id, title, rule }   点底色时那一句：card 是 grammar.js 的 Card（有就从它的 rule 里挑一句，
+//       按标签和点的词挑：my / our 挑物主代词那句、isn't 挑否定那句、三单挑“动词加 s”那句……），没有就用 GRAMMAR_RULE_ZH
+//   storyExamples(tagOrCard, { content, max = 3, names }) -> [{ ref: 'ep1:4', ep, n, i, en, zh, tag, marks: [词] }]
+//       先用 meta.grammar_cards[卡]，再用 meta.grammar[标签]，再找 example 里有这个标签的句子，最后找 tags 里有它的句子；
+//       给语法卡（grammar.js / ui-grammar.js）借例句用。names 是 kv 'story:names'（换上她起的名字）
+//   readAloudPick(ep, { n = 2, words }) -> [{ en, zh, words: [目标词], ref, item, i }]   读出来挑的 2 句：含目标词、4 到 14 个词，
+//       不同的目标词优先，8 个词左右的优先；words 给了就按这些词挑（每日阅读用）
+//   chatReading(kv, { content, now, max = 2 }) -> { line, sentences: [{ en, zh, ep, n, i, level }], text } | null
+//       给问老师的提示词：“读到第 3 集（共 6 集）”和她看了整句中文才懂的句子；text 是拼好的一段（没读过返回 null）
+
+export const GRAMMAR_TAG_CARD = { there_be: 'there_be', poss_s: 'possessive_s', pronoun: 'pronoun', be_adj: 'be_verb', be_verb: 'be_verb', can: 'can',
+  third_s: 'present_simple', do_q: 'present_simple', plural: 'plural', freq_adv: 'freq_adverb' };
+export const GRAMMAR_TAG_ZH = { there_be: 'there be', poss_s: "名词所有格 's", pronoun: '代词', be_adj: 'be 动词', be_verb: 'be 动词', can: 'can',
+  third_s: '三单 -s', do_q: 'do / does', plural: '名词复数', freq_adv: '频度副词' };
+export const GRAMMAR_RULE_ZH = {
+  there_be: '说“某个地方有什么”，用 There is / There are。',
+  poss_s: "说“某人的”，在人名后面加 's：Tom's bag。",
+  pronoun: '代词替前面说过的人和东西：she 是她，her 是她的，they 是他们。',
+  be_adj: '“她很高”英语也要有 be：She is tall。',
+  be_verb: 'be 动词跟着主语走：I am，he / she / it is，we / you / they are。',
+  can: 'can 后面跟动词原形，不管主语是谁 can 都不变。',
+  third_s: '主语是 he、she、it 或一个人，常做的事动词加 s：She likes cats。',
+  do_q: '一般现在时的问句和否定借 do / does，后面的动词用原形。',
+  plural: '两个以上名词变复数，一般加 s：two cats。',
+  freq_adv: '频度副词放在动词前面、be 动词后面：I always get up at six。',
+};
+export const cardsOfTag = tag => (GRAMMAR_TAG_CARD[tag] ? [GRAMMAR_TAG_CARD[tag]] : []);
+export const tagsOfCard = card => Object.keys(GRAMMAR_TAG_CARD).filter(t => GRAMMAR_TAG_CARD[t] === card);
+
+const GRAM_PREFIX = 'grammar:';
+export function weekGrammar(kv, now = new Date(), { days = 7, cards = [] } = {}) {
+  const floor = (() => { const d = new Date(toDate(now).getTime()); d.setDate(d.getDate() - (days - 1)); return dayOf(d); })();
+  const today = dayOf(now);
+  const seen = new Map();
+  const note = (card, day) => { if (!card || !GRAMMAR_TAG_CARD_IDS.has(card)) return; if (!seen.has(card) || seen.get(card) < day) seen.set(card, day); };
+  const keys = safe(() => (kv && typeof kv.keys === 'function' ? kv.keys(GRAM_PREFIX) : []), []) || [];
+  for (const k of keys) {
+    const card = String(k).slice(GRAM_PREFIX.length);
+    const st = safe(() => kv.peek(k, null), null);
+    if (!st || typeof st !== 'object') continue;
+    const days0 = [];
+    const push = x => { const s = str(x).slice(0, 10); if (/^\d{4}-\d\d-\d\d$/.test(s)) days0.push(s); };
+    for (const p of Object.values(st.parts || {})) if (p && typeof p === 'object') { push(p.started); push(p.done); }
+    for (const it of Object.values(st.items || {})) if (it && typeof it === 'object') push(it.last);
+    for (const r of arr(st.reviews)) if (r && typeof r === 'object') push(r.miss);
+    if (st.warm && typeof st.warm === 'object') push(st.warm.day);
+    const last = days0.filter(d => d >= floor && d <= today).sort().pop();
+    if (last) note(card, last);
+  }
+  for (const c of arr(cards)) note(str(c), today + 'z');
+  const list = [...seen.entries()].sort((a, b) => (a[1] < b[1] ? 1 : a[1] > b[1] ? -1 : 0)).map(([c]) => c);
+  return { cards: list, tags: list.flatMap(tagsOfCard) };
+}
+const GRAMMAR_TAG_CARD_IDS = new Set(Object.values(GRAMMAR_TAG_CARD));
+
+const isLetter = c => !!c && /[A-Za-z]/.test(c);
+export function findMarks(en, mark) {
+  const text = String(en || '').replace(/’/g, "'");
+  const m = String(mark || '').replace(/’/g, "'");
+  const out = [];
+  if (!m) return out;
+  for (let i = text.indexOf(m); i >= 0; i = text.indexOf(m, i + 1)) {
+    if (isLetter(m[0]) && isLetter(text[i - 1])) continue;
+    if (isLetter(m[m.length - 1]) && isLetter(text[i + m.length])) continue;
+    out.push(i);
+  }
+  return out;
+}
+// the spans [from, to) of this sentence's marks for these tags: { from, to, tag }
+function markSpans(s, tags) {
+  const out = [];
+  const marks = (s && s.marks) || {};
+  for (const tag of arr(tags)) for (const w of arr(marks[tag])) for (const a of findMarks(s.en, w)) out.push({ from: a, to: a + String(w).length, tag });
+  return out;
+}
+export function markTokens(tokens, s, tags) {
+  const spans = markSpans(s, tags);
+  if (!spans.length) return tokens;
+  let at = 0;
+  return tokens.map(t => {
+    const from = at, to = at + String(t.text).length;
+    at = to;
+    if (!t.word) return t;
+    const hit = spans.find(x => x.from < to && x.to > from);
+    return hit ? { ...t, gram: hit.tag } : t;
+  });
+}
+export const gramSentences = (ep, tags) => ((ep && ep.sentences) || []).filter(s => markSpans(s, tags).length).map(s => s.i);
+
+// which line of the card fits the tag and the word she tapped
+const RULE_PICK = {
+  pronoun: w => (/^(my|your|his|her|its|our|their|mine|yours|hers|ours|theirs)$/.test(w) ? /物主|谁的/ : /^(me|him|us|them)$/.test(w) ? /宾格/ : /主格|主语/),
+  be_verb: w => (/n't$|^not$/.test(w) ? /否定/ : /跟着主语/),
+  be_adj: () => /没有“是”|She is tall/,
+  third_s: () => /加 s|三单/,
+  do_q: () => /do 或 does|does/,
+  there_be: w => (/^(are)$/.test(w) ? /两个以上|There are/ : /某个地方|There is/),
+  poss_s: () => /'s/,
+  freq_adv: () => /前面|后面/,
+};
+export function gramRule(tag, word = '', card = null) {
+  const w = normW(word).replace(/’/g, "'");
+  const lines = card && Array.isArray(card.rule) ? card.rule.map(str).filter(Boolean) : [];
+  const re = RULE_PICK[tag] ? RULE_PICK[tag](w) : null;
+  const rule = (re && lines.find(l => re.test(l))) || lines[0] || GRAMMAR_RULE_ZH[tag] || '';
+  return { tag, card: (card && card.id) || GRAMMAR_TAG_CARD[tag] || '', title: (card && card.title) || GRAMMAR_TAG_ZH[tag] || tag, rule };
+}
+
+export function storyExamples(tagOrCard, { content: c = null, max = 3, names = null } = {}) {
+  const ct = c || (names ? contentWith(names) : cached);
+  const key = str(tagOrCard);
+  if (!ct || !key) return [];
+  // a card id (be_verb, present_simple ...) covers all its tags; a tag alone (third_s, be_adj) only itself
+  const asCard = GRAMMAR_TAG_CARD_IDS.has(key);
+  const tags = asCard ? tagsOfCard(key) : [key];
+  const card = asCard ? key : GRAMMAR_TAG_CARD[key] || '';
+  const meta = (raw && raw.meta) || {};
+  const refs = [];
+  const add = r => { const v = str(r); if (v && !refs.includes(v)) refs.push(v); };
+  const has = (x, list) => !!x && list.some(t => arr(x.s.tags).includes(t));
+  if (asCard) arr(meta.grammar_cards && meta.grammar_cards[card]).forEach(add);
+  for (const t of tags) arr(meta.grammar && meta.grammar[t]).forEach(add);
+  if (!asCard && card) arr(meta.grammar_cards && meta.grammar_cards[card]).filter(r => has(sentenceAt(ct, r), tags)).forEach(add);
+  for (const ep of ct.episodes) for (const x of ep.sentences) if (tags.some(t => arr(x.example).includes(t))) add(`${ep.id}:${x.id}`);
+  for (const ep of ct.episodes) for (const x of ep.sentences) if (tags.some(t => arr(x.tags).includes(t) && arr((x.marks || {})[t]).length)) add(`${ep.id}:${x.id}`);
+  const out = [];
+  for (const r of refs) {
+    if (out.length >= max) break;
+    const x = sentenceAt(ct, r);
+    if (!x) continue;
+    const tag = tags.find(t => arr(x.s.tags).includes(t)) || tags[0];
+    out.push({ ref: r, ep: x.ep.id, n: x.ep.n, i: x.s.i, en: x.s.en, zh: x.s.zh, tag, marks: arr((x.s.marks || {})[tag]).slice() });
+  }
+  return out;
+}
+function sentenceAt(ct, ref) {
+  const m = String(ref || '').match(/^([^:]+):s?(\w+)$/);
+  if (!m) return null;
+  const ep = ct.episode(m[1]);
+  if (!ep) return null;
+  const s = ep.sentences.find(x => x.id === m[2]) || (/^\d+$/.test(m[2]) ? ep.sentences.find(x => x.no === Number(m[2])) : null);
+  return s ? { ep, s } : null;
+}
+
+// ---------------------------------------------------------------- 0.8 读出来（roadmap-gaps 4、DESIGN 2.3、5.7）：挑 2 句含目标词的
+export const READ_ALOUD_N = 2;
+export function readAloudPick(ep, { n = READ_ALOUD_N, words = null } = {}) {
+  if (!ep || !Array.isArray(ep.sentences)) return [];
+  const targets = (words ? arr(words).map(w => ({ w: str(typeof w === 'object' ? w.w : w) })) : ep.targets || []).map(t => normW(t.w)).filter(Boolean);
+  const hitsOf = s => {
+    const toks = tokenize(s.en).filter(t => t.word).map(t => t.word);
+    const text = ' ' + normW(s.en).replace(/[^a-z' ]/g, ' ').replace(/\s+/g, ' ') + ' ';
+    return targets.filter(w => (/ /.test(w) ? text.includes(' ' + w + ' ') : toks.some(x => sameWord(x, w))));
+  };
+  const pool = ep.sentences.map(s => ({ s, hits: hitsOf(s) })).filter(x => x.hits.length && x.s.words >= 4 && x.s.words <= 14);
+  pool.sort((a, b) => b.hits.length - a.hits.length || Math.abs(a.s.words - 8) - Math.abs(b.s.words - 8) || a.s.i - b.s.i);
+  const out = [], used = new Set();
+  for (const pass of [0, 1]) {
+    for (const x of pool) {
+      if (out.length >= n) break;
+      if (out.some(o => o.i === x.s.i)) continue;
+      if (!pass && x.hits.every(w => used.has(w))) continue;
+      x.hits.forEach(w => used.add(w));
+      out.push({ en: x.s.en, zh: x.s.zh, words: x.hits.slice(), ref: `${ep.id}:${x.s.id}`, item: `ep:${ep.id}:s${x.s.i}`, i: x.s.i });
+    }
+  }
+  return out.sort((a, b) => a.i - b.i);
+}
+
+// ---------------------------------------------------------------- 0.8 问老师的提示词：阅读进度和她最吃力的句子
+export function chatReading(kv, { content: c = null, now = new Date(), max = 2 } = {}) {
+  const ct = c || cached;
+  if (!ct || !ct.episodes.length) return null;
+  const p = progressOf(kv);
+  const doneEps = ct.episodes.filter(ep => p.episodes[ep.id] && p.episodes[ep.id].done);
+  const cur = p.current && ct.episode(p.current) && !(p.episodes[p.current] || {}).done ? ct.episode(p.current) : null;
+  if (!doneEps.length && !cur) return null;
+  const line = cur ? `她在读期中番外第 ${cur.n} 集（共 ${ct.episodes.length} 集，读完了 ${doneEps.length} 集）。`
+    : `她读完了期中番外 ${doneEps.length} 集（共 ${ct.episodes.length} 集）。`;
+  const sum = readingSummary(p, { content: ct });
+  const sentences = sum.hard.filter(x => x.level >= 2).slice(0, max).map(x => {
+    const ep = ct.episode(x.ep);
+    const s = ep && ep.sentences[x.i - 1];
+    return { en: x.en, zh: (s && s.zh) || '', ep: x.ep, n: x.n, i: x.i, level: x.level };
+  });
+  const text = [line, ...sentences.map(s => `她读的时候最吃力的一句（第 ${s.n} 集）：${s.en}${s.zh ? `（${s.zh}）` : ''}`),
+    sentences.length ? '举例时可以用她读过的这些句子。' : ''].filter(Boolean).join('\n');
+  return { line, sentences, text };
 }

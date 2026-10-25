@@ -2385,5 +2385,6635 @@
     }
   ],
   "questions": [],
-  "tone": "可选，只在 praise 里用：ctx.tone 给了时优先挑带这个 tone 的句子，没有就照常挑"
+  "tone": "可选，只在 praise 里用：ctx.tone 给了时优先挑带这个 tone 的句子，没有就照常挑",
+  "talk_note": "“老师说 + 学一点”（Wei 10-25）：首页招呼和收尾不再只说 Hi / See you，换成一句有意思的英文（生词不超过 1 个）加一行“学一点”。kind 轮换：idiom 地道说法、unit 课本单元小知识、cat 猫的小笑话和冷知识、mix 易混词、day 星期几 / 节日 / 天气、origin 单词来历、twister 绕口令；scene 是能出现的场景（open / close / back / late / exam）；level 1-3 难度；unit 是要学到哪个单元才出（S、U1…U6）；topic 对上她在“我”里选的喜好时优先；when 同 lines，另认 weekday（1 周一…7 周日）、month [起, 止)（可跨年，[11, 3] 是 11 月到 2 月）、near（MM-DD，节日当天，before 提前几天）、dates（农历节日的公历日子）。learn.add 是可以加进单词本的词或短语。个性化的几类在 talk_make，由 lines.js 填空。",
+  "talk_kinds": {
+    "idiom": "地道说法",
+    "unit": "课本小知识",
+    "cat": "猫咪时间",
+    "mix": "易混词",
+    "day": "今天的日子",
+    "origin": "单词来历",
+    "twister": "绕口令",
+    "word": "刚学的词",
+    "likes": "你喜欢的",
+    "streak": "连着学"
+  },
+  "talks": [
+    {
+      "id": "t-idiom-001",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Look outside! It's raining cats and dogs.",
+      "zh": "看外面！雨下得好大。",
+      "learn": {
+        "text": "It's raining cats and dogs.",
+        "zh": "雨下得特别大。下大雨的时候说，天上可没有真的掉猫和狗。",
+        "kind": "idiom",
+        "add": {
+          "w": "rain cats and dogs",
+          "cn": "下倾盆大雨",
+          "phrase": true
+        }
+      },
+      "words": [
+        "look",
+        "outside",
+        "it",
+        "be",
+        "rain",
+        "cat",
+        "and",
+        "dog"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-idiom-002",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Tell me about your day. I'm all ears.",
+      "zh": "说说你今天怎么样，我认真听着呢。",
+      "learn": {
+        "text": "I'm all ears.",
+        "zh": "我洗耳恭听，你说吧。想认真听别人讲话的时候说。",
+        "kind": "idiom",
+        "add": {
+          "w": "be all ears",
+          "cn": "洗耳恭听",
+          "phrase": true
+        }
+      },
+      "words": [
+        "tell",
+        "me",
+        "about",
+        "your",
+        "day",
+        "i",
+        "be",
+        "all",
+        "ear"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-003",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Today's words? A piece of cake!",
+      "zh": "今天的单词？小菜一碟！",
+      "learn": {
+        "text": "a piece of cake",
+        "zh": "小菜一碟，很容易。This test is a piece of cake. 这次小测很容易。",
+        "kind": "idiom",
+        "add": {
+          "w": "a piece of cake",
+          "cn": "小菜一碟，很容易的事",
+          "phrase": true
+        }
+      },
+      "words": [
+        "today",
+        "word",
+        "a",
+        "piece",
+        "of",
+        "cake"
+      ],
+      "level": 1,
+      "topic": "food"
+    },
+    {
+      "id": "t-idiom-004",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Time flies when you have fun.",
+      "zh": "开心的时候，时间过得飞快。",
+      "learn": {
+        "text": "Time flies.",
+        "zh": "时间过得真快。玩得开心、聊得高兴的时候常说。",
+        "kind": "idiom",
+        "add": {
+          "w": "time flies",
+          "cn": "时间过得真快",
+          "phrase": true
+        }
+      },
+      "words": [
+        "time",
+        "fly",
+        "when",
+        "you",
+        "have",
+        "fun"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-005",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Shh! Don't let the cat out of the bag.",
+      "zh": "嘘！别说漏嘴哦。",
+      "learn": {
+        "text": "let the cat out of the bag",
+        "zh": "说漏嘴，把秘密说出去。Who let the cat out of the bag? 谁把秘密说出去了？",
+        "kind": "idiom",
+        "add": {
+          "w": "let the cat out of the bag",
+          "cn": "说漏嘴，泄露秘密",
+          "phrase": true
+        }
+      },
+      "words": [
+        "shh",
+        "do",
+        "not",
+        "let",
+        "the",
+        "cat",
+        "out",
+        "of",
+        "bag"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-idiom-006",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "exam"
+      ],
+      "en": "Practice makes perfect, {name}.",
+      "zh": "{name}，熟能生巧。",
+      "learn": {
+        "text": "Practice makes perfect.",
+        "zh": "熟能生巧。练得多了，就做得好。",
+        "kind": "idiom",
+        "add": {
+          "w": "practice makes perfect",
+          "cn": "熟能生巧",
+          "phrase": true
+        }
+      },
+      "words": [
+        "practice",
+        "make",
+        "perfect"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-007",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "back"
+      ],
+      "en": "Start now. Better late than never!",
+      "zh": "现在开始。晚做也比不做好！",
+      "learn": {
+        "text": "Better late than never.",
+        "zh": "晚一点也比不做好。迟到了、晚交了，也可以这样给自己打气。",
+        "kind": "idiom",
+        "add": {
+          "w": "better late than never",
+          "cn": "晚做总比不做好",
+          "phrase": true
+        }
+      },
+      "words": [
+        "start",
+        "now",
+        "good",
+        "late",
+        "than",
+        "never"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-008",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Easy does it. One word at a time.",
+      "zh": "慢慢来，一次一个词。",
+      "learn": {
+        "text": "Easy does it.",
+        "zh": "慢慢来，别着急。做一件要小心的事之前说。",
+        "kind": "idiom",
+        "add": {
+          "w": "easy does it",
+          "cn": "慢慢来，别着急",
+          "phrase": true
+        }
+      },
+      "words": [
+        "easy",
+        "do",
+        "it",
+        "one",
+        "word",
+        "at",
+        "a",
+        "time"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-009",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Keep your chin up today!",
+      "zh": "今天也要抬起头哦！",
+      "learn": {
+        "text": "Keep your chin up.",
+        "zh": "chin 是下巴。抬起下巴，就是“别灰心，打起精神”。",
+        "kind": "idiom",
+        "add": {
+          "w": "keep your chin up",
+          "cn": "别灰心，打起精神",
+          "phrase": true
+        }
+      },
+      "words": [
+        "keep",
+        "your",
+        "chin",
+        "up",
+        "today"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-010",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Is your little brother a copycat?",
+      "zh": "你家小弟弟是不是学人精？",
+      "learn": {
+        "text": "copycat",
+        "zh": "学人精，总学别人的人。小孩子之间常说：Stop being a copycat! 别学我啦！",
+        "kind": "idiom",
+        "add": {
+          "w": "copycat",
+          "cn": "学人精，模仿别人的人",
+          "phrase": false
+        }
+      },
+      "words": [
+        "be",
+        "your",
+        "little",
+        "brother",
+        "a",
+        "copycat"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-idiom-011",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "I need a catnap after lunch.",
+      "zh": "吃完午饭我要打个盹。",
+      "learn": {
+        "text": "catnap",
+        "zh": "小睡一会儿，像猫一样打个盹。take a catnap = 打个盹。",
+        "kind": "idiom",
+        "add": {
+          "w": "catnap",
+          "cn": "小睡，打盹",
+          "phrase": false
+        }
+      },
+      "words": [
+        "i",
+        "need",
+        "a",
+        "catnap",
+        "after",
+        "lunch"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-idiom-012",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "My cat is a scaredy-cat. She hides!",
+      "zh": "我的猫是个胆小鬼，一有动静就躲起来！",
+      "learn": {
+        "text": "scaredy-cat",
+        "zh": "胆小鬼（开玩笑的说法）。Don't be a scaredy-cat! 别当胆小鬼啦！",
+        "kind": "idiom",
+        "add": {
+          "w": "scaredy-cat",
+          "cn": "胆小鬼",
+          "phrase": false
+        }
+      },
+      "words": [
+        "my",
+        "cat",
+        "be",
+        "a",
+        "scaredy",
+        "she",
+        "hide"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-idiom-013",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "No words today? Cat got your tongue?",
+      "zh": "今天怎么不说话？舌头被猫叼走啦？",
+      "learn": {
+        "text": "Cat got your tongue?",
+        "zh": "怎么不说话啦？别人突然不吭声时，开玩笑地问。",
+        "kind": "idiom",
+        "add": {
+          "w": "Cat got your tongue?",
+          "cn": "怎么不说话了？",
+          "phrase": true
+        }
+      },
+      "words": [
+        "no",
+        "word",
+        "today",
+        "cat",
+        "get",
+        "your",
+        "tongue"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-idiom-014",
+      "kind": "idiom",
+      "scene": [
+        "close",
+        "late"
+      ],
+      "en": "Hit the books, then hit the hay!",
+      "zh": "先用功读书，再上床睡觉！",
+      "learn": {
+        "text": "hit the hay",
+        "zh": "上床睡觉。hit the books 是“用功读书”。两个 hit 意思不一样。",
+        "kind": "idiom",
+        "add": {
+          "w": "hit the hay",
+          "cn": "上床睡觉",
+          "phrase": true
+        }
+      },
+      "words": [
+        "hit",
+        "the",
+        "book",
+        "then",
+        "hay"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-015",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Are you under the weather? Rest a little.",
+      "zh": "你是不是不太舒服？休息一下吧。",
+      "learn": {
+        "text": "under the weather",
+        "zh": "有点不舒服。感冒了、没精神的时候说：I feel a bit under the weather.",
+        "kind": "idiom",
+        "add": {
+          "w": "under the weather",
+          "cn": "有点不舒服",
+          "phrase": true
+        }
+      },
+      "words": [
+        "be",
+        "you",
+        "under",
+        "the",
+        "weather",
+        "rest",
+        "a",
+        "little"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-016",
+      "kind": "idiom",
+      "scene": [
+        "close"
+      ],
+      "en": "You did it! I am over the moon!",
+      "zh": "你做到了！我高兴得不得了！",
+      "learn": {
+        "text": "over the moon",
+        "zh": "高兴极了，高兴得能跳过月亮。",
+        "kind": "idiom",
+        "add": {
+          "w": "over the moon",
+          "cn": "高兴极了",
+          "phrase": true
+        }
+      },
+      "words": [
+        "you",
+        "do",
+        "it",
+        "i",
+        "be",
+        "over",
+        "the",
+        "moon"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-017",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Once in a blue moon, I eat cake for breakfast.",
+      "zh": "我难得一次早饭吃蛋糕。",
+      "learn": {
+        "text": "once in a blue moon",
+        "zh": "难得一次，很少。blue moon 是一个月里的第二次满月，很少见。",
+        "kind": "idiom",
+        "add": {
+          "w": "once in a blue moon",
+          "cn": "难得一次",
+          "phrase": true
+        }
+      },
+      "words": [
+        "once",
+        "in",
+        "a",
+        "blue",
+        "moon",
+        "i",
+        "eat",
+        "cake",
+        "for",
+        "breakfast"
+      ],
+      "level": 3
+    },
+    {
+      "id": "t-idiom-018",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Cats are cute? You can say that again!",
+      "zh": "猫很可爱？说得太对了！",
+      "learn": {
+        "text": "You can say that again!",
+        "zh": "说得太对了！完全同意的时候说，不是真让你再说一遍。",
+        "kind": "idiom",
+        "add": {
+          "w": "You can say that again!",
+          "cn": "说得太对了",
+          "phrase": true
+        }
+      },
+      "words": [
+        "cat",
+        "be",
+        "cute",
+        "you",
+        "can",
+        "say",
+        "that",
+        "again"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-idiom-019",
+      "kind": "idiom",
+      "scene": [
+        "back"
+      ],
+      "en": "Long time no see, {name}!",
+      "zh": "{name}，好久不见！",
+      "learn": {
+        "text": "Long time no see!",
+        "zh": "好久不见！据说这句和中文的“好久不见”有关，现在说英语的人都这么说。",
+        "kind": "idiom",
+        "add": {
+          "w": "Long time no see!",
+          "cn": "好久不见",
+          "phrase": true
+        }
+      },
+      "words": [
+        "long",
+        "time",
+        "no",
+        "see"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-020",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "exam"
+      ],
+      "en": "Fingers crossed for you!",
+      "zh": "我为你祈祷好运！",
+      "learn": {
+        "text": "Fingers crossed!",
+        "zh": "祝好运！说的时候可以把食指和中指交叉起来。",
+        "kind": "idiom",
+        "add": {
+          "w": "fingers crossed",
+          "cn": "祝好运",
+          "phrase": true
+        }
+      },
+      "words": [
+        "finger",
+        "cross",
+        "for",
+        "you"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-021",
+      "kind": "idiom",
+      "scene": [
+        "open"
+      ],
+      "en": "Rise and shine, {name}!",
+      "zh": "{name}，起床啦，打起精神！",
+      "learn": {
+        "text": "Rise and shine!",
+        "zh": "起床啦，打起精神！早上叫人起床时说。",
+        "kind": "idiom",
+        "add": {
+          "w": "Rise and shine!",
+          "cn": "起床啦，打起精神",
+          "phrase": true
+        }
+      },
+      "words": [
+        "rise",
+        "and",
+        "shine"
+      ],
+      "level": 1,
+      "when": {
+        "hour": [
+          5,
+          12
+        ]
+      }
+    },
+    {
+      "id": "t-idiom-022",
+      "kind": "idiom",
+      "scene": [
+        "close",
+        "late"
+      ],
+      "en": "Good night, {name}. Sleep tight!",
+      "zh": "晚安，{name}，睡个好觉！",
+      "learn": {
+        "text": "Sleep tight!",
+        "zh": "睡个好觉！常和晚安连着说：Good night, sleep tight! 读起来押韵。",
+        "kind": "idiom",
+        "add": {
+          "w": "sleep tight",
+          "cn": "睡个好觉",
+          "phrase": true
+        }
+      },
+      "words": [
+        "good",
+        "night",
+        "sleep",
+        "tight"
+      ],
+      "level": 1,
+      "when": {
+        "hour": [
+          19,
+          24
+        ]
+      }
+    },
+    {
+      "id": "t-idiom-023",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Learn these words by heart.",
+      "zh": "把这些词背下来。",
+      "learn": {
+        "text": "learn ... by heart",
+        "zh": "背下来，记熟。I learn the poem by heart. 我把这首诗背下来了。",
+        "kind": "idiom",
+        "add": {
+          "w": "learn by heart",
+          "cn": "背下来，记住",
+          "phrase": true
+        }
+      },
+      "words": [
+        "learn",
+        "these",
+        "word",
+        "by",
+        "heart"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-024",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Ask a friend. Two heads are better than one!",
+      "zh": "问问朋友吧，两个人一起想更好！",
+      "learn": {
+        "text": "Two heads are better than one.",
+        "zh": "两个人一起想，比一个人强。和同学一起学的时候说。",
+        "kind": "idiom",
+        "add": {
+          "w": "Two heads are better than one.",
+          "cn": "两个人一起想比一个人强",
+          "phrase": true
+        }
+      },
+      "words": [
+        "ask",
+        "a",
+        "friend",
+        "two",
+        "head",
+        "be",
+        "good",
+        "than",
+        "one"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-025",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Hang in there! The weekend is coming.",
+      "zh": "坚持住！周末快到了。",
+      "learn": {
+        "text": "Hang in there!",
+        "zh": "坚持住！累的时候互相打气。",
+        "kind": "idiom",
+        "add": {
+          "w": "Hang in there!",
+          "cn": "坚持住",
+          "phrase": true
+        }
+      },
+      "words": [
+        "hang",
+        "in",
+        "there",
+        "the",
+        "weekend",
+        "be",
+        "come"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-026",
+      "kind": "idiom",
+      "scene": [
+        "close"
+      ],
+      "en": "Way to go, {name}!",
+      "zh": "{name}，干得好！",
+      "learn": {
+        "text": "Way to go!",
+        "zh": "干得好！夸别人做成了一件事。",
+        "kind": "idiom",
+        "add": {
+          "w": "Way to go!",
+          "cn": "干得好",
+          "phrase": true
+        }
+      },
+      "words": [
+        "way",
+        "to",
+        "go"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-027",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "exam"
+      ],
+      "en": "Hard work today? No pain, no gain!",
+      "zh": "今天很辛苦？不吃苦就没收获！",
+      "learn": {
+        "text": "No pain, no gain.",
+        "zh": "不付出就没有收获。pain 是疼、辛苦，gain 是得到。",
+        "kind": "idiom",
+        "add": {
+          "w": "No pain, no gain.",
+          "cn": "不劳无获",
+          "phrase": true
+        }
+      },
+      "words": [
+        "hard",
+        "work",
+        "today",
+        "no",
+        "pain",
+        "gain"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-028",
+      "kind": "idiom",
+      "scene": [
+        "late"
+      ],
+      "en": "I'm a night owl. Are you?",
+      "zh": "我是个夜猫子，你呢？",
+      "learn": {
+        "text": "night owl",
+        "zh": "夜猫子，喜欢晚睡的人。英语里说的是“夜里的猫头鹰”。早起的人叫 early bird。",
+        "kind": "idiom",
+        "add": {
+          "w": "night owl",
+          "cn": "夜猫子",
+          "phrase": true
+        }
+      },
+      "words": [
+        "i",
+        "be",
+        "a",
+        "night",
+        "owl",
+        "you"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-029",
+      "kind": "idiom",
+      "scene": [
+        "open"
+      ],
+      "en": "Up early? The early bird catches the worm!",
+      "zh": "起得早？早起的鸟儿有虫吃！",
+      "learn": {
+        "text": "The early bird catches the worm.",
+        "zh": "早起的鸟儿有虫吃。早起的人可以叫 an early bird。",
+        "kind": "idiom",
+        "add": {
+          "w": "early bird",
+          "cn": "早起的人",
+          "phrase": true
+        }
+      },
+      "words": [
+        "up",
+        "early",
+        "the",
+        "bird",
+        "catch",
+        "worm"
+      ],
+      "level": 2,
+      "when": {
+        "hour": [
+          5,
+          12
+        ]
+      }
+    },
+    {
+      "id": "t-idiom-030",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Busy as a bee today?",
+      "zh": "今天忙得像小蜜蜂吗？",
+      "learn": {
+        "text": "as busy as a bee",
+        "zh": "忙得像小蜜蜂一样。I am as busy as a bee. 我忙极了。",
+        "kind": "idiom",
+        "add": {
+          "w": "as busy as a bee",
+          "cn": "非常忙碌",
+          "phrase": true
+        }
+      },
+      "words": [
+        "busy",
+        "as",
+        "a",
+        "bee",
+        "today"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-031",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Be as quiet as a mouse. The cat is sleeping.",
+      "zh": "像小老鼠一样安静，猫在睡觉呢。",
+      "learn": {
+        "text": "as quiet as a mouse",
+        "zh": "安静得像只小老鼠。as ... as 中间放形容词：as cute as a cat。",
+        "kind": "idiom",
+        "add": {
+          "w": "as quiet as a mouse",
+          "cn": "非常安静",
+          "phrase": true
+        }
+      },
+      "words": [
+        "be",
+        "as",
+        "quiet",
+        "a",
+        "mouse",
+        "the",
+        "cat",
+        "sleep"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-idiom-032",
+      "kind": "idiom",
+      "scene": [
+        "close"
+      ],
+      "en": "Ten new words tomorrow? It's a deal!",
+      "zh": "明天学十个新词？一言为定！",
+      "learn": {
+        "text": "It's a deal!",
+        "zh": "一言为定！说好了一件事的时候说。",
+        "kind": "idiom",
+        "add": {
+          "w": "It's a deal!",
+          "cn": "一言为定",
+          "phrase": true
+        }
+      },
+      "words": [
+        "ten",
+        "new",
+        "word",
+        "tomorrow",
+        "it",
+        "be",
+        "a",
+        "deal"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-033",
+      "kind": "idiom",
+      "scene": [
+        "late",
+        "close"
+      ],
+      "en": "Take it easy tonight.",
+      "zh": "今晚放轻松。",
+      "learn": {
+        "text": "Take it easy.",
+        "zh": "放轻松，别累着。也可以当“再见”说：Take it easy!",
+        "kind": "idiom",
+        "add": {
+          "w": "take it easy",
+          "cn": "放轻松",
+          "phrase": true
+        }
+      },
+      "words": [
+        "take",
+        "it",
+        "easy",
+        "tonight"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-034",
+      "kind": "idiom",
+      "scene": [
+        "exam"
+      ],
+      "en": "Do you feel butterflies before a test?",
+      "zh": "考试前，你会紧张得心里七上八下吗？",
+      "learn": {
+        "text": "have butterflies in my stomach",
+        "zh": "紧张得心里七上八下，像肚子里有蝴蝶在飞。",
+        "kind": "idiom",
+        "add": {
+          "w": "have butterflies in one's stomach",
+          "cn": "紧张，心里七上八下",
+          "phrase": true
+        }
+      },
+      "words": [
+        "do",
+        "you",
+        "feel",
+        "butterflies",
+        "before",
+        "a",
+        "test"
+      ],
+      "level": 3,
+      "when": {
+        "exam": "day"
+      }
+    },
+    {
+      "id": "t-idiom-035",
+      "kind": "idiom",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "My cat fell down, but she is OK. Nine lives!",
+      "zh": "我的猫摔了一下，没事。九条命嘛！",
+      "learn": {
+        "text": "A cat has nine lives.",
+        "zh": "猫有九条命。中文也这么说，英语一模一样！",
+        "kind": "idiom",
+        "add": {
+          "w": "A cat has nine lives.",
+          "cn": "猫有九条命",
+          "phrase": true
+        }
+      },
+      "words": [
+        "my",
+        "cat",
+        "fall",
+        "down",
+        "but",
+        "she",
+        "be",
+        "ok",
+        "nine",
+        "live"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-idiom-036",
+      "kind": "idiom",
+      "scene": [
+        "exam"
+      ],
+      "en": "Stay cool as a cucumber in the test.",
+      "zh": "考试的时候要冷静，像黄瓜一样凉。",
+      "learn": {
+        "text": "as cool as a cucumber",
+        "zh": "非常冷静。黄瓜摸起来凉凉的，所以用来说人很镇定。",
+        "kind": "idiom",
+        "add": {
+          "w": "as cool as a cucumber",
+          "cn": "非常冷静",
+          "phrase": true
+        }
+      },
+      "words": [
+        "stay",
+        "cool",
+        "as",
+        "a",
+        "cucumber",
+        "in",
+        "the",
+        "test"
+      ],
+      "level": 3,
+      "when": {
+        "exam": "quiz"
+      }
+    },
+    {
+      "id": "t-idiom-037",
+      "kind": "idiom",
+      "scene": [
+        "open"
+      ],
+      "en": "Let's get the ball rolling!",
+      "zh": "我们开始吧！",
+      "learn": {
+        "text": "get the ball rolling",
+        "zh": "开个头，开始干。把球滚起来，事情就动起来了。",
+        "kind": "idiom",
+        "add": {
+          "w": "get the ball rolling",
+          "cn": "开始做某事",
+          "phrase": true
+        }
+      },
+      "words": [
+        "let",
+        "us",
+        "get",
+        "the",
+        "ball",
+        "rolling"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-038",
+      "kind": "idiom",
+      "scene": [
+        "open"
+      ],
+      "en": "Hi {name}! What's up?",
+      "zh": "嗨 {name}！最近怎么样？",
+      "learn": {
+        "text": "What's up?",
+        "zh": "最近怎么样？朋友之间打招呼。回答可以说 Not much. 没什么特别的。",
+        "kind": "idiom",
+        "add": {
+          "w": "What's up?",
+          "cn": "怎么样？有什么事？",
+          "phrase": true
+        }
+      },
+      "words": [
+        "hi",
+        "what",
+        "be",
+        "up"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-039",
+      "kind": "idiom",
+      "scene": [
+        "open"
+      ],
+      "en": "Hey {name}! How's it going?",
+      "zh": "嘿 {name}！最近还好吗？",
+      "learn": {
+        "text": "How's it going?",
+        "zh": "最近怎么样？回答：Pretty good! 挺好的！",
+        "kind": "idiom",
+        "add": {
+          "w": "How's it going?",
+          "cn": "最近怎么样",
+          "phrase": true
+        }
+      },
+      "words": [
+        "hey",
+        "how",
+        "be",
+        "it",
+        "go"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-040",
+      "kind": "idiom",
+      "scene": [
+        "back"
+      ],
+      "en": "Welcome back, {name}! I missed you.",
+      "zh": "欢迎回来，{name}！我想你了。",
+      "learn": {
+        "text": "I missed you.",
+        "zh": "miss 有两个意思：想念，还有错过。I missed the bus. 我没赶上公交车。",
+        "kind": "idiom",
+        "add": {
+          "w": "miss",
+          "cn": "想念；错过",
+          "phrase": false
+        }
+      },
+      "words": [
+        "welcome",
+        "back",
+        "i",
+        "miss",
+        "you"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-041",
+      "kind": "idiom",
+      "scene": [
+        "back"
+      ],
+      "en": "Welcome back! Let's pick up where we left off.",
+      "zh": "欢迎回来！我们从上次停下的地方接着来。",
+      "learn": {
+        "text": "pick up where we left off",
+        "zh": "从上次停下的地方接着做。看书、上课中断以后常说。",
+        "kind": "idiom",
+        "add": {
+          "w": "pick up where we left off",
+          "cn": "从上次停下的地方继续",
+          "phrase": true
+        }
+      },
+      "words": [
+        "welcome",
+        "back",
+        "let",
+        "us",
+        "pick",
+        "up",
+        "where",
+        "we",
+        "left",
+        "off"
+      ],
+      "level": 3
+    },
+    {
+      "id": "t-idiom-042",
+      "kind": "idiom",
+      "scene": [
+        "back"
+      ],
+      "en": "Welcome back! Every day is a fresh start.",
+      "zh": "欢迎回来！每天都是新的开始。",
+      "learn": {
+        "text": "a fresh start",
+        "zh": "一个新的开始。fresh 是“新鲜的”：fresh fruit 新鲜水果，fresh air 新鲜空气。",
+        "kind": "idiom",
+        "add": {
+          "w": "a fresh start",
+          "cn": "新的开始",
+          "phrase": true
+        }
+      },
+      "words": [
+        "welcome",
+        "back",
+        "every",
+        "day",
+        "be",
+        "a",
+        "fresh",
+        "start"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-043",
+      "kind": "idiom",
+      "scene": [
+        "back"
+      ],
+      "en": "Hey, stranger! Good to see you.",
+      "zh": "嘿，好久不见的“陌生人”！见到你真好。",
+      "learn": {
+        "text": "Hey, stranger!",
+        "zh": "好久没见的朋友，开玩笑地叫一声“陌生人”。只对熟人这样说。",
+        "kind": "idiom",
+        "add": {
+          "w": "Hey, stranger!",
+          "cn": "（开玩笑）好久不见",
+          "phrase": true
+        }
+      },
+      "words": [
+        "hey",
+        "strange",
+        "good",
+        "to",
+        "see",
+        "you"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-044",
+      "kind": "idiom",
+      "scene": [
+        "back"
+      ],
+      "en": "Welcome back! Let's go step by step.",
+      "zh": "欢迎回来！我们一步一步来。",
+      "learn": {
+        "text": "step by step",
+        "zh": "一步一步地。Learn English step by step. 一步一步学英语。",
+        "kind": "idiom",
+        "add": {
+          "w": "step by step",
+          "cn": "一步一步地",
+          "phrase": true
+        }
+      },
+      "words": [
+        "welcome",
+        "back",
+        "let",
+        "us",
+        "go",
+        "step",
+        "by"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-045",
+      "kind": "idiom",
+      "scene": [
+        "late"
+      ],
+      "en": "It's late. Count sheep, not words!",
+      "zh": "很晚了。去数羊吧，别数单词了！",
+      "learn": {
+        "text": "count sheep",
+        "zh": "数羊。睡不着的时候说。sheep 的复数还是 sheep，不加 s。",
+        "kind": "idiom",
+        "add": {
+          "w": "count sheep",
+          "cn": "数羊（帮助入睡）",
+          "phrase": true
+        }
+      },
+      "words": [
+        "it",
+        "be",
+        "late",
+        "count",
+        "sheep",
+        "not",
+        "word"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-046",
+      "kind": "idiom",
+      "scene": [
+        "close"
+      ],
+      "en": "See you later, alligator!",
+      "zh": "回头见啦，小鳄鱼！",
+      "learn": {
+        "text": "See you later, alligator! / In a while, crocodile!",
+        "zh": "押韵的说再见，英语小朋友常玩。对方回一句 In a while, crocodile!",
+        "kind": "idiom",
+        "add": {
+          "w": "See you later, alligator!",
+          "cn": "回头见（押韵玩笑）",
+          "phrase": true
+        }
+      },
+      "words": [
+        "see",
+        "you",
+        "late",
+        "alligator"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-047",
+      "kind": "idiom",
+      "scene": [
+        "close"
+      ],
+      "en": "Catch you later, {name}!",
+      "zh": "回头见，{name}！",
+      "learn": {
+        "text": "Catch you later!",
+        "zh": "回头见！比 See you later 更随意，朋友之间说。",
+        "kind": "idiom",
+        "add": {
+          "w": "Catch you later!",
+          "cn": "回头见",
+          "phrase": true
+        }
+      },
+      "words": [
+        "catch",
+        "you",
+        "late"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-048",
+      "kind": "idiom",
+      "scene": [
+        "close"
+      ],
+      "en": "Take care! See you tomorrow.",
+      "zh": "保重！明天见。",
+      "learn": {
+        "text": "Take care!",
+        "zh": "保重！说再见时常加一句，大人小孩都用。",
+        "kind": "idiom",
+        "add": {
+          "w": "Take care!",
+          "cn": "保重",
+          "phrase": true
+        }
+      },
+      "words": [
+        "take",
+        "care",
+        "see",
+        "you",
+        "tomorrow"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-049",
+      "kind": "idiom",
+      "scene": [
+        "close"
+      ],
+      "en": "That's all for today. Bye for now!",
+      "zh": "今天就到这里，先说再见啦！",
+      "learn": {
+        "text": "Bye for now!",
+        "zh": "先说到这儿，回头见。for now 是“暂时、眼下”。",
+        "kind": "idiom",
+        "add": {
+          "w": "bye for now",
+          "cn": "先再见啦",
+          "phrase": true
+        }
+      },
+      "words": [
+        "that",
+        "be",
+        "all",
+        "for",
+        "today",
+        "bye",
+        "now"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-050",
+      "kind": "idiom",
+      "scene": [
+        "close"
+      ],
+      "en": "Good job today! Give me five!",
+      "zh": "今天做得好！击个掌！",
+      "learn": {
+        "text": "Give me five!",
+        "zh": "击个掌！举起手掌拍一下。也可以说 High five!",
+        "kind": "idiom",
+        "add": {
+          "w": "Give me five!",
+          "cn": "击掌",
+          "phrase": true
+        }
+      },
+      "words": [
+        "good",
+        "job",
+        "today",
+        "give",
+        "me",
+        "five"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-051",
+      "kind": "idiom",
+      "scene": [
+        "close"
+      ],
+      "en": "You worked hard. Time to chill!",
+      "zh": "你很努力了，歇一会儿吧！",
+      "learn": {
+        "text": "chill",
+        "zh": "放松，歇一歇（口语）。Let's chill! 我们歇会儿吧！",
+        "kind": "idiom",
+        "add": {
+          "w": "chill",
+          "cn": "放松，歇一歇",
+          "phrase": false
+        }
+      },
+      "words": [
+        "you",
+        "work",
+        "hard",
+        "time",
+        "to",
+        "chill"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-idiom-052",
+      "kind": "idiom",
+      "scene": [
+        "close"
+      ],
+      "en": "Same time tomorrow?",
+      "zh": "明天老时间？",
+      "learn": {
+        "text": "Same time tomorrow?",
+        "zh": "明天老时间见？约下一次时这么说，回答 Sure! 好呀！",
+        "kind": "idiom",
+        "add": {
+          "w": "Same time tomorrow?",
+          "cn": "明天老时间见？",
+          "phrase": true
+        }
+      },
+      "words": [
+        "same",
+        "time",
+        "tomorrow"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-idiom-053",
+      "kind": "idiom",
+      "scene": [
+        "exam"
+      ],
+      "en": "Big day tomorrow. Go to bed early!",
+      "zh": "明天是大日子，早点睡！",
+      "learn": {
+        "text": "a big day",
+        "zh": "重要的日子。Tomorrow is a big day. 明天是重要的一天。",
+        "kind": "idiom",
+        "add": {
+          "w": "a big day",
+          "cn": "重要的日子",
+          "phrase": true
+        }
+      },
+      "words": [
+        "big",
+        "day",
+        "tomorrow",
+        "go",
+        "to",
+        "bed",
+        "early"
+      ],
+      "level": 1,
+      "when": {
+        "exam": "eve"
+      }
+    },
+    {
+      "id": "t-idiom-054",
+      "kind": "idiom",
+      "scene": [
+        "exam"
+      ],
+      "en": "Sleep well tonight. You've got this!",
+      "zh": "今晚睡个好觉，早点睡。你能行的！",
+      "learn": {
+        "text": "You've got this!",
+        "zh": "你能行的！给人打气时说。",
+        "kind": "idiom",
+        "add": {
+          "w": "You've got this!",
+          "cn": "你能行的",
+          "phrase": true
+        }
+      },
+      "words": [
+        "sleep",
+        "well",
+        "tonight",
+        "you",
+        "have",
+        "get",
+        "this"
+      ],
+      "level": 2,
+      "when": {
+        "exam": "eve"
+      }
+    },
+    {
+      "id": "t-idiom-055",
+      "kind": "idiom",
+      "scene": [
+        "exam"
+      ],
+      "en": "Today's the day! Break a leg!",
+      "zh": "就是今天！祝你好运！",
+      "learn": {
+        "text": "Break a leg!",
+        "zh": "祝你好运！演出、比赛、考试之前说，可不是让你摔断腿。",
+        "kind": "idiom",
+        "add": {
+          "w": "Break a leg!",
+          "cn": "祝你好运",
+          "phrase": true
+        }
+      },
+      "words": [
+        "today",
+        "the",
+        "day",
+        "break",
+        "a",
+        "leg"
+      ],
+      "level": 2,
+      "when": {
+        "exam": "day"
+      }
+    },
+    {
+      "id": "t-idiom-056",
+      "kind": "idiom",
+      "scene": [
+        "exam"
+      ],
+      "en": "Review a little every day. Slow and steady!",
+      "zh": "每天复习一点，慢而稳！",
+      "learn": {
+        "text": "Slow and steady wins the race.",
+        "zh": "慢而稳，才能赢。来自龟兔赛跑的故事：The Tortoise and the Hare。",
+        "kind": "idiom",
+        "add": {
+          "w": "slow and steady",
+          "cn": "慢而稳",
+          "phrase": true
+        }
+      },
+      "words": [
+        "review",
+        "a",
+        "little",
+        "every",
+        "day",
+        "slow",
+        "and",
+        "steady"
+      ],
+      "level": 2,
+      "when": {
+        "exam": "season"
+      }
+    },
+    {
+      "id": "t-idiom-057",
+      "kind": "idiom",
+      "scene": [
+        "exam"
+      ],
+      "en": "One step at a time, {name}.",
+      "zh": "{name}，一步一步来。",
+      "learn": {
+        "text": "one step at a time",
+        "zh": "一步一步来，别急。复习很多的时候这样想就好。",
+        "kind": "idiom",
+        "add": {
+          "w": "one step at a time",
+          "cn": "一步一步来",
+          "phrase": true
+        }
+      },
+      "words": [
+        "one",
+        "step",
+        "at",
+        "a",
+        "time"
+      ],
+      "level": 1,
+      "when": {
+        "exam": "season"
+      }
+    },
+    {
+      "id": "t-idiom-058",
+      "kind": "idiom",
+      "scene": [
+        "exam"
+      ],
+      "en": "The test is over. Phew!",
+      "zh": "考完了。呼！",
+      "learn": {
+        "text": "Phew!",
+        "zh": "（松一口气）呼！终于结束了。It's over! 结束了！",
+        "kind": "idiom",
+        "add": {
+          "w": "phew",
+          "cn": "（松口气）呼",
+          "phrase": false
+        }
+      },
+      "words": [
+        "the",
+        "test",
+        "be",
+        "over",
+        "phew"
+      ],
+      "level": 1,
+      "when": {
+        "exam": "done"
+      }
+    },
+    {
+      "id": "t-idiom-059",
+      "kind": "idiom",
+      "scene": [
+        "exam"
+      ],
+      "en": "The test is over. Time to relax!",
+      "zh": "考完了，放松一下吧！",
+      "learn": {
+        "text": "Relax!",
+        "zh": "放松！relax 是放松，relaxed 是“很放松的”：I feel relaxed.",
+        "kind": "idiom",
+        "add": {
+          "w": "relax",
+          "cn": "放松",
+          "phrase": false
+        }
+      },
+      "words": [
+        "the",
+        "test",
+        "be",
+        "over",
+        "time",
+        "to",
+        "relax"
+      ],
+      "level": 2,
+      "when": {
+        "exam": "done"
+      }
+    },
+    {
+      "id": "t-unit-001",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "We say good morning until twelve o'clock.",
+      "zh": "中午十二点以前，我们说早上好。",
+      "learn": {
+        "text": "Good morning / Good afternoon / Good evening",
+        "zh": "中午 12 点前说 Good morning，下午 Good afternoon，晚上见面 Good evening。Good night 是睡前道别用的。",
+        "kind": "unit",
+        "say": "Good morning. Good afternoon. Good evening."
+      },
+      "words": [
+        "we",
+        "say",
+        "good",
+        "morning",
+        "until",
+        "twelve",
+        "o'clock"
+      ],
+      "level": 1,
+      "unit": "S"
+    },
+    {
+      "id": "t-unit-002",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Can I use your eraser? Or your rubber?",
+      "zh": "能借我用一下橡皮吗？",
+      "learn": {
+        "text": "eraser / rubber",
+        "zh": "橡皮：美国人说 eraser，英国人常说 rubber。",
+        "kind": "unit"
+      },
+      "words": [
+        "can",
+        "i",
+        "use",
+        "your",
+        "eraser",
+        "or",
+        "rubber"
+      ],
+      "level": 2,
+      "unit": "S",
+      "topic": "school"
+    },
+    {
+      "id": "t-unit-003",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Sorry, how do you spell it?",
+      "zh": "不好意思，这个怎么拼？",
+      "learn": {
+        "text": "How do you spell it?",
+        "zh": "怎么拼？没听清单词的时候，可以这样问老师和同学。",
+        "kind": "unit",
+        "add": {
+          "w": "How do you spell it?",
+          "cn": "这个怎么拼？",
+          "phrase": true
+        }
+      },
+      "words": [
+        "sorry",
+        "how",
+        "do",
+        "you",
+        "spell",
+        "it"
+      ],
+      "level": 1,
+      "unit": "S",
+      "topic": "school"
+    },
+    {
+      "id": "t-unit-004",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Nice to meet you! Nice to meet you, too!",
+      "zh": "很高兴认识你！我也很高兴认识你！",
+      "learn": {
+        "text": "Nice to meet you.",
+        "zh": "第一次见面说。对方回答 Nice to meet you, too. 以后再见面就说 Nice to see you。",
+        "kind": "unit"
+      },
+      "words": [
+        "nice",
+        "to",
+        "meet",
+        "you",
+        "too"
+      ],
+      "level": 1,
+      "unit": "S"
+    },
+    {
+      "id": "t-unit-005",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "In the UK, many students wear uniforms.",
+      "zh": "在英国，很多学生穿校服。",
+      "learn": {
+        "text": "school uniform",
+        "zh": "校服。英国很多中学的校服有西装外套，还要打领带。",
+        "kind": "unit",
+        "add": {
+          "w": "school uniform",
+          "cn": "校服",
+          "phrase": true
+        }
+      },
+      "words": [
+        "in",
+        "the",
+        "uk",
+        "many",
+        "student",
+        "wear",
+        "uniform"
+      ],
+      "level": 2,
+      "unit": "U1",
+      "topic": "school"
+    },
+    {
+      "id": "t-unit-006",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Junior high is a new start for you!",
+      "zh": "初中对你来说是一个新的开始！",
+      "learn": {
+        "text": "junior high / senior high",
+        "zh": "初中 junior high，高中 senior high。junior 是“年纪小一些的”，senior 是“年纪大一些的”。",
+        "kind": "unit"
+      },
+      "words": [
+        "junior",
+        "high",
+        "be",
+        "a",
+        "new",
+        "start",
+        "for",
+        "you"
+      ],
+      "level": 2,
+      "unit": "U1",
+      "topic": "school"
+    },
+    {
+      "id": "t-unit-007",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "What's your favourite subject?",
+      "zh": "你最喜欢哪门课？",
+      "learn": {
+        "text": "subject",
+        "zh": "科目。My favourite subject is art. 我最喜欢美术课。英国拼 favourite，美国拼 favorite。",
+        "kind": "unit"
+      },
+      "words": [
+        "what",
+        "be",
+        "your",
+        "favourite",
+        "subject"
+      ],
+      "level": 2,
+      "unit": "U1",
+      "topic": "school"
+    },
+    {
+      "id": "t-unit-008",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Can you help me? Sure!",
+      "zh": "你能帮帮我吗？当然！",
+      "learn": {
+        "text": "Sure! / Of course!",
+        "zh": "当然可以！别人请你帮忙时，Sure! 比 Yes. 更热情。",
+        "kind": "unit",
+        "add": {
+          "w": "Sure!",
+          "cn": "当然可以",
+          "phrase": true
+        }
+      },
+      "words": [
+        "can",
+        "you",
+        "help",
+        "me",
+        "sure"
+      ],
+      "level": 1,
+      "unit": "U1"
+    },
+    {
+      "id": "t-unit-009",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Basketball started with two fruit baskets!",
+      "zh": "篮球最早用的是两个水果篮！",
+      "learn": {
+        "text": "basketball = basket + ball",
+        "zh": "1891 年发明篮球时，用的是两个装桃子的篮子。每进一个球，都要有人把球拿出来。",
+        "kind": "unit",
+        "say": "basketball. basket, ball."
+      },
+      "words": [
+        "basketball",
+        "start",
+        "with",
+        "two",
+        "fruit",
+        "baskets"
+      ],
+      "level": 2,
+      "unit": "U2",
+      "topic": "sports"
+    },
+    {
+      "id": "t-unit-010",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Table tennis has another name!",
+      "zh": "乒乓球还有一个名字！",
+      "learn": {
+        "text": "table tennis = ping-pong",
+        "zh": "乒乓球。ping-pong 学的是小球弹来弹去的声音。",
+        "kind": "unit",
+        "say": "table tennis. ping-pong."
+      },
+      "words": [
+        "table",
+        "tennis",
+        "have",
+        "another",
+        "name"
+      ],
+      "level": 2,
+      "unit": "U2",
+      "topic": "sports"
+    },
+    {
+      "id": "t-unit-011",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Join a club. It's more than fun!",
+      "zh": "参加个社团吧，不只是好玩！",
+      "learn": {
+        "text": "join a club",
+        "zh": "参加社团。I want to join the music club. 我想参加音乐社。",
+        "kind": "unit",
+        "add": {
+          "w": "join a club",
+          "cn": "参加社团",
+          "phrase": true
+        }
+      },
+      "words": [
+        "join",
+        "a",
+        "club",
+        "it",
+        "be",
+        "more",
+        "than",
+        "fun"
+      ],
+      "level": 2,
+      "unit": "U2",
+      "topic": "music"
+    },
+    {
+      "id": "t-unit-012",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Do you play the piano or play football?",
+      "zh": "你弹钢琴还是踢足球？",
+      "learn": {
+        "text": "play the piano / play football",
+        "zh": "乐器前面加 the：play the piano；球类不加：play football。",
+        "kind": "unit"
+      },
+      "words": [
+        "do",
+        "you",
+        "play",
+        "the",
+        "piano",
+        "or",
+        "football"
+      ],
+      "level": 2,
+      "unit": "U2",
+      "topic": "music"
+    },
+    {
+      "id": "t-unit-013",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Volleyball is more than a hundred years old.",
+      "zh": "排球已经有一百多年了。",
+      "learn": {
+        "text": "volleyball",
+        "zh": "排球 1895 年在美国发明。volley 是“球落地前把它打回去”。",
+        "kind": "unit"
+      },
+      "words": [
+        "volleyball",
+        "be",
+        "more",
+        "than",
+        "a",
+        "hundred",
+        "year",
+        "old"
+      ],
+      "level": 3,
+      "unit": "U2",
+      "topic": "sports"
+    },
+    {
+      "id": "t-unit-014",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Your cousin can be a boy or a girl.",
+      "zh": "你的 cousin 可以是男孩，也可以是女孩。",
+      "learn": {
+        "text": "cousin",
+        "zh": "堂兄弟姐妹、表兄弟姐妹，英语都叫 cousin，不分男女，也不分堂和表。",
+        "kind": "unit",
+        "add": {
+          "w": "cousin",
+          "cn": "堂（表）兄弟姐妹",
+          "phrase": false
+        }
+      },
+      "words": [
+        "your",
+        "cousin",
+        "can",
+        "be",
+        "a",
+        "boy",
+        "or",
+        "girl"
+      ],
+      "level": 2,
+      "unit": "U3",
+      "topic": "family"
+    },
+    {
+      "id": "t-unit-015",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "In English, aunt can mean many people!",
+      "zh": "英语里，aunt 可以是好几个人！",
+      "learn": {
+        "text": "aunt / uncle",
+        "zh": "姑姑、姨妈、婶婶、舅妈都是 aunt；叔叔、伯伯、舅舅、姑父都是 uncle。",
+        "kind": "unit"
+      },
+      "words": [
+        "in",
+        "english",
+        "aunt",
+        "can",
+        "mean",
+        "many",
+        "people"
+      ],
+      "level": 2,
+      "unit": "U3",
+      "topic": "family"
+    },
+    {
+      "id": "t-unit-016",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "My mum's mum is my grandma.",
+      "zh": "妈妈的妈妈是我的外婆。",
+      "learn": {
+        "text": "grandma / grandpa",
+        "zh": "外婆、奶奶都是 grandma；外公、爷爷都是 grandpa。",
+        "kind": "unit"
+      },
+      "words": [
+        "my",
+        "mum",
+        "be",
+        "grandma"
+      ],
+      "level": 1,
+      "unit": "U3",
+      "topic": "family"
+    },
+    {
+      "id": "t-unit-017",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Like father, like son!",
+      "zh": "有其父必有其子！",
+      "learn": {
+        "text": "Like father, like son.",
+        "zh": "儿子像爸爸。女孩像妈妈可以说 Like mother, like daughter.",
+        "kind": "unit",
+        "add": {
+          "w": "Like father, like son.",
+          "cn": "有其父必有其子",
+          "phrase": true
+        }
+      },
+      "words": [
+        "like",
+        "father",
+        "son"
+      ],
+      "level": 2,
+      "unit": "U3",
+      "topic": "family"
+    },
+    {
+      "id": "t-unit-018",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "In the UK, there is a Pancake Day!",
+      "zh": "英国有一个煎饼日！",
+      "learn": {
+        "text": "Pancake Day",
+        "zh": "英国的煎饼日在春天。大家在家做薄饼，有的地方还举行边跑边翻饼的比赛。",
+        "kind": "unit"
+      },
+      "words": [
+        "in",
+        "the",
+        "uk",
+        "there",
+        "be",
+        "a",
+        "pancake",
+        "day"
+      ],
+      "level": 2,
+      "unit": "U4",
+      "topic": "food"
+    },
+    {
+      "id": "t-unit-019",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "We say Happy New Year at Spring Festival.",
+      "zh": "春节我们说新年快乐。",
+      "learn": {
+        "text": "Spring Festival",
+        "zh": "春节。红包叫 red packet 或 red envelope。",
+        "kind": "unit"
+      },
+      "words": [
+        "we",
+        "say",
+        "happy",
+        "new",
+        "year",
+        "at",
+        "spring",
+        "festival"
+      ],
+      "level": 2,
+      "unit": "U4",
+      "topic": "family"
+    },
+    {
+      "id": "t-unit-020",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "How do you celebrate your birthday?",
+      "zh": "你怎么过生日？",
+      "learn": {
+        "text": "celebrate",
+        "zh": "庆祝。Let's celebrate! 我们来庆祝吧！",
+        "kind": "unit",
+        "add": {
+          "w": "celebrate",
+          "cn": "庆祝",
+          "phrase": false
+        }
+      },
+      "words": [
+        "how",
+        "do",
+        "you",
+        "celebrate",
+        "your",
+        "birthday"
+      ],
+      "level": 2,
+      "unit": "U4"
+    },
+    {
+      "id": "t-unit-021",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Thanksgiving is in November in the US.",
+      "zh": "美国的感恩节在十一月。",
+      "learn": {
+        "text": "Thanksgiving",
+        "zh": "感恩节在美国是 11 月的第四个星期四，很多家庭一起吃火鸡（turkey）。",
+        "kind": "unit"
+      },
+      "words": [
+        "thanksgiving",
+        "be",
+        "in",
+        "november",
+        "the",
+        "us"
+      ],
+      "level": 2,
+      "unit": "U4",
+      "topic": "food"
+    },
+    {
+      "id": "t-unit-022",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Some bamboo grows very, very fast!",
+      "zh": "有的竹子长得特别特别快！",
+      "learn": {
+        "text": "bamboo",
+        "zh": "竹子。有的竹子一天能长将近 1 米，是长得最快的植物之一。熊猫最爱吃它。",
+        "kind": "unit",
+        "add": {
+          "w": "bamboo",
+          "cn": "竹子",
+          "phrase": false
+        }
+      },
+      "words": [
+        "some",
+        "bamboo",
+        "grow",
+        "very",
+        "fast"
+      ],
+      "level": 2,
+      "unit": "U5",
+      "topic": "nature"
+    },
+    {
+      "id": "t-unit-023",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Fun fact: a banana is a berry!",
+      "zh": "冷知识：香蕉是一种浆果！",
+      "learn": {
+        "text": "berry",
+        "zh": "按植物学的分法，香蕉算浆果，草莓反而不算。berry 是浆果：blueberry 蓝莓。",
+        "kind": "unit"
+      },
+      "words": [
+        "fun",
+        "fact",
+        "a",
+        "banana",
+        "be",
+        "berry"
+      ],
+      "level": 3,
+      "unit": "U5",
+      "topic": "nature"
+    },
+    {
+      "id": "t-unit-024",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Young sunflowers follow the sun.",
+      "zh": "小向日葵会跟着太阳转。",
+      "learn": {
+        "text": "sunflower = sun + flower",
+        "zh": "向日葵。还没长大的向日葵白天跟着太阳转，长大以后大多一直朝着东边。",
+        "kind": "unit",
+        "say": "sunflower. sun, flower."
+      },
+      "words": [
+        "young",
+        "sunflowers",
+        "follow",
+        "the",
+        "sun"
+      ],
+      "level": 2,
+      "unit": "U5",
+      "topic": "nature"
+    },
+    {
+      "id": "t-unit-025",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Is a tomato a fruit or a vegetable?",
+      "zh": "番茄是水果还是蔬菜？",
+      "learn": {
+        "text": "tomato → tomatoes",
+        "zh": "按植物学，番茄是果实；做饭时大家当蔬菜用。复数加 es：tomatoes，potatoes。",
+        "kind": "unit",
+        "say": "tomato. tomatoes."
+      },
+      "words": [
+        "be",
+        "a",
+        "tomato",
+        "fruit",
+        "or",
+        "vegetable"
+      ],
+      "level": 2,
+      "unit": "U5",
+      "topic": "food"
+    },
+    {
+      "id": "t-unit-026",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "We can't live without plants.",
+      "zh": "我们离不开植物。",
+      "learn": {
+        "text": "without",
+        "zh": "without 是“没有”。plants 给我们空气、食物和木头。",
+        "kind": "unit"
+      },
+      "words": [
+        "we",
+        "can",
+        "not",
+        "live",
+        "without",
+        "plant"
+      ],
+      "level": 1,
+      "unit": "U5",
+      "topic": "nature"
+    },
+    {
+      "id": "t-unit-027",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "A friend in need is a friend indeed.",
+      "zh": "患难见真情。",
+      "learn": {
+        "text": "A friend in need is a friend indeed.",
+        "zh": "你需要帮助时还在你身边的，才是真朋友。",
+        "kind": "unit",
+        "add": {
+          "w": "A friend in need is a friend indeed.",
+          "cn": "患难见真情",
+          "phrase": true
+        }
+      },
+      "words": [
+        "a",
+        "friend",
+        "in",
+        "need",
+        "be",
+        "indeed"
+      ],
+      "level": 3,
+      "unit": "U6",
+      "topic": "school"
+    },
+    {
+      "id": "t-unit-028",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Who is your best friend?",
+      "zh": "你最好的朋友是谁？",
+      "learn": {
+        "text": "best friend / BFF",
+        "zh": "最好的朋友。年轻人写 BFF，就是 best friends forever，永远的好朋友。",
+        "kind": "unit",
+        "add": {
+          "w": "BFF",
+          "cn": "永远的好朋友（best friends forever）",
+          "phrase": false
+        }
+      },
+      "words": [
+        "who",
+        "be",
+        "your",
+        "best",
+        "friend"
+      ],
+      "level": 1,
+      "unit": "U6",
+      "topic": "school"
+    },
+    {
+      "id": "t-unit-029",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Make new friends, but keep the old.",
+      "zh": "交新朋友，也别忘了老朋友。",
+      "learn": {
+        "text": "Make new friends, but keep the old. One is silver and the other gold.",
+        "zh": "一首英文儿歌：新朋友是银子，老朋友是金子。",
+        "kind": "unit"
+      },
+      "words": [
+        "make",
+        "new",
+        "friend",
+        "but",
+        "keep",
+        "the",
+        "old"
+      ],
+      "level": 2,
+      "unit": "U6",
+      "topic": "music"
+    },
+    {
+      "id": "t-unit-030",
+      "kind": "unit",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "An elephant never forgets a friend.",
+      "zh": "大象永远记得朋友。",
+      "learn": {
+        "text": "An elephant never forgets.",
+        "zh": "大象记性很好。英语里说一个人记性好，就说他像大象。",
+        "kind": "unit"
+      },
+      "words": [
+        "an",
+        "elephant",
+        "never",
+        "forget",
+        "a",
+        "friend"
+      ],
+      "level": 2,
+      "unit": "U6",
+      "topic": "animals"
+    },
+    {
+      "id": "t-cat-001",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "What is a cat's favourite colour?",
+      "zh": "猫最喜欢什么颜色？",
+      "learn": {
+        "text": "Purr-ple!",
+        "zh": "紫色！purr 是猫打呼噜的声音，听起来像 purple（紫色）。",
+        "kind": "cat",
+        "say": "Purple!"
+      },
+      "words": [
+        "what",
+        "be",
+        "a",
+        "cat",
+        "favourite",
+        "colour"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-002",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Why did the cat sit on the computer?",
+      "zh": "猫为什么坐在电脑上？",
+      "learn": {
+        "text": "To keep an eye on the mouse!",
+        "zh": "为了盯着老鼠！mouse 是老鼠，也是鼠标。keep an eye on 是“盯着、看着”。",
+        "kind": "cat",
+        "add": {
+          "w": "keep an eye on",
+          "cn": "盯着，照看",
+          "phrase": true
+        }
+      },
+      "words": [
+        "why",
+        "do",
+        "the",
+        "cat",
+        "sit",
+        "on",
+        "computer"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-003",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "What is a cat's favourite dessert?",
+      "zh": "猫最喜欢的甜点是什么？",
+      "learn": {
+        "text": "Mice cream!",
+        "zh": "老鼠冰淇淋！mice 是 mouse 的复数，连起来读像 ice cream。",
+        "kind": "cat"
+      },
+      "words": [
+        "what",
+        "be",
+        "a",
+        "cat",
+        "favourite",
+        "dessert"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-004",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "What is a cat's favourite subject at school?",
+      "zh": "猫最喜欢哪门课？",
+      "learn": {
+        "text": "Hiss-tory!",
+        "zh": "历史课！猫生气时会发出 hiss（嘶嘶）声，hiss 听着像 history 的开头。",
+        "kind": "cat",
+        "say": "History!"
+      },
+      "words": [
+        "what",
+        "be",
+        "a",
+        "cat",
+        "favourite",
+        "subject",
+        "at",
+        "school"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-005",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "What do you call lots of kittens?",
+      "zh": "一大堆小猫叫什么？",
+      "learn": {
+        "text": "A meow-ntain!",
+        "zh": "一座喵山！meow（喵）+ mountain（山）。",
+        "kind": "cat",
+        "say": "A meowntain!"
+      },
+      "words": [
+        "what",
+        "do",
+        "you",
+        "call",
+        "lot",
+        "of",
+        "kittens"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-006",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Why was the cat afraid of the tree?",
+      "zh": "猫为什么怕那棵树？",
+      "learn": {
+        "text": "Because of its bark!",
+        "zh": "因为它的树皮！bark 是树皮，也是狗叫声。",
+        "kind": "cat"
+      },
+      "words": [
+        "why",
+        "be",
+        "the",
+        "cat",
+        "afraid",
+        "of",
+        "tree"
+      ],
+      "level": 3,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-007",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "What is a cat's favourite song?",
+      "zh": "猫最喜欢什么歌？",
+      "learn": {
+        "text": "Three Blind Mice!",
+        "zh": "《三只瞎老鼠》，一首有名的英文儿歌。猫当然最爱听这首！",
+        "kind": "cat"
+      },
+      "words": [
+        "what",
+        "be",
+        "a",
+        "cat",
+        "favourite",
+        "song"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-008",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "What does a cat say when it is surprised?",
+      "zh": "猫吃惊的时候说什么？",
+      "learn": {
+        "text": "Me-wow!",
+        "zh": "喵哇！meow（喵）+ wow（哇）。",
+        "kind": "cat",
+        "say": "Me wow!"
+      },
+      "words": [
+        "what",
+        "do",
+        "a",
+        "cat",
+        "say",
+        "when",
+        "it",
+        "be",
+        "surprise"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-009",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Why are cats good at video games?",
+      "zh": "猫为什么玩游戏很厉害？",
+      "learn": {
+        "text": "Because they have nine lives!",
+        "zh": "因为它们有九条命！游戏里的“命”英语也叫 life，复数 lives。",
+        "kind": "cat"
+      },
+      "words": [
+        "why",
+        "be",
+        "cat",
+        "good",
+        "at",
+        "video",
+        "game"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-010",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Which cat loves the water?",
+      "zh": "哪种猫最爱水？",
+      "learn": {
+        "text": "An octo-puss!",
+        "zh": "章鱼猫！octopus（章鱼）听着像 octo-puss，puss 是“猫咪”。",
+        "kind": "cat",
+        "say": "An octopus!"
+      },
+      "words": [
+        "which",
+        "cat",
+        "love",
+        "the",
+        "water"
+      ],
+      "level": 3,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-011",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Cats sleep more than half the day!",
+      "zh": "猫一天要睡一大半的时间！",
+      "learn": {
+        "text": "about 12 to 16 hours a day",
+        "zh": "猫一天大约睡 12 到 16 个小时。a day 在这里是“每天”。",
+        "kind": "cat",
+        "say": "about twelve to sixteen hours a day"
+      },
+      "words": [
+        "cat",
+        "sleep",
+        "more",
+        "than",
+        "half",
+        "the",
+        "day"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-012",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Cats can't taste sweet food.",
+      "zh": "猫尝不出甜味。",
+      "learn": {
+        "text": "sweet / sour / bitter / salty",
+        "zh": "四种味道：甜 sweet，酸 sour，苦 bitter，咸 salty。猫吃不出甜。",
+        "kind": "cat"
+      },
+      "words": [
+        "cat",
+        "can",
+        "not",
+        "taste",
+        "sweet",
+        "food"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-013",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Big cats meow to people, not to cats.",
+      "zh": "大猫喵喵叫，主要是说给人听的。",
+      "learn": {
+        "text": "meow",
+        "zh": "大猫之间很少喵喵叫，它们用身体和眼睛“说话”。喵，是专门说给人听的。",
+        "kind": "cat"
+      },
+      "words": [
+        "big",
+        "cat",
+        "meow",
+        "to",
+        "people",
+        "not"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-014",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Every cat has its own nose print.",
+      "zh": "每只猫的鼻纹都不一样。",
+      "learn": {
+        "text": "nose print / fingerprint",
+        "zh": "每只猫的鼻子纹路都不一样，就像人的指纹 fingerprint。",
+        "kind": "cat"
+      },
+      "words": [
+        "every",
+        "cat",
+        "have",
+        "its",
+        "own",
+        "nose",
+        "print"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-015",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Cats have five toes on each front paw.",
+      "zh": "猫的每只前爪有五个趾头。",
+      "learn": {
+        "text": "paw / toe",
+        "zh": "猫前爪五个趾，后爪四个。paw 是动物的爪子，toe 是脚趾。",
+        "kind": "cat",
+        "add": {
+          "w": "paw",
+          "cn": "（动物的）爪子",
+          "phrase": false
+        }
+      },
+      "words": [
+        "cat",
+        "have",
+        "five",
+        "to",
+        "on",
+        "each",
+        "front",
+        "paw"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-016",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "All kittens have blue eyes at first.",
+      "zh": "小猫刚出生时，眼睛都是蓝色的。",
+      "learn": {
+        "text": "kitten",
+        "zh": "小猫刚生下来眼睛是蓝的，长大才慢慢变颜色。kitten 是小猫，puppy 是小狗。",
+        "kind": "cat",
+        "add": {
+          "w": "kitten",
+          "cn": "小猫",
+          "phrase": false
+        }
+      },
+      "words": [
+        "all",
+        "kittens",
+        "have",
+        "blue",
+        "eye",
+        "at",
+        "first"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-017",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "A cat can turn its ears around!",
+      "zh": "猫的耳朵能转过来！",
+      "learn": {
+        "text": "turn around",
+        "zh": "猫的耳朵能转很大的角度，去找声音在哪儿。turn around 是“转过来”。",
+        "kind": "cat"
+      },
+      "words": [
+        "a",
+        "cat",
+        "can",
+        "turn",
+        "its",
+        "ear",
+        "around"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-018",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Tabby cats have an M on their heads.",
+      "zh": "虎斑猫的头上有个 M。",
+      "learn": {
+        "text": "tabby",
+        "zh": "虎斑猫的额头上常有一个 M 形的花纹。tabby cat 就是虎斑猫。",
+        "kind": "cat"
+      },
+      "words": [
+        "tabby",
+        "cat",
+        "have",
+        "an",
+        "m",
+        "on",
+        "their",
+        "head"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-019",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "In Japan, a black cat can mean good luck.",
+      "zh": "在日本，黑猫可能代表好运。",
+      "learn": {
+        "text": "good luck",
+        "zh": "在日本和英国，黑猫常被当作好运。祝别人好运说 Good luck!",
+        "kind": "cat"
+      },
+      "words": [
+        "in",
+        "japan",
+        "a",
+        "black",
+        "cat",
+        "can",
+        "mean",
+        "good",
+        "luck"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-020",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "A group of cats is called a clowder.",
+      "zh": "一群猫叫作 a clowder。",
+      "learn": {
+        "text": "a clowder of cats",
+        "zh": "一群猫是 a clowder of cats，一窝小猫是 a litter of kittens。",
+        "kind": "cat"
+      },
+      "words": [
+        "a",
+        "group",
+        "of",
+        "cat",
+        "be",
+        "call",
+        "clowder"
+      ],
+      "level": 3,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-021",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Cats sweat from their feet!",
+      "zh": "猫是用脚出汗的！",
+      "learn": {
+        "text": "sweat",
+        "zh": "猫只在爪子的肉垫上出汗。sweat 是出汗，也是汗水。",
+        "kind": "cat"
+      },
+      "words": [
+        "cat",
+        "sweat",
+        "from",
+        "their",
+        "foot"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-022",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Cats love boxes. Do you know why?",
+      "zh": "猫喜欢纸箱子，你知道为什么吗？",
+      "learn": {
+        "text": "feel safe",
+        "zh": "钻进小盒子，猫会觉得安全。feel safe 是“觉得安全”。",
+        "kind": "cat"
+      },
+      "words": [
+        "cat",
+        "love",
+        "box",
+        "do",
+        "you",
+        "know",
+        "why"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-023",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Hello Kitty has a twin sister!",
+      "zh": "Hello Kitty 有一个双胞胎妹妹！",
+      "learn": {
+        "text": "twin sister",
+        "zh": "她叫 Mimmy。Kitty 的蝴蝶结戴在左耳，Mimmy 的戴在右耳。twin 是双胞胎。",
+        "kind": "cat",
+        "add": {
+          "w": "twin",
+          "cn": "双胞胎",
+          "phrase": false
+        }
+      },
+      "words": [
+        "hello",
+        "kitty",
+        "have",
+        "a",
+        "twin",
+        "sister"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-024",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Hello Kitty's full name is Kitty White.",
+      "zh": "Hello Kitty 的全名叫 Kitty White。",
+      "learn": {
+        "text": "first name / last name",
+        "zh": "Kitty 是名（first name），White 是姓（last name）。英语里名在前，姓在后。",
+        "kind": "cat"
+      },
+      "words": [
+        "hello",
+        "kitty",
+        "full",
+        "name",
+        "be",
+        "white"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-025",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Hello Kitty lives near London.",
+      "zh": "Hello Kitty 住在伦敦附近。",
+      "learn": {
+        "text": "London",
+        "zh": "设定里她住在英国伦敦郊外。英国的首都是伦敦，London。",
+        "kind": "cat"
+      },
+      "words": [
+        "hello",
+        "kitty",
+        "live",
+        "near",
+        "london"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-026",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Hello Kitty is five apples tall!",
+      "zh": "Hello Kitty 有五个苹果那么高！",
+      "learn": {
+        "text": "tall",
+        "zh": "设定里她有 5 个苹果高、3 个苹果重。说身高：I am 160 centimetres tall.",
+        "kind": "cat"
+      },
+      "words": [
+        "hello",
+        "kitty",
+        "be",
+        "five",
+        "apple",
+        "tall"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-027",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Hello Kitty first came out in 1974.",
+      "zh": "Hello Kitty 是 1974 年出现的。",
+      "learn": {
+        "text": "come out",
+        "zh": "come out 是（书、电影、新东西）出来、面世。1975 年她被印在一个小钱包上开始卖。",
+        "kind": "cat"
+      },
+      "words": [
+        "hello",
+        "kitty",
+        "first",
+        "come",
+        "out",
+        "in"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-028",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Hello Kitty has a pet cat, too!",
+      "zh": "Hello Kitty 自己也养了一只猫！",
+      "learn": {
+        "text": "pet",
+        "zh": "她的宠物是一只白猫，叫 Charmmy Kitty。pet 是宠物：Do you have a pet?",
+        "kind": "cat"
+      },
+      "words": [
+        "hello",
+        "kitty",
+        "have",
+        "a",
+        "pet",
+        "cat",
+        "too"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-029",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Cats climb up trees easily. Coming down is hard!",
+      "zh": "猫上树容易，下树难！",
+      "learn": {
+        "text": "climb up / climb down",
+        "zh": "猫的爪子往后弯，往上爬抓得牢，下来时常常要倒着退。",
+        "kind": "cat"
+      },
+      "words": [
+        "cat",
+        "climb",
+        "up",
+        "tree",
+        "easy",
+        "come",
+        "down",
+        "be",
+        "hard"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-cat-030",
+      "kind": "cat",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Cats have a third eyelid.",
+      "zh": "猫有第三层眼皮。",
+      "learn": {
+        "text": "third",
+        "zh": "猫的眼角藏着第三层薄薄的眼皮，用来保护眼睛。first、second、third：第一、第二、第三。",
+        "kind": "cat"
+      },
+      "words": [
+        "cat",
+        "have",
+        "a",
+        "third",
+        "eyelid"
+      ],
+      "level": 3,
+      "topic": "cats"
+    },
+    {
+      "id": "t-mix-001",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "An apple a day keeps the doctor away.",
+      "zh": "一天一个苹果，医生远离我。",
+      "learn": {
+        "text": "a / an",
+        "zh": "元音开头的音前用 an：an apple, an hour；其他用 a：a cat, a uniform（uniform 读 /juː/ 开头，所以用 a）。",
+        "kind": "mix"
+      },
+      "words": [
+        "an",
+        "apple",
+        "a",
+        "day",
+        "keep",
+        "the",
+        "doctor",
+        "away"
+      ],
+      "level": 2,
+      "topic": "food"
+    },
+    {
+      "id": "t-mix-002",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "It's my cat. Its name is Mimi.",
+      "zh": "这是我的猫，它的名字叫 Mimi。",
+      "learn": {
+        "text": "it's / its",
+        "zh": "it's 是 it is；its 是“它的”。It's a cat. Its name is Mimi.",
+        "kind": "mix"
+      },
+      "words": [
+        "it",
+        "be",
+        "my",
+        "cat",
+        "its",
+        "name",
+        "mimi"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-mix-003",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Two cats want to play, too!",
+      "zh": "两只猫也想玩！",
+      "learn": {
+        "text": "two / to / too",
+        "zh": "two 是二，to 是“去、向”，too 是“也”。三个读音一样。",
+        "kind": "mix"
+      },
+      "words": [
+        "two",
+        "cat",
+        "want",
+        "to",
+        "play",
+        "too"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-mix-004",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Come here! Can you hear me?",
+      "zh": "过来！你能听见我吗？",
+      "learn": {
+        "text": "here / hear",
+        "zh": "here 这里，hear 听见。hear 里面藏着 ear（耳朵），这样好记。",
+        "kind": "mix"
+      },
+      "words": [
+        "come",
+        "here",
+        "can",
+        "you",
+        "hear",
+        "me"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-mix-005",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Look over there! Their cat is so cute.",
+      "zh": "看那边！他们的猫好可爱。",
+      "learn": {
+        "text": "there / their",
+        "zh": "there 是“那里”，their 是“他们的”。they → their，就像 I → my。",
+        "kind": "mix"
+      },
+      "words": [
+        "look",
+        "over",
+        "there",
+        "their",
+        "cat",
+        "be",
+        "so",
+        "cute"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-mix-006",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "The library is quite quiet.",
+      "zh": "图书馆相当安静。",
+      "learn": {
+        "text": "quiet / quite",
+        "zh": "quiet /ˈkwaɪət/ 安静的，读两个音节；quite /kwaɪt/ 相当，读一个音节。",
+        "kind": "mix"
+      },
+      "words": [
+        "the",
+        "library",
+        "be",
+        "quite",
+        "quiet"
+      ],
+      "level": 3
+    },
+    {
+      "id": "t-mix-007",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "I can see the sea!",
+      "zh": "我能看见大海！",
+      "learn": {
+        "text": "see / sea",
+        "zh": "see 看见，sea 大海。读音一样，写法不同。",
+        "kind": "mix"
+      },
+      "words": [
+        "i",
+        "can",
+        "see",
+        "the",
+        "sea"
+      ],
+      "level": 1,
+      "topic": "nature"
+    },
+    {
+      "id": "t-mix-008",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Look at the sun, my son!",
+      "zh": "看太阳，我的儿子！",
+      "learn": {
+        "text": "sun / son",
+        "zh": "sun 太阳，son 儿子。读音一样。son 里的 o 读 /ʌ/。",
+        "kind": "mix"
+      },
+      "words": [
+        "look",
+        "at",
+        "the",
+        "sun",
+        "my",
+        "son"
+      ],
+      "level": 2,
+      "topic": "family"
+    },
+    {
+      "id": "t-mix-009",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Write the right answer.",
+      "zh": "写出正确的答案。",
+      "learn": {
+        "text": "write / right",
+        "zh": "write 写（w 不发音），right 对的、右边。两个词读音一样。",
+        "kind": "mix"
+      },
+      "words": [
+        "write",
+        "the",
+        "right",
+        "answer"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-mix-010",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "No, I don't know.",
+      "zh": "不，我不知道。",
+      "learn": {
+        "text": "know / no",
+        "zh": "know 知道（k 不发音），no 不。读音一样。knife 刀、knee 膝盖的 k 也不发音。",
+        "kind": "mix"
+      },
+      "words": [
+        "no",
+        "i",
+        "do",
+        "not",
+        "know"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-mix-011",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Bye! I'll buy it by Friday.",
+      "zh": "再见！我星期五以前买。",
+      "learn": {
+        "text": "buy / by / bye",
+        "zh": "buy 买，by 在……之前、在旁边，bye 再见。三个读音一样。",
+        "kind": "mix"
+      },
+      "words": [
+        "bye",
+        "i",
+        "will",
+        "buy",
+        "it",
+        "by",
+        "friday"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-mix-012",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "How many cats? How much milk?",
+      "zh": "几只猫？多少牛奶？",
+      "learn": {
+        "text": "many / much",
+        "zh": "能数的用 many：many cats；数不清的用 much：much milk, much water。",
+        "kind": "mix"
+      },
+      "words": [
+        "how",
+        "many",
+        "cat",
+        "much",
+        "milk"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-mix-013",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Look! Can you see it? Let's watch TV.",
+      "zh": "看！你看见了吗？我们看电视吧。",
+      "learn": {
+        "text": "look / see / watch",
+        "zh": "look 是去看（往这边看），see 是看见了，watch 是盯着看会动的东西，比如电视、比赛。",
+        "kind": "mix"
+      },
+      "words": [
+        "look",
+        "can",
+        "you",
+        "see",
+        "it",
+        "let",
+        "us",
+        "watch",
+        "tv"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-mix-014",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Say hello. Tell me a story.",
+      "zh": "打个招呼。给我讲个故事。",
+      "learn": {
+        "text": "say / tell",
+        "zh": "say 后面接说的话：say hello；tell 后面接人：tell me。speak English 说语言，talk to me 跟我聊。",
+        "kind": "mix"
+      },
+      "words": [
+        "say",
+        "hello",
+        "tell",
+        "me",
+        "a",
+        "story"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-mix-015",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "The game is fun. The joke is funny.",
+      "zh": "这个游戏好玩，这个笑话好笑。",
+      "learn": {
+        "text": "fun / funny",
+        "zh": "fun 是好玩、让人开心；funny 是好笑、让人笑出来。",
+        "kind": "mix"
+      },
+      "words": [
+        "the",
+        "game",
+        "be",
+        "fun",
+        "joke",
+        "funny"
+      ],
+      "level": 1,
+      "topic": "games"
+    },
+    {
+      "id": "t-mix-016",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "The book is interesting. I'm interested!",
+      "zh": "这本书很有意思，我很感兴趣！",
+      "learn": {
+        "text": "interesting / interested",
+        "zh": "东西有意思用 interesting；人感兴趣用 interested。boring 和 bored 也一样。",
+        "kind": "mix"
+      },
+      "words": [
+        "the",
+        "book",
+        "be",
+        "interesting",
+        "i",
+        "interest"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-mix-017",
+      "kind": "mix",
+      "scene": [
+        "close"
+      ],
+      "en": "You did well. Good work!",
+      "zh": "你做得很好。干得好！",
+      "learn": {
+        "text": "good / well",
+        "zh": "good 用来说东西：a good book；well 说做得怎么样：You sing well.",
+        "kind": "mix"
+      },
+      "words": [
+        "you",
+        "do",
+        "well",
+        "good",
+        "work"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-mix-018",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "I am a student. They are students.",
+      "zh": "我是学生，他们是学生。",
+      "learn": {
+        "text": "am / is / are",
+        "zh": "I 用 am，he、she、it 用 is，you、we、they 用 are。",
+        "kind": "mix"
+      },
+      "words": [
+        "i",
+        "be",
+        "a",
+        "student",
+        "they"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-mix-019",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "My mum? She is a teacher.",
+      "zh": "我妈妈？她是老师。",
+      "learn": {
+        "text": "he / she",
+        "zh": "男的用 he，女的用 she。说妈妈、姐姐、女老师，都用 she。",
+        "kind": "mix"
+      },
+      "words": [
+        "my",
+        "mum",
+        "she",
+        "be",
+        "a",
+        "teacher"
+      ],
+      "level": 1,
+      "topic": "family"
+    },
+    {
+      "id": "t-mix-020",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "This cat is white. These cats are black.",
+      "zh": "这只猫是白的，这些猫是黑的。",
+      "learn": {
+        "text": "this / these",
+        "zh": "一个用 this，几个用 these，后面名词加 s：these cats。远的用 that / those。",
+        "kind": "mix"
+      },
+      "words": [
+        "this",
+        "cat",
+        "be",
+        "white",
+        "these",
+        "black"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-mix-021",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "There is a cat. There are two dogs.",
+      "zh": "有一只猫，有两只狗。",
+      "learn": {
+        "text": "there is / there are",
+        "zh": "看后面紧跟的名词：一个用 there is，两个以上用 there are。",
+        "kind": "mix"
+      },
+      "words": [
+        "there",
+        "be",
+        "a",
+        "cat",
+        "two",
+        "dog"
+      ],
+      "level": 1,
+      "topic": "cats"
+    },
+    {
+      "id": "t-mix-022",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "See you at seven on Monday!",
+      "zh": "星期一七点见！",
+      "learn": {
+        "text": "at / on / in",
+        "zh": "几点用 at：at seven；星期几用 on：on Monday；月份用 in：in May。",
+        "kind": "mix"
+      },
+      "words": [
+        "see",
+        "you",
+        "at",
+        "seven",
+        "on",
+        "monday"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-mix-023",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Lend me your pen? I'll give it back.",
+      "zh": "把笔借给我好吗？我会还你的。",
+      "learn": {
+        "text": "borrow / lend",
+        "zh": "borrow 是借进来，lend 是借出去。Can I borrow your pen? 就等于 Can you lend me your pen?",
+        "kind": "mix"
+      },
+      "words": [
+        "lend",
+        "me",
+        "your",
+        "pen",
+        "i",
+        "will",
+        "give",
+        "it",
+        "back"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-mix-024",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Do you like cats? Does she like dogs?",
+      "zh": "你喜欢猫吗？她喜欢狗吗？",
+      "learn": {
+        "text": "do / does",
+        "zh": "I、you、we、they 用 do；he、she、it 用 does。does 后面的动词不加 s：Does she like dogs?",
+        "kind": "mix"
+      },
+      "words": [
+        "do",
+        "you",
+        "like",
+        "cat",
+        "she",
+        "dog"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-mix-025",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "This is my book. It's mine.",
+      "zh": "这是我的书，它是我的。",
+      "learn": {
+        "text": "my / mine",
+        "zh": "my 后面要跟东西：my book；mine 自己就够了：It's mine. your / yours 也一样。",
+        "kind": "mix"
+      },
+      "words": [
+        "this",
+        "be",
+        "my",
+        "book",
+        "it",
+        "mine"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-mix-026",
+      "kind": "mix",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "She can swim. He can dance.",
+      "zh": "她会游泳，他会跳舞。",
+      "learn": {
+        "text": "can + 动词原形",
+        "zh": "can 后面的动词不加 s，can 自己也不加 s：She can swim.",
+        "kind": "mix"
+      },
+      "words": [
+        "she",
+        "can",
+        "swim",
+        "he",
+        "dance"
+      ],
+      "level": 1,
+      "topic": "sports"
+    },
+    {
+      "id": "t-mix-027",
+      "kind": "mix",
+      "scene": [
+        "late"
+      ],
+      "en": "It's late. Even my cat is asleep!",
+      "zh": "很晚了，连我的猫都睡着了！",
+      "learn": {
+        "text": "asleep / sleep",
+        "zh": "asleep 是“睡着了”（状态）：The cat is asleep. sleep 是睡觉（动作）：I sleep at ten.",
+        "kind": "mix"
+      },
+      "words": [
+        "it",
+        "be",
+        "late",
+        "even",
+        "my",
+        "cat",
+        "asleep"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-mix-028",
+      "kind": "mix",
+      "scene": [
+        "late"
+      ],
+      "en": "It's late. Let's be quick tonight.",
+      "zh": "很晚了，今晚我们快一点。",
+      "learn": {
+        "text": "early / late",
+        "zh": "早 early，晚 late。Go to bed early! 早点睡！Don't be late! 别迟到！",
+        "kind": "mix"
+      },
+      "words": [
+        "it",
+        "be",
+        "late",
+        "let",
+        "us",
+        "quick",
+        "tonight"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-mix-029",
+      "kind": "mix",
+      "scene": [
+        "exam"
+      ],
+      "en": "Read the question twice.",
+      "zh": "题目读两遍。",
+      "learn": {
+        "text": "once / twice",
+        "zh": "once 一次，twice 两次，three times 三次。考试时，题目读两遍再选。",
+        "kind": "mix"
+      },
+      "words": [
+        "read",
+        "the",
+        "question",
+        "twice"
+      ],
+      "level": 2,
+      "when": {
+        "exam": "season"
+      }
+    },
+    {
+      "id": "t-mix-030",
+      "kind": "mix",
+      "scene": [
+        "exam"
+      ],
+      "en": "Check your answers once more.",
+      "zh": "再检查一遍答案。",
+      "learn": {
+        "text": "check",
+        "zh": "check 是检查。Check your spelling! 检查拼写！",
+        "kind": "mix"
+      },
+      "words": [
+        "check",
+        "your",
+        "answer",
+        "once",
+        "more"
+      ],
+      "level": 1,
+      "when": {
+        "exam": "quiz"
+      }
+    },
+    {
+      "id": "t-day-001",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "It's Monday. A new week, a new start!",
+      "zh": "星期一，新的一周，新的开始！",
+      "learn": {
+        "text": "Monday = Moon day",
+        "zh": "Monday 来自“月亮日”（Moon day）。Sunday 是太阳日。",
+        "kind": "day"
+      },
+      "words": [
+        "it",
+        "be",
+        "monday",
+        "a",
+        "new",
+        "week",
+        "start"
+      ],
+      "level": 1,
+      "when": {
+        "weekday": 1
+      }
+    },
+    {
+      "id": "t-day-002",
+      "kind": "day",
+      "scene": [
+        "open"
+      ],
+      "en": "Monday again! Do you have the Monday blues?",
+      "zh": "又是星期一！你有“星期一综合症”吗？",
+      "learn": {
+        "text": "Monday blues",
+        "zh": "星期一不想上学上班的心情。blue 除了蓝色，还有“难过”的意思：I feel blue.",
+        "kind": "day"
+      },
+      "words": [
+        "monday",
+        "again",
+        "do",
+        "you",
+        "have",
+        "the",
+        "blue"
+      ],
+      "level": 2,
+      "when": {
+        "weekday": 1
+      }
+    },
+    {
+      "id": "t-day-003",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "It's Tuesday. Do you know its story?",
+      "zh": "今天星期二，你知道它名字的来历吗？",
+      "learn": {
+        "text": "Tuesday",
+        "zh": "星期二来自古代北欧的神 Tiw：Tiw's day。拼写注意 ue：T-u-e-s-day。",
+        "kind": "day"
+      },
+      "words": [
+        "it",
+        "be",
+        "tuesday",
+        "do",
+        "you",
+        "know",
+        "its",
+        "story"
+      ],
+      "level": 2,
+      "when": {
+        "weekday": 2
+      }
+    },
+    {
+      "id": "t-day-004",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "It's Wednesday. The week is half done!",
+      "zh": "星期三了，这周过了一半！",
+      "learn": {
+        "text": "Wednesday",
+        "zh": "第一个 d 不发音，读 /ˈwenzdeɪ/。拼的时候心里读 Wed-nes-day。",
+        "kind": "day"
+      },
+      "words": [
+        "it",
+        "be",
+        "wednesday",
+        "the",
+        "week",
+        "half",
+        "do"
+      ],
+      "level": 2,
+      "when": {
+        "weekday": 3
+      }
+    },
+    {
+      "id": "t-day-005",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "It's Thursday. Just one more day!",
+      "zh": "星期四了，再坚持一天！",
+      "learn": {
+        "text": "Thursday",
+        "zh": "星期四来自雷神 Thor：Thor's day。th 要把舌尖放在上下牙中间。",
+        "kind": "day"
+      },
+      "words": [
+        "it",
+        "be",
+        "thursday",
+        "just",
+        "one",
+        "more",
+        "day"
+      ],
+      "level": 2,
+      "when": {
+        "weekday": 4
+      }
+    },
+    {
+      "id": "t-day-006",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Friday! Thank goodness it's Friday!",
+      "zh": "星期五！终于星期五了！",
+      "learn": {
+        "text": "TGIF",
+        "zh": "Thank goodness it's Friday 的缩写，周末前大家常说。",
+        "kind": "day",
+        "add": {
+          "w": "TGIF",
+          "cn": "终于星期五了",
+          "phrase": true
+        }
+      },
+      "words": [
+        "friday",
+        "thank",
+        "goodness",
+        "it",
+        "be"
+      ],
+      "level": 2,
+      "when": {
+        "weekday": 5
+      }
+    },
+    {
+      "id": "t-day-007",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "It's Friday. What are your weekend plans?",
+      "zh": "星期五了，周末有什么打算？",
+      "learn": {
+        "text": "at the weekend / on the weekend",
+        "zh": "在周末：英国说 at the weekend，美国说 on the weekend。",
+        "kind": "day"
+      },
+      "words": [
+        "it",
+        "be",
+        "friday",
+        "what",
+        "your",
+        "weekend",
+        "plan"
+      ],
+      "level": 2,
+      "when": {
+        "weekday": 5
+      }
+    },
+    {
+      "id": "t-day-008",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "It's Saturday. Sleep in a little!",
+      "zh": "星期六了，多睡一会儿吧！",
+      "learn": {
+        "text": "sleep in",
+        "zh": "多睡一会儿，晚点起床。On Saturday I sleep in. Saturday 来自土星 Saturn。",
+        "kind": "day",
+        "add": {
+          "w": "sleep in",
+          "cn": "睡懒觉",
+          "phrase": true
+        }
+      },
+      "words": [
+        "it",
+        "be",
+        "saturday",
+        "sleep",
+        "in",
+        "a",
+        "little"
+      ],
+      "level": 2,
+      "when": {
+        "weekday": 6
+      }
+    },
+    {
+      "id": "t-day-009",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Sunday is sun day. Is it sunny?",
+      "zh": "星期天是太阳日。今天出太阳了吗？",
+      "learn": {
+        "text": "Sunday = sun + day",
+        "zh": "sun 太阳，sunny 晴朗的。今天是 Sunday，天气 sunny 就更好了。",
+        "kind": "day"
+      },
+      "words": [
+        "sunday",
+        "be",
+        "sun",
+        "day",
+        "it",
+        "sunny"
+      ],
+      "level": 1,
+      "when": {
+        "weekday": 7
+      }
+    },
+    {
+      "id": "t-day-010",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "What's the weather like today?",
+      "zh": "今天天气怎么样？",
+      "learn": {
+        "text": "What's the weather like?",
+        "zh": "问天气。回答：It's sunny. 晴天。It's windy. 有风。It's cloudy. 多云。",
+        "kind": "day"
+      },
+      "words": [
+        "what",
+        "be",
+        "the",
+        "weather",
+        "like",
+        "today"
+      ],
+      "level": 1,
+      "topic": "nature"
+    },
+    {
+      "id": "t-day-011",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "It's freezing outside! Wear a warm coat.",
+      "zh": "外面冷极了！穿件暖和的外套。",
+      "learn": {
+        "text": "freezing",
+        "zh": "cold 是冷，freezing 是冻得发僵的那种冷。I'm freezing! 我快冻僵了！",
+        "kind": "day"
+      },
+      "words": [
+        "it",
+        "be",
+        "free",
+        "outside",
+        "wear",
+        "a",
+        "warm",
+        "coat"
+      ],
+      "level": 2,
+      "topic": "nature",
+      "when": {
+        "month": [
+          11,
+          3
+        ]
+      }
+    },
+    {
+      "id": "t-day-012",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Do you like snow? Let's make a snowman!",
+      "zh": "你喜欢雪吗？我们堆个雪人吧！",
+      "learn": {
+        "text": "snowman = snow + man",
+        "zh": "雪人。复数是 snowmen，和 man → men 一样。",
+        "kind": "day"
+      },
+      "words": [
+        "do",
+        "you",
+        "like",
+        "snow",
+        "let",
+        "us",
+        "make",
+        "a",
+        "snowman"
+      ],
+      "level": 1,
+      "topic": "nature",
+      "when": {
+        "month": [
+          12,
+          3
+        ]
+      }
+    },
+    {
+      "id": "t-day-013",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Spring is here! Flowers are everywhere.",
+      "zh": "春天来了！到处都是花。",
+      "learn": {
+        "text": "spring",
+        "zh": "春天。spring 还有“弹簧”和“泉水”的意思。",
+        "kind": "day"
+      },
+      "words": [
+        "spring",
+        "be",
+        "here",
+        "flower",
+        "everywhere"
+      ],
+      "level": 2,
+      "topic": "nature",
+      "when": {
+        "month": [
+          3,
+          6
+        ]
+      }
+    },
+    {
+      "id": "t-day-014",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "It's so hot! Time for ice cream.",
+      "zh": "好热啊！该吃冰淇淋了。",
+      "learn": {
+        "text": "ice cream",
+        "zh": "冰淇淋。一句有名的绕口令：I scream, you scream, we all scream for ice cream!",
+        "kind": "day"
+      },
+      "words": [
+        "it",
+        "be",
+        "so",
+        "hot",
+        "time",
+        "for",
+        "ice",
+        "cream"
+      ],
+      "level": 1,
+      "topic": "food",
+      "when": {
+        "month": [
+          6,
+          9
+        ]
+      }
+    },
+    {
+      "id": "t-day-015",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Leaves fall in autumn. Americans say fall!",
+      "zh": "秋天树叶落下。美国人就叫秋天 fall！",
+      "learn": {
+        "text": "autumn = fall",
+        "zh": "秋天：英国说 autumn，美国说 fall，因为树叶在这时落下（fall）。",
+        "kind": "day"
+      },
+      "words": [
+        "leave",
+        "fall",
+        "in",
+        "autumn",
+        "american",
+        "say"
+      ],
+      "level": 2,
+      "topic": "nature",
+      "when": {
+        "month": [
+          9,
+          12
+        ]
+      }
+    },
+    {
+      "id": "t-day-016",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Halloween is coming soon!",
+      "zh": "万圣节快到了！",
+      "learn": {
+        "text": "Trick or treat!",
+        "zh": "万圣节在 10 月 31 日。孩子们穿上怪物衣服去敲门要糖，说的就是这句。",
+        "kind": "day",
+        "add": {
+          "w": "Trick or treat!",
+          "cn": "不给糖就捣蛋",
+          "phrase": true
+        }
+      },
+      "words": [
+        "halloween",
+        "be",
+        "come",
+        "soon"
+      ],
+      "level": 2,
+      "unit": "U4",
+      "when": {
+        "near": "10-31",
+        "before": 7
+      }
+    },
+    {
+      "id": "t-day-017",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Today is Hello Kitty's birthday!",
+      "zh": "今天是 Hello Kitty 的生日！",
+      "learn": {
+        "text": "Happy birthday!",
+        "zh": "Hello Kitty 的生日是 11 月 1 日。一起说：Happy birthday, Hello Kitty!",
+        "kind": "day"
+      },
+      "words": [
+        "today",
+        "be",
+        "hello",
+        "kitty",
+        "birthday"
+      ],
+      "level": 1,
+      "topic": "cats",
+      "when": {
+        "near": "11-01",
+        "before": 0
+      }
+    },
+    {
+      "id": "t-day-018",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Today is Thanksgiving in the US.",
+      "zh": "今天是美国的感恩节。",
+      "learn": {
+        "text": "Thank you for everything.",
+        "zh": "感恩节可以对家人说：Thank you for everything. 谢谢你为我做的一切。",
+        "kind": "day"
+      },
+      "words": [
+        "today",
+        "be",
+        "thanksgiving",
+        "in",
+        "the",
+        "us"
+      ],
+      "level": 2,
+      "unit": "U4",
+      "when": {
+        "dates": [
+          "2026-11-26",
+          "2027-11-25",
+          "2028-11-23"
+        ]
+      }
+    },
+    {
+      "id": "t-day-019",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Tonight is Christmas Eve.",
+      "zh": "今晚是平安夜。",
+      "learn": {
+        "text": "Christmas Eve",
+        "zh": "eve 是“前一天晚上”。New Year's Eve 是 12 月 31 日，跨年夜。",
+        "kind": "day"
+      },
+      "words": [
+        "tonight",
+        "be",
+        "christmas",
+        "eve"
+      ],
+      "level": 2,
+      "unit": "U4",
+      "when": {
+        "near": "12-24",
+        "before": 0
+      }
+    },
+    {
+      "id": "t-day-020",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Merry Christmas, {name}!",
+      "zh": "圣诞快乐，{name}！",
+      "learn": {
+        "text": "Merry Christmas!",
+        "zh": "圣诞快乐！merry 是“快乐的”，平时很少用，几乎只在这句里出现。",
+        "kind": "day"
+      },
+      "words": [
+        "merry",
+        "christmas"
+      ],
+      "level": 1,
+      "unit": "U4",
+      "when": {
+        "near": "12-25",
+        "before": 1
+      }
+    },
+    {
+      "id": "t-day-021",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "It's the last day of the year!",
+      "zh": "今天是一年的最后一天！",
+      "learn": {
+        "text": "New Year's Eve",
+        "zh": "12 月 31 日跨年夜。零点前大家一起倒数：Ten, nine, eight...",
+        "kind": "day"
+      },
+      "words": [
+        "it",
+        "be",
+        "the",
+        "last",
+        "day",
+        "of",
+        "year"
+      ],
+      "level": 2,
+      "unit": "U4",
+      "when": {
+        "near": "12-31",
+        "before": 0
+      }
+    },
+    {
+      "id": "t-day-022",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Happy New Year! New year, new words!",
+      "zh": "新年快乐！新的一年，新的单词！",
+      "learn": {
+        "text": "New Year's resolution",
+        "zh": "新年决心。My New Year's resolution: read every day. 我的新年决心：每天读一点。",
+        "kind": "day"
+      },
+      "words": [
+        "happy",
+        "new",
+        "year",
+        "word"
+      ],
+      "level": 3,
+      "when": {
+        "near": "01-01",
+        "before": 0
+      }
+    },
+    {
+      "id": "t-day-023",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Today is the shortest day of the year.",
+      "zh": "今天是一年里白天最短的一天。",
+      "learn": {
+        "text": "short → shorter → the shortest",
+        "zh": "冬至，白天最短。北方冬至吃饺子，饺子叫 dumplings。",
+        "kind": "day"
+      },
+      "words": [
+        "today",
+        "be",
+        "the",
+        "short",
+        "day",
+        "of",
+        "year"
+      ],
+      "level": 2,
+      "when": {
+        "dates": [
+          "2026-12-22",
+          "2027-12-22",
+          "2028-12-21"
+        ]
+      }
+    },
+    {
+      "id": "t-day-024",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Happy Spring Festival! Happy New Year!",
+      "zh": "春节快乐！新年快乐！",
+      "learn": {
+        "text": "red packet",
+        "zh": "红包，英语叫 red packet 或 red envelope。拿到红包别忘了说 Thank you!",
+        "kind": "day"
+      },
+      "words": [
+        "happy",
+        "spring",
+        "festival",
+        "new",
+        "year"
+      ],
+      "level": 1,
+      "unit": "U4",
+      "when": {
+        "dates": [
+          "2027-02-06",
+          "2028-01-26"
+        ],
+        "before": 2
+      }
+    },
+    {
+      "id": "t-day-025",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Today is the Lantern Festival.",
+      "zh": "今天是元宵节。",
+      "learn": {
+        "text": "lantern",
+        "zh": "灯笼。元宵节就叫 Lantern Festival，汤圆可以说 sweet rice balls。",
+        "kind": "day"
+      },
+      "words": [
+        "today",
+        "be",
+        "the",
+        "lantern",
+        "festival"
+      ],
+      "level": 2,
+      "unit": "U4",
+      "when": {
+        "dates": [
+          "2027-02-20",
+          "2028-02-09"
+        ]
+      }
+    },
+    {
+      "id": "t-day-026",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Happy Dragon Boat Festival!",
+      "zh": "端午节快乐！",
+      "learn": {
+        "text": "dragon boat / rice dumpling",
+        "zh": "龙舟 dragon boat，粽子 rice dumpling，也有人直接说 zongzi。",
+        "kind": "day"
+      },
+      "words": [
+        "happy",
+        "dragon",
+        "boat",
+        "festival"
+      ],
+      "level": 2,
+      "unit": "U4",
+      "when": {
+        "dates": [
+          "2027-06-09",
+          "2028-05-28"
+        ]
+      }
+    },
+    {
+      "id": "t-day-027",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Happy Mid-Autumn Festival! Look at the moon.",
+      "zh": "中秋节快乐！看看月亮吧。",
+      "learn": {
+        "text": "mooncake = moon + cake",
+        "zh": "月饼就是 moon + cake。满月叫 full moon。",
+        "kind": "day"
+      },
+      "words": [
+        "happy",
+        "mid",
+        "autumn",
+        "festival",
+        "look",
+        "at",
+        "the",
+        "moon"
+      ],
+      "level": 2,
+      "unit": "U4",
+      "when": {
+        "dates": [
+          "2027-09-15",
+          "2028-10-03"
+        ],
+        "before": 1
+      }
+    },
+    {
+      "id": "t-day-028",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Happy Teachers' Day!",
+      "zh": "教师节快乐！",
+      "learn": {
+        "text": "Teachers' Day",
+        "zh": "teachers 是复数，已经有 s 了，所以撇号放在 s 后面：teachers'。",
+        "kind": "day"
+      },
+      "words": [
+        "happy",
+        "teacher",
+        "day"
+      ],
+      "level": 2,
+      "when": {
+        "near": "09-10",
+        "before": 1
+      }
+    },
+    {
+      "id": "t-day-029",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Happy National Day! Enjoy your holiday.",
+      "zh": "国庆节快乐！好好过假期。",
+      "learn": {
+        "text": "holiday / vacation",
+        "zh": "假期：英国说 holiday，美国常说 vacation。",
+        "kind": "day"
+      },
+      "words": [
+        "happy",
+        "national",
+        "day",
+        "enjoy",
+        "your",
+        "holiday"
+      ],
+      "level": 2,
+      "when": {
+        "near": "10-01",
+        "before": 1
+      }
+    },
+    {
+      "id": "t-day-030",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Happy Children's Day!",
+      "zh": "儿童节快乐！",
+      "learn": {
+        "text": "child → children → Children's Day",
+        "zh": "child 的复数是 children，不加 s。所以写 Children's Day。",
+        "kind": "day"
+      },
+      "words": [
+        "happy",
+        "child",
+        "day"
+      ],
+      "level": 2,
+      "when": {
+        "near": "06-01",
+        "before": 0
+      }
+    },
+    {
+      "id": "t-day-031",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Be careful today. It's April Fool's Day!",
+      "zh": "今天小心点，是愚人节！",
+      "learn": {
+        "text": "April Fool!",
+        "zh": "愚人节。开完玩笑，大家会笑着喊 April Fool! 上当啦！",
+        "kind": "day"
+      },
+      "words": [
+        "be",
+        "careful",
+        "today",
+        "it",
+        "april",
+        "fool",
+        "day"
+      ],
+      "level": 2,
+      "when": {
+        "near": "04-01",
+        "before": 0
+      }
+    },
+    {
+      "id": "t-day-032",
+      "kind": "day",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Sunday is Mother's Day. Say thanks to Mum!",
+      "zh": "星期天是母亲节，跟妈妈说声谢谢！",
+      "learn": {
+        "text": "Mother's Day",
+        "zh": "母亲节在 5 月的第二个星期天。可以说：Happy Mother's Day, Mum! I love you.",
+        "kind": "day"
+      },
+      "words": [
+        "sunday",
+        "be",
+        "mother",
+        "day",
+        "say",
+        "thanks",
+        "to",
+        "mum"
+      ],
+      "level": 2,
+      "topic": "family",
+      "when": {
+        "dates": [
+          "2027-05-09",
+          "2028-05-14"
+        ],
+        "before": 2
+      }
+    },
+    {
+      "id": "t-origin-001",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Why do we call it breakfast?",
+      "zh": "早饭为什么叫 breakfast？",
+      "learn": {
+        "text": "breakfast = break + fast",
+        "zh": "fast 在这里是“不吃东西”。睡了一夜没吃饭，早饭就是“打破不吃饭”。",
+        "kind": "origin",
+        "say": "breakfast. break, fast."
+      },
+      "words": [
+        "why",
+        "do",
+        "we",
+        "call",
+        "it",
+        "breakfast"
+      ],
+      "level": 1,
+      "topic": "food"
+    },
+    {
+      "id": "t-origin-002",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Goodbye was once four words!",
+      "zh": "goodbye 以前是四个词！",
+      "learn": {
+        "text": "goodbye = God be with you",
+        "zh": "古时候人们说 God be with you，意思是“愿上帝与你同在”，说着说着就缩成了 goodbye。",
+        "kind": "origin",
+        "say": "God be with you. Goodbye."
+      },
+      "words": [
+        "goodbye",
+        "be",
+        "once",
+        "four",
+        "word"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-origin-003",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Sandwich was a place name, then a food!",
+      "zh": "sandwich 原来是个地名，后来才是食物！",
+      "learn": {
+        "text": "sandwich",
+        "zh": "英国有位桑威奇伯爵（Earl of Sandwich），据说他边玩牌边吃夹肉面包，大家就把它叫作 sandwich。",
+        "kind": "origin"
+      },
+      "words": [
+        "sandwich",
+        "be",
+        "a",
+        "place",
+        "name",
+        "then",
+        "food"
+      ],
+      "level": 2,
+      "topic": "food"
+    },
+    {
+      "id": "t-origin-004",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Hamburgers come from a city's name!",
+      "zh": "汉堡的名字来自一座城市！",
+      "learn": {
+        "text": "hamburger",
+        "zh": "名字来自德国城市汉堡（Hamburg），和火腿（ham）没关系。",
+        "kind": "origin"
+      },
+      "words": [
+        "hamburgers",
+        "come",
+        "from",
+        "a",
+        "city",
+        "name"
+      ],
+      "level": 1,
+      "topic": "food"
+    },
+    {
+      "id": "t-origin-005",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Ketchup may come from Chinese!",
+      "zh": "番茄酱这个词可能来自中文！",
+      "learn": {
+        "text": "ketchup",
+        "zh": "很多人认为 ketchup 来自闽南话里一种鱼酱的叫法，发音像 kê-tsiap。",
+        "kind": "origin"
+      },
+      "words": [
+        "ketchup",
+        "may",
+        "come",
+        "from",
+        "chinese"
+      ],
+      "level": 2,
+      "topic": "food"
+    },
+    {
+      "id": "t-origin-006",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Tea came from Chinese, too!",
+      "zh": "tea 这个词也来自中文！",
+      "learn": {
+        "text": "tea",
+        "zh": "tea 来自闽南话“茶”的读音 te。俄语叫茶 chai，是从“茶 cha”的读音来的。",
+        "kind": "origin"
+      },
+      "words": [
+        "tea",
+        "come",
+        "from",
+        "chinese",
+        "too"
+      ],
+      "level": 1,
+      "topic": "food"
+    },
+    {
+      "id": "t-origin-007",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Some Chinese words are English words now.",
+      "zh": "有些中文词，现在也是英语单词了。",
+      "learn": {
+        "text": "kung fu / tofu / dim sum",
+        "zh": "这些词从中文借进了英语：功夫、豆腐、点心。",
+        "kind": "origin",
+        "say": "kung fu. tofu. dim sum."
+      },
+      "words": [
+        "some",
+        "chinese",
+        "word",
+        "be",
+        "english",
+        "now"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-origin-008",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "The word robot is about one hundred years old.",
+      "zh": "robot 这个词才一百岁左右。",
+      "learn": {
+        "text": "robot",
+        "zh": "1920 年一部捷克话剧第一次用了 robot 这个词，原来的意思是“干苦活的人”。",
+        "kind": "origin"
+      },
+      "words": [
+        "the",
+        "word",
+        "robot",
+        "be",
+        "about",
+        "one",
+        "hundred",
+        "year",
+        "old"
+      ],
+      "level": 2,
+      "topic": "science"
+    },
+    {
+      "id": "t-origin-009",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "A window was once a wind eye!",
+      "zh": "窗户原来是“风的眼睛”！",
+      "learn": {
+        "text": "window = wind + eye",
+        "zh": "古代北欧的话里，窗户叫“风的眼睛”，风从这个“眼睛”吹进来。",
+        "kind": "origin",
+        "say": "window. wind, eye."
+      },
+      "words": [
+        "a",
+        "window",
+        "be",
+        "once",
+        "wind",
+        "eye"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-origin-010",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "A daisy is a day's eye.",
+      "zh": "雏菊就是“白天的眼睛”。",
+      "learn": {
+        "text": "daisy = day's eye",
+        "zh": "雏菊白天开、晚上合，像白天睁开的眼睛。",
+        "kind": "origin"
+      },
+      "words": [
+        "a",
+        "daisy",
+        "be",
+        "day",
+        "eye"
+      ],
+      "level": 2,
+      "topic": "nature"
+    },
+    {
+      "id": "t-origin-011",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Kindergarten means a garden for children.",
+      "zh": "幼儿园的意思是“孩子的花园”。",
+      "learn": {
+        "text": "kindergarten",
+        "zh": "来自德语：Kinder 是孩子，Garten 是花园。",
+        "kind": "origin"
+      },
+      "words": [
+        "kindergarten",
+        "mean",
+        "a",
+        "garden",
+        "for",
+        "child"
+      ],
+      "level": 2,
+      "topic": "school"
+    },
+    {
+      "id": "t-origin-012",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "A hippo is a river horse!",
+      "zh": "河马是“河里的马”！",
+      "learn": {
+        "text": "hippopotamus",
+        "zh": "来自希腊语，意思是“河里的马”。太长了，平时说 hippo 就好。",
+        "kind": "origin",
+        "say": "hippopotamus. hippo."
+      },
+      "words": [
+        "a",
+        "hippo",
+        "be",
+        "river",
+        "horse"
+      ],
+      "level": 2,
+      "topic": "animals"
+    },
+    {
+      "id": "t-origin-013",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Do you know what dinosaur means?",
+      "zh": "你知道 dinosaur 是什么意思吗？",
+      "learn": {
+        "text": "dinosaur",
+        "zh": "来自希腊语“可怕的蜥蜴”。中文“恐龙”的“恐”就是这么来的。",
+        "kind": "origin"
+      },
+      "words": [
+        "do",
+        "you",
+        "know",
+        "what",
+        "dinosaur",
+        "mean"
+      ],
+      "level": 3,
+      "topic": "science"
+    },
+    {
+      "id": "t-origin-014",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Television means seeing far away.",
+      "zh": "television 的意思是“看远处”。",
+      "learn": {
+        "text": "tele = far",
+        "zh": "tele 是“远”：television 电视（看远处的东西），telephone 电话（远处传来的声音）。",
+        "kind": "origin"
+      },
+      "words": [
+        "television",
+        "mean",
+        "see",
+        "far",
+        "away"
+      ],
+      "level": 2,
+      "topic": "science"
+    },
+    {
+      "id": "t-origin-015",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "A bicycle has two wheels. Look at its name!",
+      "zh": "自行车有两个轮子，看看它的名字！",
+      "learn": {
+        "text": "bicycle",
+        "zh": "bi 二 + cycle 轮子。tricycle 是三轮车，tri 是三，triangle 是三角形。",
+        "kind": "origin"
+      },
+      "words": [
+        "a",
+        "bicycle",
+        "have",
+        "two",
+        "wheel",
+        "look",
+        "at",
+        "its",
+        "name"
+      ],
+      "level": 2,
+      "topic": "sports"
+    },
+    {
+      "id": "t-origin-016",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Is a pineapple a kind of apple?",
+      "zh": "菠萝是一种苹果吗？",
+      "learn": {
+        "text": "pineapple",
+        "zh": "最早 pineapple 指的是松果。后来人们觉得菠萝长得像松果，就借来叫它了。",
+        "kind": "origin"
+      },
+      "words": [
+        "be",
+        "a",
+        "pineapple",
+        "kind",
+        "of",
+        "apple"
+      ],
+      "level": 2,
+      "topic": "food"
+    },
+    {
+      "id": "t-origin-017",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Muscle means little mouse!",
+      "zh": "muscle 的意思是“小老鼠”！",
+      "learn": {
+        "text": "muscle",
+        "zh": "肌肉来自拉丁语“小老鼠”：肌肉动起来，像皮下有只小老鼠在跑。",
+        "kind": "origin"
+      },
+      "words": [
+        "muscle",
+        "mean",
+        "little",
+        "mouse"
+      ],
+      "level": 3,
+      "topic": "science"
+    },
+    {
+      "id": "t-origin-018",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "January has a god with two faces.",
+      "zh": "一月里藏着一个有两张脸的神。",
+      "learn": {
+        "text": "January",
+        "zh": "来自古罗马的双面神 Janus：一张脸看过去，一张脸看未来。一年的开头正好。",
+        "kind": "origin"
+      },
+      "words": [
+        "january",
+        "have",
+        "a",
+        "god",
+        "with",
+        "two",
+        "face"
+      ],
+      "level": 2,
+      "when": {
+        "month": [
+          12,
+          2
+        ]
+      }
+    },
+    {
+      "id": "t-origin-019",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Why is it called the alphabet?",
+      "zh": "字母表为什么叫 alphabet？",
+      "learn": {
+        "text": "alphabet = alpha + beta",
+        "zh": "希腊字母的头两个是 alpha 和 beta，合起来就是“字母表”。",
+        "kind": "origin"
+      },
+      "words": [
+        "why",
+        "be",
+        "it",
+        "call",
+        "the",
+        "alphabet"
+      ],
+      "level": 2,
+      "topic": "school"
+    },
+    {
+      "id": "t-origin-020",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Nobody is sure where OK came from!",
+      "zh": "没人确定 OK 是从哪来的！",
+      "learn": {
+        "text": "OK",
+        "zh": "最常见的说法：1839 年美国报纸开玩笑，把 all correct 故意写成 oll korrect，缩写成 OK。",
+        "kind": "origin"
+      },
+      "words": [
+        "nobody",
+        "be",
+        "sure",
+        "where",
+        "ok",
+        "come",
+        "from"
+      ],
+      "level": 3
+    },
+    {
+      "id": "t-origin-021",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "Shampoo comes from India.",
+      "zh": "shampoo 这个词来自印度。",
+      "learn": {
+        "text": "shampoo",
+        "zh": "来自印地语，原来的意思是“按摩、揉一揉”。",
+        "kind": "origin"
+      },
+      "words": [
+        "shampoo",
+        "come",
+        "from",
+        "india"
+      ],
+      "level": 3
+    },
+    {
+      "id": "t-origin-022",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "School once meant free time!",
+      "zh": "school 原来的意思是“空闲时间”！",
+      "learn": {
+        "text": "school",
+        "zh": "来自希腊语 skholē，意思是“空闲时间”：有空了，才去学习、讨论。",
+        "kind": "origin"
+      },
+      "words": [
+        "school",
+        "once",
+        "meant",
+        "free",
+        "time"
+      ],
+      "level": 2,
+      "topic": "school"
+    },
+    {
+      "id": "t-origin-023",
+      "kind": "origin",
+      "scene": [
+        "open",
+        "close",
+        "back"
+      ],
+      "en": "A pencil was once a little tail!",
+      "zh": "铅笔原来是“小尾巴”！",
+      "learn": {
+        "text": "pencil",
+        "zh": "pencil 来自拉丁语“小尾巴”。最早的笔是用毛做的小刷子。",
+        "kind": "origin"
+      },
+      "words": [
+        "a",
+        "pencil",
+        "be",
+        "once",
+        "little",
+        "tail"
+      ],
+      "level": 2,
+      "unit": "S",
+      "topic": "school"
+    },
+    {
+      "id": "t-origin-024",
+      "kind": "origin",
+      "scene": [
+        "late"
+      ],
+      "en": "It's late. Tonight is a short one.",
+      "zh": "很晚了，今晚上一节短的。",
+      "learn": {
+        "text": "tonight = to + night",
+        "zh": "today、tonight、tomorrow 都是 to 开头：今天、今晚、明天。",
+        "kind": "origin"
+      },
+      "words": [
+        "it",
+        "be",
+        "late",
+        "tonight",
+        "a",
+        "short",
+        "one"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-twister-001",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Try this one slowly, then fast!",
+      "zh": "先慢慢说，再说快一点！",
+      "learn": {
+        "text": "She sells seashells by the seashore.",
+        "zh": "她在海边卖贝壳。练 s 和 sh：s 舌尖抵着下牙，sh 嘴唇往前撅。",
+        "kind": "twister"
+      },
+      "words": [
+        "try",
+        "this",
+        "one",
+        "slow",
+        "then",
+        "fast"
+      ],
+      "level": 2,
+      "topic": "nature"
+    },
+    {
+      "id": "t-twister-002",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Say this three times. Go!",
+      "zh": "说三遍，开始！",
+      "learn": {
+        "text": "Red lorry, yellow lorry.",
+        "zh": "红卡车，黄卡车。lorry 是英国说的卡车。练 r 和 l：l 舌尖顶上牙后面。",
+        "kind": "twister"
+      },
+      "words": [
+        "say",
+        "this",
+        "three",
+        "time",
+        "go"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-twister-003",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Ready? Say it with me!",
+      "zh": "准备好了吗？跟我一起说！",
+      "learn": {
+        "text": "A big black bug bit a big black bear.",
+        "zh": "一只大黑虫咬了一只大黑熊。练 b，嘴唇先闭紧再弹开。",
+        "kind": "twister"
+      },
+      "words": [
+        "ready",
+        "say",
+        "it",
+        "with",
+        "me"
+      ],
+      "level": 1,
+      "topic": "animals"
+    },
+    {
+      "id": "t-twister-004",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Can you say this without a mistake?",
+      "zh": "你能一个都不错地说下来吗？",
+      "learn": {
+        "text": "Fred fed Ted bread, and Ted fed Fred bread.",
+        "zh": "Fred 喂 Ted 面包，Ted 也喂 Fred 面包。fed 是 feed（喂）的过去式。",
+        "kind": "twister"
+      },
+      "words": [
+        "can",
+        "you",
+        "say",
+        "this",
+        "without",
+        "a",
+        "mistake"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-twister-005",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "This one is for cat lovers!",
+      "zh": "这句送给爱猫的你！",
+      "learn": {
+        "text": "Kitty caught the kitten in the kitchen.",
+        "zh": "Kitty 在厨房抓住了小猫。练 k，还有 kitchen 里的 tch。caught 是 catch 的过去式。",
+        "kind": "twister"
+      },
+      "words": [
+        "this",
+        "one",
+        "be",
+        "for",
+        "cat",
+        "lovers"
+      ],
+      "level": 2,
+      "topic": "cats"
+    },
+    {
+      "id": "t-twister-006",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Here is a short one. Try it!",
+      "zh": "来个短的，试试！",
+      "learn": {
+        "text": "Which witch is which?",
+        "zh": "哪个女巫是哪个？which 和 witch 读音几乎一样，很难分出来。",
+        "kind": "twister"
+      },
+      "words": [
+        "here",
+        "be",
+        "a",
+        "short",
+        "one",
+        "try",
+        "it"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-twister-007",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Say it five times fast!",
+      "zh": "快速说五遍！",
+      "learn": {
+        "text": "Four fine fresh fish for you.",
+        "zh": "给你四条新鲜的好鱼。练 f：上牙轻轻碰下嘴唇。",
+        "kind": "twister"
+      },
+      "words": [
+        "say",
+        "it",
+        "five",
+        "time",
+        "fast"
+      ],
+      "level": 1,
+      "topic": "food"
+    },
+    {
+      "id": "t-twister-008",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Only three words, but very hard!",
+      "zh": "只有三个词，可是很难！",
+      "learn": {
+        "text": "Toy boat. Toy boat. Toy boat.",
+        "zh": "玩具船。连说五遍试试，舌头会打结。",
+        "kind": "twister"
+      },
+      "words": [
+        "only",
+        "three",
+        "word",
+        "but",
+        "very",
+        "hard"
+      ],
+      "level": 1
+    },
+    {
+      "id": "t-twister-009",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Say this one with a big smile!",
+      "zh": "笑着说这一句！",
+      "learn": {
+        "text": "I scream, you scream, we all scream for ice cream!",
+        "zh": "我叫你叫，我们都为冰淇淋叫！I scream 和 ice cream 听起来一模一样。",
+        "kind": "twister"
+      },
+      "words": [
+        "say",
+        "this",
+        "one",
+        "with",
+        "a",
+        "big",
+        "smile"
+      ],
+      "level": 1,
+      "topic": "food"
+    },
+    {
+      "id": "t-twister-010",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Here is a famous one. Ready?",
+      "zh": "这是一句很有名的，准备好了吗？",
+      "learn": {
+        "text": "Peter Piper picked a peck of pickled peppers.",
+        "zh": "彼得·派柏摘了一大筐腌辣椒。英语里最有名的绕口令，练 p。",
+        "kind": "twister"
+      },
+      "words": [
+        "here",
+        "be",
+        "a",
+        "famous",
+        "one",
+        "ready"
+      ],
+      "level": 3
+    },
+    {
+      "id": "t-twister-011",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "A scary one. Say it slowly!",
+      "zh": "一句吓人的，慢慢说！",
+      "learn": {
+        "text": "Six sticky skeletons.",
+        "zh": "六具黏糊糊的骷髅。练 s 连着别的辅音：st、sk。",
+        "kind": "twister"
+      },
+      "words": [
+        "a",
+        "scary",
+        "one",
+        "say",
+        "it",
+        "slow"
+      ],
+      "level": 3
+    },
+    {
+      "id": "t-twister-012",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Can your mum say this one?",
+      "zh": "你妈妈能说这一句吗？",
+      "learn": {
+        "text": "Betty Botter bought some butter, but the butter was bitter.",
+        "zh": "Betty Botter 买了些黄油，可是黄油是苦的。练 b 和 t。",
+        "kind": "twister"
+      },
+      "words": [
+        "can",
+        "your",
+        "mum",
+        "say",
+        "this",
+        "one"
+      ],
+      "level": 2,
+      "topic": "food"
+    },
+    {
+      "id": "t-twister-013",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Slowly first. Then faster!",
+      "zh": "先慢后快！",
+      "learn": {
+        "text": "Silly Sally swiftly shooed seven silly sheep.",
+        "zh": "傻乎乎的 Sally 飞快地赶走七只傻乎乎的羊。练 s 和 sh。",
+        "kind": "twister"
+      },
+      "words": [
+        "slow",
+        "first",
+        "then",
+        "fast"
+      ],
+      "level": 3,
+      "topic": "animals"
+    },
+    {
+      "id": "t-twister-014",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "One for animal lovers!",
+      "zh": "这句送给爱动物的你！",
+      "learn": {
+        "text": "Eleven benevolent elephants.",
+        "zh": "十一头善良的大象。练 l 和 v：v 上牙碰下唇，还要震动。",
+        "kind": "twister"
+      },
+      "words": [
+        "one",
+        "for",
+        "animal",
+        "lovers"
+      ],
+      "level": 3,
+      "topic": "animals"
+    },
+    {
+      "id": "t-twister-015",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Let's warm up our mouth!",
+      "zh": "我们来热热嘴！",
+      "learn": {
+        "text": "Three free throws.",
+        "zh": "三次罚球。th 舌尖放在上下牙中间，fr 先咬下唇再卷舌。",
+        "kind": "twister"
+      },
+      "words": [
+        "let",
+        "us",
+        "warm",
+        "up",
+        "our",
+        "mouth"
+      ],
+      "level": 2,
+      "topic": "sports"
+    },
+    {
+      "id": "t-twister-016",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "This one is a bear story!",
+      "zh": "这句讲的是一只熊！",
+      "learn": {
+        "text": "Fuzzy Wuzzy was a bear. Fuzzy Wuzzy had no hair. Fuzzy Wuzzy wasn't fuzzy, was he?",
+        "zh": "毛毛熊是只熊，毛毛熊没有毛，毛毛熊不毛，对吧？最后一句是反问。",
+        "kind": "twister"
+      },
+      "words": [
+        "this",
+        "one",
+        "be",
+        "a",
+        "bear",
+        "story"
+      ],
+      "level": 2,
+      "topic": "animals"
+    },
+    {
+      "id": "t-twister-017",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Say it ten times if you can!",
+      "zh": "能说十遍就说十遍！",
+      "learn": {
+        "text": "Red leather, yellow leather.",
+        "zh": "红皮革，黄皮革。比 lorry 那句还难，练 r 和 l。",
+        "kind": "twister"
+      },
+      "words": [
+        "say",
+        "it",
+        "ten",
+        "time",
+        "if",
+        "you",
+        "can"
+      ],
+      "level": 2
+    },
+    {
+      "id": "t-twister-018",
+      "kind": "twister",
+      "scene": [
+        "open",
+        "close"
+      ],
+      "en": "Your mouth will get tired!",
+      "zh": "你的嘴会累的！",
+      "learn": {
+        "text": "A proper copper coffee pot.",
+        "zh": "一把像样的铜咖啡壶。练 p 和 k。",
+        "kind": "twister"
+      },
+      "words": [
+        "your",
+        "mouth",
+        "will",
+        "get",
+        "tired"
+      ],
+      "level": 3
+    }
+  ],
+  "talk_make": {
+    "note": "个性化的“老师说 + 学一点”，由 lines.js 用她的数据填空（talk）。{pair} {w} {other} {topic} {n} 是程序填的；每种都有几句英文轮着用。",
+    "slip": {
+      "en": [
+        "Let's look at {pair} again.",
+        "One small tip about {pair}.",
+        "{pair}: a quick check!",
+        "Remember this? {pair}"
+      ],
+      "zh": [
+        "我们再看一眼 {pair}。",
+        "关于 {pair} 的一个小提醒。",
+        "{pair}：快速看一眼！",
+        "还记得吗？{pair}"
+      ],
+      "learn_zh": "{when}你 {pair} 错了{times}。{tip}",
+      "tips": {
+        "be_agree": {
+          "pair": "is / are",
+          "text": "I am, he is, they are.",
+          "zh": "I 用 am，he、she、it 用 is，you、we、they 用 are。"
+        },
+        "he_she": {
+          "pair": "he / she",
+          "text": "My mum? She is a teacher.",
+          "zh": "男的用 he，女的用 she。妈妈、姐姐、女老师都用 she。"
+        },
+        "subj_obj": {
+          "pair": "I / me",
+          "text": "I like cats. Cats like me.",
+          "zh": "在动词前面当主语用 I，在动词、介词后面用 me：with me, help me。"
+        },
+        "subj_vs_poss": {
+          "pair": "I / my",
+          "text": "I have a cat. My cat is white.",
+          "zh": "I 是“我”，my 是“我的”，my 后面要跟东西。"
+        },
+        "obj_vs_poss": {
+          "pair": "me / my",
+          "text": "Help me. This is my bag.",
+          "zh": "me 是“我”（宾格），my 是“我的”，后面跟东西：my bag。"
+        },
+        "poss_adj_vs_pron": {
+          "pair": "my / mine",
+          "text": "This is my book. It's mine.",
+          "zh": "my 后面要跟东西，mine 自己就够了。your / yours、her / hers 也一样。"
+        },
+        "poss_person": {
+          "pair": "his / her",
+          "text": "Tom and his dog. Amy and her cat.",
+          "zh": "看主人是男是女：男的用 his，女的用 her。"
+        },
+        "there_have": {
+          "pair": "there is / have",
+          "text": "There is a cat in the box. I have a cat.",
+          "zh": "“某处有”用 there is / are；“某人有”用 have / has。"
+        },
+        "there_be_agree": {
+          "pair": "there is / there are",
+          "text": "There is a cat. There are two cats.",
+          "zh": "看紧跟在后面的名词：一个用 is，两个以上用 are。"
+        },
+        "there_order": {
+          "pair": "there be",
+          "text": "There is a box under the tree.",
+          "zh": "顺序：There is + 东西 + 地点。地点放最后。"
+        },
+        "poss_s_missing": {
+          "pair": "'s",
+          "text": "Tom's cat, my mum's bag",
+          "zh": "“谁的”在人名后面加 's：Tom's cat。"
+        },
+        "poss_of_overuse": {
+          "pair": "'s / of",
+          "text": "my sister's room, the door of the room",
+          "zh": "人和动物用 's：my sister's room；东西常用 of：the door of the room。"
+        },
+        "poss_plural": {
+          "pair": "students'",
+          "text": "the students' books",
+          "zh": "复数已经有 s，只加撇号：students'。不规则复数照常加 's：children's。"
+        },
+        "be_missing": {
+          "pair": "be",
+          "text": "She is happy. They are at school.",
+          "zh": "说“是、在、怎么样”时别漏了 am / is / are：She is happy."
+        },
+        "be_plus_verb": {
+          "pair": "is / likes",
+          "text": "She likes cats.",
+          "zh": "有了动词就不用 is：She likes cats，不说 She is like cats。"
+        },
+        "plural_missing": {
+          "pair": "cat / cats",
+          "text": "one cat, two cats",
+          "zh": "两个以上，名词后面加 s：two cats, three books。"
+        },
+        "uncountable_plural": {
+          "pair": "milk / water",
+          "text": "some milk, some water",
+          "zh": "milk、water、rice、bread 数不清，不加 s：some milk。"
+        },
+        "third_s_missing": {
+          "pair": "like / likes",
+          "text": "I like cats. She likes cats.",
+          "zh": "he、she、it 或一个人做主语，动词加 s：She likes cats。"
+        },
+        "third_s_extra": {
+          "pair": "like / likes",
+          "text": "I like it. They play football.",
+          "zh": "I、you、we、they 后面的动词不加 s。"
+        },
+        "third_s_spelling": {
+          "pair": "watches / studies",
+          "text": "watch → watches, study → studies, have → has",
+          "zh": "ch、sh、s、x 结尾加 es；辅音 + y 改 y 为 i 加 es；have 变 has。"
+        },
+        "do_does": {
+          "pair": "do / does",
+          "text": "Do you like cats? Does she like dogs?",
+          "zh": "I、you、we、they 用 do；he、she、it 用 does。"
+        },
+        "does_verb_s": {
+          "pair": "does + like",
+          "text": "Does she like dogs?",
+          "zh": "does 已经“加了 s”，后面的动词用原形：Does she like，不说 likes。"
+        },
+        "be_do_mix": {
+          "pair": "is / does",
+          "text": "Is she happy? Does she like it?",
+          "zh": "后面是形容词、地点用 is；后面是动词用 does。"
+        },
+        "not_order": {
+          "pair": "not",
+          "text": "She is not tall. He can't swim.",
+          "zh": "not 放在 is / can / do 后面：is not, can not, does not。"
+        },
+        "not_missing": {
+          "pair": "isn't / doesn't",
+          "text": "She isn't here. He doesn't like milk.",
+          "zh": "否定句别漏了 not：isn't、can't、doesn't。"
+        },
+        "q_order": {
+          "pair": "Can you...?",
+          "text": "Can you swim? Is she ten?",
+          "zh": "问句把 is / can / do 放到最前面：Can you swim?"
+        },
+        "short_answer": {
+          "pair": "Yes, I am.",
+          "text": "Are you OK? Yes, I am. No, I'm not.",
+          "zh": "怎么问就怎么答：Are you...? Yes, I am. Do you...? Yes, I do."
+        },
+        "plural_rule": {
+          "pair": "boxes / babies",
+          "text": "box → boxes, baby → babies",
+          "zh": "s、x、ch、sh 结尾加 es；辅音 + y 改 y 为 i 加 es。"
+        },
+        "plural_irregular": {
+          "pair": "child / children",
+          "text": "child → children, man → men, sheep → sheep",
+          "zh": "有些复数要单独记：children、men、women、feet、sheep。"
+        },
+        "a_plural": {
+          "pair": "a cat / cats",
+          "text": "a cat, this book, these books",
+          "zh": "a 和 this 后面只跟一个：a cat；这些用 these books。"
+        },
+        "a_an": {
+          "pair": "a / an",
+          "text": "an apple, an egg, a cat",
+          "zh": "元音开头的音前用 an：an apple；其他用 a：a cat。"
+        },
+        "modal_s": {
+          "pair": "can + swim",
+          "text": "She can swim.",
+          "zh": "can 自己不加 s，后面的动词也不加 s。"
+        },
+        "modal_to": {
+          "pair": "can swim",
+          "text": "I can swim.",
+          "zh": "can 后面直接跟动词，不加 to：can swim。"
+        },
+        "modal_do": {
+          "pair": "can't / Can you",
+          "text": "I can't swim. Can you swim?",
+          "zh": "can 自己就能变否定和问句：can't、Can you...?，不借 do。"
+        },
+        "can_cant": {
+          "pair": "can / can't",
+          "text": "I can swim, but I can't dance.",
+          "zh": "can 是能、会做；can't 是做不到。听的时候注意尾巴上的 t。"
+        },
+        "can_who": {
+          "pair": "Can I / Can you",
+          "text": "Can I help you? Can you help me?",
+          "zh": "Can I 是“我可以……吗”，Can you 是“你能……吗”。"
+        },
+        "adv_meaning": {
+          "pair": "always / never",
+          "text": "always > usually > often > sometimes > never",
+          "zh": "always 总这样，usually 通常，often 经常，sometimes 有时，never 从不。"
+        },
+        "adv_position": {
+          "pair": "often",
+          "text": "I often read. She is always happy.",
+          "zh": "频度副词放在一般动词前、be 动词后：I often read. She is always happy."
+        },
+        "how_often": {
+          "pair": "How often / How many",
+          "text": "How often? Twice a week. How many? Two.",
+          "zh": "How often 问多久一次，How many 问有几个。"
+        },
+        "word_order": {
+          "pair": "word order",
+          "text": "I play football at school.",
+          "zh": "英语顺序：谁 + 做什么 + 什么 + 在哪儿。"
+        },
+        "adj_order": {
+          "pair": "a white cat",
+          "text": "a white cat, a big black dog",
+          "zh": "形容词放在名词前面：a white cat，不说 a cat white。"
+        },
+        "place_time": {
+          "pair": "place + time",
+          "text": "I read at home every day.",
+          "zh": "地点在前，时间在后，一起放句子最后。"
+        },
+        "wh_order": {
+          "pair": "Where is...?",
+          "text": "Where is your bag?",
+          "zh": "问句顺序：Where + is + 主语：Where is your bag?"
+        },
+        "wh_word": {
+          "pair": "what / where / who",
+          "text": "What is it? Where is it? Who is he?",
+          "zh": "what 问东西，where 问地方，who 问人，when 问时间。"
+        },
+        "wh_keep": {
+          "pair": "What do you...?",
+          "text": "What do you like?",
+          "zh": "问“做什么”要借 do / does：What do you like?"
+        },
+        "some_any": {
+          "pair": "some / any",
+          "text": "I have some milk. Do you have any milk?",
+          "zh": "肯定句用 some，否定句和问句用 any。"
+        }
+      }
+    },
+    "word_slip": {
+      "en": {
+        "form": [
+          "{w} and {other} look alike!"
+        ],
+        "sound": [
+          "{w} and {other} sound alike!"
+        ],
+        "meaning": [
+          "{w} or {other}? Let's check."
+        ],
+        "category": [
+          "{w} and {other}: same group, not the same!"
+        ]
+      },
+      "zh": {
+        "form": "{w} 和 {other} 长得很像！",
+        "sound": "{w} 和 {other} 读起来很像！",
+        "meaning": "{w} 还是 {other}？我们来看看。",
+        "category": "{w} 和 {other} 是一类，可不一样！"
+      },
+      "learn_zh": "{when}你把 {w} 和 {other} 弄混了{times}。{meanings}"
+    },
+    "unit_word": {
+      "en": [
+        "A word from your unit: {w}.",
+        "Here is a word you just learned: {w}.",
+        "Do you remember {w}?"
+      ],
+      "zh": [
+        "课本这个单元的一个词：{w}。",
+        "这是你刚学的一个词：{w}。",
+        "还记得 {w} 吗？"
+      ],
+      "learn_zh": "{cn}。拼一遍：{letters}"
+    },
+    "likes": {
+      "topics": {
+        "cats": [
+          "cats",
+          "猫"
+        ],
+        "animals": [
+          "animals",
+          "小动物"
+        ],
+        "food": [
+          "good food",
+          "好吃的"
+        ],
+        "school": [
+          "school",
+          "学校"
+        ],
+        "family": [
+          "family time",
+          "和家人在一起"
+        ],
+        "sports": [
+          "sports",
+          "运动"
+        ],
+        "music": [
+          "music",
+          "音乐"
+        ],
+        "art": [
+          "art",
+          "画画"
+        ],
+        "games": [
+          "games",
+          "游戏"
+        ],
+        "travel": [
+          "trips",
+          "出去玩"
+        ],
+        "nature": [
+          "nature",
+          "大自然"
+        ],
+        "science": [
+          "science",
+          "科学"
+        ]
+      },
+      "lines": [
+        {
+          "en": "You like {topic}. So do I!",
+          "zh": "你喜欢{topic_zh}，我也是！",
+          "text": "So do I!",
+          "learn_zh": "我也是！别人说 I like ...，你也喜欢，就说 So do I! 或者 Me too!"
+        },
+        {
+          "en": "I hear you're into {topic}!",
+          "zh": "听说你很迷{topic_zh}！",
+          "text": "I'm into {topic}.",
+          "learn_zh": "be into 就是“很喜欢、迷上”：I'm into {topic}. 我很迷{topic_zh}。"
+        },
+        {
+          "en": "{topic}? That's cool!",
+          "zh": "{topic_zh}？真酷！",
+          "text": "That's cool!",
+          "learn_zh": "真酷，真不错！听到有意思的事时说。cool 本来是“凉快的”。"
+        }
+      ]
+    },
+    "streak": {
+      "min": 3,
+      "lines": [
+        {
+          "en": "{n} days in a row! Keep it up!",
+          "zh": "连着 {n} 天了！继续保持！",
+          "text": "in a row",
+          "learn_zh": "连着，一连。three days in a row = 连着三天。Keep it up! 是“继续保持”。"
+        },
+        {
+          "en": "Day {n} in a row. You are on a roll!",
+          "zh": "连着第 {n} 天了，状态正好！",
+          "text": "on a roll",
+          "learn_zh": "状态正好，一件接一件做成，像球一直往前滚。"
+        },
+        {
+          "en": "{n} days! Keep up the good work!",
+          "zh": "{n} 天了！继续好好学！",
+          "text": "Keep up the good work!",
+          "learn_zh": "继续好好干！夸别人坚持的时候说。"
+        }
+      ]
+    }
+  }
 }

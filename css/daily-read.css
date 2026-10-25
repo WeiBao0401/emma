@@ -1,0 +1,21 @@
+/* 每日阅读（ui-daily-read.js，类名 dr-）。阅读器本身用 reader.css 的 rd-；这里只有外面一圈 */
+.dr { max-width: var(--col); margin: 0 auto; }
+.dr-head { display: flex; align-items: baseline; gap: 12px; padding: 4px 0 12px; border-bottom: 1px solid var(--rule); margin-bottom: 16px; }
+.dr-kicker { margin: 0; font-family: var(--serif); font-size: 1.15rem; color: var(--ink); }
+.dr-sub { margin: 0; color: var(--muted); }
+.dr-wait { padding: 24px 0 12px; }
+.dr-wait .lede { margin: 0 0 6px; }
+.dr-wait .sk-bars { margin-top: 18px; }
+.dr-end { padding: 12px 0; }
+.dr-added { margin: 8px 0 16px; }
+.dr-feel { margin: 20px 0 4px; }
+.dr-feel-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.dr-feel-btn { border: 1px solid var(--rule); border-radius: 999px; padding: 6px 16px; }
+.dr-feel-btn.on { border-color: var(--accent); color: var(--accent); }
+.dr-feel-btn:disabled:not(.on) { opacity: .5; }
+.dr-feel-note { min-height: 1.4em; margin: 6px 0 0; }
+.dr-screen { position: fixed; inset: 0; z-index: var(--z-sheet); background: var(--paper); color: var(--ink); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.dr-screen[hidden] { display: none; }
+.dr-bar { position: sticky; top: 0; display: flex; justify-content: flex-end; padding: max(8px, env(safe-area-inset-top)) var(--gutter) 4px; background: var(--paper); z-index: 1; }
+.dr-page { padding: 0 var(--gutter) 48px; }
+html.dr-open { overflow: hidden; }

@@ -403,10 +403,13 @@ export function createCaptureView(ctx, { root = null } = {}) {
 
   return {
     show() {
+      const params = arguments[0] || {};
       if (!el) el = root || (typeof document !== 'undefined' ? document.getElementById('tab-capture') : null);
       inputs();
       openNow = true;
       reset();
+      // 0.8.0: from 进 Unit X 了 (ui-unit-flow.js, { unit, from: 'unit' }) the unit is chosen already
+      if (params && typeof params.unit === 'string' && params.unit) lastUnit = params.unit;
       render();
     },
     hide() {

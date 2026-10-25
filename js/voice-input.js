@@ -530,7 +530,7 @@ export function createVoiceInput(ctx = {}, deps = {}) {
   }
 
   // one whole question; isWav: already 16 kHz mono WAV (the stream's audio), no decoding
-  async function recognize(raw, route, seconds, isWav = false) {
+  async function recognize(raw, route, seconds, isWav = false, context = null) {
     let audio = raw, format = isWav ? 'wav' : formatOf(raw.type);
     if (!isWav) {
       try { const w = await wav(raw); if (w && w.blob) { audio = w.blob; format = 'wav'; if (w.seconds) seconds = w.seconds; } } catch (e) { console.warn('voice: wav', (e && e.message) || e); }
@@ -545,7 +545,7 @@ export function createVoiceInput(ctx = {}, deps = {}) {
       if (out.error) throw kidErr(out.error, ctx, new Error(out.message));
       return out.text;
     }
-    const body = bailianBody(route, dataUrl, format, contextText({ kv: ctx.kv, progress: progressNow() }));
+    const body = bailianBody(route, dataUrl, format, context === null ? contextText({ kv: ctx.kv, progress: progressNow() }) : context);
     const res = await post(route.url, { method: 'POST', headers: { Authorization: 'Bearer ' + route.key, 'Content-Type': 'application/json', 'X-DashScope-SSE': 'disable' },
       body: JSON.stringify(body) });
     let j = null;
@@ -563,12 +563,28 @@ export function createVoiceInput(ctx = {}, deps = {}) {
     return parseBailian(j);
   }
 
+  // 0.8.0 读出来的“老师听听”: a clip already recorded (rec.js, audio/mp4 or webm) as one whole recognition. Bailian first
+  // (fallbackRoute), else 豆包's 录音文件极速版. lang 'en': no context at all, so the recognizer does not “fill in” the
+  // sentence she was reading and a word she skipped still shows as skipped.
+  async function transcribe(blob, opts = {}) {
+    if (!blob || !blob.size) throw kidErr('format', ctx);
+    const route = fallbackRoute(settings());
+    if (!route) throw kidErr('notready', ctx);
+    const blocked = budgetBlock(route);
+    if (blocked) throw blocked;
+    const t0 = now();
+    const text = await recognize(blob, route, 0, false, opts && opts.lang === 'en' ? '' : null);
+    last = { provider: route.provider, stream: false, via: 'transcribe', ms: now() - t0 };
+    return String(text || '').trim();
+  }
+
   return {
     available: supported,
     supported,
     start,
     stop,
     cancel,
+    transcribe,
     state: () => state,
     info: () => (last ? { ...last } : null),
   };

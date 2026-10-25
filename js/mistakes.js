@@ -59,10 +59,12 @@
 //   answer { item: 'mx:<id>:<qid>', mode: 'mistake', step: 'mistakes' | 'warmup', kind: 'review' | 'practice' | 'explain',
 //            choice, correct, first_try, ms, hint_level: 0, misconception（选错时是这道错题的第一个误解标签）, point, card, mistake: id }
 //   ask    { qid: 'mistake', who: 'emma', step: 'mistakes', item: 'mx:<id>', about: 'mistake:<考点 key>', answer: 'saved' | 'skip' }
-// 依赖：ai.js（AIError）、textread.js（callJSON、visionRoute、textRoute：和课文陪读同一条看图 / 写内容的线路）、capture.js（unitIdOf）。
+// 依赖：ai.js（AIError）、textread.js（callJSON、visionRoute、textRoute：和课文陪读同一条看图 / 写内容的线路）、capture.js（unitIdOf）、
+// words.js（slugify，拍听写本对词用）。
 import { AIError } from './ai.js';
 import { callJSON, visionRoute, textRoute } from './textread.js';
 import { unitIdOf } from './capture.js';
+import { slugify, localIso } from './words.js';
 
 export const KV_PREFIX = 'mistake:';
 export const kvKey = id => KV_PREFIX + String(id || '');
@@ -653,6 +655,204 @@ export function askText(rec) {
     '请换个说法再给我讲讲，最后出一道小题考考我。',
   ].filter(Boolean).join('\n');
   return { ask, send };
+}
+
+// ---------------------------------------------------------------- 拍听写本（roadmap-gaps 6，0.7.2）
+// 老师批改过的听写本（或单词小测）拍一张：模型认出她写的每个词和老师的批改（打叉、打勾、改过的写法），程序对上单词本里的词。
+// 她看一眼、可以改、勾要收的（打叉的默认勾上）→ 确认：这些词打开“写得出”线（words.patch，write_from 'school'），
+// 记进 kv 'mistake.dictation'，第二天起热身里拼一次（dictWarmSlugs 给 plan.js；拼对一次或过了 3 天就不再排）。
+// “会写了”的词被老师打了叉，同时退回“在练”（encounters.js markBack，ui-mistakes 调）。
+//   DICT_KEY 'mistake.dictation'；DICT_WARM_DAYS 3；DICT_MAX 40；DICT_SYSTEM、dictUserText({ units, unit, words })
+//   normalizeDictation(raw) -> [DictItem]
+//     DictItem = { no, her（她写的）, answer（正确拼写：老师改的，或者照中文 / 课本该写的词）, cn, mark: 'wrong' | 'right' | 'none', unsure }
+//   matchDictation(items, { entries, unitWords }) -> [DictItem + { slug, headword, inBook, keep }]   对上单词本的词；keep = 打叉的
+//   recognizeDictation({ dataUrl, settings, budget, fetchImpl, signal, sleep, units, unit, words }) -> Promise<{ items, unclear, model, mock }>
+//   readDict(kv) -> DictState；noteDictation(state, { items, now, id, mock }) -> DictState（items 是她确认收的，只记有 slug 的）
+//   dictWarmSlugs(kv | state, now, { events, max = 6 }) -> [slug]   第二天起热身要拼的；收进来那天不排；拼对过一次（那天以后）或者过了 3 天就不排
+//   dictPlaceholder(item, now) -> emma-export（一个占位词条，source 'school'）
+//   saveDictation({ kv, words, items, now, unit, mock }) -> Promise<{ state, opened, added, skipped, page }>   确认收：不在单词本的先加、
+//     打开“写得出”线（words.patch，write_from 'school'；已经开着的不改来源）、写 kv；模拟模式不写词条也不写 kv
+//   dictEvent(item, { now, page }) -> events 'dictation' 的字段：{ type: 'dictation', slug, correct: false, mode: 'paper', pass: 'school',
+//     source: 'photo', step: 'mistakes', her, answer, page }（wordbook 的 dictWrong、teacher 的错词都认 dictation 事件）
+//   kv 'mistake.dictation'（新键，随备份导出；照片不存）= { v: 1, pages: [{ id, day, at, unit, mock?, words: [{ slug, w, her, cn }] }]（最近 30 页）,
+//     warm: { slug: { day: 收进来那天, page } }, updated }
+export const DICT_KEY = 'mistake.dictation';
+export const DICT_WARM_DAYS = 3;
+export const DICT_MAX = 40;
+
+export const DICT_SYSTEM = `你帮一个初一学生（北京，外研版七年级上册，英语基础弱）看一张英语听写本或单词小测的照片，上面有老师的批改。
+做三件事：
+1. 按顺序找出她写的每个英文单词或短语，原样抄下来（拼错了也照抄，不要改）。看不清的字母写 ?。
+2. 看老师的批改：这个词旁边打了叉、圈出来、划线、旁边写了正确写法，算 wrong；打了勾算 right；没批改算 none。
+3. 写出这个词正确的拼写：老师改过就照老师改的；没改就按旁边的中文或你能判断的意思写正确的词。拿不准把 unsure 写 true。
+只回一个 JSON 对象：
+{
+  "items": [
+    { "no": "1", "her": "她写的原样", "answer": "正确拼写", "cn": "旁边的中文（没有写 \\"\\"）", "mark": "wrong" | "right" | "none", "unsure": false }
+  ],
+  "unclear": "照片哪里看不清，一句话；都清楚写 \\"\\""
+}
+规则：只收英文词和短语，一页最多 40 个；不要编没写的词；正确拼写只写词本身，不带中文、不带序号。`;
+
+export function dictUserText({ units = [], unit = '', words = [] } = {}) {
+  const u = arr(units).map(x => (typeof x === 'string' ? x : x && x.id)).filter(Boolean);
+  const list = arr(words).map(w => (typeof w === 'string' ? w : w && (w.w || w.headword))).filter(Boolean).slice(0, 120);
+  return [
+    unit ? `她现在学到 ${unit}。` : '',
+    u.length ? `课本单元：${u.join('、')}。` : '',
+    list.length ? `这几个单元要会写的词（正确拼写多半是其中一个）：${list.join(', ')}。` : '',
+    '看照片，按上面的格式回 JSON。',
+  ].filter(Boolean).join('\n');
+}
+
+const MARKS = new Set(['wrong', 'right', 'none']);
+export function normalizeDictation(raw) {
+  const list = arr(obj(raw).items || (Array.isArray(raw) ? raw : []));
+  const out = [];
+  for (const it of list) {
+    if (out.length >= DICT_MAX) break;
+    const r = obj(it);
+    const her = EN(r.her);
+    const answer = EN(r.answer).replace(/^\d+[.)、]\s*/, '');
+    if (!her && !answer) continue;
+    let mark = MARKS.has(r.mark) ? r.mark : 'none';
+    out.push({ no: ONE(r.no) || String(out.length + 1), her, answer: answer || her, cn: ONE(r.cn), mark, unsure: r.unsure === true || /\?/.test(her + answer) });
+  }
+  return out;
+}
+
+const wordKey = s => EN(s).toLowerCase().replace(/[.。!！?？,，;；]+$/g, '').replace(/\s+/g, ' ').trim();
+export function matchDictation(items, { entries = [], unitWords = [] } = {}) {
+  const byWord = new Map();
+  for (const e of arr(entries)) {
+    if (!e || !e.slug) continue;
+    const k = wordKey(e.headword || e.slug.replace(/-/g, ' '));
+    if (k && !byWord.has(k)) byWord.set(k, e);
+  }
+  const book = new Map();
+  for (const w of arr(unitWords)) { const k = wordKey(w && (w.w || w.headword)); if (k && !book.has(k)) book.set(k, w); }
+  return arr(items).map(it => {
+    const k = wordKey(it.answer);
+    const e = byWord.get(k) || null;
+    const b = book.get(k) || null;
+    return { ...it, slug: e ? e.slug : slugify(k), headword: e ? (e.headword || k) : (b && b.w) || k, cn: it.cn || (b && b.cn) || ONE(e && e.brief_cn) || '',
+      inBook: !!e, keep: it.mark === 'wrong' };
+  });
+}
+
+export async function recognizeDictation({ dataUrl, settings = {}, budget = null, fetchImpl = null, signal = null, sleep = sleepMs,
+  units = [], unit = '', words = [] } = {}) {
+  const s = settings || {};
+  if (s.mock) {
+    await sleep(600);
+    if (signal && signal.aborted) throw new AIError('已取消', 'abort');
+    if (s.mockFail === 'network') throw new AIError('连不上：网络不通（模拟断网）。', 'network');
+    return { items: normalizeDictation(mockDictation()), unclear: '', model: 'mock', mock: true };
+  }
+  if (!dataUrl || !/^data:image\/(jpeg|png);base64,/.test(dataUrl)) throw new AIError('照片还没准备好，再拍一次。', 'empty');
+  const route = visionRoute(s);
+  const r = await callJSON({ route, system: DICT_SYSTEM, user: dictUserText({ units, unit, words }), image: dataUrl, kind: OCR_KIND,
+    budget, fetchImpl, signal, sleep, timeoutMs: OCR_TIMEOUT_MS });
+  const items = normalizeDictation(r.obj);
+  if (!items.length) throw new AIError('这张照片里没认出听写的词。拍正、拍清楚，再试一次。', 'empty');
+  return { items, unclear: ONE(r.obj.unclear), model: r.model, mock: false };
+}
+
+export function normDict(raw) {
+  const r = obj(raw);
+  const pages = arr(r.pages).filter(p => p && p.id && /^\d{4}-\d\d-\d\d$/.test(String(p.day || ''))).map(p => ({
+    id: String(p.id), day: String(p.day), at: String(p.at || ''), unit: p.unit || null, ...(p.mock ? { mock: true } : {}),
+    words: arr(p.words).filter(w => w && w.slug).map(w => ({ slug: String(w.slug), w: EN(w.w), her: EN(w.her), cn: ONE(w.cn) })),
+  })).slice(-30);
+  const warm = {};
+  for (const [slug, w] of Object.entries(obj(r.warm))) if (w && /^\d{4}-\d\d-\d\d$/.test(String(w.day || ''))) warm[slug] = { day: String(w.day), page: String(w.page || '') };
+  return { v: 1, pages, warm, updated: String(r.updated || '') };
+}
+export function readDict(kv) { try { return normDict(kv.peek(DICT_KEY, null)); } catch (e) { return normDict(null); } }
+
+export function noteDictation(state, { items = [], now = new Date(), id = '', mock = false, unit = null } = {}) {
+  const s = normDict(state);
+  const day = dayOf(now);
+  const pid = id || 'd' + newId(now).slice(1);
+  const words = arr(items).filter(x => x && x.slug).map(x => ({ slug: String(x.slug), w: EN(x.headword || x.answer), her: EN(x.her), cn: ONE(x.cn) }));
+  if (!words.length) return s;
+  s.pages = [...s.pages, { id: pid, day, at: isoLocal(now), unit, ...(mock ? { mock: true } : {}), words }].slice(-30);
+  for (const w of words) s.warm[w.slug] = { day, page: pid };
+  s.updated = isoLocal(now);
+  return s;
+}
+
+export function dictWarmSlugs(src, now = new Date(), { events = [], max = 6 } = {}) {
+  const s = src && typeof src.peek === 'function' ? readDict(src) : normDict(src);
+  const today = dayOf(now);
+  const spelledOk = new Map();   // slug -> days she spelled it right
+  for (const e of arr(events)) {
+    if (!e || e.correct !== true || !e.at) continue;
+    const isSpellEv = e.type === 'dictation' || (e.type === 'answer' && ['tiles', 'keys', 'cloze', 'paper'].includes(e.mode) && !(Number(e.hint_level) > 0));
+    if (!isSpellEv) continue;
+    const slug = e.slug || (String(e.item || '').startsWith('w:') ? String(e.item).slice(2) : '');
+    if (!slug) continue;
+    if (!spelledOk.has(slug)) spelledOk.set(slug, []);
+    spelledOk.get(slug).push(dayOf(e.at));
+  }
+  return Object.entries(s.warm)
+    .filter(([slug, w]) => w.day < today && addDays(w.day, DICT_WARM_DAYS) >= today && !arr(spelledOk.get(slug)).some(d => d > w.day))
+    .sort((a, b) => a[1].day.localeCompare(b[1].day) || a[0].localeCompare(b[0]))
+    .slice(0, Math.max(0, max))
+    .map(([slug]) => slug);
+}
+
+export function dictEvent(item, { page = '' } = {}) {
+  const it = obj(item);
+  return { type: 'dictation', slug: String(it.slug || ''), correct: false, first_try: true, mode: 'paper', pass: 'school', source: 'photo', step: STEP,
+    her: EN(it.her), answer: EN(it.headword || it.answer), page: String(page || ''), item: 'w:' + String(it.slug || '') };
+}
+
+// a word from the dictation photo that is not in her wordbook yet: a placeholder entry (like the reader and 摸底 do),
+// its explanation comes the first time she opens it (needs_core)
+export function dictPlaceholder(item, now = new Date()) {
+  const it = obj(item);
+  const at = localIso(toDate(now));
+  const w = wordKey(it.headword || it.answer);
+  const e = { slug: String(it.slug || slugify(w)), headword: w, brief_cn: ONE(it.cn), cn_source: 'school', needs_core: true,
+    favorited: true, favorited_at: at, created: at, updated: at, note: '', history: [{ at, query: w, source: 'school' }] };
+  return { format: 'emma-export', version: 1, source: 'school', exported_at: toDate(now).toISOString(), entries: [e], zh: [] };
+}
+
+// 确认收：没在单词本的先加进去，打开“写得出”线，记进 kv 'mistake.dictation'。words 是 ctx.words（get、patch、importData）。
+// -> { state, opened: [slug], added: [slug], skipped: [slug], page }
+export async function saveDictation({ kv, words: W = null, items = [], now = new Date(), unit = null, mock = false } = {}) {
+  const keep = arr(items).filter(x => x && x.slug && wordKey(x.headword || x.answer));
+  const opened = [], added = [], skipped = [];
+  const day = dayOf(now);
+  for (const it of keep) {
+    if (mock || !W) { skipped.push(it.slug); continue; }
+    let e = null;
+    try { e = typeof W.get === 'function' ? W.get(it.slug) : null; } catch (err) { e = null; }
+    if (!e && typeof W.importData === 'function') {
+      try { await W.importData(dictPlaceholder(it, now)); added.push(it.slug); e = typeof W.get === 'function' ? W.get(it.slug) : null; } catch (err) { e = null; }
+    }
+    if (!e || typeof W.patch !== 'function') { skipped.push(it.slug); continue; }
+    try { await W.patch(it.slug, { write: true, write_at: e.write_at || day, write_from: e.write ? (e.write_from || 'school') : 'school' }); opened.push(it.slug); }
+    catch (err) { skipped.push(it.slug); }
+  }
+  const pid = 'd' + newId(now).slice(1);
+  let state = noteDictation(kv ? readDict(kv) : null, { items: keep, now, id: pid, mock, unit });
+  if (!mock && kv && typeof kv.set === 'function' && keep.length) { try { await kv.set(DICT_KEY, state); } catch (err) { /* kv full */ } }
+  return { state, opened, added, skipped, page: pid };
+}
+
+export function mockDictation() {
+  return {
+    items: [
+      { no: '1', her: 'frend', answer: 'friend', cn: '朋友', mark: 'wrong' },
+      { no: '2', her: 'teacher', answer: 'teacher', cn: '老师', mark: 'right' },
+      { no: '3', her: 'shcool', answer: 'school', cn: '学校', mark: 'wrong' },
+      { no: '4', her: 'apple', answer: 'apple', cn: '苹果', mark: 'right' },
+      { no: '5', her: 'classrom', answer: 'classroom', cn: '教室', mark: 'wrong' },
+    ],
+    unclear: '',
+  };
 }
 
 // ---------------------------------------------------------------- mock (original sentences, only words she knows)

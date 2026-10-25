@@ -79,6 +79,9 @@ export const EVENT_TYPES = [
   // 0.7.0 难度反馈 (kid-me.js recordFeedback): step, part, choice easy|ok|hard, level, prev, changed, from button|chat,
   // sid?, item?, mode?, text?
   'feedback',
+  // 0.8.0 读出来 (ui-readaloud.js): item 'ep:<集>:s<句>', mode 'read', step, sid, sentence, recorded, ms, plays, compared,
+  // checked, missed?
+  'read_aloud',
 ];
 // card: the flashcard the warm-up falls back to when four choices cannot be built (ui-lesson.js)
 // grammar: a grammar card or warm-up grammar question (grammar.js, ui-grammar.js; v1)

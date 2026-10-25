@@ -81,6 +81,7 @@ import * as T from './teacher.js';
 import * as S from './screen.js';
 import { slugify } from './words.js';
 import * as K from './kid-me.js';
+import * as R from './reader.js';
 import { buildSystemPrompt, KINDS, KIND_LABEL, POINTS, POINT_LABEL, CHECKS, META_OPEN, META_CLOSE } from './chat-prompt.js';
 
 export const KV_PREFIX = 'chat:';
@@ -792,6 +793,8 @@ export async function gatherContext(app, { now = new Date(), exclude = '', event
     recent: recentAsks(kv, { exclude }),
     stuck: stuckLines(peek('teacher.stuck', null)),
     asked: safe(() => T.askedLines(T.readAsked(kv), now), []),
+    // 0.8.0: where she is in the story and the sentence she found hardest (reader.js chatReading)
+    reading: safe(() => { const r = R.chatReading(kv, { now }); return r && r.text ? r.text : ''; }, ''),
     focus: safe(() => focusCards(focus), []),
     contrast: safe(() => contrastRefs({ text, points: focus, events: evs || [] }), []),
     // 0.7.0 孩子端“我” (kid-me.js): what she likes, and the difficulty she asked for

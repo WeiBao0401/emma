@@ -42,7 +42,9 @@
 //                                          或 state.grammarWarmItems（grammar.js 的函数，按它的写法 fn(state, now, { max }) 调，
 //                                          state.grammar 是 grammarState(kv)）给了就用，空的也算数；都没给或者出错才用兜底题
 //   grammarQuiz(state, now, n, sprint?) -> [GrammarItem]   小卷的语法选择题：state.grammarQuiz / grammarQuizItems 给了带选项的整题就用，
-//                                          否则兜底（grammar.js 还没有出小卷题的函数）
+//                                          否则用语法卡里的整题（0.7.2 cardQuizItems，错过的点优先，state.grammarContent 给内容），
+//                                          不够再用兜底题补
+//   cardQuizItems(state, now, n, sprint?) -> [GrammarItem]   0.7.2：见文件下面那一节；QUIZ_MISS_DAYS = 21、QUIZ_PER_FAMILY = 2
 //   writePlan({ now, state, sprint, words, warm, light, first, quiz, isKey }) -> { status, mode, items, minutes, note, card?, week?, quiz? }
 //       mode 'order'（连词成句）：items 是 state.orderItems（modes/order.js writeItems 给的句子 id），没给或 state.noOrder 就跳过这一种
 //   wordsOf(state, now) -> words           state.words（plan 的形状）；没有就从 state.entries 或 words.js 实例（state.words.favorites()）
@@ -330,8 +332,157 @@ export function grammarQuiz(state = {}, now = new Date(), n = QUIZ_GRAMMAR, spri
   const ext = external(state, 'grammarQuiz', 'grammarQuizItems', n, now, { sprint, kind: 'quiz' });
   // the quiz needs whole questions; grammar.js warm items (item refs only) are not enough here
   if (ext && ext.length && ext.every(x => Array.isArray(x.options))) return ext.slice(0, n);
+  // 0.7.2 (roadmap-gaps 5): whole questions from the grammar cards, the points she got wrong first
+  const fromCards = cardQuizItems(state, now, n, sprint);
   // the two quiz days get different questions where the pool allows
-  return pickRotating(GRAMMAR_FALLBACK.filter(it => ok(it.unit)), n, dayNumber(now) * 3);
+  const fallback = pickRotating(GRAMMAR_FALLBACK.filter(it => ok(it.unit)), n, dayNumber(now) * 3);
+  if (!fromCards.length) return fallback;
+  if (fromCards.length >= n) return fromCards.slice(0, n);
+  const have = new Set(fromCards.map(x => x.point));
+  return [...fromCards, ...fallback.filter(x => !have.has(x.point)), ...fallback.filter(x => have.has(x.point))].slice(0, n);
+}
+
+// ---------------------------------------------------------------- 0.7.2 the quiz from the grammar cards
+//
+// cardQuizItems(state, now, n, sprint?) -> [GrammarItem]   考前小卷的语法题用语法卡里的整题（curriculum/grammar.json），错过的点优先。
+//   内容：state.grammarContent（grammar.js content() 的 Content，或 grammar.json 原样），或 state.grammar 是 grammar.js 模块时它的 content()。
+//     没有内容返回 []，grammarQuiz 退回兜底题。
+//   进度：state.grammar.cards[cardId]（grammarState），没有就读 state.kv.peek('grammar:<cardId>')。
+//   错过的点（按卡和题的类 family 记分）：kv 里这题没一次做对（passed false，2 分）或用过提示（clean false，1 分）、待复习的（1 分）；
+//     最近 21 天的事件（state.history / state.events）里第一次就错的语法题：item 是卡里的题就记那一类，只有 point（兜底题、错题本 mode
+//     'mistake'）就记那张卡里这个点的第一类。分高的先，一类最多 2 道。
+//   其余：期中范围里的卡（地基卡 unit 'S' 也在里面，ahead 的卡不出），开过头的卡先，每张卡轮着出一道。
+//   每类先出她没做过的题（备用题也算），再出做过的；按日子轮换，两个小卷日尽量不一样。flagged 的题不出，第二讲法 alt 的题不出。
+//   GrammarItem 比兜底题多：card、qid、family、kind（'fill' | 'pick'）、cue、hints（4 级）、variant（同形状，没有 null）、
+//     missed（true = 因为她错过排进来的）、source: 'card'。options 第一个是答案（ui-lesson 的 shuffleOptions 会打乱）。
+export const QUIZ_MISS_DAYS = 21;
+export const QUIZ_PER_FAMILY = 2;
+
+function grammarContentOf(state) {
+  let c = state.grammarContent || null;
+  if (!c && state.grammar && typeof state.grammar.content === 'function') { try { c = state.grammar.content(); } catch (e) { c = null; } }
+  return c && Array.isArray(c.cards) ? c : null;
+}
+function cardStateOf(state, id) {
+  const g = state.grammar && state.grammar.cards && typeof state.grammar.cards === 'object' ? state.grammar.cards[id] : null;
+  const s = g || kvPeek(state, 'grammar:' + id) || {};
+  return s && typeof s === 'object' ? s : {};
+}
+const qText = raw => (raw.kind === 'pick' ? String(raw.ask || '选出正确的句子。') : String(raw.stem || '') + (raw.cue ? `（${raw.cue}）` : ''));
+function quizItemOf(card, raw, qid, point, missed) {
+  const item = `g:${card.id}:${qid}`;
+  const wrong = raw.wrong && typeof raw.wrong === 'object' ? raw.wrong : {};
+  const answer = String(raw.answer ?? '');
+  const options = [answer, ...Object.keys(wrong).filter(o => o && o !== answer)];
+  const hints = Array.isArray(raw.hints) ? raw.hints.slice(0, 4) : [];
+  const why = String(raw.explain || hints[hints.length - 1] || '');
+  const q = qText(raw);
+  const out = {
+    id: item, item, card: card.id, qid, family: raw.family || '', point, unit: card.unit || null, kind: raw.kind === 'pick' ? 'pick' : 'fill',
+    q, stem: q, cue: raw.cue || '', cn: raw.zh || '', zh: raw.zh || '', options, answer, tags: { ...wrong }, hints, why, explain: why,
+    variant: null, missed: !!missed, source: 'card',
+  };
+  if (raw.variant && typeof raw.variant === 'object' && !raw.isVariant) {
+    const v = quizItemOf(card, { ...raw.variant, family: raw.variant.family || raw.family }, qid + 'v', point, missed);
+    v.variant = null;
+    if (v.answer && v.options.length >= 2) out.variant = v;
+  }
+  return out;
+}
+
+export function cardQuizItems(state = {}, now = new Date(), n = QUIZ_GRAMMAR, sprint = null) {
+  state = state || {};
+  const c = grammarContentOf(state);
+  if (!c || n <= 0) return [];
+  const ok = grammarUnits(state, sprint);
+  const seed = dayNumber(now) * 7 + (sprint && Number.isFinite(sprint.daysLeft) ? sprint.daysLeft : 0);
+  const cards = c.cards.filter(card => card && card.id && !(card.ahead && sprint && sprint.on) && ok(card.unit || 'S'));
+  if (!cards.length) return [];
+  // every question we may ask, by card and family
+  const fams = new Map();       // 'card|family' -> { card, family, point, qs: [{ raw, qid, seen }], score, order }
+  const byItem = new Map();     // 'g:card:qid' -> fam key
+  const famOfPoint = new Map(); // 'g:point' -> fam key (first family of the first card with it)
+  cards.forEach((card, ci) => {
+    const st = cardStateOf(state, card.id);
+    const items = st.items && typeof st.items === 'object' ? st.items : {};
+    const seenQ = st.seen && typeof st.seen === 'object' ? st.seen : {};
+    const flagged = new Set(Array.isArray(st.flagged) ? st.flagged : []);
+    const families = card.families || {};
+    const pointOf = raw => raw.point || (families[raw.family] && families[raw.family].point) || (card.points || [])[0] || '';
+    const add = (raw, qid) => {
+      if (!raw || !qid || raw.alt || flagged.has(qid)) return;
+      const answer = String(raw.answer ?? '');
+      if (!answer || !Object.keys(raw.wrong || {}).some(o => o && o !== answer)) return;
+      const key = card.id + '|' + (raw.family || '');
+      if (!fams.has(key)) fams.set(key, { card, family: raw.family || '', point: pointOf(raw), qs: [], score: 0, order: ci });
+      fams.get(key).qs.push({ raw, qid, seen: !!(items[qid] || seenQ[qid]) });
+      byItem.set(`g:${card.id}:${qid}`, key);
+      if (raw.variant) byItem.set(`g:${card.id}:${qid}v`, key);
+      const p = pointOf(raw);
+      if (p && !famOfPoint.has(p)) famOfPoint.set(p, key);
+    };
+    for (const raw of card.questions || []) add(raw, raw.id);
+    for (const raw of card.spares || []) add(raw, raw.id);
+    // her record on this card: questions never passed, passed with hints, reviews still waiting
+    for (const [qid, rec] of Object.entries(items)) {
+      if (!rec || typeof rec !== 'object') continue;
+      const key = byItem.get(`g:${card.id}:${qid}`);
+      if (!key) continue;
+      if (rec.passed === false) fams.get(key).score += 2;
+      else if (rec.clean === false) fams.get(key).score += 1;
+    }
+    for (const r of Array.isArray(st.reviews) ? st.reviews : []) {
+      if (!r || (Number(r.step) || 0) >= 3) continue;
+      const key = byItem.get(`g:${card.id}:${r.id}`) || (r.family && fams.has(card.id + '|' + r.family) ? card.id + '|' + r.family : '');
+      if (key) fams.get(key).score += 1;
+    }
+  });
+  // the last 21 days of events: a grammar question wrong at the first try (cards, fallback questions, 错题本)
+  const events = Array.isArray(state.history) ? state.history : Array.isArray(state.events) ? state.events : [];
+  const since = now.getTime() - QUIZ_MISS_DAYS * 864e5;
+  for (const e of events) {
+    if (!e || e.type !== 'answer' || e.correct !== false || e.first_try === false) continue;
+    const t = new Date(e.at).getTime();
+    if (!Number.isFinite(t) || t < since || t > now.getTime()) continue;
+    const it = String(e.item || '');
+    let key = byItem.get(it);
+    if (!key) {
+      const p = e.point ? (String(e.point).startsWith('g:') ? String(e.point) : 'g:' + e.point) : /^g:[^:]+:/.test(it) ? 'g:' + it.split(':')[1] : '';
+      key = p ? famOfPoint.get(p) : '';
+    }
+    if (key && fams.has(key)) fams.get(key).score += 1;
+  }
+  const rot = (list, s) => { if (!list.length) return list; const k = ((s % list.length) + list.length) % list.length; return [...list.slice(k), ...list.slice(0, k)]; };
+  const used = new Set();
+  const take = (fam, missed) => {
+    const fresh = fam.qs.filter(q => !used.has(q.qid) && !q.seen), old = fam.qs.filter(q => !used.has(q.qid) && q.seen);
+    const pick = rot(fresh, seed + fam.order)[0] || rot(old, seed + fam.order)[0];
+    if (!pick) return null;
+    used.add(pick.qid);
+    return quizItemOf(fam.card, pick.raw, pick.qid, fam.point, missed);
+  };
+  const out = [];
+  // 1. the points she got wrong, most first; one question a family per round, at most QUIZ_PER_FAMILY
+  const missed = [...fams.values()].filter(f => f.score > 0).sort((a, b) => b.score - a.score || a.order - b.order);
+  for (let round = 0; round < QUIZ_PER_FAMILY && out.length < n; round++) {
+    for (const f of missed) { if (out.length >= n) break; const q = take(f, true); if (q) out.push(q); }
+  }
+  // 2. the rest of the range: cards she has started first, one question a card in turn
+  if (out.length < n) {
+    const started = card => { const st = cardStateOf(state, card.id); return !!(st.parts && Object.keys(st.parts).length) || !!(st.items && Object.keys(st.items).length); };
+    const rank = card => (started(card) ? 0 : 1);
+    const order = cards.slice().sort((a, b) => rank(a) - rank(b));
+    const famsOf = card => rot([...fams.values()].filter(f => f.card === card), seed);
+    const lists = order.map(famsOf);
+    let guard = 0;
+    while (out.length < n && lists.some(l => l.length) && guard++ < 200) {
+      for (const l of lists) {
+        if (out.length >= n) break;
+        while (l.length) { const q = take(l.shift(), false); if (q) { out.push(q); break; } }
+      }
+    }
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------- “写几个词”

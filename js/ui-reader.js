@@ -21,12 +21,24 @@
 //     另认 id（passage 没写 id 时用）、onHelp(i, level)（每点一下“看不懂”）、onAnswer(qid, result)（每题做完，result 同 results 里的一条）。
 //     句子带 unsure: true 的（课文陪读第二遍核对没对上），第 3 下不给中文，说“这句老师也拿不准，可以问问老师”。
 //   两个 onDone 都另带 ms（从打开到做完）和 hardSentences: [{ i, en, zh, level }]（这次看了整句中文才懂的句子）。
+//   0.8（roadmap-gaps 7，语法放进她读的句子里）：本周在练的语法点在句子里加浅底色（.rd-gram，sentence.marks），点底色出一句那张语法卡的规则
+//     （grammar.js 的 Card.rule 里按标签和词挑一句，没读到用 R.GRAMMAR_RULE_ZH），卡片上能接着看“这个词的意思”。
+//     哪几个点：opts.grammarTags（标签数组）给了就用它；不给就是 R.weekGrammar(kv) 最近做过的 GRAM_CARDS_MAX 张卡（opts.grammarCards 另外算上）；
+//     opts.grammarMarks === false 不加底色。点底色不记事件、不算求助，onDone 多 gramTaps（点了几下）、grammarTags。
+//     onDone 另带 readAloud: R.readAloudPick(ep)（读出来要读的 2 句，ui-readaloud.js renderReadAloud 用）。
 //   Controller = { el, onKey(ev), stop() }   onKey：听的时候空格暂停 / 接着听，R 重听这句；做题时 1-4 / A-D 选，Enter 下一题。
 //   stop()：离开上课页时调用，停掉朗读。
 import { h, icon } from './ui-dom.js';
 import * as R from './reader.js';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+export const GRAM_CARDS_MAX = 2;   // this week's grammar: the two cards she did last (more would paint half the story)
+// grammar.js's cards for the rule line; loaded on first need, nothing breaks without it
+let gramLoad = null;
+function grammarCards() {
+  if (!gramLoad) gramLoad = import('./grammar.js').then(G => (G && typeof G.content === 'function' ? G.content() : null)).catch(() => null);
+  return gramLoad;
+}
 // 答案是“Green.”。 the answer in curly quotes, so a full stop never runs into “。”
 const endStop = t => `“${String(t)}”。`;
 const hasCJK = s => /[㐀-鿿]/.test(String(s || ''));
@@ -46,8 +58,9 @@ function sayBtn(ctx, text, label = '听一遍') {
   return h('button', { type: 'button', className: 'say', 'aria-label': label, on: { click: ev => { ev.stopPropagation(); ctx.say(text, ev.currentTarget); } } }, icon('speak'));
 }
 const roleCls = r => (r === 'subject' ? 'rd-subj' : r === 'verb' ? 'rd-verb' : '');
-// a sentence's tokens -> nodes; words are tap targets when tap is given; the subject and the verb (trunk) get their marks
-function renderTokens(tokens, tap = null) {
+// a sentence's tokens -> nodes; words are tap targets when tap is given; the subject and the verb (trunk) get their marks;
+// a word with gram (this week's grammar, R.markTokens) gets the light underlay and opens the rule (gramTap) instead of the word card
+function renderTokens(tokens, tap = null, gramTap = null) {
   const out = [];
   let group = null, groupRole = null;
   const flush = () => { if (group) out.push(group); group = null; groupRole = null; };
@@ -55,7 +68,8 @@ function renderTokens(tokens, tap = null) {
     let node = t.text;
     if (t.word) {
       const inner = t.parts ? t.parts.map(p => (p.role ? h('span', { className: roleCls(p.role) }, p.text) : p.text)) : [t.text];
-      if (tap) node = h('span', { className: 'rd-w', role: 'button', tabindex: '0', on: { click: ev => { if (ev && ev.stopPropagation) ev.stopPropagation(); tap(t.text); } } }, inner);
+      if (t.gram && gramTap) node = h('span', { className: 'rd-w rd-gram', role: 'button', tabindex: '0', dataset: { tag: t.gram }, on: { click: ev => { if (ev && ev.stopPropagation) ev.stopPropagation(); gramTap(t.gram, t.text); } } }, inner);
+      else if (tap) node = h('span', { className: 'rd-w', role: 'button', tabindex: '0', on: { click: ev => { if (ev && ev.stopPropagation) ev.stopPropagation(); tap(t.text); } } }, inner);
       else if (t.parts) node = h('span', null, inner);
     }
     const r = !t.parts && t.role ? t.role : null;
@@ -119,7 +133,8 @@ function mount(sh, ctx, c, ep, cfg) {
   const { body, card, st } = sh;
   const { onDone = () => {}, sid: sid0 = '', step = R.STEP, doneLabel = '接着上课', short = false, again: againOpt = null,
     speak: speakHook = null, gap: gapHook = null, story = true, mode = 'read', listen: canListen = true, reopen = null,
-    onHelp = null, onAnswer = null, challenge = 0, autoTrunk: trunkOpt = false } = cfg;
+    onHelp = null, onAnswer = null, challenge = 0, autoTrunk: trunkOpt = false,
+    grammarTags: gramOpt = null, grammarCards: gramCardsOpt = [], grammarMarks = true } = cfg;
   const t00 = Date.now();
   const hook = (fn, ...args) => { if (typeof fn === 'function') { try { fn(...args); } catch (e) { /* the caller's problem */ } } };
   const kv = ctx && ctx.kv;
@@ -152,6 +167,12 @@ function mount(sh, ctx, c, ep, cfg) {
   let autoTrunk = !!trunkOpt || (!nChallenge && R.readAdjust(triage, ep.id).trunkFirst);
   let methodShownAt = 0;
   let liveStory = null;   // the story view on screen: repainted when the trunk starts showing by itself
+  // 0.8 this week's grammar points get a light underlay in the sentences; a tap shows one line of the card's rule
+  const gramTags = !grammarMarks ? [] : Array.isArray(gramOpt) ? gramOpt.map(String).filter(Boolean)
+    : (() => { try { const w = R.weekGrammar(kv, new Date(), { cards: gramCardsOpt }); return w.cards.slice(0, GRAM_CARDS_MAX).flatMap(R.tagsOfCard); } catch (e) { return []; } })();
+  const gramHere = gramTags.length ? R.gramSentences(ep, gramTags) : [];
+  let gramContent = null, gramTaps = 0;
+  if (gramHere.length) grammarCards().then(c => { gramContent = c; });
   const epLabel = () => (!story ? cfg.label || ep.label || '读一篇' : again ? `再读一遍 · 第 ${ep.n} 集` : `番外 · 第 ${ep.n} 集`);
 
   function noteStuck(entry) {
@@ -242,6 +263,24 @@ function mount(sh, ctx, c, ep, cfg) {
       foot || goOn ? h('div', { className: 'rd-card-foot' }, foot, goOn) : null].filter(Boolean));
     card.hidden = false;
   }
+  function openGram(tag, text, s) {
+    pauseForHelp();
+    gramTaps++;
+    const cardOf = id => { try { return gramContent && gramContent.card ? gramContent.card(id) : null; } catch (e) { return null; } };
+    const g = R.gramRule(tag, text, cardOf(R.GRAMMAR_TAG_CARD[tag]));
+    const goOn = phase === 'listen' && resumeListen && player && player.state === 'paused'
+      ? h('button', { type: 'button', className: 'text-btn accent rd-card-go', on: { click: () => resumeListen() } }, '接着听') : null;
+    card.replaceChildren(
+      h('div', { className: 'rd-card-top' },
+        h('p', { className: 'rd-gram-head' }, h('span', { className: 'rd-tag' }, '这周的语法'), ' ', g.title),
+        h('button', { type: 'button', className: 'text-btn rd-card-x', 'aria-label': '关上', on: { click: closeCard } }, icon('close'))),
+      h('p', { className: 'rd-gram-w', lang: 'en' }, h('span', { className: 'rd-gram' }, text)),
+      h('p', { className: 'rd-gram-rule' }, g.rule),
+      h('div', { className: 'rd-card-foot' },
+        h('button', { type: 'button', className: 'text-btn rd-gram-word', on: { click: () => openWord(text, s) } }, '这个词的意思'),
+        goOn));
+    card.hidden = false;
+  }
   async function addWord(info, btn) {
     if (btn) btn.disabled = true;
     try {
@@ -296,6 +335,10 @@ function mount(sh, ctx, c, ep, cfg) {
     const el = h('div', { className: 'rd-story' + (compact ? ' compact' : '') + (locate ? ' rd-locate' : '') });
     const autoNote = locate ? null : h('p', { className: 'rd-auto-note small', hidden: !autoTrunk }, '后面的句子先标出了主干：', h('span', { className: 'rd-subj' }, '谁'), ' 和 ', h('span', { className: 'rd-verb' }, '干什么'), '。');
     if (autoNote) el.append(autoNote);
+    if (!locate && gramHere.length) {
+      const names = [...new Set(gramTags.filter(t => R.gramSentences(ep, [t]).length).map(t => R.GRAMMAR_TAG_ZH[t] || t))];
+      el.append(h('p', { className: 'rd-gram-note small' }, '浅色底的是这周在练的语法', names.length ? `：${names.join('、')}` : '', '。点一下看规则。'));
+    }
     for (const s of ep.sentences) {
       // a new part of the episode (群聊 / 那天深夜 / 日记): its label, so she knows where and when
       if (s.part != null && s.part !== prevPart && ep.parts[s.part]) {
@@ -338,7 +381,8 @@ function mount(sh, ctx, c, ep, cfg) {
         const lv = helpLevel.get(s.i) || 0;
         // the trunk is marked in the sentence itself: after the first 看不懂, or by itself once she got stuck on sentences 3 times today
         const tr = lv >= 1 || autoTrunk ? trunkShown(s) : null;
-        enEl.replaceChildren(...renderTokens(tr ? tr.tokens : R.tokenize(s.en), text => openWord(text, s)));
+        const toks = tr ? tr.tokens : R.tokenize(s.en);
+        enEl.replaceChildren(...renderTokens(gramTags.length ? R.markTokens(toks, s, gramTags) : toks, text => openWord(text, s), (tag, text) => openGram(tag, text, s)));
         helpBox.replaceChildren(...helpParts(s));
         helpBox.hidden = !lv;
         helpBtn.textContent = R.HELP_LABELS[Math.min(lv, R.HELP_LABELS.length - 1)];
@@ -904,7 +948,7 @@ function mount(sh, ctx, c, ep, cfg) {
       b.disabled = true;
     } } }, '这集不好看') : null;
     const hardSentences = [...helpLevel].filter(([, lv]) => lv >= R.HELP_MAX).map(([i, lv]) => ep.sentences[i - 1] && { i, en: ep.sentences[i - 1].en, zh: ep.sentences[i - 1].zh, level: lv }).filter(Boolean).sort((x, y) => x.i - y.i);
-    const extra = () => ({ ms: Date.now() - t00, hardSentences });
+    const extra = () => ({ ms: Date.now() - t00, hardSentences, gramTaps, grammarTags: gramTags.slice(), readAloud: R.readAloudPick(ep) });
     const finish = () => onDone(story ? {
       episodeId: ep.id, n: ep.n, done: true, again, stats: { ...stt }, results: results.slice(),
       words: ep.targets.map(t => t.slug), passedWords: [...passedWords], helps, taps, hard: hardAnswer, triage: R.triageToday(triage, ep.id), ...extra(),

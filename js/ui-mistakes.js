@@ -11,7 +11,12 @@
 //   renderMistakeReview(container, ctx, { items, sid, step = 'warmup', onDone, autoNextMs }) -> { el, onKey, stop }
 //     热身里用：items 是 mistakes.js mistakeReviewItems 的返回；每道答完写回 kv 'mistake:<id>'（到日子的才算进日程），
 //     onDone({ results: [{ id, item, qid, correct }], right })
-//   ctx 用到：kv、settings()、mockForced()、budget、curriculum（units）、fetchJSON、say、events（log、sessionId）、toast、kidError、go、busy
+//   0.7.2 拍听写本（roadmap-gaps 6）：首页“拍听写本”→ 老师认出她写的词和批改 → 她看一眼（打叉的默认勾上，写法能改）→ 收下：
+//     mistakes.js saveDictation（不在单词本的先加，打开“写得出”线，记 kv 'mistake.dictation'，第二天起热身拼一次），
+//     每个词记一条 dictation 事件（mistakes.js dictEvent）；已经“会写了”的词退回“在练”（encounters.js markBack，写 kv 'write.recheck'）。
+//     show({ dictation: true }) 直接开相机拍听写本。
+//   ctx 用到：kv、settings()、mockForced()、budget、curriculum（units、unitWords）、fetchJSON、say、events（log、sessionId）、toast、kidError、go、busy、
+//     words（get、patch、importData、favorites / all）
 import { h, icon, skBars } from './ui-dom.js';
 import { imageToJpeg } from './capture.js';
 import * as M from './mistakes.js';
@@ -110,6 +115,8 @@ export function createMistakesTab(ctx = {}, { root = null, sleep = null, fetchIm
   const log = logOf(ctx);
   let ctrl = null, working = false, quizzing = false, busyOn = false;
   let draft = null;           // [{ item, keep }] recognized, not saved yet
+  let dictDraft = null;       // 拍听写本: [DictItem + slug] recognized, not saved yet
+  let dictCam = null, dictAlbum = null;
   let thumb = '';
   let groupBy = 'topic';
   let camIn = null, albumIn = null;
@@ -158,6 +165,13 @@ export function createMistakesTab(ctx = {}, { root = null, sleep = null, fetchIm
       return i;
     };
     camIn = mk(true); albumIn = mk(false);
+    const mkD = cam => {
+      const i = h('input', { type: 'file', accept: 'image/*', className: 'visually-hidden', tabIndex: -1, 'aria-hidden': 'true' });
+      if (cam) i.setAttribute('capture', 'environment');
+      i.addEventListener('change', () => { const f = i.files && i.files[0]; i.value = ''; if (f) takeDict(f); });
+      return i;
+    };
+    dictCam = mkD(true); dictAlbum = mkD(false);
   }
   function stopWork() {
     if (ctrl) { safe(() => ctrl.abort()); ctrl = null; }
@@ -167,7 +181,7 @@ export function createMistakesTab(ctx = {}, { root = null, sleep = null, fetchIm
   // ------------------------------------------------ 1. the tab's first page
   function home() {
     stopWork();
-    draft = null; thumb = '';
+    draft = null; thumb = ''; dictDraft = null;
     inputs();
     const B = M.bank();
     const all = store.all();
@@ -201,11 +215,18 @@ export function createMistakesTab(ctx = {}, { root = null, sleep = null, fetchIm
         mock() ? h('button', { type: 'button', className: 'text-btn mx-mock-btn', on: { click: () => take(null) } }, '不拍，用几道假题') : null),
       h('p', { className: 'small mx-tip' }, '拍正、拍清楚。一页题也可以，老师会一道一道认。'),
       mock() ? h('p', { className: 'small mx-mock' }, '模拟模式：不看照片，给几道假题；错题本不存。') : null,
+      h('div', { className: 'mx-dict' },
+        h('h3', { className: 'mx-h3' }, '拍听写本'),
+        h('p', { className: 'small mx-tip' }, '老师批改过的听写本或单词小测，拍一下。打了叉的词，明天热身里再拼一次。'),
+        h('div', { className: 'mx-actions' },
+          h('button', { type: 'button', className: 'text-btn accent mx-dict-cam', on: { click: () => { inputs(); dictCam.click(); } } }, '拍听写本'),
+          h('button', { type: 'button', className: 'text-btn', on: { click: () => { inputs(); dictAlbum.click(); } } }, '从相册选'),
+          mock() ? h('button', { type: 'button', className: 'text-btn mx-mock-btn', on: { click: () => takeDict(null) } }, '不拍，用假的听写本') : null)),
       due.length ? h('div', { className: 'mx-due' },
         h('p', { className: 'mx-due-text' }, `今天有 ${due.length} 道错题要再考。`),
         h('button', { type: 'button', className: 'btn mx-big', on: { click: () => reviewNow() } }, '现在考')) : null,
       book,
-      camIn, albumIn);
+      camIn, albumIn, dictCam, dictAlbum);
     screen = 'home';
   }
 
@@ -429,6 +450,101 @@ export function createMistakesTab(ctx = {}, { root = null, sleep = null, fetchIm
     page(h('div', { className: 'mx-top' }, h('button', { type: 'button', className: 'text-btn mx-back', on: { click: () => { quizzing = false; detail(rec.id); } } }, icon('back'), h('span', null, '这道题'))), card.el);
   }
 
+  // ------------------------------------------------ 拍听写本 (roadmap-gaps 6)
+  const entriesNow = () => safe(() => (ctx.words && typeof ctx.words.all === 'function' ? ctx.words.all() : ctx.words.favorites()) || [], []);
+  function unitWordList() {
+    const cur = unitNow();
+    const units = safe(() => ctx.curriculum.units().map(u => u.id), []);
+    const order = cur ? [cur, ...units.filter(u => u !== cur).reverse()] : units.slice().reverse();
+    const out = [];
+    for (const u of order) for (const w of safe(() => ctx.curriculum.unitWords(u) || [], [])) if (w && w.w && !out.some(x => x.w === w.w)) out.push(w);
+    return out;
+  }
+  async function takeDict(file) {
+    stopWork();
+    working = true; setBusy(true);
+    ctrl = new AbortController();
+    const my = ctrl;
+    waiting('老师在看听写本……');
+    try {
+      let photo = null;
+      if (!mock()) { try { photo = await toJpeg(file); } catch (e) { e.kid = e.message || '这张照片打不开，换一张再试。'; throw e; } }
+      const units = safe(() => ctx.curriculum.units().map(u => u.id), []);
+      const words = unitWordList();
+      const r = await M.recognizeDictation({ dataUrl: photo && photo.dataUrl, settings: settings(), budget: ctx.budget, signal: my.signal, units, unit: unitNow(), words, ...opts() });
+      photo = null;
+      if (my !== ctrl) return;
+      working = false; setBusy(false);
+      dictDraft = M.matchDictation(r.items, { entries: entriesNow(), unitWords: words }).map(it => ({ ...it, mock: r.mock }));
+      confirmDict(r.unclear);
+    } catch (err) {
+      if (my !== ctrl) return;
+      if (err && err.code === 'abort') { home(); return; }
+      failed(err, file || mock() ? () => takeDict(file) : null);
+    }
+  }
+  const MARK_ZH = { wrong: '老师打了叉', right: '老师打了勾', none: '没批改' };
+  function confirmDict(unclear = '') {
+    const rows = dictDraft.map(it => {
+      const keep = h('input', { type: 'checkbox', className: 'mx-check', checked: it.keep });
+      const ans = h('input', { className: 'mx-input', type: 'text', lang: 'en', 'aria-label': '正确的写法', value: it.answer, autocapitalize: 'off', spellcheck: false });
+      it.read = () => ({ ...it, answer: ans.value.trim(), keep: keep.checked });
+      return h('div', { className: 'mx-card mx-dict-row' + (it.mark === 'wrong' ? ' is-wrong' : '') },
+        h('label', { className: 'mx-keep' }, keep, h('span', null, `第 ${it.no} 个 · ${MARK_ZH[it.mark] || ''}`)),
+        it.unsure ? h('p', { className: 'small mx-warn' }, '这个老师没看太清，对一下本子。') : null,
+        h('div', { className: 'mx-two' },
+          h('div', { className: 'mx-field' }, h('span', { className: 'mx-field-name' }, '你写的'), h('p', { className: 'mx-dict-her', lang: 'en' }, it.her || '没认出来')),
+          h('label', { className: 'mx-field' }, h('span', { className: 'mx-field-name' }, '正确的写法'), ans)),
+        it.cn ? h('p', { className: 'small mx-zh' }, it.cn) : null);
+    });
+    const wrongN = dictDraft.filter(x => x.mark === 'wrong').length;
+    page(
+      h('h2', { className: 'mx-title' }, `老师认出了 ${dictDraft.length} 个词`),
+      h('p', { className: 'mx-lede' }, wrongN ? `打了叉的 ${wrongN} 个已经勾上。认错了直接改正确的写法。` : '没看到打叉的词。写错了的自己勾上。'),
+      unclear ? h('p', { className: 'small mx-warn' }, unclear) : null,
+      rows,
+      h('div', { className: 'mx-actions mx-end' },
+        h('button', { type: 'button', className: 'btn mx-big', on: { click: saveDict } }, '收下勾上的词'),
+        h('button', { type: 'button', className: 'text-btn', on: { click: home } }, '不收了')));
+  }
+  async function saveDict() {
+    const now = new Date();
+    const read = dictDraft.map(it => (it.read ? it.read() : it)).filter(it => it.keep && it.answer);
+    if (!read.length) { safe(() => ctx.toast && ctx.toast('先勾上一个词。')); return; }
+    // a corrected spelling may be another word: match again
+    const items = M.matchDictation(read.map(({ slug, headword, inBook, ...rest }) => rest), { entries: entriesNow(), unitWords: unitWordList() });
+    const isMock = mock() || items.some(x => x.mock);
+    working = true; setBusy(true);
+    let res = null;
+    try { res = await M.saveDictation({ kv: ctx.kv, words: ctx.words, items, now, unit: unitNow() || null, mock: isMock }); }
+    catch (e) { res = null; }
+    working = false; setBusy(false);
+    if (!res) { failed(new Error('save'), null); return; }
+    if (!isMock) {
+      const sid = sidNow();
+      for (const it of items) log({ ...M.dictEvent(it, { page: res.page }), sid, unit: unitNow() || undefined });
+      // a word she could write (会写了) that the teacher crossed out goes back to 在练
+      try {
+        // encounters.js loads here (not at the top), so the tab still opens while the file is not in the offline shell
+        const E = await import('./encounters.js');
+        let st = E.readRecheck(ctx.kv);
+        const written = E.writtenOf({ kv: ctx.kv, events: [] });
+        let n = 0;
+        for (const it of items) if (written[it.slug] || st.items[it.slug]) { st = E.markBack(st, it.slug, { now, why: 'school' }); n++; }
+        if (n) await ctx.kv.set(E.RECHECK_KEY, { ...st, updated: now.toISOString() });
+      } catch (e) { /* the words are saved anyway */ }
+    }
+    dictDraft = null;
+    const names = items.map(x => x.headword || x.answer);
+    page(
+      h('h2', { className: 'mx-title' }, '收好了'),
+      h('p', { className: 'mx-lede' }, `明天热身里再拼一次：${names.slice(0, 8).join('、')}${names.length > 8 ? ` 等 ${names.length} 个` : ''}。`),
+      h('ul', { className: 'mx-list mx-dict-list' }, items.map(x => h('li', { lang: 'en' }, x.headword || x.answer, x.cn ? h('span', { className: 'small' }, '  ' + x.cn) : null))),
+      res.added.length ? h('p', { className: 'small' }, `${res.added.length} 个词原来不在单词本里，加进去了。`) : null,
+      isMock ? h('p', { className: 'small mx-mock' }, '模拟模式：单词本和热身都不改。') : null,
+      h('div', { className: 'mx-actions' }, h('button', { type: 'button', className: 'btn mx-big', on: { click: home } }, '回到错题本')));
+  }
+
   // ------------------------------------------------ 5. today's reviews, one after another
   async function reviewNow() {
     const B = await getBank();
@@ -457,12 +573,13 @@ export function createMistakesTab(ctx = {}, { root = null, sleep = null, fetchIm
       const p = params || {};
       if (p.id) { detail(p.id); return; }
       if (p.review) { reviewNow(); return; }
+      if (p.dictation) { home(); inputs(); safe(() => dictCam.click()); return; }
       home();
       if (p.take) { inputs(); safe(() => camIn.click()); }
     },
-    onChange() { if (screen === 'home' && !working && !quizzing && !draft) safe(() => home()); },
-    hide() { stopWork(); draft = null; thumb = ''; },
+    onChange() { if (screen === 'home' && !working && !quizzing && !draft && !dictDraft) safe(() => home()); },
+    hide() { stopWork(); draft = null; thumb = ''; dictDraft = null; },
     inSession: () => working || quizzing,
-    holding: () => !!(draft && draft.length),
+    holding: () => !!(draft && draft.length) || !!(dictDraft && dictDraft.length),
   };
 }

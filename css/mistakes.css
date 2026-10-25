@@ -98,3 +98,9 @@
 .mx-fb-head{font:600 20px/1.4 var(--serif)}
 .mx-fb-why{margin-top:6px;font:400 17px/1.55 var(--serif);color:var(--muted)}
 .mx-review .mx-label{margin-top:8px}
+/* 0.7.2 拍听写本 */
+.mx-dict{margin-top:28px;padding-top:16px;border-top:1px solid var(--rule)}
+.mx-dict .mx-actions{margin-top:10px}
+.mx-dict-her{font:400 20px/1.4 var(--serif);text-decoration:line-through;text-decoration-color:var(--danger);color:var(--muted)}
+.mx-dict-row.is-wrong .mx-keep span{color:var(--danger)}
+.mx-dict-list li{padding:8px 0;border-bottom:1px solid var(--rule);font:400 19px/1.4 var(--serif)}

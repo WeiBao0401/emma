@@ -245,3 +245,12 @@
   .rd-stem{font-size:32px}
 }
 @media (prefers-reduced-motion:reduce){.rd-s,.rd-opt{transition:none}}
+
+/* 0.8 this week's grammar in the sentences (roadmap-gaps 7): a light underlay, a tap shows one line of the rule */
+.rd-gram{background:color-mix(in srgb,var(--accent) 12%,transparent);border-bottom:1.5px dotted color-mix(in srgb,var(--accent) 70%,transparent);border-radius:3px 3px 0 0;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.rd-w.rd-gram:active{background:color-mix(in srgb,var(--accent) 24%,transparent)}
+.rd-gram-note{margin-bottom:6px;color:var(--muted)}
+.rd-gram-head{font-size:15px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rd-gram-w{font:650 30px/1.2 var(--serif);color:var(--ink)}
+.rd-gram-w .rd-gram{padding:0 4px}
+.rd-gram-rule{font:400 19px/1.6 var(--serif);color:var(--ink)}

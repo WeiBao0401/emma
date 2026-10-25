@@ -2,7 +2,7 @@
 // Keep VERSION identical to VERSION in js/config.js and bump both on every release, or the iPad keeps the old files.
 // Same origin as Wei's dictionary (its own scope and caches): every cache here starts with "emma-" and only "emma-" caches are ever
 // deleted, so neither app touches the other's. The check page (check/) has its own worker and "emma-check-" caches.
-const VERSION = '0.7.1';
+const VERSION = '0.8.0';
 const CACHE = 'emma-' + VERSION;
 // The offline dictionary (data/, about 4.6 MB, 2 MB gzipped) changes rarely, so it lives in its own cache that
 // survives app updates and is only downloaded when missing. Bump DATA_VERSION whenever a file in data/ changes.
@@ -30,6 +30,10 @@ const SHELL = [
   // 0.7.0 (第 5 批): 孩子端“我”, 我要复习考试, 错题 (the fifth tab), 单词本的积累, the teacher's picture in 问老师
   'js/kid-me.js', 'js/ui-kid-me.js', 'js/review.js', 'js/ui-review-request.js', 'js/mistakes.js', 'js/ui-mistakes.js', 'js/wordbook.js',
   'css/kid-me.css', 'css/review-request.css', 'css/mistakes.css', 'css/wordbook.css', 'teacher-96.png', 'teacher-256.png',
+  // 0.8.0 (第 6 批): 每日阅读, 接着练, 读出来 (本机录音), 进新单元, 会写复查和遇见计数, 周末课
+  'js/daily-read.js', 'js/ui-daily-read.js', 'js/practice.js', 'js/ui-practice.js', 'js/rec.js', 'js/ui-readaloud.js',
+  'js/unit-flow.js', 'js/ui-unit-flow.js', 'js/encounters.js', 'js/weekend.js', 'js/teach-tune.js',
+  'css/daily-read.css', 'css/practice.css', 'css/readaloud.css', 'css/unit-flow.css',
   'css/home.css', 'css/lesson.css', 'css/dictation.css', 'css/choice.css', 'css/parent.css', 'css/onboard.css',
   'css/spell.css', 'css/grammar.css', 'css/phonics.css', 'css/weekly.css', 'css/capture.css', 'css/chat.css', 'css/reader.css', 'css/order.css',
   'css/textread.css', 'css/teacher.css', 'css/screen.css', 'css/verb.css', 'css/cloze.css',

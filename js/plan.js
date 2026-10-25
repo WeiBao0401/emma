@@ -165,7 +165,7 @@
 
 import { endOfDay, State, retrievability, daysBetween, localMidnight } from './fsrs.js';
 import {
-  dayOf, unitRank, unitName, sprintOf, assignModes, grammarWarm, writePlan, buildQuiz, weeklyGains,
+  dayOf, unitRank, unitName, sprintOf, assignModes, grammarWarm, writePlan, buildQuiz, weeklyGains, tileable,
   MODE_SECONDS, PULL_MAX, SPELL_PER_DAY, WRITE_SPELL, WRITE_ROTATION,
 } from './sprint.js';
 import { todayMix } from './kid-me.js';
@@ -196,6 +196,10 @@ export const ASKED_WORDS = { standard: 2, light: 1 };
 // 0.6.0 热身里的新东西（design/teacher-next.md 4.3、5）
 export const CLOZE_WARM = { standard: 2, season: 3, light: 1, lightSeason: 2 };
 export const PICKED_WORDS = { standard: 2, light: 1 };
+// 0.8.0: 学校听写打了叉的词（state.dictWarm，mistakes.js dictWarmSlugs）和“会写了”第 7、21 天复查（state.recheck，encounters.js）：
+// 没到期也补进热身，一律拼写（字母块；spellMode 'keys' 给键盘；拼不了字母块的四选一），减卡时不减；第一节课不放，复查考前一天也不放
+export const DICT_WARM_MAX = 6;
+export const RECHECK_MAX = 3;
 export const CONTRAST_WARM = 1;
 
 export const isWeekend = d => d.getDay() === 0 || d.getDay() === 6;
@@ -481,6 +485,14 @@ export function planToday(state = {}, now = new Date()) {
     }
     // 0.6.0: the words she tapped or asked about herself come in even when not due (her own order: stuck most days first)
     if (!noExtras && pickedSet.size && cards.length) bring(pickedSet, isLight ? PICKED_WORDS.light : PICKED_WORDS.standard, { order: pickedList, skipNew: true });
+    // 0.8.0: the school's dictation misses and the 会写 rechecks due today
+    const dictList = Array.isArray(state.dictWarm) ? state.dictWarm.filter(Boolean) : [];
+    const recheckList = Array.isArray(state.recheck) ? state.recheck.filter(Boolean) : [];
+    if (!first && dictList.length && cards.length) bring(new Set(dictList), DICT_WARM_MAX, { order: dictList, skipNew: true });
+    if (!first && !examEve && recheckList.length && cards.length) bring(new Set(recheckList), RECHECK_MAX, { order: recheckList, skipNew: true });
+    const spellMust = new Set([...dictList.filter(x => cards.some(w => w.slug === x)), ...(first || examEve ? [] : recheckList).filter(x => cards.some(w => w.slug === x))]);
+    const mustMode = w => (!tileable(w) ? 'mc4' : state.spellMode === 'keys' ? 'keys' : 'tiles');
+    const forceSpell = () => { cards.forEach((w, i) => { if (i > 0 && spellMust.has(w.slug)) modes[i] = mustMode(w); }); };
 
     // ---- what kind of card each one is (DESIGN 2.2, 5.1)
     const spellDay = !isLight && !first && !quizDay && WRITE_ROTATION[now.getDay()] === 'spell';
@@ -511,6 +523,7 @@ export function planToday(state = {}, now = new Date()) {
         .sort((a, b) => score(a.w, a.i) - score(b.w, b.i) || (b.w.reps || 0) - (a.w.reps || 0) || a.i - b.i)
         .slice(0, clozeMax).forEach(({ i }) => { modes[i] = 'cloze'; });
     }
+    forceSpell();
 
     // ---- grammar in the warm-up: 1-2 a day; the quiz day brings its 5
     const gN0 = first || examEve || quizDay || !cards.length ? 0 : isLight ? GRAMMAR_WARM.light : GRAMMAR_WARM.standard;
@@ -551,7 +564,7 @@ export function planToday(state = {}, now = new Date()) {
     if (read.status === 'ready') {
       const preSet2 = new Set(preteach);
       for (let i = cards.length - 1; i > 0 && total() > limit && cards.length > WARM_MIN; i--) {
-        if (modes[i] === 'tiles' || modes[i] === 'cloze' || cards[i].isNew || preSet2.has(cards[i].slug) || asked.includes(cards[i].slug) || pickedSet.has(cards[i].slug)) continue;
+        if (modes[i] === 'tiles' || modes[i] === 'cloze' || cards[i].isNew || preSet2.has(cards[i].slug) || asked.includes(cards[i].slug) || pickedSet.has(cards[i].slug) || spellMust.has(cards[i].slug)) continue;
         cards.splice(i, 1); modes.splice(i, 1); trimmed++;
       }
     }
@@ -576,6 +589,7 @@ export function planToday(state = {}, now = new Date()) {
     if (total() > limit) verb = [];
     if (total() > limit) probe = [];
     if (total() > limit && mistakes.length > 1) mistakes = mistakes.slice(0, 1);
+    forceSpell();   // the time trims turn tiles back into four-choice; these stay spelled
 
     const wcards = cards.map((w, i) => ({ type: 'word', slug: w.slug, mode: modes[i], ...(kw.distractor && kw.distractor !== 'normal' ? { distractor: kw.distractor } : {}) }));
     // grammar questions and probes spread through the word cards together (probes after the grammar ones)
@@ -595,7 +609,9 @@ export function planToday(state = {}, now = new Date()) {
     if (tuneSentences && verb.length > VERB_WARM.standard) tuned.push({ id: 'verb', why: `${tune.hard === 'sentences' ? '她说句子看不懂' : '读的时候多卡在句子上'}：今天多找一句的动词。` });
     const cloze = cards.filter((w, i) => modes[i] === 'cloze').map(w => w.slug);
     const picked = cards.filter(w => pickedSet.has(w.slug)).map(w => w.slug);
-    return { cards, modes, grammar, order, preteach, asked, probe, screen, verb, forms, contrast, cloze, picked, tuned, wcards, mistakes, write, read, pick, pulled, quizDay, R, I, Fp, trimmed, warmMin: minOf(warmSec()) };
+    const dictWarm = cards.filter(w => dictList.includes(w.slug)).map(w => w.slug);
+    const recheck = cards.filter(w => spellMust.has(w.slug) && recheckList.includes(w.slug)).map(w => w.slug);
+    return { cards, modes, grammar, order, preteach, asked, probe, screen, verb, forms, contrast, cloze, picked, dictWarm, recheck, tuned, wcards, mistakes, write, read, pick, pulled, quizDay, R, I, Fp, trimmed, warmMin: minOf(warmSec()) };
   }
 
   const m = build(light);
@@ -630,6 +646,8 @@ export function planToday(state = {}, now = new Date()) {
       contrast: m.contrast,
       picked: m.picked,
       mistakes: m.mistakes,
+      dictWarm: m.dictWarm || [],
+      recheck: m.recheck || [],
     }),
     cell('read', r.status, r.minutes, [], readExtra),
     cell('write', w.status, w.minutes, w.items, writeExtra),
@@ -684,6 +702,8 @@ export function planToday(state = {}, now = new Date()) {
       contrast: m.contrast.length,
       picked: m.picked.length,
       mistakes: m.mistakes.length,
+      dictWarm: (m.dictWarm || []).length,
+      recheck: (m.recheck || []).length,
     },
     tune: m.tuned,
     kind: light ? 'easy' : weekend ? 'weekend' : 'standard',

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "语法卡（DESIGN 5.4、5.5）：Claude 原创预写，Wei 过目。v1 的三张（代词、there be、名词所有格）；10-25 加了四张打地基的卡（be 动词、名词复数、一般现在时和三单、can，foundation: true）和一张下个单元的卡（Unit 4 频度副词，ahead: true，提前练）。order 是排课的先后（grammar.js nextCard）；fixes 是她选了就该先补这张地基卡的误解标签；label 是卡片上的小标签。例句和题目只用小学 505 词、课标另列的数词和星期、七上 Starter 到 Unit 3 的词，不含课文；usually 由频度副词卡教。names 是还没并进 prereq.json 的语法点名字。每题：answer 是正确选项，wrong 是干扰项和它的误解标签；hints 是四级提示（1 点出考点、2 给一个像的例子、3 给第一步、4 讲清楚）；variant 是第 4 级之后马上出的变式题；spares 是备用题，错过的题 1、3、7 天后从这里挑同类的新句子，热身里每天混 1-2 道也从这里出。kind：fill 填空（stem 里的 ____ 是空，cue 是括号里的提示），pick 选出正确的一项（ask 是题目要求）。alt 是第二讲法（teacher-next 4.3）：换一个角度讲同一张卡（title、rule、pairs 配对或 steps 判断步骤、5 个新例句、3 道题 a01-a03，题的写法同上，没有变式题，第 4 级之后从同类备用题里挑一道当变式），同一张卡里同一个误解错 2 次以上、或第 4 级提示后变式还错，下一次就用它讲（grammar.js altDue）。",
+  "source": "语法卡（DESIGN 5.4、5.5）：Claude 原创预写，Wei 过目。v1 的三张（代词、there be、名词所有格）；10-25 加了四张打地基的卡（be 动词、名词复数、一般现在时和三单、can，foundation: true）和一张下个单元的卡（Unit 4 频度副词，ahead: true，提前练）。order 是排课的先后（grammar.js nextCard）；fixes 是她选了就该先补这张地基卡的误解标签；label 是卡片上的小标签。例句和题目只用小学 505 词、课标另列的数词和星期、七上 Starter 到 Unit 3 的词，不含课文；usually 由频度副词卡教。names 是还没并进 prereq.json 的语法点名字。每题：answer 是正确选项，wrong 是干扰项和它的误解标签；hints 是四级提示（1 点出考点、2 给一个像的例子、3 给第一步、4 讲清楚）；variant 是第 4 级之后马上出的变式题；spares 是备用题，错过的题 1、3、7 天后从这里挑同类的新句子，热身里每天混 1-2 道也从这里出。kind：fill 填空（stem 里的 ____ 是空，cue 是括号里的提示），pick 选出正确的一项（ask 是题目要求）。alt 是第二讲法（teacher-next 4.3）：换一个角度讲同一张卡（title、rule、pairs 配对或 steps 判断步骤、5 个新例句、3 道题 a01-a03，题的写法同上，没有变式题，第 4 级之后从同类备用题里挑一道当变式），同一张卡里同一个误解错 2 次以上、或第 4 级提示后变式还错，下一次就用它讲（grammar.js altDue）。10-25 又加了动物单元的三张（现在进行时、as ... as、had better，topic: animals）和一张七下预告卡（一般过去时，preview: true）：topic 是这张卡属于课本的哪个话题单元，第 5、6 单元的顺序以她的课本为准（topics，grammar.js topicUnits），unit 只是默认值。",
   "tags": {
     "subj_vs_poss": { "zh": "主格和物主代词（I / my）", "kind": "grammar" },
     "be_agree": { "zh": "be 动词和主语不一致（I is / they is）", "kind": "grammar" },
@@ -23,10 +23,33 @@
     "adv_position": { "zh": "频度副词放错位置（go often / always is）", "kind": "grammar" },
     "how_often": { "zh": "How often 和 How many 弄混", "kind": "grammar" },
     "a_an": { "zh": "a 和 an 用反了（a apple / an cat）", "kind": "grammar" },
-    "can_cant": { "zh": "can 和 can't 弄反了（会 / 不会）", "kind": "grammar" }
+    "can_cant": { "zh": "can 和 can't 弄反了（会 / 不会）", "kind": "grammar" },
+    "ing_spelling": { "zh": "加 -ing 拼错了（makeing / runing / swiming）", "kind": "grammar" },
+    "cont_vs_simple": { "zh": "正在做和每天做弄混（Look! 用 plays / every day 用 is playing）", "kind": "grammar" },
+    "asas_er": { "zh": "as ... as 中间的词变了（as taller as / as more beautiful as）", "kind": "grammar" },
+    "asas_than": { "zh": "as 后面配了 than（as tall than）", "kind": "grammar" },
+    "asas_missing": { "zh": "as ... as 少了前面那个 as（tall as）", "kind": "grammar" },
+    "asas_not": { "zh": "not as ... as 的意思弄反了（谁没有谁那么……）", "kind": "grammar" },
+    "better_to": { "zh": "had better 后面加了 to（had better to go）", "kind": "grammar" },
+    "better_form": { "zh": "had better 后面的动词变了（had better goes / going）", "kind": "grammar" },
+    "better_has": { "zh": "had better 的 had 变成了 has / have", "kind": "grammar" },
+    "better_not": { "zh": "“最好别”的 not 放错了（had not better / don't had better）", "kind": "grammar" },
+    "better_sense": { "zh": "出的主意和情况对不上", "kind": "grammar" },
+    "be_after_better": { "zh": "had better 后面用了 am / is / are，该用原形 be", "kind": "grammar" },
+    "be_past": { "zh": "was / were 用错了（they was / I were）", "kind": "grammar" },
+    "past_ed": { "zh": "过去式 -ed 拼错了（playd / stoped / studyed）", "kind": "grammar" },
+    "past_irregular": { "zh": "要单独记的过去式（goed / haved）", "kind": "grammar" },
+    "tense_mix": { "zh": "过去和现在弄混（yesterday 还用 go / now 用 was）", "kind": "grammar" }
   },
   "names": {
-    "g:can": "can（会、能、请求）"
+    "g:can": "can（会、能、请求）",
+    "g:as_as": "as ... as（和……一样）",
+    "g:had_better": "had better（最好做……）",
+    "g:past_simple": "一般过去时（was / were 和 -ed）"
+  },
+  "topics": {
+    "plants": { "zh": "植物", "match": ["plant"], "unit": "U5", "leans": ["g:can"], "note": "这单元会用 Can I ...? 请求别人同意，先看一眼 can。" },
+    "animals": { "zh": "动物", "match": ["friend", "animal"], "unit": "U6", "leans": [] }
   },
   "cards": [
     {
@@ -3057,6 +3080,2259 @@
           "hints": ["How often 问的是“多久一次”。", "像这样：How often do you swim? I swim every week.", "Two rooms 是“几个”，I am twelve 是“几岁”。哪个说的是“多久一次”？", "答案是 Every Saturday. How often 问多久一次，回答 every Saturday 这样的话。"]
         }
       ]
+    },
+    {
+      "id": "present_continuous",
+      "unit": "U6",
+      "topic": "animals",
+      "order": 9,
+      "label": "动物单元",
+      "title": "现在进行时 be + 动词 -ing",
+      "points": ["g:present_continuous", "g:ing_spelling"],
+      "foundations": ["g:be", "g:be_agree", "g:present_simple"],
+      "fixes": [],
+      "rule": [
+        "说“正在做”用 be + 动词 -ing：I am reading. She is running. 常和 now、Look!、Listen! 一起用。",
+        "加 -ing：一般直接加（read → reading）；不发音的 e 去掉再加（make → making）；短词以一个元音加一个辅音结尾，双写再加（run → running）。",
+        "否定：He isn't watching TV. 问句把 be 放前面：Are you listening? Yes, I am.",
+        "每天都做用一般现在时（He plays every day.），正在做用进行时（He is playing now.）。"
+      ],
+      "table": {
+        "head": ["动词", "加 -ing"],
+        "rows": [
+          ["read", "reading"],
+          ["make", "making"],
+          ["write", "writing"],
+          ["run", "running"],
+          ["swim", "swimming"],
+          ["sit", "sitting"]
+        ]
+      },
+      "examples": [
+        { "en": "Look! The cat is sleeping on the chair.", "zh": "看！猫正在椅子上睡觉。", "mark": ["is sleeping"] },
+        { "en": "I am reading a book now.", "zh": "我现在正在看书。", "mark": ["am reading"] },
+        { "en": "Listen! The birds are singing.", "zh": "听！鸟儿正在唱歌。", "mark": ["are singing"] },
+        { "en": "Tom is swimming in the river.", "zh": "汤姆正在河里游泳。", "mark": ["is swimming"] },
+        { "en": "My mother is making dinner.", "zh": "我妈妈正在做晚饭。", "mark": ["is making"] },
+        { "en": "He isn't watching TV. He is writing.", "zh": "他没在看电视，他正在写字。", "mark": ["isn't watching", "is writing"] },
+        { "en": "Are you listening? Yes, I am.", "zh": "你在听吗？是的，我在听。", "mark": ["Are you listening"] },
+        { "en": "Lily plays the piano every day. She is playing now.", "zh": "莉莉每天都弹钢琴。她现在正在弹。", "mark": ["plays", "is playing"] }
+      ],
+      "families": {
+        "form": { "name": "be + 动词 -ing", "point": "g:present_continuous" },
+        "spell": { "name": "-ing 的拼法", "point": "g:ing_spelling" },
+        "neg": { "name": "没在做：isn't / aren't", "point": "g:present_continuous" },
+        "q": { "name": "问句和回答", "point": "g:present_continuous" },
+        "now": { "name": "正在做还是每天做", "point": "g:present_continuous" }
+      },
+      "questions": [
+        {
+          "id": "q01",
+          "part": 1,
+          "family": "form",
+          "kind": "fill",
+          "stem": "Look! The dog ____ in the garden.",
+          "cue": "run",
+          "answer": "is running",
+          "wrong": { "running": "be_missing", "is run": "be_plus_verb", "are running": "be_agree" },
+          "zh": "看！狗正在花园里跑。",
+          "hints": [
+            "有 Look!，说的是现在正在做。正在做要两样：be 和 -ing。",
+            "像这样：Look! The cat is sleeping on the chair. is 和 sleeping 一个都不能少。",
+            "the dog 是一只，用 is 还是 are？run 加 -ing 要不要双写 n？",
+            "答案是 is running。正在做用 be + -ing；the dog 是一只，用 is；run 双写 n 再加 ing。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "Listen! The children ____ in the classroom.",
+            "cue": "sing",
+            "answer": "are singing",
+            "wrong": { "singing": "be_missing", "are sing": "be_plus_verb", "is singing": "be_agree" },
+            "zh": "听！孩子们正在教室里唱歌。",
+            "explain": "有 Listen! 是正在做，用 be + -ing；the children 是很多人，用 are。"
+          }
+        },
+        {
+          "id": "q02",
+          "part": 1,
+          "family": "form",
+          "kind": "fill",
+          "stem": "I ____ my English book now.",
+          "cue": "read",
+          "answer": "am reading",
+          "wrong": { "reading": "be_missing", "am read": "be_plus_verb", "is reading": "be_agree" },
+          "zh": "我现在正在看英语书。",
+          "hints": [
+            "有 now，说的是现在正在做。",
+            "像这样：Listen! The birds are singing. 正在做要 be 和 -ing。",
+            "主语是 I，用 am、is 还是 are？read 后面加什么？",
+            "答案是 am reading。现在正在做用 be + -ing；主语是 I，用 am。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "We ____ lunch now.",
+            "cue": "have",
+            "answer": "are having",
+            "wrong": { "having": "be_missing", "are have": "be_plus_verb", "is having": "be_agree" },
+            "zh": "我们现在正在吃午饭。",
+            "explain": "we 用 are；have 去掉 e 再加 ing：having。"
+          }
+        },
+        {
+          "id": "q03",
+          "part": 1,
+          "family": "spell",
+          "kind": "fill",
+          "stem": "My mother is ____ dinner in the kitchen.",
+          "cue": "make",
+          "answer": "making",
+          "wrong": { "makeing": "ing_spelling", "makking": "ing_spelling", "make": "be_plus_verb" },
+          "zh": "我妈妈正在厨房做晚饭。",
+          "hints": [
+            "is 已经有了，空里只填动词的 -ing。看 make 是什么字母结尾。",
+            "像这样：write 变 writing，去掉不发音的 e 再加 ing。",
+            "make 最后的 e 不发音。留着还是去掉？",
+            "答案是 making。make 是不发音的 e 结尾，去掉 e 再加 ing。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "Lucy is ____ a letter to her friend.",
+            "cue": "write",
+            "answer": "writing",
+            "wrong": { "writeing": "ing_spelling", "writting": "ing_spelling", "write": "be_plus_verb" },
+            "zh": "露西正在给朋友写信。",
+            "explain": "write 是不发音的 e 结尾，去掉 e 再加 ing：writing。"
+          }
+        },
+        {
+          "id": "q04",
+          "part": 1,
+          "family": "spell",
+          "kind": "fill",
+          "stem": "Tom is ____ in the river.",
+          "cue": "swim",
+          "answer": "swimming",
+          "wrong": { "swiming": "ing_spelling", "swimeing": "ing_spelling", "swim": "be_plus_verb" },
+          "zh": "汤姆正在河里游泳。",
+          "hints": [
+            "is 已经有了，空里填 swim 的 -ing。看 swim 最后三个字母。",
+            "像这样：run 变 running，最后的 n 要双写。",
+            "swim 是 w、i、m：一个元音夹在两个辅音中间。m 要不要双写？",
+            "答案是 swimming。swim 是短词，结尾是一个元音加一个辅音，双写 m 再加 ing。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "The cat is ____ on my bed.",
+            "cue": "sit",
+            "answer": "sitting",
+            "wrong": { "siting": "ing_spelling", "sit": "be_plus_verb" },
+            "zh": "猫正坐在我的床上。",
+            "explain": "sit 双写 t 再加 ing：sitting。"
+          }
+        },
+        {
+          "id": "q05",
+          "part": 1,
+          "family": "now",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Listen! Lily is singing.",
+          "wrong": {
+            "Listen! Lily sings.": "cont_vs_simple",
+            "Listen! Lily singing.": "be_missing",
+            "Listen! Lily is sing.": "be_plus_verb"
+          },
+          "zh": "听！莉莉正在唱歌。",
+          "hints": [
+            "有 Listen!，说的是现在正在发生的事。",
+            "像这样：Listen! The birds are singing. 用 be + -ing。",
+            "先去掉没有 is 的那句，再去掉 is 后面没加 ing 的那句。剩下两句，哪句是“正在”？",
+            "答案是 Listen! Lily is singing. 有 Listen! 是正在发生，用 is + singing；Lily sings 说的是她平时会唱。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "Look! The boys are playing football.",
+            "wrong": {
+              "Look! The boys play football.": "cont_vs_simple",
+              "Look! The boys playing football.": "be_missing",
+              "Look! The boys is playing football.": "be_agree"
+            },
+            "zh": "看！男孩们正在踢足球。",
+            "explain": "有 Look! 是正在发生，用 are + playing；the boys 是很多人，用 are。"
+          }
+        },
+        {
+          "id": "q06",
+          "part": 2,
+          "family": "neg",
+          "kind": "fill",
+          "stem": "Mike ____ watching TV. He is reading.",
+          "answer": "isn't",
+          "wrong": { "doesn't": "be_do_mix", "aren't": "be_agree", "not": "be_missing" },
+          "zh": "迈克没在看电视，他正在看书。",
+          "hints": [
+            "后面是 watching，说的是正在做。正在做的否定，not 跟着谁？",
+            "像这样：He isn't watching TV. not 放在 be 后面，is not 合起来是 isn't。",
+            "Mike 是一个人，用 is。is 加 not 是什么？",
+            "答案是 isn't。正在做的否定是 be + not：Mike 用 is，is not 就是 isn't；不用 doesn't。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "They ____ playing games. They are cleaning the classroom.",
+            "answer": "aren't",
+            "wrong": { "don't": "be_do_mix", "isn't": "be_agree", "not": "be_missing" },
+            "zh": "他们没在玩游戏，他们正在打扫教室。",
+            "explain": "they 用 are，否定是 aren't；正在做不用 don't。"
+          }
+        },
+        {
+          "id": "q07",
+          "part": 2,
+          "family": "neg",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "I am not sleeping.",
+          "wrong": { "I not am sleeping.": "not_order", "I don't sleeping.": "be_do_mix", "I am not sleep.": "be_plus_verb" },
+          "zh": "我没在睡觉。",
+          "hints": [
+            "看 not 放在哪里，还有 sleep 加没加 ing。",
+            "像这样：He isn't watching TV. not 放在 be 后面。",
+            "先去掉 not 放在 am 前面的那句。剩下的，哪句有 am、有 not，又有 -ing？",
+            "答案是 I am not sleeping. not 放在 am 后面；正在做要 am + sleeping，不用 don't。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "She isn't cooking now.",
+            "wrong": {
+              "She doesn't cooking now.": "be_do_mix",
+              "She not is cooking now.": "not_order",
+              "She isn't cook now.": "be_plus_verb"
+            },
+            "zh": "她现在没在做饭。",
+            "explain": "否定是 is + not：isn't；后面跟 cooking。"
+          }
+        },
+        {
+          "id": "q08",
+          "part": 2,
+          "family": "q",
+          "kind": "fill",
+          "stem": "____ you listening to me?",
+          "answer": "Are",
+          "wrong": { "Do": "be_do_mix", "Is": "be_agree", "Does": "be_do_mix" },
+          "zh": "你在听我说话吗？",
+          "hints": [
+            "后面是 listening，问的是“正在做吗”。问句把谁放到前面？",
+            "像这样：Is Tom swimming? 把 be 放到最前面。",
+            "主语是 you，be 用 am、is 还是 are？",
+            "答案是 Are。正在做的问句把 be 放到前面；you 用 are；不用 Do。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "____ your father cooking now?",
+            "answer": "Is",
+            "wrong": { "Does": "be_do_mix", "Are": "be_agree" },
+            "zh": "你爸爸现在在做饭吗？",
+            "explain": "your father 是一个人，用 Is；正在做的问句不用 Does。"
+          }
+        },
+        {
+          "id": "q09",
+          "part": 2,
+          "family": "q",
+          "kind": "pick",
+          "ask": "“Is Tom swimming?” 他正在游泳。哪个回答对？",
+          "answer": "Yes, he is.",
+          "wrong": { "Yes, he does.": "be_do_mix", "Yes, he swimming.": "short_answer", "Yes, he isn't.": "short_answer" },
+          "zh": "是的，他在游泳。",
+          "hints": [
+            "问句用 Is 开头，回答也要用 is。",
+            "像这样：Are you listening? Yes, I am. 问句用 be，回答也用 be。",
+            "Tom 换成 he。Yes 后面是 he is 还是 he does？",
+            "答案是 Yes, he is. 问句用 Is，回答也用 is；Yes 后面不能跟 isn't。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "“Are the girls dancing?” 她们没有跳舞。哪个回答对？",
+            "answer": "No, they aren't.",
+            "wrong": { "No, they don't.": "be_do_mix", "No, they are.": "short_answer", "No, they isn't.": "be_agree" },
+            "zh": "不，她们没在跳舞。",
+            "explain": "问句用 Are，否定回答用 aren't；the girls 换成 they。"
+          }
+        },
+        {
+          "id": "q10",
+          "part": 2,
+          "family": "now",
+          "kind": "fill",
+          "stem": "My brother ____ basketball every Saturday.",
+          "cue": "play",
+          "answer": "plays",
+          "wrong": { "is playing": "cont_vs_simple", "play": "third_s_missing" },
+          "zh": "我弟弟每个星期六都打篮球。",
+          "hints": [
+            "看时间：every Saturday，每周都这样，不是现在正在做。",
+            "像这样：Lily plays the piano every day. 每天都做，用一般现在时。",
+            "每周都做，用一般现在时。my brother 是一个人，play 加不加 s？",
+            "答案是 plays。every Saturday 是每周都这样，用一般现在时；my brother 是一个人，play 加 s。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "Look! My brother ____ basketball.",
+            "cue": "play",
+            "answer": "is playing",
+            "wrong": { "plays": "cont_vs_simple", "playing": "be_missing" },
+            "zh": "看！我弟弟正在打篮球。",
+            "explain": "有 Look! 是正在做：is playing。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01",
+          "family": "form",
+          "kind": "fill",
+          "stem": "Look! Snowy ____ milk.",
+          "cue": "drink",
+          "answer": "is drinking",
+          "wrong": { "drinking": "be_missing", "is drink": "be_plus_verb", "are drinking": "be_agree" },
+          "zh": "看！Snowy 正在喝牛奶。",
+          "hints": [
+            "有 Look!，是现在正在做。正在做要 be 和 -ing。",
+            "像这样：Look! The cat is sleeping on the chair.",
+            "Snowy 是一只猫，用 is 还是 are？drink 后面加什么？",
+            "答案是 is drinking。正在做用 be + -ing；Snowy 是一只，用 is。"
+          ]
+        },
+        {
+          "id": "s02",
+          "family": "form",
+          "kind": "fill",
+          "stem": "The students ____ in the playground now.",
+          "cue": "run",
+          "answer": "are running",
+          "wrong": { "running": "be_missing", "are run": "be_plus_verb", "is running": "be_agree" },
+          "zh": "学生们现在正在操场上跑步。",
+          "hints": [
+            "有 now，是现在正在做。",
+            "像这样：Listen! The birds are singing. 很多只用 are。",
+            "the students 是很多人，用 is 还是 are？run 加 -ing 怎么拼？",
+            "答案是 are running。the students 用 are；run 双写 n 再加 ing。"
+          ]
+        },
+        {
+          "id": "s03",
+          "family": "form",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "We are drawing pictures now.",
+          "wrong": {
+            "We drawing pictures now.": "be_missing",
+            "We are draw pictures now.": "be_plus_verb",
+            "We is drawing pictures now.": "be_agree"
+          },
+          "zh": "我们现在正在画画。",
+          "hints": [
+            "看三样：有没有 be，be 对不对，动词加没加 ing。",
+            "像这样：I am reading a book now.",
+            "we 用 are。哪一句有 are，又有 drawing？",
+            "答案是 We are drawing pictures now. we 用 are，后面是 drawing。"
+          ]
+        },
+        {
+          "id": "s04",
+          "family": "spell",
+          "kind": "fill",
+          "stem": "The boys are ____ near the river.",
+          "cue": "sit",
+          "answer": "sitting",
+          "wrong": { "siting": "ing_spelling", "siteing": "ing_spelling", "sit": "be_plus_verb" },
+          "zh": "男孩们正坐在河边。",
+          "hints": [
+            "are 已经有了，空里填 sit 的 -ing。",
+            "像这样：swim 变 swimming，双写 m。",
+            "sit 是短词，结尾是一个元音加一个辅音。t 要不要双写？",
+            "答案是 sitting。sit 双写 t 再加 ing。"
+          ]
+        },
+        {
+          "id": "s05",
+          "family": "spell",
+          "kind": "fill",
+          "stem": "Mia is ____ to music.",
+          "cue": "listen",
+          "answer": "listening",
+          "wrong": { "listenning": "ing_spelling", "listen": "be_plus_verb" },
+          "zh": "Mia 正在听音乐。",
+          "hints": [
+            "is 已经有了，空里填 listen 的 -ing。",
+            "像这样：read 变 reading，直接加 ing。",
+            "listen 不是 e 结尾；它读 LIS-ten，重音在前面，不是短词。n 要不要双写？",
+            "答案是 listening。listen 重音在前面，最后的 n 不双写，直接加 ing。"
+          ]
+        },
+        {
+          "id": "s06",
+          "family": "spell",
+          "kind": "fill",
+          "stem": "My father is ____ photos of the flowers.",
+          "cue": "take",
+          "answer": "taking",
+          "wrong": { "takeing": "ing_spelling", "takking": "ing_spelling", "take": "be_plus_verb" },
+          "zh": "我爸爸正在给花拍照。",
+          "hints": [
+            "is 已经有了，空里填 take 的 -ing。看 take 是什么字母结尾。",
+            "像这样：make 变 making，去掉不发音的 e。",
+            "take 最后的 e 不发音。留着还是去掉？",
+            "答案是 taking。take 去掉不发音的 e，再加 ing。"
+          ]
+        },
+        {
+          "id": "s07",
+          "family": "neg",
+          "kind": "fill",
+          "stem": "I ____ sleeping. I am reading.",
+          "answer": "am not",
+          "wrong": { "don't": "be_do_mix", "isn't": "be_agree", "not": "be_missing" },
+          "zh": "我没在睡觉，我在看书。",
+          "hints": [
+            "后面是 sleeping，是正在做。否定的 not 跟着 be。",
+            "像这样：He isn't watching TV.",
+            "主语是 I，用 am。am 加 not 怎么说？",
+            "答案是 am not。I 用 am，否定是 am not；不用 don't。"
+          ]
+        },
+        {
+          "id": "s08",
+          "family": "neg",
+          "kind": "fill",
+          "stem": "The cats ____ eating fish. They are sleeping.",
+          "answer": "aren't",
+          "wrong": { "don't": "be_do_mix", "isn't": "be_agree", "not": "be_missing" },
+          "zh": "猫没在吃鱼，它们在睡觉。",
+          "hints": [
+            "后面是 eating，是正在做。否定跟着 be。",
+            "像这样：He isn't watching TV. not 跟在 be 后面。",
+            "the cats 是很多只，用 are。are 加 not 合起来是什么？",
+            "答案是 aren't。the cats 用 are，否定是 aren't；不用 don't。"
+          ]
+        },
+        {
+          "id": "s09",
+          "family": "neg",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Lucy isn't doing her work.",
+          "wrong": {
+            "Lucy doesn't doing her work.": "be_do_mix",
+            "Lucy not is doing her work.": "not_order",
+            "Lucy isn't do her work.": "be_plus_verb"
+          },
+          "zh": "露西没在做她的事。",
+          "hints": [
+            "看 not 跟着谁，还有动词加没加 ing。",
+            "像这样：She isn't cooking now.",
+            "正在做的否定用 isn't 还是 doesn't？后面是 do 还是 doing？",
+            "答案是 Lucy isn't doing her work. 否定是 isn't，后面跟 doing。"
+          ]
+        },
+        {
+          "id": "s10",
+          "family": "q",
+          "kind": "fill",
+          "stem": "____ the children singing in the classroom?",
+          "answer": "Are",
+          "wrong": { "Do": "be_do_mix", "Is": "be_agree" },
+          "zh": "孩子们在教室里唱歌吗？",
+          "hints": [
+            "后面是 singing，问“正在做吗”。把 be 放到前面。",
+            "像这样：Is Tom swimming? 把 be 放到最前面。",
+            "the children 是很多人，用 Is 还是 Are？",
+            "答案是 Are。正在做的问句把 be 放前面；the children 用 are；不用 Do。"
+          ]
+        },
+        {
+          "id": "s11",
+          "family": "q",
+          "kind": "pick",
+          "ask": "“Are you reading?” 你正在看书。哪个回答对？",
+          "answer": "Yes, I am.",
+          "wrong": { "Yes, I do.": "be_do_mix", "Yes, I'm.": "short_answer", "Yes, you are.": "short_answer" },
+          "zh": "是的，我在看。",
+          "hints": [
+            "问句是 Are you，回答要说 I。",
+            "像这样：Is Tom swimming? Yes, he is.",
+            "回答里用 am 还是 do？I'm 能不能放在最后？",
+            "答案是 Yes, I am. 问 are you，答 I am；简略回答最后不能用 I'm。"
+          ]
+        },
+        {
+          "id": "s12",
+          "family": "now",
+          "kind": "fill",
+          "stem": "Tom usually ____ to school.",
+          "cue": "walk",
+          "answer": "walks",
+          "wrong": { "is walking": "cont_vs_simple", "walk": "third_s_missing" },
+          "zh": "汤姆通常走路上学。",
+          "hints": [
+            "看 usually：平时都这样，不是现在正在做。",
+            "像这样：Lily plays the piano every day.",
+            "平时都这样，用一般现在时。Tom 是一个人，walk 加不加 s？",
+            "答案是 walks。usually 说的是平时，用一般现在时；Tom 是一个人，walk 加 s。"
+          ]
+        },
+        {
+          "id": "s13",
+          "family": "now",
+          "kind": "fill",
+          "stem": "Listen! Mike ____ the guitar.",
+          "cue": "play",
+          "answer": "is playing",
+          "wrong": { "plays": "cont_vs_simple", "playing": "be_missing" },
+          "zh": "听！迈克正在弹吉他。",
+          "hints": [
+            "有 Listen!，是现在正在发生。",
+            "像这样：Listen! The birds are singing.",
+            "正在做要 be 和 -ing。Mike 是一个人，be 用什么？",
+            "答案是 is playing。有 Listen! 是正在做，用 is + playing。"
+          ]
+        },
+        {
+          "id": "s14",
+          "family": "now",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "We have English every day.",
+          "wrong": { "We are having English every day.": "cont_vs_simple", "We has English every day.": "third_s_extra" },
+          "zh": "我们每天都上英语课。",
+          "hints": [
+            "看时间 every day：每天都这样。",
+            "像这样：Lily plays the piano every day.",
+            "每天都做，用一般现在时。we 后面用 have 还是 has？",
+            "答案是 We have English every day. 每天都这样，用一般现在时；we 用 have。"
+          ]
+        }
+      ],
+      "alt": {
+        "title": "搭两块积木：be 和 -ing",
+        "rule": [
+          "把“正在做”想成两块积木：第一块是 am / is / are，第二块是动词加 ing。少一块都不行。",
+          "第一块看主语选：I 配 am，一个人或一样东西配 is，很多配 are。",
+          "想说“没在做”，把 not 贴在第一块后面；想问“在做吗”，把第一块搬到最前面。"
+        ],
+        "pairs": [
+          { "left": "I", "right": "am reading" },
+          { "left": "Tom", "right": "is reading" },
+          { "left": "Tom and Lily", "right": "are reading" },
+          { "left": "没在看", "right": "isn't reading" },
+          { "left": "在看吗？", "right": "Is he reading?" }
+        ],
+        "examples": [
+          { "en": "Momo is sleeping on Mia's bed.", "zh": "Momo 正在 Mia 的床上睡觉。", "mark": ["is sleeping"] },
+          { "en": "Mia and Lucy are running in the park.", "zh": "Mia 和 Lucy 正在公园里跑步。", "mark": ["are running"] },
+          { "en": "I am writing a letter now.", "zh": "我现在正在写信。", "mark": ["am writing"] },
+          { "en": "Snowy isn't eating. She is sitting by the window.", "zh": "Snowy 没在吃东西，它正坐在窗边。", "mark": ["isn't eating", "is sitting"] },
+          { "en": "Is Tom taking photos? Yes, he is.", "zh": "Tom 在拍照吗？是的，他在拍。", "mark": ["Is Tom taking"] }
+        ],
+        "questions": [
+          {
+            "id": "a01",
+            "family": "form",
+            "kind": "fill",
+            "stem": "Mia ____ a book now.",
+            "cue": "read",
+            "answer": "is reading",
+            "wrong": { "reading": "be_missing", "is read": "be_plus_verb" },
+            "zh": "Mia 现在正在看书。",
+            "hints": [
+              "两块积木：第一块 am / is / are，第二块动词加 ing。",
+              "像这样：Momo is sleeping on Mia's bed.",
+              "Mia 是一个人，第一块用 is。第二块 read 变成什么？",
+              "答案是 is reading。两块都要：is 和 reading。"
+            ]
+          },
+          {
+            "id": "a02",
+            "family": "neg",
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "Momo isn't sleeping now.",
+            "wrong": { "Momo doesn't sleeping now.": "be_do_mix", "Momo not sleeping now.": "be_missing" },
+            "zh": "Momo 现在没在睡觉。",
+            "hints": [
+              "没在做：not 贴在第一块后面。",
+              "像这样：Snowy isn't eating.",
+              "第一块是 is，贴上 not 是什么？",
+              "答案是 Momo isn't sleeping now. not 贴在 is 后面：isn't，再加 sleeping。"
+            ]
+          },
+          {
+            "id": "a03",
+            "family": "q",
+            "kind": "fill",
+            "stem": "____ Mia and Lucy dancing?",
+            "answer": "Are",
+            "wrong": { "Do": "be_do_mix", "Is": "be_agree" },
+            "zh": "Mia 和 Lucy 在跳舞吗？",
+            "hints": [
+              "问“在做吗”：把第一块搬到最前面。",
+              "像这样：Is Tom taking photos?",
+              "Mia 和 Lucy 是两个人，第一块用 is 还是 are？",
+              "答案是 Are。两个人用 are，问句把 are 搬到最前面。"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "as_as",
+      "unit": "U6",
+      "topic": "animals",
+      "order": 10,
+      "label": "动物单元",
+      "title": "as ... as 和……一样",
+      "points": ["g:as_as"],
+      "foundations": ["g:be", "g:be_agree"],
+      "fixes": [],
+      "rule": [
+        "说两样一样，用 as + 词 + as：Tom is as tall as Mike. 汤姆和迈克一样高。",
+        "中间的词不变：不加 -er，也不加 more。as taller as 是错的。",
+        "说“没有……那么”，在 be 后面加 not：My cat isn't as big as your dog. 我的猫没有你的狗那么大。",
+        "as 后面配 as，不配 than：as tall as 对，as tall than 错。"
+      ],
+      "examples": [
+        { "en": "Tom is as tall as Mike.", "zh": "汤姆和迈克一样高。", "mark": ["as tall as"] },
+        { "en": "My bag is as big as yours.", "zh": "我的包和你的一样大。", "mark": ["as big as"] },
+        { "en": "This apple is as red as that one.", "zh": "这个苹果和那个一样红。", "mark": ["as red as"] },
+        { "en": "Lily runs as fast as her brother.", "zh": "莉莉跑得和她哥哥一样快。", "mark": ["as fast as"] },
+        { "en": "My cat isn't as big as your dog.", "zh": "我的猫没有你的狗那么大。", "mark": ["isn't as big as"] },
+        { "en": "Today is as hot as yesterday.", "zh": "今天和昨天一样热。", "mark": ["as hot as"] }
+      ],
+      "families": {
+        "same": { "name": "两样一样：as ... as", "point": "g:as_as" },
+        "word": { "name": "中间的词不变", "point": "g:as_as" },
+        "not": { "name": "没有……那么：not as ... as", "point": "g:as_as" },
+        "be": { "name": "前面的 be 动词", "point": "g:be" }
+      },
+      "questions": [
+        {
+          "id": "q01",
+          "part": 1,
+          "family": "same",
+          "kind": "fill",
+          "stem": "Tom is ____ Mike.",
+          "cue": "一样高",
+          "answer": "as tall as",
+          "wrong": { "as taller as": "asas_er", "as tall than": "asas_than", "tall as": "asas_missing" },
+          "zh": "汤姆和迈克一样高。",
+          "hints": [
+            "括号里是“一样高”。两样一样，用 as ... as。",
+            "像这样：My bag is as big as yours. 前后各一个 as，中间是 big。",
+            "高是 tall。前面一个 as，后面一个 as，中间的 tall 要不要变？",
+            "答案是 as tall as。两样一样用 as + tall + as；中间不加 -er，后面不用 than。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "This box is ____ that one.",
+            "cue": "一样大",
+            "answer": "as big as",
+            "wrong": { "as bigger as": "asas_er", "as big than": "asas_than", "big as": "asas_missing" },
+            "zh": "这个盒子和那个一样大。",
+            "explain": "两样一样大：as big as，中间的 big 不变。"
+          }
+        },
+        {
+          "id": "q02",
+          "part": 1,
+          "family": "same",
+          "kind": "fill",
+          "stem": "Amy is ____ her sister.",
+          "cue": "一样漂亮",
+          "answer": "as beautiful as",
+          "wrong": { "as more beautiful as": "asas_er", "as beautiful than": "asas_than", "beautiful as": "asas_missing" },
+          "zh": "埃米和她姐姐一样漂亮。",
+          "hints": [
+            "括号里是“一样漂亮”。两样一样，用 as ... as。",
+            "像这样：Tom is as tall as Mike. 中间的 tall 不变。",
+            "漂亮是 beautiful。中间要不要加 more？后面配 as 还是 than？",
+            "答案是 as beautiful as。两样一样用 as + beautiful + as；中间不加 more，后面不用 than。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "Today is ____ yesterday.",
+            "cue": "一样冷",
+            "answer": "as cold as",
+            "wrong": { "as colder as": "asas_er", "as cold than": "asas_than" },
+            "zh": "今天和昨天一样冷。",
+            "explain": "两样一样冷：as cold as，中间的 cold 不变。"
+          }
+        },
+        {
+          "id": "q03",
+          "part": 1,
+          "family": "word",
+          "kind": "fill",
+          "stem": "My dog is as ____ as your cat.",
+          "cue": "small",
+          "answer": "small",
+          "wrong": { "smaller": "asas_er", "more small": "asas_er" },
+          "zh": "我的狗和你的猫一样小。",
+          "hints": [
+            "空在两个 as 中间。中间的词要不要变？",
+            "像这样：Tom is as tall as Mike. 中间是 tall，不是 taller。",
+            "small 原样放进去，还是加 -er？",
+            "答案是 small。as 和 as 中间的词不变，不加 -er，也不加 more。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "Lily's room is as ____ as mine.",
+            "cue": "clean",
+            "answer": "clean",
+            "wrong": { "cleaner": "asas_er", "more clean": "asas_er" },
+            "zh": "莉莉的房间和我的一样干净。",
+            "explain": "as 和 as 中间的 clean 不变。"
+          }
+        },
+        {
+          "id": "q04",
+          "part": 1,
+          "family": "word",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "My pencil is as long as yours.",
+          "wrong": {
+            "My pencil is as longer as yours.": "asas_er",
+            "My pencil is as long than yours.": "asas_than",
+            "My pencil is long as yours.": "asas_missing"
+          },
+          "zh": "我的铅笔和你的一样长。",
+          "hints": [
+            "看三处：前面有没有 as，中间的词变没变，后面配 as 还是 than。",
+            "像这样：My bag is as big as yours.",
+            "先去掉用了 than 的那句。剩下的，哪句前后都有 as，中间又是 long？",
+            "答案是 My pencil is as long as yours. 前后各一个 as，中间的 long 不变。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "This book is as old as that one.",
+            "wrong": {
+              "This book is as older as that one.": "asas_er",
+              "This book is old as that one.": "asas_missing",
+              "This book is as old than that one.": "asas_than"
+            },
+            "zh": "这本书和那本一样旧。",
+            "explain": "as old as：前后各一个 as，中间的 old 不变。"
+          }
+        },
+        {
+          "id": "q05",
+          "part": 1,
+          "family": "be",
+          "kind": "fill",
+          "stem": "Lily and Lucy ____ as tall as their mother.",
+          "answer": "are",
+          "wrong": { "is": "be_agree", "am": "be_agree" },
+          "zh": "莉莉和露西跟她们的妈妈一样高。",
+          "hints": [
+            "as ... as 前面也要有 be 动词。看主语是几个人。",
+            "像这样：Tom is as tall as Mike. Tom 一个人用 is。",
+            "Lily and Lucy 是两个人，用 is 还是 are？",
+            "答案是 are。两个人用 are：Lily and Lucy are as tall as their mother。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "I ____ as busy as my father.",
+            "answer": "am",
+            "wrong": { "is": "be_agree", "are": "be_agree" },
+            "zh": "我和我爸爸一样忙。",
+            "explain": "主语是 I，用 am。"
+          }
+        },
+        {
+          "id": "q06",
+          "part": 2,
+          "family": "not",
+          "kind": "pick",
+          "ask": "Tom 没有 Mike 那么高。选出正确的句子。",
+          "answer": "Tom isn't as tall as Mike.",
+          "wrong": {
+            "Mike isn't as tall as Tom.": "asas_not",
+            "Tom is as tall as Mike.": "asas_not",
+            "Tom not is as tall as Mike.": "not_order"
+          },
+          "zh": "汤姆没有迈克那么高。",
+          "hints": [
+            "Tom 没有 Mike 高：Tom 矮一点。not 加在 be 后面。",
+            "像这样：My cat isn't as big as your dog. 我的猫没有你的狗那么大。",
+            "先去掉没有 not 的那句。没有那么高的是谁？他放在前面还是后面？",
+            "答案是 Tom isn't as tall as Mike. 没有那么高的 Tom 放前面，isn't 放在 as 前面。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "这个盒子没有那个盒子那么重。选出正确的句子。",
+            "answer": "This box isn't as heavy as that one.",
+            "wrong": { "That box isn't as heavy as this one.": "asas_not", "This box is as heavy as that one.": "asas_not" },
+            "zh": "这个盒子没有那个盒子那么重。",
+            "explain": "这个盒子轻一点，放前面：This box isn't as heavy as that one."
+          }
+        },
+        {
+          "id": "q07",
+          "part": 2,
+          "family": "not",
+          "kind": "fill",
+          "stem": "My bike is new. Your bike is old. Your bike ____ as new as mine.",
+          "answer": "isn't",
+          "wrong": { "is": "asas_not", "doesn't": "be_do_mix", "not": "be_missing" },
+          "zh": "我的自行车是新的，你的是旧的。你的自行车没有我的新。",
+          "hints": [
+            "前面说：你的车是旧的。它和我的一样新吗？",
+            "像这样：My cat isn't as big as your dog. 不一样就用 isn't。",
+            "你的车没有我的新，用 is 还是 isn't？",
+            "答案是 isn't。你的车旧，没有我的那么新：isn't as new as；不用 doesn't。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "Mike is twelve. Tom is twelve too. Tom ____ as old as Mike.",
+            "answer": "is",
+            "wrong": { "isn't": "asas_not", "are": "be_agree" },
+            "zh": "迈克十二岁，汤姆也十二岁。汤姆和迈克一样大。",
+            "explain": "两个人都是十二岁，一样大：is as old as。"
+          }
+        },
+        {
+          "id": "q08",
+          "part": 2,
+          "family": "same",
+          "kind": "fill",
+          "stem": "Amy can run fast. Lucy can run fast too. Lucy runs ____ Amy.",
+          "cue": "一样快",
+          "answer": "as fast as",
+          "wrong": { "as faster as": "asas_er", "as fast than": "asas_than", "fast as": "asas_missing" },
+          "zh": "埃米跑得快，露西也跑得快。露西跑得和埃米一样快。",
+          "hints": [
+            "两个人都跑得快，就是一样快。",
+            "像这样：Lily runs as fast as her brother.",
+            "快是 fast。前后各放一个什么词？中间的 fast 要不要变？",
+            "答案是 as fast as。一样快：as + fast + as；中间不加 -er，后面不用 than。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "My mother is ____ my father.",
+            "cue": "一样忙",
+            "answer": "as busy as",
+            "wrong": { "as busier as": "asas_er", "as busy than": "asas_than", "busy as": "asas_missing" },
+            "zh": "我妈妈和我爸爸一样忙。",
+            "explain": "一样忙：as busy as。"
+          }
+        },
+        {
+          "id": "q09",
+          "part": 2,
+          "family": "word",
+          "kind": "fill",
+          "stem": "Lucy is as ____ as her friends.",
+          "cue": "happy",
+          "answer": "happy",
+          "wrong": { "happier": "asas_er", "more happy": "asas_er" },
+          "zh": "露西和她的朋友们一样开心。",
+          "hints": [
+            "空在两个 as 中间。",
+            "像这样：My dog is as small as your cat. 中间是 small。",
+            "happy 原样放进去，还是变成 happier？",
+            "答案是 happy。as 和 as 中间的词不变：as happy as。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "This room is as ____ as that one.",
+            "cue": "hot",
+            "answer": "hot",
+            "wrong": { "hotter": "asas_er", "more hot": "asas_er" },
+            "zh": "这个房间和那个一样热。",
+            "explain": "as 和 as 中间的 hot 不变。"
+          }
+        },
+        {
+          "id": "q10",
+          "part": 2,
+          "family": "be",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "My shoes are as old as yours.",
+          "wrong": { "My shoes is as old as yours.": "be_agree", "My shoes as old as yours.": "be_missing" },
+          "zh": "我的鞋和你的一样旧。",
+          "hints": [
+            "as ... as 前面也要有 be。看主语是一样还是很多。",
+            "像这样：Lily and Lucy are as tall as their mother.",
+            "先去掉没有 be 的那句。my shoes 是一双，很多只，用 is 还是 are？",
+            "答案是 My shoes are as old as yours. my shoes 用 are；as ... as 前面不能少 be。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "Our classroom is as big as theirs.",
+            "wrong": { "Our classroom are as big as theirs.": "be_agree", "Our classroom as big as theirs.": "be_missing" },
+            "zh": "我们的教室和他们的一样大。",
+            "explain": "our classroom 是一间，用 is。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01",
+          "family": "same",
+          "kind": "fill",
+          "stem": "Your hair is ____ mine.",
+          "cue": "一样长",
+          "answer": "as long as",
+          "wrong": { "as longer as": "asas_er", "as long than": "asas_than", "long as": "asas_missing" },
+          "zh": "你的头发和我的一样长。",
+          "hints": [
+            "括号里是“一样长”。两样一样，用 as ... as。",
+            "像这样：Tom is as tall as Mike.",
+            "长是 long。前后各一个 as，中间的 long 变不变？",
+            "答案是 as long as。一样长：as + long + as。"
+          ]
+        },
+        {
+          "id": "s02",
+          "family": "same",
+          "kind": "fill",
+          "stem": "This flower is ____ that one.",
+          "cue": "一样红",
+          "answer": "as red as",
+          "wrong": { "as redder as": "asas_er", "as red than": "asas_than" },
+          "zh": "这朵花和那朵一样红。",
+          "hints": [
+            "括号里是“一样红”。",
+            "像这样：My bag is as big as yours. 中间是 big。",
+            "红是 red。前后各放什么词？中间的 red 要不要变？",
+            "答案是 as red as。一样红：as + red + as。"
+          ]
+        },
+        {
+          "id": "s03",
+          "family": "same",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "My sister is as tall as my mother.",
+          "wrong": { "My sister is as taller as my mother.": "asas_er", "My sister is as tall than my mother.": "asas_than" },
+          "zh": "我姐姐和我妈妈一样高。",
+          "hints": [
+            "两样一样，用 as ... as，中间的词不变。",
+            "像这样：Tom is as tall as Mike.",
+            "先去掉用了 than 的那句。剩下两句，中间是 tall 还是 taller？",
+            "答案是 My sister is as tall as my mother. 前后各一个 as，中间的 tall 不变。"
+          ]
+        },
+        {
+          "id": "s04",
+          "family": "word",
+          "kind": "fill",
+          "stem": "My father is as ____ as my uncle.",
+          "cue": "strong",
+          "answer": "strong",
+          "wrong": { "stronger": "asas_er", "more strong": "asas_er" },
+          "zh": "我爸爸和我叔叔一样强壮。",
+          "hints": ["空在两个 as 中间。", "像这样：My dog is as small as your cat.", "strong 原样放，还是加 -er？", "答案是 strong。as 和 as 中间不变：as strong as。"]
+        },
+        {
+          "id": "s05",
+          "family": "word",
+          "kind": "fill",
+          "stem": "The library is as ____ as the classroom.",
+          "cue": "quiet",
+          "answer": "quiet",
+          "wrong": { "quieter": "asas_er", "more quiet": "asas_er" },
+          "zh": "图书馆和教室一样安静。",
+          "hints": [
+            "空在两个 as 中间。",
+            "像这样：Lucy is as happy as her friends. 中间是 happy。",
+            "quiet 原样放，还是加 -er？",
+            "答案是 quiet。as 和 as 中间的词不变：as quiet as。"
+          ]
+        },
+        {
+          "id": "s06",
+          "family": "word",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Snowy is as white as milk.",
+          "wrong": {
+            "Snowy is as whiter as milk.": "asas_er",
+            "Snowy is white as milk.": "asas_missing",
+            "Snowy is as white than milk.": "asas_than"
+          },
+          "zh": "Snowy 像牛奶一样白。",
+          "hints": [
+            "看三处：前面有没有 as，中间变没变，后面配 as 还是 than。",
+            "像这样：My pencil is as long as yours.",
+            "先去掉用了 than 的那句。剩下的，哪句前后都有 as，中间又没变？",
+            "答案是 Snowy is as white as milk. 前后各一个 as，中间的 white 不变。"
+          ]
+        },
+        {
+          "id": "s07",
+          "family": "not",
+          "kind": "fill",
+          "stem": "I am eleven. My brother is eight. My brother ____ as old as me.",
+          "answer": "isn't",
+          "wrong": { "is": "asas_not", "doesn't": "be_do_mix", "not": "be_missing" },
+          "zh": "我十一岁，我弟弟八岁。我弟弟没有我大。",
+          "hints": [
+            "前面说：弟弟八岁，我十一岁。他和我一样大吗？",
+            "像这样：My cat isn't as big as your dog.",
+            "不一样大，用 is 还是 isn't？",
+            "答案是 isn't。弟弟比我小，没有我那么大：isn't as old as；不用 doesn't。"
+          ]
+        },
+        {
+          "id": "s08",
+          "family": "not",
+          "kind": "pick",
+          "ask": "公共汽车没有火车那么快。选出正确的句子。",
+          "answer": "The bus isn't as fast as the train.",
+          "wrong": {
+            "The train isn't as fast as the bus.": "asas_not",
+            "The bus is as fast as the train.": "asas_not",
+            "The bus not is as fast as the train.": "not_order"
+          },
+          "zh": "公共汽车没有火车那么快。",
+          "hints": [
+            "公共汽车慢一点。谁放前面？not 放哪里？",
+            "像这样：My cat isn't as big as your dog.",
+            "先去掉没有 not 的那句。慢一点的那个，放在前面还是后面？",
+            "答案是 The bus isn't as fast as the train. 慢一点的 the bus 放前面，用 isn't as fast as。"
+          ]
+        },
+        {
+          "id": "s09",
+          "family": "not",
+          "kind": "fill",
+          "stem": "Tom's bag is heavy. My bag is not heavy. My bag ____ as heavy as Tom's.",
+          "answer": "isn't",
+          "wrong": { "is": "asas_not", "doesn't": "be_do_mix" },
+          "zh": "汤姆的包很重，我的包不重。我的包没有汤姆的重。",
+          "hints": [
+            "前面说：我的包不重。它和 Tom 的一样重吗？",
+            "像这样：My cat isn't as big as your dog.",
+            "没有那么重，用 is 还是 isn't？",
+            "答案是 isn't。我的包没有 Tom 的那么重：isn't as heavy as；不用 doesn't。"
+          ]
+        },
+        {
+          "id": "s10",
+          "family": "be",
+          "kind": "fill",
+          "stem": "These apples ____ as big as my hand.",
+          "answer": "are",
+          "wrong": { "is": "be_agree", "am": "be_agree" },
+          "zh": "这些苹果和我的手一样大。",
+          "hints": [
+            "as ... as 前面也要有 be。看主语是几个。",
+            "像这样：Lily and Lucy are as tall as their mother.",
+            "these apples 是很多个，用 is 还是 are？",
+            "答案是 are。these apples 是很多个，用 are。"
+          ]
+        },
+        {
+          "id": "s11",
+          "family": "be",
+          "kind": "fill",
+          "stem": "My cat ____ as old as your dog.",
+          "answer": "is",
+          "wrong": { "are": "be_agree", "am": "be_agree" },
+          "zh": "我的猫和你的狗年纪一样大。",
+          "hints": ["as ... as 前面也要有 be。看主语是一只还是很多只。", "像这样：Tom is as tall as Mike.", "my cat 是一只，用 is 还是 are？", "答案是 is。my cat 是一只，用 is。"]
+        },
+        {
+          "id": "s12",
+          "family": "be",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "We are as busy as our teacher.",
+          "wrong": { "We is as busy as our teacher.": "be_agree", "We as busy as our teacher.": "be_missing" },
+          "zh": "我们和我们的老师一样忙。",
+          "hints": [
+            "as ... as 前面也要有 be。看主语是谁。",
+            "像这样：Lily and Lucy are as tall as their mother.",
+            "先去掉没有 be 的那句。we 用 is 还是 are？",
+            "答案是 We are as busy as our teacher. we 用 are；as ... as 前面不能少 be。"
+          ]
+        }
+      ],
+      "alt": {
+        "title": "天平两边一样重",
+        "rule": [
+          "把 as ... as 想成一架天平：左边一样，右边一样，两边一样，天平就平了。",
+          "天平中间放一个原样的词：tall、big、fast，不加 -er，也不加 more。",
+          "天平歪了（不一样），就在 be 后面加 not：Snowy isn't as big as Momo."
+        ],
+        "pairs": [
+          { "left": "一样高", "right": "as tall as" },
+          { "left": "一样大", "right": "as big as" },
+          { "left": "一样快", "right": "as fast as" },
+          { "left": "没有那么大", "right": "isn't as big as" }
+        ],
+        "examples": [
+          { "en": "Momo is as old as Snowy.", "zh": "Momo 和 Snowy 一样大。", "mark": ["as old as"] },
+          { "en": "Mia is as tall as Lucy.", "zh": "Mia 和 Lucy 一样高。", "mark": ["as tall as"] },
+          { "en": "Mia's bag is as heavy as Tom's.", "zh": "Mia 的包和 Tom 的一样重。", "mark": ["as heavy as"] },
+          { "en": "Snowy isn't as happy as Momo today.", "zh": "Snowy 今天没有 Momo 那么开心。", "mark": ["isn't as happy as"] },
+          { "en": "Ms Wang is as busy as Mia's mother.", "zh": "王老师和 Mia 的妈妈一样忙。", "mark": ["as busy as"] }
+        ],
+        "questions": [
+          {
+            "id": "a01",
+            "family": "same",
+            "kind": "fill",
+            "stem": "Mia is ____ Lucy today.",
+            "cue": "一样开心",
+            "answer": "as happy as",
+            "wrong": { "as happier as": "asas_er", "as happy than": "asas_than" },
+            "zh": "Mia 今天和 Lucy 一样开心。",
+            "hints": [
+              "天平两边一样：用 as ... as。",
+              "像这样：Mia is as tall as Lucy.",
+              "开心是 happy。中间放原样的 happy 还是 happier？",
+              "答案是 as happy as。两边一样：as + happy + as。"
+            ]
+          },
+          {
+            "id": "a02",
+            "family": "word",
+            "kind": "fill",
+            "stem": "Tom's room is as ____ as Mia's.",
+            "cue": "clean",
+            "answer": "clean",
+            "wrong": { "cleaner": "asas_er", "more clean": "asas_er" },
+            "zh": "Tom 的房间和 Mia 的一样干净。",
+            "hints": ["空在天平中间。", "中间放原样的词：Mia is as tall as Lucy.", "clean 原样放，还是加 -er？", "答案是 clean。中间的词不变：as clean as。"]
+          },
+          {
+            "id": "a03",
+            "family": "not",
+            "kind": "pick",
+            "ask": "Snowy 没有 Momo 那么大。选出正确的句子。",
+            "answer": "Snowy isn't as big as Momo.",
+            "wrong": { "Momo isn't as big as Snowy.": "asas_not", "Snowy is as big as Momo.": "asas_not" },
+            "zh": "Snowy 没有 Momo 那么大。",
+            "hints": [
+              "天平歪了：Snowy 小一点。用 isn't。",
+              "像这样：Snowy isn't as happy as Momo today.",
+              "先去掉没有 not 的那句。小一点的 Snowy 放前面还是后面？",
+              "答案是 Snowy isn't as big as Momo. 小一点的 Snowy 放前面，用 isn't as big as。"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "had_better",
+      "unit": "U6",
+      "topic": "animals",
+      "order": 11,
+      "label": "动物单元",
+      "title": "had better 最好做……",
+      "points": ["g:had_better"],
+      "foundations": ["g:can"],
+      "fixes": [],
+      "rule": [
+        "给别人出主意、提醒他，用 had better + 动词原形：You had better go to bed. 你最好去睡觉。",
+        "和 can 一样，后面的动词不加 -s、不加 to、不加 -ing；he、she 也用 had better，不变成 has better。",
+        "说“最好别”，not 放在 better 后面：You had better not run here. 你最好别在这儿跑。",
+        "常常缩成 'd better：I'd better go now. 我最好现在就走。"
+      ],
+      "examples": [
+        { "en": "You had better go to bed now.", "zh": "你最好现在去睡觉。", "mark": ["had better go"] },
+        { "en": "It's cold. You had better wear your coat.", "zh": "天冷，你最好穿上外套。", "mark": ["had better wear"] },
+        { "en": "Tom is ill. He had better see a doctor.", "zh": "汤姆病了。他最好去看医生。", "mark": ["had better see"] },
+        { "en": "We had better not be late.", "zh": "我们最好别迟到。", "mark": ["had better not be"] },
+        { "en": "You had better not eat too much.", "zh": "你最好别吃太多。", "mark": ["had better not eat"] },
+        { "en": "She had better do her work first.", "zh": "她最好先做她的事。", "mark": ["had better do"] }
+      ],
+      "families": {
+        "base": { "name": "后面跟动词原形", "point": "g:had_better" },
+        "had": { "name": "had 不变", "point": "g:had_better" },
+        "not": { "name": "最好别：had better not", "point": "g:had_better" },
+        "sense": { "name": "看情况出主意", "point": "g:had_better" }
+      },
+      "questions": [
+        {
+          "id": "q01",
+          "part": 1,
+          "family": "base",
+          "kind": "fill",
+          "stem": "You had better ____ to bed now.",
+          "cue": "go",
+          "answer": "go",
+          "wrong": { "to go": "better_to", "going": "better_form", "goes": "better_form" },
+          "zh": "你最好现在去睡觉。",
+          "hints": [
+            "had better 后面跟什么样的动词？想想 can 后面。",
+            "像这样：Tom had better see a doctor. better 后面是原样的 see。",
+            "go 要不要加 to、加 -ing 或者加 -es？",
+            "答案是 go。had better 后面跟动词原形，不加 to，不加 -ing。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "We had better ____ the windows.",
+            "cue": "close",
+            "answer": "close",
+            "wrong": { "to close": "better_to", "closing": "better_form" },
+            "zh": "我们最好把窗户关上。",
+            "explain": "had better 后面跟原形 close。"
+          }
+        },
+        {
+          "id": "q02",
+          "part": 1,
+          "family": "base",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Lily had better drink some water.",
+          "wrong": {
+            "Lily had better drinks some water.": "better_form",
+            "Lily had better to drink some water.": "better_to",
+            "Lily had better drinking some water.": "better_form"
+          },
+          "zh": "莉莉最好喝点水。",
+          "hints": [
+            "看 better 后面的动词：有没有 to，有没有 -s、-ing。",
+            "像这样：She had better do her work first. better 后面是原样的 do。",
+            "Lily 是一个人，可 had better 后面的动词要不要加 s？",
+            "答案是 Lily had better drink some water. had better 后面跟原形 drink；Lily 是一个人也不加 s。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "Mike had better clean his room.",
+            "wrong": { "Mike had better cleans his room.": "better_form", "Mike had better to clean his room.": "better_to" },
+            "zh": "迈克最好打扫一下他的房间。",
+            "explain": "had better 后面跟原形 clean，不加 s，不加 to。"
+          }
+        },
+        {
+          "id": "q03",
+          "part": 1,
+          "family": "had",
+          "kind": "fill",
+          "stem": "Your sister is ill. She ____ better go to bed.",
+          "answer": "had",
+          "wrong": { "has": "better_has", "have": "better_has" },
+          "zh": "你姐姐病了。她最好去躺着。",
+          "hints": [
+            "主语是 she。had better 里的 had 要不要跟着变？",
+            "像这样：Tom is ill. He had better see a doctor. he 也用 had。",
+            "she 后面，had 会不会变成 has？",
+            "答案是 had。had better 是固定的，he、she 后面也用 had，不变成 has。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "My father ____ better go to work now.",
+            "answer": "had",
+            "wrong": { "has": "better_has", "have": "better_has" },
+            "zh": "我爸爸最好现在去上班。",
+            "explain": "had better 不变：my father 也用 had。"
+          }
+        },
+        {
+          "id": "q04",
+          "part": 1,
+          "family": "not",
+          "kind": "fill",
+          "stem": "It's late. We had better ____ watch TV.",
+          "answer": "not",
+          "wrong": { "don't": "better_not", "no": "better_not" },
+          "zh": "很晚了。我们最好别看电视了。",
+          "hints": [
+            "最好别：not 放在哪里？",
+            "像这样：We had better not be late.",
+            "better 后面放 not、don't 还是 no？",
+            "答案是 not。最好别是 had better not + 动词原形，不用 don't。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "It's raining. You had better ____ play in the park.",
+            "answer": "not",
+            "wrong": { "don't": "better_not", "no": "better_not" },
+            "zh": "下雨了。你最好别在公园里玩。",
+            "explain": "最好别：had better not play。"
+          }
+        },
+        {
+          "id": "q05",
+          "part": 1,
+          "family": "sense",
+          "kind": "pick",
+          "ask": "外面在下雨。你给 Tom 出个主意：",
+          "answer": "You had better take an umbrella.",
+          "wrong": {
+            "You had better not take an umbrella.": "better_sense",
+            "You had better takes an umbrella.": "better_form",
+            "You had better to take an umbrella.": "better_to"
+          },
+          "zh": "你最好带把伞。",
+          "hints": [
+            "下雨了，出门要带什么？再看 better 后面的动词。",
+            "像这样：It's cold. You had better wear your coat. 冷了就穿外套。",
+            "下雨了，是“最好带伞”还是“最好别带伞”？better 后面是 take 还是 takes？",
+            "答案是 You had better take an umbrella. 下雨要带伞；had better 后面跟原形 take。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "Lucy 有点冷。你给她出个主意：",
+            "answer": "You had better wear a coat.",
+            "wrong": { "You had better not wear a coat.": "better_sense", "You had better wearing a coat.": "better_form" },
+            "zh": "你最好穿上外套。",
+            "explain": "冷了最好穿外套：had better wear a coat。"
+          }
+        },
+        {
+          "id": "q06",
+          "part": 2,
+          "family": "base",
+          "kind": "fill",
+          "stem": "Amy had better ____ her mother now.",
+          "cue": "help",
+          "answer": "help",
+          "wrong": { "helps": "better_form", "to help": "better_to", "helping": "better_form" },
+          "zh": "埃米最好现在去帮妈妈。",
+          "hints": [
+            "主语是 Amy，可动词前面有 had better。",
+            "像这样：Lily had better drink some water. drink 没加 s。",
+            "had better 后面的 help 加不加 s、to、-ing？",
+            "答案是 help。had better 后面跟原形，Amy 是一个人也不加 s。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "The boys had better ____ quiet in the library.",
+            "cue": "be",
+            "answer": "be",
+            "wrong": { "are": "be_after_better", "to be": "better_to", "being": "better_form" },
+            "zh": "男孩们在图书馆最好安静点。",
+            "explain": "had better 后面跟原形 be，不用 are。"
+          }
+        },
+        {
+          "id": "q07",
+          "part": 2,
+          "family": "not",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "You had better not run in the classroom.",
+          "wrong": {
+            "You had not better run in the classroom.": "better_not",
+            "You don't had better run in the classroom.": "better_not",
+            "You had better not running in the classroom.": "better_form"
+          },
+          "zh": "你最好别在教室里跑。",
+          "hints": [
+            "最好别：not 放在 had 后面还是 better 后面？",
+            "像这样：We had better not be late. not 放在 better 后面。",
+            "先去掉用 don't 的那句。剩下的，not 在 better 后面、后面又是原形的是哪一句？",
+            "答案是 You had better not run in the classroom. not 放在 better 后面，再跟原形 run。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "We had better not open the door.",
+            "wrong": { "We had not better open the door.": "better_not", "We don't had better open the door.": "better_not" },
+            "zh": "我们最好别开门。",
+            "explain": "not 放在 better 后面：had better not open。"
+          }
+        },
+        {
+          "id": "q08",
+          "part": 2,
+          "family": "had",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "He had better go home now.",
+          "wrong": { "He has better go home now.": "better_has", "He had better goes home now.": "better_form" },
+          "zh": "他最好现在回家。",
+          "hints": [
+            "主语是 he。看 had 变没变，还有 go 变没变。",
+            "像这样：Tom is ill. He had better see a doctor.",
+            "he 后面用 had 还是 has？better 后面用 go 还是 goes？",
+            "答案是 He had better go home now. had better 不变，后面跟原形 go。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "My sister had better get up early.",
+            "wrong": { "My sister has better get up early.": "better_has", "My sister had better gets up early.": "better_form" },
+            "zh": "我姐姐最好早点起床。",
+            "explain": "had better 不变，后面跟原形 get。"
+          }
+        },
+        {
+          "id": "q09",
+          "part": 2,
+          "family": "sense",
+          "kind": "pick",
+          "ask": "Mike 病了。你给他出个主意：",
+          "answer": "You had better see a doctor.",
+          "wrong": {
+            "You had better play football.": "better_sense",
+            "You had better to see a doctor.": "better_to",
+            "You had better sees a doctor.": "better_form"
+          },
+          "zh": "你最好去看医生。",
+          "hints": [
+            "病了应该做什么？再看 better 后面的动词。",
+            "像这样：It's cold. You had better wear your coat.",
+            "病了是去踢球，还是去看医生？better 后面加不加 to、加不加 s？",
+            "答案是 You had better see a doctor. 病了要看医生；had better 后面跟原形 see。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "已经十点了，Lucy 还在看电视。你提醒她：",
+            "answer": "You had better go to bed.",
+            "wrong": { "You had better not go to bed.": "better_sense", "You had better going to bed.": "better_form" },
+            "zh": "你最好去睡觉。",
+            "explain": "很晚了，最好去睡觉：had better go to bed。"
+          }
+        },
+        {
+          "id": "q10",
+          "part": 2,
+          "family": "not",
+          "kind": "fill",
+          "stem": "The baby is sleeping. You had better not ____ the piano.",
+          "cue": "play",
+          "answer": "play",
+          "wrong": { "playing": "better_form", "to play": "better_to", "plays": "better_form" },
+          "zh": "宝宝在睡觉。你最好别弹钢琴。",
+          "hints": [
+            "had better not 后面跟什么样的动词？",
+            "像这样：We had better not be late. not 后面是原样的 be。",
+            "play 要不要加 -ing、加 to、加 s？",
+            "答案是 play。had better not 后面也跟动词原形。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "It's very cold. You had better not ____ out.",
+            "cue": "go",
+            "answer": "go",
+            "wrong": { "going": "better_form", "to go": "better_to" },
+            "zh": "天很冷，你最好别出去。",
+            "explain": "had better not 后面跟原形 go。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01",
+          "family": "base",
+          "kind": "fill",
+          "stem": "You had better ____ your hands.",
+          "cue": "wash",
+          "answer": "wash",
+          "wrong": { "washes": "better_form", "to wash": "better_to", "washing": "better_form" },
+          "zh": "你最好洗洗手。",
+          "hints": [
+            "had better 后面跟什么样的动词？",
+            "像这样：You had better go to bed now.",
+            "wash 要不要加 es、to 或 -ing？",
+            "答案是 wash。had better 后面跟原形 wash。"
+          ]
+        },
+        {
+          "id": "s02",
+          "family": "base",
+          "kind": "fill",
+          "stem": "Tom had better ____ his teacher.",
+          "cue": "ask",
+          "answer": "ask",
+          "wrong": { "asks": "better_form", "to ask": "better_to" },
+          "zh": "汤姆最好问问他的老师。",
+          "hints": [
+            "主语是 Tom，可前面有 had better。",
+            "像这样：Lily had better drink some water.",
+            "ask 要不要加 s 或 to？",
+            "答案是 ask。had better 后面跟原形，Tom 是一个人也不加 s。"
+          ]
+        },
+        {
+          "id": "s03",
+          "family": "base",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "You had better be quiet in the library.",
+          "wrong": {
+            "You had better are quiet in the library.": "be_after_better",
+            "You had better to be quiet in the library.": "better_to"
+          },
+          "zh": "在图书馆你最好安静点。",
+          "hints": [
+            "had better 后面跟原形。am、is、are 的原形是什么？",
+            "像这样：We had better not be late. better 后面是 be。",
+            "先去掉有 to 的那句。better 后面用 be 还是 are？",
+            "答案是 You had better be quiet in the library. had better 后面跟原形 be，不用 are。"
+          ]
+        },
+        {
+          "id": "s04",
+          "family": "had",
+          "kind": "fill",
+          "stem": "Lucy is tired. She ____ better go to bed early.",
+          "answer": "had",
+          "wrong": { "has": "better_has", "have": "better_has" },
+          "zh": "露西累了。她最好早点睡。",
+          "hints": [
+            "主语是 she。had better 里的 had 变不变？",
+            "像这样：He had better go home now.",
+            "she 后面用 had 还是 has？",
+            "答案是 had。had better 不变，she 后面也用 had。"
+          ]
+        },
+        {
+          "id": "s05",
+          "family": "had",
+          "kind": "fill",
+          "stem": "It's cold. Your brother ____ better wear his coat.",
+          "answer": "had",
+          "wrong": { "has": "better_has", "have": "better_has" },
+          "zh": "天冷。你弟弟最好穿上外套。",
+          "hints": [
+            "主语是 your brother，一个人。had better 变不变？",
+            "像这样：Tom is ill. He had better see a doctor.",
+            "your brother 后面用 had 还是 has？",
+            "答案是 had。had better 是固定的，不变成 has。"
+          ]
+        },
+        {
+          "id": "s06",
+          "family": "had",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Mike had better close the window.",
+          "wrong": { "Mike has better close the window.": "better_has", "Mike had better closes the window.": "better_form" },
+          "zh": "迈克最好把窗户关上。",
+          "hints": [
+            "看两处：had 变没变，close 变没变。",
+            "像这样：He had better go home now.",
+            "Mike 后面用 had 还是 has？better 后面用 close 还是 closes？",
+            "答案是 Mike had better close the window. had better 不变，后面跟原形 close。"
+          ]
+        },
+        {
+          "id": "s07",
+          "family": "not",
+          "kind": "fill",
+          "stem": "It's late. You had better ____ play games.",
+          "answer": "not",
+          "wrong": { "don't": "better_not", "no": "better_not" },
+          "zh": "很晚了，你最好别玩游戏了。",
+          "hints": [
+            "最好别：not 放在 better 后面。",
+            "像这样：We had better not be late.",
+            "better 后面放 not、don't 还是 no？",
+            "答案是 not。最好别是 had better not + 动词原形。"
+          ]
+        },
+        {
+          "id": "s08",
+          "family": "not",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "They had better not talk in class.",
+          "wrong": { "They had not better talk in class.": "better_not", "They don't had better talk in class.": "better_not" },
+          "zh": "他们上课时最好别说话。",
+          "hints": [
+            "最好别：not 放在哪里？",
+            "像这样：You had better not run in the classroom.",
+            "先去掉用 don't 的那句。not 在 had 后面还是 better 后面？",
+            "答案是 They had better not talk in class. not 放在 better 后面。"
+          ]
+        },
+        {
+          "id": "s09",
+          "family": "not",
+          "kind": "fill",
+          "stem": "You had better not ____ cold water.",
+          "cue": "drink",
+          "answer": "drink",
+          "wrong": { "drinking": "better_form", "to drink": "better_to" },
+          "zh": "你最好别喝凉水。",
+          "hints": [
+            "had better not 后面跟什么样的动词？",
+            "像这样：The baby is sleeping. You had better not play the piano.",
+            "drink 要不要加 -ing 或 to？",
+            "答案是 drink。had better not 后面跟原形 drink。"
+          ]
+        },
+        {
+          "id": "s10",
+          "family": "sense",
+          "kind": "pick",
+          "ask": "Tom 明天有英语考试。你给他出个主意：",
+          "answer": "You had better read your English book.",
+          "wrong": {
+            "You had better not read your English book.": "better_sense",
+            "You had better reads your English book.": "better_form"
+          },
+          "zh": "你最好看看英语书。",
+          "hints": [
+            "明天考英语，今天该做什么？再看 better 后面的动词。",
+            "像这样：Tom is ill. He had better see a doctor. 病了就去看医生。",
+            "是“最好看书”还是“最好别看书”？better 后面是 read 还是 reads？",
+            "答案是 You had better read your English book. 要考试了最好看书；had better 后面跟原形 read。"
+          ]
+        },
+        {
+          "id": "s11",
+          "family": "sense",
+          "kind": "pick",
+          "ask": "天很热，Lily 要出去跑步。你提醒她：",
+          "answer": "You had better take some water.",
+          "wrong": { "You had better wear a coat.": "better_sense", "You had better to take some water.": "better_to" },
+          "zh": "你最好带点水。",
+          "hints": [
+            "天热跑步，要带什么？再看 better 后面的动词。",
+            "像这样：It's cold. You had better wear your coat. 冷了才穿外套。",
+            "天热，是带水还是穿外套？better 后面加不加 to？",
+            "答案是 You had better take some water. 天热跑步最好带水；had better 后面跟原形 take。"
+          ]
+        },
+        {
+          "id": "s12",
+          "family": "sense",
+          "kind": "pick",
+          "ask": "Amy 早上起晚了。你提醒她：",
+          "answer": "You had better go to school now.",
+          "wrong": { "You had better go to bed now.": "better_sense", "You had better going to school now.": "better_form" },
+          "zh": "你最好现在就去上学。",
+          "hints": [
+            "早上起晚了，最要紧的是什么？再看 better 后面的动词。",
+            "像这样：You had better go to bed now. 晚上很晚了就去睡觉。",
+            "早上起晚了，是去上学还是去睡觉？better 后面是 go 还是 going？",
+            "答案是 You had better go to school now. 起晚了最好马上去上学；had better 后面跟原形 go。"
+          ]
+        }
+      ],
+      "alt": {
+        "title": "当个小参谋：先看情况，再出主意",
+        "rule": [
+          "had better 是在给人出主意：看到一个情况，告诉他“最好怎么做”。",
+          "出主意的句子都一个样：谁 + had better + 原样的动词。had、better 和动词都不变。",
+          "劝他别做，把 not 放在 better 后面：had better not + 原样的动词。"
+        ],
+        "steps": [
+          {
+            "ask": "情况是什么？",
+            "branches": [{ "if": "下雨了", "then": "You had better take an umbrella." }, { "if": "很晚了", "then": "You had better go to bed." }]
+          },
+          { "ask": "劝他做，还是劝他别做？", "branches": [{ "if": "劝他做", "then": "had better go" }, { "if": "劝他别做", "then": "had better not go" }] }
+        ],
+        "examples": [
+          { "en": "Momo is hungry. Mia had better give her some fish.", "zh": "Momo 饿了。Mia 最好给它一点鱼。", "mark": ["had better give"] },
+          { "en": "It's raining. Mia had better take an umbrella.", "zh": "下雨了。Mia 最好带把伞。", "mark": ["had better take"] },
+          { "en": "Tom is tired. He had better go to bed early.", "zh": "Tom 累了。他最好早点睡。", "mark": ["had better go"] },
+          { "en": "Snowy is sleeping. We had better not sing.", "zh": "Snowy 在睡觉。我们最好别唱歌。", "mark": ["had better not sing"] },
+          { "en": "It's late. Lucy had better not watch TV.", "zh": "很晚了。Lucy 最好别看电视了。", "mark": ["had better not watch"] }
+        ],
+        "questions": [
+          {
+            "id": "a01",
+            "family": "base",
+            "kind": "fill",
+            "stem": "Momo is hungry. Mia had better ____ her some milk.",
+            "cue": "give",
+            "answer": "give",
+            "wrong": { "gives": "better_form", "to give": "better_to" },
+            "zh": "Momo 饿了。Mia 最好给它一点牛奶。",
+            "hints": [
+              "出主意的句子：谁 + had better + 原样的动词。",
+              "像这样：Mia had better take an umbrella.",
+              "Mia 是一个人，可 had better 后面的 give 加不加 s？",
+              "答案是 give。had better 后面跟原样的 give，不加 s，不加 to。"
+            ]
+          },
+          {
+            "id": "a02",
+            "family": "not",
+            "kind": "fill",
+            "stem": "Snowy is sleeping. You had better ____ open the door.",
+            "answer": "not",
+            "wrong": { "don't": "better_not", "no": "better_not" },
+            "zh": "Snowy 在睡觉。你最好别开门。",
+            "hints": [
+              "劝他别做：not 放在 better 后面。",
+              "像这样：Snowy is sleeping. We had better not sing.",
+              "better 后面放 not 还是 don't？",
+              "答案是 not。劝别做是 had better not + 原样的动词。"
+            ]
+          },
+          {
+            "id": "a03",
+            "family": "sense",
+            "kind": "pick",
+            "ask": "Mia 累了。你给她出个主意：",
+            "answer": "You had better go to bed early.",
+            "wrong": { "You had better not go to bed.": "better_sense", "You had better goes to bed early.": "better_form" },
+            "zh": "你最好早点睡。",
+            "hints": [
+              "先看情况：累了，最好怎么做？",
+              "像这样：Tom is tired. He had better go to bed early.",
+              "累了，是早点睡还是别睡？better 后面是 go 还是 goes？",
+              "答案是 You had better go to bed early. 累了最好早点睡；had better 后面跟原样的 go。"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "past_simple",
+      "unit": "U6",
+      "topic": "animals",
+      "order": 12,
+      "preview": true,
+      "label": "七下预告",
+      "next": { "book": "七下", "unit": "U1" },
+      "title": "一般过去时 was、were 和 -ed",
+      "points": ["g:past_simple"],
+      "foundations": ["g:be", "g:be_agree", "g:present_simple"],
+      "fixes": [],
+      "rule": [
+        "说过去的事用过去式，常和 yesterday、last week、two days ago 一起出现。",
+        "am、is 的过去式是 was，are 的过去式是 were：I was at home yesterday. They were happy.",
+        "大多数动词加 -ed：play → played；e 结尾只加 d：live → lived；辅音加 y，变 y 为 i：study → studied；stop 这样的短词双写：stopped。",
+        "有些要单独记：go → went，have → had，see → saw。问句和否定，七下再学。"
+      ],
+      "table": {
+        "head": ["现在", "过去"],
+        "rows": [
+          ["am / is", "was"],
+          ["are", "were"],
+          ["play", "played"],
+          ["live", "lived"],
+          ["study", "studied"],
+          ["stop", "stopped"],
+          ["go", "went"],
+          ["have", "had"]
+        ]
+      },
+      "examples": [
+        { "en": "I was at home yesterday.", "zh": "我昨天在家。", "mark": ["was"] },
+        { "en": "They were very happy last week.", "zh": "他们上周很开心。", "mark": ["were"] },
+        { "en": "We played football yesterday afternoon.", "zh": "我们昨天下午踢了足球。", "mark": ["played"] },
+        { "en": "Tom lived near the river two years ago.", "zh": "两年前汤姆住在河边。", "mark": ["lived"] },
+        { "en": "Lily studied English last night.", "zh": "莉莉昨晚学了英语。", "mark": ["studied"] },
+        { "en": "I went to the park last Sunday.", "zh": "我上周日去了公园。", "mark": ["went"] },
+        { "en": "We had a big dinner yesterday.", "zh": "我们昨天吃了一顿丰盛的晚饭。", "mark": ["had"] }
+      ],
+      "families": {
+        "be": { "name": "was 和 were", "point": "g:past_simple" },
+        "ed": { "name": "加 -ed 的拼法", "point": "g:past_simple" },
+        "irr": { "name": "要单独记的：went、had、saw", "point": "g:past_simple" },
+        "time": { "name": "过去还是现在", "point": "g:past_simple" }
+      },
+      "questions": [
+        {
+          "id": "q01",
+          "part": 1,
+          "family": "be",
+          "kind": "fill",
+          "stem": "I ____ at school yesterday morning.",
+          "answer": "was",
+          "wrong": { "were": "be_past", "am": "tense_mix" },
+          "zh": "我昨天早上在学校。",
+          "hints": [
+            "有 yesterday，说的是过去。am 的过去式是什么？",
+            "像这样：I was at home yesterday. 过去的 I am 变成 I was。",
+            "主语是 I。过去用 was 还是 were？",
+            "答案是 was。yesterday 是过去；am、is 的过去式是 was。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "My mother ____ busy last week.",
+            "answer": "was",
+            "wrong": { "were": "be_past", "is": "tense_mix" },
+            "zh": "我妈妈上周很忙。",
+            "explain": "last week 是过去；my mother 是一个人，is 变成 was。"
+          }
+        },
+        {
+          "id": "q02",
+          "part": 1,
+          "family": "be",
+          "kind": "fill",
+          "stem": "The children ____ in the park two hours ago.",
+          "answer": "were",
+          "wrong": { "was": "be_past", "are": "tense_mix" },
+          "zh": "两小时前孩子们在公园里。",
+          "hints": [
+            "有 two hours ago，是过去。",
+            "像这样：They were very happy last week. are 的过去式是 were。",
+            "the children 是很多人，现在用 are，过去用什么？",
+            "答案是 were。two hours ago 是过去；很多人用 are，过去式是 were。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "We ____ very tired last night.",
+            "answer": "were",
+            "wrong": { "was": "be_past", "are": "tense_mix" },
+            "zh": "我们昨晚很累。",
+            "explain": "last night 是过去；we 的 are 变成 were。"
+          }
+        },
+        {
+          "id": "q03",
+          "part": 1,
+          "family": "ed",
+          "kind": "fill",
+          "stem": "We ____ basketball yesterday.",
+          "cue": "play",
+          "answer": "played",
+          "wrong": { "play": "tense_mix", "playd": "past_ed", "plaied": "past_ed" },
+          "zh": "我们昨天打了篮球。",
+          "hints": [
+            "有 yesterday，是过去。play 要变成过去式。",
+            "像这样：clean 变 cleaned，直接加 ed。",
+            "play 是 a 加 y 结尾，a 是元音。y 要不要变？加 d 还是 ed？",
+            "答案是 played。play 是元音加 y，y 不变，直接加 ed。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "Tom ____ his room last Sunday.",
+            "cue": "clean",
+            "answer": "cleaned",
+            "wrong": { "clean": "tense_mix", "cleans": "tense_mix" },
+            "zh": "汤姆上周日打扫了他的房间。",
+            "explain": "last Sunday 是过去，clean 加 ed：cleaned。"
+          }
+        },
+        {
+          "id": "q04",
+          "part": 1,
+          "family": "ed",
+          "kind": "fill",
+          "stem": "Amy ____ Chinese with her grandfather two years ago.",
+          "cue": "study",
+          "answer": "studied",
+          "wrong": { "studyed": "past_ed", "study": "tense_mix" },
+          "zh": "两年前埃米跟着爷爷学中文。",
+          "hints": [
+            "有 two years ago，是过去。study 要变成过去式。",
+            "像这样：cry 变 cried，辅音字母加 y，把 y 变 i 再加 ed。",
+            "study 是 d 加 y 结尾，d 是辅音字母。y 要不要变？",
+            "答案是 studied。辅音字母加 y 结尾，把 y 变 i 再加 ed。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "The baby ____ last night.",
+            "cue": "cry",
+            "answer": "cried",
+            "wrong": { "cryed": "past_ed", "cry": "tense_mix" },
+            "zh": "宝宝昨晚哭了。",
+            "explain": "cry 是辅音加 y，y 变 i 再加 ed：cried。"
+          }
+        },
+        {
+          "id": "q05",
+          "part": 1,
+          "family": "irr",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "I went to the zoo yesterday.",
+          "wrong": { "I goed to the zoo yesterday.": "past_irregular", "I go to the zoo yesterday.": "tense_mix" },
+          "zh": "我昨天去了动物园。",
+          "hints": [
+            "有 yesterday，是过去。go 的过去式要单独记。",
+            "像这样：have 变 had，不是 haved。",
+            "先去掉用 go 的那句。go 的过去式是 goed 还是 went？",
+            "答案是 I went to the zoo yesterday. go 的过去式是 went，要单独记。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "We had a party last week.",
+            "wrong": { "We haved a party last week.": "past_irregular", "We have a party last week.": "tense_mix" },
+            "zh": "我们上周开了个聚会。",
+            "explain": "last week 是过去；have 的过去式是 had。"
+          }
+        },
+        {
+          "id": "q06",
+          "part": 2,
+          "family": "time",
+          "kind": "fill",
+          "stem": "Tom walked to school last year. Now he ____ to school by bus every day.",
+          "cue": "go",
+          "answer": "goes",
+          "wrong": { "went": "tense_mix", "go": "third_s_missing" },
+          "zh": "汤姆去年走路上学。现在他每天坐公共汽车上学。",
+          "hints": [
+            "看空所在的那句：Now ... every day，说的是现在每天都这样。",
+            "像这样：I went to the park last Sunday. last Sunday 是过去才用 went。",
+            "现在每天都这样，用一般现在时。he 是一个人，go 怎么变？",
+            "答案是 goes。Now 和 every day 说的是现在，用一般现在时；he 是一个人，go 加 es。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "Tom ____ to school by bike yesterday.",
+            "cue": "go",
+            "answer": "went",
+            "wrong": { "goes": "tense_mix", "goed": "past_irregular" },
+            "zh": "汤姆昨天骑自行车上学。",
+            "explain": "yesterday 是过去，go 变成 went。"
+          }
+        },
+        {
+          "id": "q07",
+          "part": 2,
+          "family": "ed",
+          "kind": "fill",
+          "stem": "The bus ____ near our school ten minutes ago.",
+          "cue": "stop",
+          "answer": "stopped",
+          "wrong": { "stoped": "past_ed", "stop": "tense_mix", "stops": "tense_mix" },
+          "zh": "十分钟前公共汽车停在了我们学校附近。",
+          "hints": [
+            "有 ten minutes ago，是过去。stop 要变成过去式。",
+            "像这样：swim 加 -ing 要双写 m：swimming。加 -ed 也有这样的。",
+            "stop 是短词，结尾是一个元音加一个辅音。p 要不要双写？",
+            "答案是 stopped。stop 双写 p 再加 ed。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "My grandfather ____ in this house ten years ago.",
+            "cue": "live",
+            "answer": "lived",
+            "wrong": { "liveed": "past_ed", "lives": "tense_mix" },
+            "zh": "十年前我爷爷住在这所房子里。",
+            "explain": "live 是 e 结尾，只加 d：lived。"
+          }
+        },
+        {
+          "id": "q08",
+          "part": 2,
+          "family": "be",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "They were at the zoo last Saturday.",
+          "wrong": { "They was at the zoo last Saturday.": "be_past", "They are at the zoo last Saturday.": "tense_mix" },
+          "zh": "他们上周六在动物园。",
+          "hints": [
+            "有 last Saturday，是过去。they 现在用 are，过去用什么？",
+            "像这样：They were very happy last week.",
+            "先去掉用 are 的那句。they 后面用 was 还是 were？",
+            "答案是 They were at the zoo last Saturday. 过去的 are 变成 were。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "Mike was ill yesterday.",
+            "wrong": { "Mike were ill yesterday.": "be_past", "Mike is ill yesterday.": "tense_mix" },
+            "zh": "迈克昨天病了。",
+            "explain": "yesterday 是过去；Mike 是一个人，is 变成 was。"
+          }
+        },
+        {
+          "id": "q09",
+          "part": 2,
+          "family": "irr",
+          "kind": "fill",
+          "stem": "We ____ noodles for lunch yesterday.",
+          "cue": "have",
+          "answer": "had",
+          "wrong": { "haved": "past_irregular", "have": "tense_mix", "has": "tense_mix" },
+          "zh": "我们昨天午饭吃了面条。",
+          "hints": [
+            "有 yesterday，是过去。have 的过去式要单独记。",
+            "像这样：go 变 went，不是 goed。",
+            "先确定要用过去式。have 的过去式不加 ed，是哪个短短的词？",
+            "答案是 had。have 的过去式是 had，要单独记。"
+          ],
+          "variant": {
+            "kind": "fill",
+            "stem": "I ____ to the library last week.",
+            "cue": "go",
+            "answer": "went",
+            "wrong": { "goed": "past_irregular", "go": "tense_mix" },
+            "zh": "我上周去了图书馆。",
+            "explain": "last week 是过去；go 的过去式是 went。"
+          }
+        },
+        {
+          "id": "q10",
+          "part": 2,
+          "family": "time",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Lily watched TV last night.",
+          "wrong": { "Lily watches TV last night.": "tense_mix", "Lily watchd TV last night.": "past_ed" },
+          "zh": "莉莉昨晚看了电视。",
+          "hints": [
+            "有 last night，是过去。",
+            "像这样：We played football yesterday afternoon.",
+            "过去用 watches 还是过去式？watch 的过去式加 d 还是 ed？",
+            "答案是 Lily watched TV last night. last night 是过去；watch 加 ed：watched。"
+          ],
+          "variant": {
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "My sister is twelve now.",
+            "wrong": { "My sister was twelve now.": "tense_mix", "My sister were twelve now.": "be_past" },
+            "zh": "我妹妹现在十二岁。",
+            "explain": "now 是现在，用 is；was 是过去。"
+          }
+        }
+      ],
+      "spares": [
+        {
+          "id": "s01",
+          "family": "be",
+          "kind": "fill",
+          "stem": "It ____ cold yesterday.",
+          "answer": "was",
+          "wrong": { "were": "be_past", "is": "tense_mix" },
+          "zh": "昨天很冷。",
+          "hints": ["有 yesterday，是过去。", "像这样：I was at home yesterday.", "it 现在用 is，过去用 was 还是 were？", "答案是 was。yesterday 是过去；is 的过去式是 was。"]
+        },
+        {
+          "id": "s02",
+          "family": "be",
+          "kind": "fill",
+          "stem": "Tom and Mike ____ late for school yesterday.",
+          "answer": "were",
+          "wrong": { "was": "be_past", "are": "tense_mix" },
+          "zh": "汤姆和迈克昨天上学迟到了。",
+          "hints": [
+            "有 yesterday，是过去。看主语是几个人。",
+            "像这样：They were very happy last week.",
+            "Tom and Mike 是两个人，现在用 are，过去用什么？",
+            "答案是 were。两个人用 are，过去式是 were。"
+          ]
+        },
+        {
+          "id": "s03",
+          "family": "be",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "I was very hungry last night.",
+          "wrong": { "I were very hungry last night.": "be_past", "I am very hungry last night.": "tense_mix" },
+          "zh": "我昨晚很饿。",
+          "hints": [
+            "有 last night，是过去。I 后面用什么？",
+            "像这样：I was at home yesterday.",
+            "先去掉用 am 的那句。I 后面用 was 还是 were？",
+            "答案是 I was very hungry last night. 过去的 I am 变成 I was。"
+          ]
+        },
+        {
+          "id": "s04",
+          "family": "ed",
+          "kind": "fill",
+          "stem": "She ____ her grandmother last Sunday.",
+          "cue": "visit",
+          "answer": "visited",
+          "wrong": { "visitted": "past_ed", "visits": "tense_mix" },
+          "zh": "她上周日去看望了奶奶。",
+          "hints": [
+            "有 last Sunday，是过去。visit 要变成过去式。",
+            "像这样：clean 变 cleaned，直接加 ed。",
+            "visit 读 VI-sit，重音在前面，t 要不要双写？",
+            "答案是 visited。visit 重音在前面，t 不双写，直接加 ed。"
+          ]
+        },
+        {
+          "id": "s05",
+          "family": "ed",
+          "kind": "fill",
+          "stem": "Mike ____ the door ten minutes ago.",
+          "cue": "close",
+          "answer": "closed",
+          "wrong": { "closeed": "past_ed", "closes": "tense_mix" },
+          "zh": "迈克十分钟前关上了门。",
+          "hints": [
+            "有 ten minutes ago，是过去。close 要变成过去式。",
+            "像这样：live 变 lived，e 结尾只加 d。",
+            "close 是 e 结尾。加 d 还是 ed？",
+            "答案是 closed。close 是 e 结尾，只加 d。"
+          ]
+        },
+        {
+          "id": "s06",
+          "family": "ed",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "They danced at the party last night.",
+          "wrong": { "They danceed at the party last night.": "past_ed", "They dance at the party last night.": "tense_mix" },
+          "zh": "他们昨晚在聚会上跳了舞。",
+          "hints": [
+            "有 last night，是过去。dance 怎么变过去式？",
+            "像这样：live 变 lived，e 结尾只加 d。",
+            "先去掉用 dance 的那句。dance 是 e 结尾，加 d 还是 ed？",
+            "答案是 They danced at the party last night. dance 是 e 结尾，只加 d。"
+          ]
+        },
+        {
+          "id": "s07",
+          "family": "irr",
+          "kind": "fill",
+          "stem": "My brother ____ to the park with his friends yesterday.",
+          "cue": "go",
+          "answer": "went",
+          "wrong": { "goed": "past_irregular", "goes": "tense_mix" },
+          "zh": "我哥哥昨天和朋友们去了公园。",
+          "hints": ["有 yesterday，是过去。go 的过去式要单独记。", "像这样：have 变 had，不是 haved。", "go 的过去式是 goed 还是另一个词？", "答案是 went。go 的过去式是 went，要单独记。"]
+        },
+        {
+          "id": "s08",
+          "family": "irr",
+          "kind": "fill",
+          "stem": "I ____ a cold last week.",
+          "cue": "have",
+          "answer": "had",
+          "wrong": { "haved": "past_irregular", "have": "tense_mix" },
+          "zh": "我上周感冒了。",
+          "hints": ["有 last week，是过去。have 的过去式要单独记。", "像这样：go 变 went，不是 goed。", "have 的过去式不加 ed，是哪个短短的词？", "答案是 had。have 的过去式是 had。"]
+        },
+        {
+          "id": "s09",
+          "family": "irr",
+          "kind": "fill",
+          "stem": "We ____ a film last Saturday.",
+          "cue": "see",
+          "answer": "saw",
+          "wrong": { "sees": "tense_mix", "see": "tense_mix" },
+          "zh": "我们上周六看了一场电影。",
+          "hints": [
+            "有 last Saturday，是过去。see 的过去式要单独记。",
+            "像这样：go 变 went，have 变 had。",
+            "see 的过去式不加 ed，要单独记，规则页上有。",
+            "答案是 saw。last Saturday 是过去；see 的过去式是 saw。"
+          ]
+        },
+        {
+          "id": "s10",
+          "family": "time",
+          "kind": "fill",
+          "stem": "I ____ twelve now. Last year I was eleven.",
+          "answer": "am",
+          "wrong": { "was": "tense_mix", "were": "be_past" },
+          "zh": "我现在十二岁。去年我十一岁。",
+          "hints": [
+            "看空所在的那句：有 now，说的是现在。",
+            "像这样：My sister is twelve now. now 用 is，不用 was。",
+            "主语是 I，现在用 am 还是 was？",
+            "答案是 am。now 是现在，I 用 am；was 是过去。"
+          ]
+        },
+        {
+          "id": "s11",
+          "family": "time",
+          "kind": "fill",
+          "stem": "Last year I ____ eleven. Now I am twelve.",
+          "answer": "was",
+          "wrong": { "am": "tense_mix", "were": "be_past" },
+          "zh": "去年我十一岁。现在我十二岁。",
+          "hints": ["看空所在的那句：有 last year，说的是过去。", "像这样：I was at home yesterday.", "过去的 I am 变成什么？", "答案是 was。last year 是过去，I am 变成 I was。"]
+        },
+        {
+          "id": "s12",
+          "family": "time",
+          "kind": "pick",
+          "ask": "选出正确的句子。",
+          "answer": "Lucy cleaned her room yesterday.",
+          "wrong": { "Lucy cleans her room yesterday.": "tense_mix", "Lucy cleanned her room yesterday.": "past_ed" },
+          "zh": "露西昨天打扫了她的房间。",
+          "hints": [
+            "有 yesterday，是过去。",
+            "像这样：We played football yesterday afternoon.",
+            "先去掉用 cleans 的那句。clean 的 n 要不要双写？",
+            "答案是 Lucy cleaned her room yesterday. yesterday 是过去；clean 直接加 ed。"
+          ]
+        },
+        {
+          "id": "s13",
+          "family": "time",
+          "kind": "fill",
+          "stem": "Tom ____ basketball two days ago.",
+          "cue": "play",
+          "answer": "played",
+          "wrong": { "plays": "tense_mix", "play": "tense_mix" },
+          "zh": "汤姆两天前打了篮球。",
+          "hints": [
+            "有 two days ago，是过去。",
+            "像这样：We played football yesterday afternoon.",
+            "过去用 plays 还是过去式？",
+            "答案是 played。two days ago 是过去，play 加 ed。"
+          ]
+        }
+      ],
+      "alt": {
+        "title": "时光机：把句子开回过去",
+        "rule": [
+          "把句子坐上时光机开回过去：先找时间，看到 yesterday、last、ago，就换成过去的样子。",
+          "be 动词换衣服：am、is 换成 was，are 换成 were。",
+          "别的动词大多加个尾巴 ed；go、have、see 换成新词：went、had、saw。"
+        ],
+        "pairs": [
+          { "left": "I am", "right": "I was" },
+          { "left": "they are", "right": "they were" },
+          { "left": "play", "right": "played" },
+          { "left": "go", "right": "went" },
+          { "left": "have", "right": "had" }
+        ],
+        "examples": [
+          { "en": "Momo was hungry yesterday morning.", "zh": "Momo 昨天早上很饿。", "mark": ["was"] },
+          { "en": "Mia and Lucy were at the zoo yesterday.", "zh": "Mia 和 Lucy 昨天在动物园。", "mark": ["were"] },
+          { "en": "Mia played with Momo last night.", "zh": "Mia 昨晚和 Momo 玩了。", "mark": ["played"] },
+          { "en": "Snowy went into the garden two hours ago.", "zh": "两小时前 Snowy 跑进了花园。", "mark": ["went"] },
+          { "en": "Ms Wang had a cold last week.", "zh": "王老师上周感冒了。", "mark": ["had"] }
+        ],
+        "questions": [
+          {
+            "id": "a01",
+            "family": "be",
+            "kind": "fill",
+            "stem": "Momo ____ very happy yesterday.",
+            "answer": "was",
+            "wrong": { "were": "be_past", "is": "tense_mix" },
+            "zh": "Momo 昨天很开心。",
+            "hints": ["先找时间：yesterday，开回过去。", "像这样：Momo was hungry yesterday morning.", "is 换成 was 还是 were？", "答案是 was。is 开回过去换成 was。"]
+          },
+          {
+            "id": "a02",
+            "family": "ed",
+            "kind": "fill",
+            "stem": "Mia ____ her room last Sunday.",
+            "cue": "clean",
+            "answer": "cleaned",
+            "wrong": { "cleans": "tense_mix", "cleanned": "past_ed" },
+            "zh": "Mia 上周日打扫了她的房间。",
+            "hints": [
+              "先找时间：last Sunday，开回过去。",
+              "像这样：Mia played with Momo last night. play 加个尾巴 ed。",
+              "clean 加 ed 的时候，n 要不要双写？",
+              "答案是 cleaned。clean 直接加尾巴 ed。"
+            ]
+          },
+          {
+            "id": "a03",
+            "family": "irr",
+            "kind": "pick",
+            "ask": "选出正确的句子。",
+            "answer": "Mia went to school by bus yesterday.",
+            "wrong": { "Mia goed to school by bus yesterday.": "past_irregular", "Mia goes to school by bus yesterday.": "tense_mix" },
+            "zh": "Mia 昨天坐公共汽车上学。",
+            "hints": [
+              "先找时间：yesterday，开回过去。",
+              "像这样：Snowy went into the garden two hours ago.",
+              "先去掉用 goes 的那句。go 开回过去是加 ed，还是换成新词？",
+              "答案是 Mia went to school by bus yesterday. go 开回过去换成新词 went。"
+            ]
+          }
+        ]
+      }
     }
   ]
 }

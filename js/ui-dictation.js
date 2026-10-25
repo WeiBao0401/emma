@@ -149,6 +149,13 @@ export function createDictationView(ctx) {
 
   // out: words she took out on this screen; they stay out when only the way changes
   function loadList(out = new Set()) {
+    // 0.8.0 周末课: 本周 10 词纸上写 brings its own words (weekend.js weekWords)
+    if (weekWords) {
+      fromBook = false;
+      list = weekWords.map(x => { const e = ctx.words && ctx.words.get ? ctx.words.get(x.slug) : null; return { slug: x.slug, w: x.w, cn: (e && meaningOf(e)) || x.cn || '' }; });
+      picked = new Set(list.filter(x => !out.has(x.slug) && (method !== 'en2zh' || x.cn)).map(x => x.slug));
+      return;
+    }
     const us = units();
     fromBook = us.length > 0;
     if (fromBook) {
@@ -165,8 +172,11 @@ export function createDictationView(ctx) {
     }
   }
 
+  let weekWords = null;
   function setup(params = {}) {
     d = null;
+    weekWords = params.week && Array.isArray(params.words) && params.words.length ? params.words.filter(x => x && x.slug && x.w) : null;
+    if (weekWords && !weekWords.length) weekWords = null;
     pass = 'main';
     setBusy(false);
     if (params.unit) unit = params.unit;
@@ -206,7 +216,7 @@ export function createDictationView(ctx) {
       count.textContent = countText();
       go.disabled = !picked.size;
     };
-    stage.replaceChildren(header('明天有听写', () => ctx.go('home')),
+    stage.replaceChildren(header(weekWords ? '本周 10 词纸上写' : '明天有听写', () => ctx.go('home')),
       h('section', { className: 'dict-setup' },
         teacherLine(line),
         count,
@@ -227,7 +237,7 @@ export function createDictationView(ctx) {
           }))),
           methodFrom === 'school' ? h('p', { className: 'small dict-hint', text: '学校常这样考，先选好了。' }) : null),
         h('div', { className: 'dict-sec' },
-          h('p', { className: 'dict-label', text: fromBook ? '老师没划的词，点一下去掉' : '还没导入课本，先用单词本里最近的词' }),
+          h('p', { className: 'dict-label', text: weekWords ? '这周练过的词，错过的在前。点一下去掉' : fromBook ? '老师没划的词，点一下去掉' : '还没导入课本，先用单词本里最近的词' }),
           list.length ? h('ul', { className: 'dict-pick' }, list.map(x => {
             const b = h('button', { type: 'button', className: 'dict-word', 'aria-pressed': picked.has(x.slug) ? 'true' : 'false' },
               h('span', { className: 'box', 'aria-hidden': 'true' }, icon('check')),

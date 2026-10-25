@@ -1,0 +1,46 @@
+/* 进新单元（ui-unit-flow.js）. Owner: 语法卡 agent. Class names start with uf-. Tokens come from index.html :root.
+   A full-screen layer like 课文陪读: paper background, one column, serif title, thin rules between the parts. */
+html.uf-open,html.uf-open body{overflow:hidden}
+.uf-screen{position:fixed;inset:0;z-index:var(--z-sheet);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--paper);color:var(--ink)}
+.uf-screen[hidden]{display:none}
+.uf-page{max-width:var(--col);margin:0 auto;padding:var(--top) var(--gutter) calc(48px + var(--bottom))}
+.uf-head{position:sticky;top:0;z-index:var(--z-sticky);display:flex;align-items:center;justify-content:space-between;height:var(--head);
+  margin:0 calc(-1 * var(--gutter));padding:0 var(--gutter);background:var(--paper);border-bottom:1px solid var(--rule)}
+.uf-head-title{font:600 17px/1 var(--serif)}
+.uf-close{color:var(--ink)}
+.uf-title{margin-top:28px;font:600 32px/1.2 var(--serif);letter-spacing:-.015em}
+.uf-sub{margin-top:6px;font:400 20px/1.4 var(--serif);color:var(--muted)}
+.uf-sec{margin-top:28px;padding-top:20px;border-top:1px solid var(--rule)}
+.uf-label{font:600 13px/1.3 var(--sans);letter-spacing:.04em;color:var(--muted)}
+.uf-text{margin-top:8px;font-size:17px;line-height:1.55}
+.uf-quiet{margin-top:4px;font-size:15px;color:var(--muted)}
+.uf-go{margin:6px -10px 0;font-size:17px;font-weight:600}
+.uf-ask{font:600 22px/1.4 var(--serif);text-wrap:pretty}
+.uf-choices{display:flex;gap:12px;margin-top:14px}
+.uf-choice{min-width:120px;min-height:52px;padding:0 20px;border:1px solid var(--rule-strong);border-radius:var(--radius-btn);background:transparent;color:var(--ink);font:600 18px var(--sans)}
+.uf-choice:active{background:var(--tag-bg)}
+.uf-cards,.uf-words{list-style:none;margin:10px 0 0;padding:0;border-top:1px solid var(--rule)}
+.uf-card{border-bottom:1px solid var(--rule)}
+.uf-card-btn{display:grid;grid-template-columns:1fr auto;gap:2px 12px;width:100%;min-height:60px;padding:10px 0;border:0;background:none;color:var(--ink);text-align:left;font:inherit}
+.uf-card-title{font:600 17px/1.35 var(--serif)}
+.uf-card-tag{grid-column:2;grid-row:1;align-self:center;padding:3px 10px;border-radius:3px;background:var(--tag-bg);font:600 13px/1.4 var(--sans)}
+.uf-card.lean .uf-card-tag{background:transparent;border:1px solid var(--rule-strong)}
+.uf-card-status{font-size:14px;color:var(--muted)}
+.uf-rule{padding:0 0 14px;font-size:16px;line-height:1.55}
+.uf-rule[hidden]{display:none}
+.uf-rule p+p{margin-top:6px}
+.uf-ex{font:400 18px/1.5 var(--serif)}
+.uf-ex-zh{display:block;font:14px/1.4 var(--sans);color:var(--muted)}
+.uf-rule .text-btn{margin:6px -10px 0}
+.uf-word{display:flex;align-items:baseline;gap:14px;width:100%;min-height:52px;padding:8px 0;border:0;border-bottom:1px solid var(--rule);background:none;color:var(--ink);text-align:left;font:inherit}
+.uf-w{font:600 20px/1.3 var(--serif)}
+.uf-cn{font-size:15px;color:var(--muted)}
+.uf-end{margin-top:32px}
+.uf-main{min-width:220px;min-height:56px;font-size:17px}
+.uf-practice{margin-top:12px}
+.uf-next{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px}
+.uf-next-label{display:flex;align-items:center;gap:12px;font-size:17px;color:var(--ink)}
+.uf-date{min-height:44px;font:400 17px var(--serif)}
+.uf-next-actions{display:flex;gap:16px}
+.uf-msg{flex-basis:100%;font-size:14px;color:var(--muted)}
+.uf-msg.warn{color:var(--danger)}

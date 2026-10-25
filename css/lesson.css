@@ -82,3 +82,11 @@
   .lesson-gq .lesson-gq-stem{font-size:38px}
   .lesson-opener .lesson-en{font-size:24px}
 }
+/* 0.8.0 “学一点” at the wrap, 周末课 (本周 10 词纸上写, 下周想练什么), 接着练 under the wrap */
+.lesson-learn{margin-top:8px;padding-top:12px;border-top:1px solid color-mix(in srgb,var(--ink) 12%,transparent);display:flex;flex-direction:column;gap:8px}
+.lesson-learn-label{font:13px/1.3 var(--sans);color:var(--muted);letter-spacing:.04em}
+.lesson-learn-text{font:19px/1.4 var(--serif);color:var(--ink)}
+.lesson-learn-zh{font:15px/1.6 var(--sans)}
+.lesson-weekend{display:flex;flex-direction:column;gap:16px;margin-top:8px}
+.lesson-weekend-paper{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.lesson-practice{margin-top:28px}

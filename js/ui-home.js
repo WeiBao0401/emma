@@ -50,6 +50,9 @@ import { listSaved as textreadSaved } from './textread.js';
 // 0.7.0: 我要复习考试 (review.js) and 错题 due again today (mistakes.js) get a row under the four cells
 import { activePlan as reviewActive, todayIndex as reviewToday, summaryLine as reviewLine, unitList as reviewUnits } from './review.js';
 import { summary as mistakesSummary } from './mistakes.js';
+// 0.8.0 (第 6 批): “老师说 + 学一点” (lines.js talk), her difficulty and topics for it (kid-me.js), adding a phrase to her word book
+import { difficulty as kidDifficulty, readPrefs as kidPrefs } from './kid-me.js';
+import { ownCandidate, ownExport } from './wordbook.js';
 
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -165,7 +168,7 @@ export const WRITE_KINDS = { spell: '拼几个词', spelling: '拼几个词', ti
 // 读一段 once it opens (0.4.0): which episode, “第 2 集”; a light day reads it with 2 questions, after all six she reads one again
 export function readNote(c) {
   if (!c || !c.n) return c && c.note ? c.note : '';
-  if (c.again) return `再读第 ${c.n} 集`;
+  if (c.again) return '今天的阅读';   // 0.8.0: all six read, 读一段 is the daily reading (daily-read.js)
   return c.short ? `第 ${c.n} 集 · 2 道题` : `第 ${c.n} 集`;
 }
 export function slotText(c) {
@@ -212,6 +215,67 @@ export function writtenThisWeek(events, now = new Date()) {
 export const gainText = n => (n > 0 ? `这周又能写出 ${n} 个词。` : '');
 const GAIN_LOOKBACK_DAYS = 56;   // “before this week” looks back 8 weeks (events are kept 180 days)
 
+// ---- 0.8.0 “老师说 + 学一点” (lines.js talk): the context the talk lines read, and the 学一点 block (home and the wrap)
+
+// days in a row with a lesson, counting back from today (or yesterday when today has none yet)
+export function streakOf(days, now = new Date()) {
+  const set = new Set(days);
+  const d = new Date(now);
+  if (!set.has(dayOf(d))) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (set.has(dayOf(d))) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+export function talkCtx(ctx, now = new Date(), { slips = null } = {}) {
+  const kv = ctx.kv;
+  const c = { name: ((kv.peek('profile', {}) || {}).name) || 'Emma', hour: now.getHours(), now };
+  const ex = examPhaseOf(kv.peek('progress', {}) || {}, now);
+  if (ex) c.exam = ex;
+  const unit = (kv.peek('progress', {}) || {}).unit;
+  if (unit) c.unit = unit;
+  try { c.level = kidDifficulty(kv, now).read; } catch (e) { /* fine */ }
+  try { c.topics = kidPrefs(kv).topics || []; } catch (e) { /* fine */ }
+  if (Array.isArray(slips) && slips.length) c.slips = slips;
+  const streak = streakOf(lessonDays(kv), now);
+  if (streak >= 3) c.streak = streak;
+  return c;
+}
+// the 学一点 part under the teacher's line: label, the thing to learn, its explanation, listen and add to the word book
+export function learnBlock(ctx, t, { step = 'look', cls = 'home-learn' } = {}) {
+  if (!t || !t.learn || !t.learn.text) return null;
+  const L = t.learn;
+  const log = (action, extra = {}) => { try { const r = ctx.events.log(ctx.lines.talkEvent(t, action, { step, ...extra })); if (r && r.catch) r.catch(() => {}); } catch (e) { /* bookkeeping only */ } };
+  let add = null;
+  try {
+    const entry = ctx.lines.wordbookEntry ? ctx.lines.wordbookEntry(t) : null;
+    if (entry && entry.w) {
+      const cand = ownCandidate(entry.w, { dict: ctx.dict, words: ctx.words });
+      if (cand.status === 'inbook') add = h('span', { className: 'small muted', text: '单词本里有了' });
+      else if (cand.status !== 'bad') {
+        add = h('button', { type: 'button', className: 'home-pill', text: '加进单词本', on: { click: async ev => {
+          const b = ev.currentTarget;
+          b.disabled = true;
+          try {
+            const c = cand.status === 'nodict' ? { ...cand, cn: entry.cn || '' } : { ...cand, cn: cand.cn || entry.cn || '' };
+            let e = ctx.words.get(c.slug) || null;
+            if (!e) { await ctx.words.importData(ownExport(c, { typed: entry.w, where: entry.where || t.en })); e = ctx.words.get(c.slug) || null; }
+            if (e && !e.favorited) await ctx.words.favorite(e.slug, true);
+            b.textContent = '已加进单词本';
+            log('add', entry.w ? { w: entry.w } : {});
+          } catch (err) { b.disabled = false; try { ctx.toast('没加上，再点一次。'); } catch (e2) { /* ignore */ } }
+        } } });
+      }
+    }
+  } catch (e) { add = null; }
+  return h('div', { className: cls },
+    h('p', { className: cls + '-label', text: '学一点' + (t.kindZh ? ' · ' + t.kindZh : '') }),
+    h('p', { className: cls + '-text', lang: 'en', text: L.text }),
+    L.zh ? h('p', { className: cls + '-zh', lang: 'zh-CN', text: L.zh }) : null,
+    h('div', { className: 'home-pills' },
+      h('button', { type: 'button', className: 'home-pill', on: { click: ev => { ctx.say(L.say || L.text, ev.currentTarget); log('listen'); } } }, icon('speak'), h('span', { text: '听一遍' })),
+      add));
+}
+
 // ---------------------------------------------------------------- view
 
 export function createHomeTab(ctx) {
@@ -245,9 +309,26 @@ export function createHomeTab(ctx) {
     const ex = examPhaseOf(ctx.kv.peek('progress', {}) || {}, now);
     const scene = done ? 'close' : ex === 'eve' ? 'exam' : now.getHours() >= 21 ? 'late' : back ? 'back' : ex ? ['exam', 'open'] : 'open';
     const c = { name, day: dayNumber(days, now), hour: now.getHours(), ...(ex ? { exam: ex } : {}) };
-    line = ctx.lines.pick(scene, c) || (scene !== 'open' ? ctx.lines.pick('open', c) : null);
+    // 0.8.0: “老师说 + 学一点” first (lines.js talk: different every time, something to learn); the old lines are the fallback
+    let t = null;
+    try { t = ctx.lines.talk ? ctx.lines.talk(scene, talkCtx(ctx, now, { slips })) : null; } catch (e) { t = null; }
+    line = t || ctx.lines.pick(scene, c) || (scene !== 'open' ? ctx.lines.pick('open', c) : null);
     lineDay = dayOf(now);
-    if (line) ctx.lines.markSeen(line.id);
+    if (t) {
+      ctx.lines.markTalk(t);
+      try { const r = ctx.events.log(ctx.lines.talkEvent(t, 'show', { step: 'look' })); if (r && r.catch) r.catch(() => {}); } catch (e) { /* fine */ }
+    } else if (line) ctx.lines.markSeen(line.id);
+  }
+  // her slips of the last three days, for the personal talk lines (read once per visit, used by the next pick)
+  let slips = null;
+  async function loadSlips(now) {
+    try {
+      if (!ctx.lines.talk) return;
+      const { slipsFrom } = await import('./lines.js');
+      const since = new Date(now.getTime() - 3 * 864e5);
+      const list = await ctx.events.query({ since, type: 'answer', limit: 5000 });
+      slips = slipsFrom(list, { now, word: slug => { const e = ctx.words.get(slug); return e ? { w: e.headword, cn: e.brief_cn || '' } : null; } });
+    } catch (e) { slips = null; }
   }
 
   function greeting() {
@@ -263,14 +344,20 @@ export function createHomeTab(ctx) {
         l.showZh = open;
         ev.currentTarget.textContent = open ? '收起中文' : '看中文';
         if (open) (ctx.lines.tapZh || ctx.lines.markZhTapped || (() => {}))(l.id);
+        if (open && l.learn) { try { const r = ctx.events.log(ctx.lines.talkEvent(l, 'zh', { step: 'look' })); if (r && r.catch) r.catch(() => {}); } catch (e) { /* fine */ } }
       } } });
+    const listen = ev => {
+      ctx.say(l.en, ev.currentTarget);
+      if (l.learn) { try { const r = ctx.events.log(ctx.lines.talkEvent(l, 'listen', { step: 'look', part: 'en' })); if (r && r.catch) r.catch(() => {}); } catch (e) { /* fine */ } }
+    };
     return h('div', { className: 'home-hello' },
       h('p', { className: 'home-label', text: '老师说' }),
       h('p', { className: 'home-en', lang: 'en', text: l.en }),
       zh,
       h('div', { className: 'home-pills' },
-        h('button', { type: 'button', className: 'home-pill', on: { click: ev => ctx.say(l.en, ev.currentTarget) } }, icon('speak'), h('span', { text: '听一遍' })),
-        zhBtn));
+        h('button', { type: 'button', className: 'home-pill', on: { click: listen } }, icon('speak'), h('span', { text: '听一遍' })),
+        zhBtn),
+      l.learn ? learnBlock(ctx, l, { step: 'look' }) : null);
   }
 
   function noticeRow(n) {
@@ -295,12 +382,14 @@ export function createHomeTab(ctx) {
     const wrapCell = plan.cells.find(c => c.id === 'wrap');
     if (wrapCell && wrapCell.status === 'done') {
       const again = plan.counts && plan.counts.total > 0;
+      // 0.8.0: the lesson done, 今天 becomes the 接着练 center (ui-practice.js): the teacher's next pick and the entries
+      const hub = practiceSlot(false);
       return h('section', { className: 'home-plan' },
         h('p', { className: 'lede', text: '今天的课上完了。' }),
-        h('p', { className: 'home-summary', text: '明天见。' }),
+        hub ? null : h('p', { className: 'home-summary', text: '明天见。' }),
         gainLine(),
-        again ? h('div', { className: 'home-actions' },
-          h('button', { type: 'button', className: 'text-btn accent', text: '再练一会儿', on: { click: () => ctx.go('lesson', { light: true, again: true }) } })) : null,
+        hub || (again ? h('div', { className: 'home-actions' },
+          h('button', { type: 'button', className: 'text-btn accent', text: '再练一会儿', on: { click: () => ctx.go('lesson', { light: true, again: true }) } })) : null),
         textreadRow(), moreRows());
     }
     // plan.js decides the light lesson (DESIGN 2.2, 2.3): after 21:00, a dictation night, the day before the exam,
@@ -324,7 +413,16 @@ export function createHomeTab(ctx) {
       gainLine(),
       slots(plan),
       h('div', { className: 'home-actions' }, start, alt),
-      textreadRow(), moreRows());
+      textreadRow(), moreRows(), practiceSlot(true));
+  }
+
+  // 0.8.0 接着练 (ui-practice.js, app.practice): compact = only the entries (before the lesson, under the four cells)
+  function practiceSlot(compact) {
+    const P = ctx.practice;
+    if (!P || typeof P.mount !== 'function') return null;
+    const slot = h('div', { className: 'home-practice' });
+    try { P.mount(slot, { compact }); } catch (e) { console.warn('home: practice:', (e && e.message) || e); return null; }
+    return slot;
   }
 
   // 课文陪读 (0.5.0, ui-textread.js): photograph a page of the textbook and read it sentence by sentence with the teacher;
@@ -420,6 +518,7 @@ export function createHomeTab(ctx) {
     const now = new Date();
     checkGain(now, force);
     checkWeekly(now);
+    if (force) loadSlips(now);
   }
 
   function links(now, days, plan) {

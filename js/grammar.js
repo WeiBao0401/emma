@@ -14,6 +14,12 @@
 //   范围以外的卡（一般现在时、can、频度副词）考完再上。
 // 能排到的卡：地基卡一直能排；单元卡排到课本进度为止；ahead 的卡（频度副词）可以提前一个单元，期中季不提前。
 //
+// 10-25（roadmap-gaps 3）：补到 Unit 6，动物单元的现在进行时、as ... as、had better（topic: 'animals'），和一张七下预告卡
+//   一般过去时（preview: true，label '七下预告'）。第 5、6 单元哪个是植物、哪个是动物，书和资料对不上（research/01 A2），
+//   所以这几张卡不按 unit 死排，按 topic 找单元（topicUnits）：她在“进新单元”里答过“植物还是动物”（kv 'unit.flow'.order56）→
+//   拍过的目录页（textbook.toc）→ 拍过的单元（source 'photo'）→ 导入的单元标题 → 默认（Unit 5 植物、Unit 6 动物）。
+//   预告卡排在动物单元那几张后面，到了动物单元才开（不提前一周，不算“跟单元”）。
+//
 // 这个文件是纯逻辑（不碰 DOM、不读数据库），Node 里直接测。画界面在 ui-grammar.js。
 //
 // 一张卡：中文规则 3-4 句、5-8 个例句、10 道题分两天（part 1 = 前 5 道，part 2 = 后 5 道），每题四级提示和一道变式题，
@@ -48,7 +54,8 @@
 //                  spare: bool, isVariant: bool }
 //   kvKey(cardId) -> 'grammar:<cardId>'
 //   emptyState(cardId) / normState(raw, cardId)   一张卡的进度（kv 'grammar:<cardId>'，形状见下）；normState 兼容缺字段的老数据
-//   grammarState(kv, c?) -> { cards: { cardId: State }, progress? }   从 kv 读（kv.peek 同步）。ctx.planState() 用它填 state.grammar。
+//   grammarState(kv, c?) -> { cards: { cardId: State }, progress?, topics }   从 kv 读（kv.peek 同步）。ctx.planState() 用它填 state.grammar。
+//       topics（10-25）是 topicUnits(...).units，读 kv 'textbook' 和 'unit.flow'
 //       progress 是 kv 'progress'（只读），nextCard 拿它看课本进度和期中日期
 //   optionsOf(q) -> [{ text, correct, tag }]   选项顺序按题目 id 固定打乱（同一题每次一样）
 //   sentenceOf(q) -> string   答完以后显示和朗读的完整英文（填空把答案填进去；选择题就是答案）
@@ -62,7 +69,15 @@
 //       （事件数组：grammar.js 以外的语法题，比如 sprint.js 的兜底题，选错的误解也算）、state.grammarFocus（家长说的语法点 id）。
 //       upTo 给了就当课本进度（覆盖 progress.unit）。null = 今天没有卡（做过一份了，或者能排的都做完了）
 //       NextCard = { cardId, part: 1 | 2, reason: 'continue' | 'fix' | 'probe'（0.5.0：state.weakCards，地基探针看出“不会”的卡） | 'ahead' | 'unit' | 'exam' | 'order', why: 孩子能看的一句, tags?: [补地基的误解] }
+//       10-25：reason 多 'preview'（七下预告卡）
 //   todayCard(gstate, now, { content, upTo }) -> NextCard | null   就是 nextCard（app.js 一直调它）
+//   UNIT_FLOW_KV = 'unit.flow'（unit-flow.js 写，这里只读 order56）
+//   topicUnits({ textbook, flow, content }) -> { units: { plants: 'U5', animals: 'U6' }, certain, from: 'answer' | 'toc' | 'photo' | 'book' | 'default' }
+//       certain：她答过，或者拍过目录页 / 这两个单元的词汇表；不 certain 时“进新单元”问一句“植物还是动物”
+//   cardUnit(card, topics) -> 这张卡算哪个单元（有 topic 的按 topics，没有的就是 card.unit）
+//   unitCards(unitId, state, { content }) -> { unit, topic, cards: [CardBrief], foundations: [CardBrief], note }
+//       进这个单元要学的卡（cards）和它们要用到的卡（foundations，含 topics 的 leans）；CardBrief = { id, title, label, status, preview }
+//       给 unit-flow.js 的“进 Unit X 了”。state 同 nextCard（grammarState 的返回值或 planState 拼好的整份）
 //   misconceptionHits(state, now, { content, days, from? }) -> { 误解标签: 次数 }   最近 days 天（默认 21）选错的干扰项；kv 里每道题算一次；
 //       from（'YYYY-MM-DD'）给了就只算这天以后的
 //   grammarWarmItems(state, now, { content, max }) -> [WarmItem]   给 plan.js：今天热身混哪 1-2 道语法题
@@ -161,6 +176,9 @@ export const CONTRAST_FILE = 'curriculum/contrast.json';
 export const CONTRAST_KV = 'contrast.state';
 export const CONTRAST_MIN = 2;
 export const CONTRAST_GAP = 3;
+export const UNIT_FLOW_KV = 'unit.flow';
+// the book's two topic units whose order the sources disagree on (research/01 A2); grammar.json "topics" can override
+export const DEFAULT_TOPICS = { plants: { zh: '植物', match: ['plant'], unit: 'U5', leans: [] }, animals: { zh: '动物', match: ['friend', 'animal'], unit: 'U6', leans: [] } };
 
 // ---------------------------------------------------------------- dates (local days, like plan.js)
 
@@ -254,6 +272,7 @@ export function createContent(data) {
     cards,
     tags,
     names: { ...((data && data.names) || {}) },
+    topics: data && data.topics && typeof data.topics === 'object' ? data.topics : DEFAULT_TOPICS,
     card: id => byId.get(id) || null,
     item: itemId => items.get(itemId) || null,
     part: (cardId, n) => { const c = byId.get(cardId); return c ? c.questions.filter(q => Number(q.part) === Number(n)) : []; },
@@ -397,6 +416,9 @@ export function grammarState(kv, c = cached) {
   // 0.5.2: which 对比小卡 she has seen (contrastItems reads it); only when the key is there
   const cs = kv && typeof kv.peek === 'function' ? kv.peek(CONTRAST_KV, null) : null;
   if (cs && typeof cs === 'object') out.contrast = normContrastState(cs);
+  // 10-25: which unit is the plants one and which the animals one (the Unit 6 cards follow it)
+  const peekKv = k => (kv && typeof kv.peek === 'function' ? kv.peek(k, null) : null);
+  out.topics = topicUnits({ textbook: peekKv('textbook'), flow: peekKv(UNIT_FLOW_KV), content: c }).units;
   return out;
 }
 const stateOf = (g, id) => normState(g && g.cards && g.cards[id], id);
@@ -524,6 +546,54 @@ export function markAlt(state, { now = new Date(), reason = '', tag = null } = {
   return s;
 }
 
+// ---------------------------------------------------------------- topic units (Unit 5 and 6: plants or animals)
+
+const topicDefs = c => (c && c.topics) || (cached && cached.topics) || DEFAULT_TOPICS;
+const matchTopic = (defs, title) => {
+  const t = String(title || '').toLowerCase();
+  for (const [k, d] of Object.entries(defs)) if ((d.match || []).some(m => t.includes(String(m).toLowerCase()))) return k;
+  return null;
+};
+// Which unit id each topic is. Her own answer wins, then the photographed contents page, then units photographed from her
+// book, then the imported titles (third-party lists, the order may be the 2024 sample's), then the default.
+export function topicUnits({ textbook = null, flow = null, content: c = null } = {}) {
+  const defs = topicDefs(c);
+  const keys = Object.keys(defs);
+  const units = Object.fromEntries(keys.map(k => [k, defs[k].unit]));
+  const slots = keys.map(k => defs[k].unit);   // the unit ids the topics share (U5, U6)
+  const assign = (found, from, certain) => {
+    const taken = new Set(Object.values(found));
+    const free = slots.filter(u => !taken.has(u));
+    for (const k of keys) units[k] = found[k] || (free.length ? free.shift() : defs[k].unit);
+    return { units, certain, from };
+  };
+  const first = flow && typeof flow === 'object' ? String(flow.order56 || '') : '';
+  if (first && defs[first]) {
+    const other = keys.filter(k => k !== first);
+    const lo = slots.slice().sort((a, b) => unitRank(a) - unitRank(b));
+    return assign({ [first]: lo[0], ...(other[0] && lo[1] ? { [other[0]]: lo[1] } : {}) }, 'answer', true);
+  }
+  const tb = textbook && typeof textbook === 'object' ? textbook : {};
+  const scan = list => {
+    const found = {};
+    for (const u of Array.isArray(list) ? list : []) {
+      if (!u || !u.id) continue;
+      const k = matchTopic(defs, u.title);
+      if (k && !found[k] && slots.includes(String(u.id))) found[k] = String(u.id);
+    }
+    return found;
+  };
+  const toc = scan(tb.toc);
+  if (Object.keys(toc).length) return assign(toc, 'toc', true);
+  const photo = scan((tb.units || []).filter(u => u && u.source === 'photo'));
+  if (Object.keys(photo).length) return assign(photo, 'photo', true);
+  const book = scan(tb.units);
+  if (Object.keys(book).length) return assign(book, 'book', false);
+  return assign({}, 'default', false);
+}
+export const cardUnit = (card, topics) => (card && card.topic && topics && topics[card.topic]) || (card && card.unit) || '';
+const topicsOf = (state, g, ct) => (state && state.topics) || (g && g.topics) || topicUnits({ content: ct }).units;
+
 // ---------------------------------------------------------------- which card next
 
 // state.grammar (planState), or grammarState's return value itself
@@ -568,6 +638,7 @@ function whyOf(card, reason, lead) {
     case 'ahead': return lead ? `下个单元要学${spL(name)}，提前练一练。` : `下个单元要用到${spL(name)}，先练它。`;
     case 'unit': return lead ? `课本这个单元学${spL(name)}，跟上课本。` : `这个单元要用到${spL(name)}，先练它。`;
     case 'exam': return `期中前把${spLR(name)}练一练。`;
+    case 'preview': return `七下要学${spL(name)}，先打个底。`;
     default: return card.foundation ? `先把地基打牢：今天练${spL(name)}。` : `今天学${spL(name)}。`;
   }
 }
@@ -586,7 +657,8 @@ export function nextCard(state, now = new Date(), { content: c = null, upTo = nu
   const ex = examPhase(progress, toDate(now));
   const season = ex.on || ex.phase === 'day';
   const lo = unitRank(ex.from), hi = unitRank(ex.to);
-  const rank = card => unitRank(card.unit);
+  const topics = topicsOf(state, g, ct);
+  const rank = card => unitRank(cardUnit(card, topics));
   // the unit in focus outside the season: the one after the exam range once the exam is over, the next one from 7 days
   // before the parent's start date (progress.nextFrom), otherwise the textbook unit she is on
   let focus = null;
@@ -595,15 +667,16 @@ export function nextCard(state, now = new Date(), { content: c = null, upTo = nu
     else if (Number.isFinite(curRank) && isDay(progress.nextFrom) && day >= addDays(String(progress.nextFrom).slice(0, 10), -AHEAD_DAYS)) focus = curRank + 1;
     else if (Number.isFinite(curRank)) focus = curRank;
   }
-  const reach = card => !!card.foundation || rank(card) <= curRank || (focus !== null && rank(card) === focus)
-    || (!!card.ahead && !season && rank(card) === curRank + 1);
+  // a preview card (七下) opens only once the book is at its unit: no week ahead, no unit focus
+  const reach = card => (card.preview ? rank(card) <= curRank : !!card.foundation || rank(card) <= curRank || (focus !== null && rank(card) === focus)
+    || (!!card.ahead && !season && rank(card) === curRank + 1));
   // the exam: the unit cards in its range and the cards they lean on
   const inRange = card => !card.foundation && rank(card) >= lo && rank(card) <= hi && reach(card);
   const leansOn = list => new Set(list.flatMap(x => x.foundations || []));
   const examNeeds = leansOn(ct.cards.filter(inRange));
   const examCard = card => inRange(card) || (card.points || []).some(p => examNeeds.has(p));
   // the unit in focus: its cards and the cards they lean on
-  const focusCards = focus === null ? [] : ct.cards.filter(card => !card.foundation && rank(card) === focus && reach(card));
+  const focusCards = focus === null ? [] : ct.cards.filter(card => !card.foundation && !card.preview && rank(card) === focus && reach(card));
   const focusNeeds = leansOn(focusCards);
   const inFocus = card => focusCards.includes(card) || (card.points || []).some(p => focusNeeds.has(p));
   const focusReason = Number.isFinite(curRank) && focus > curRank ? 'ahead' : 'unit';
@@ -629,7 +702,7 @@ export function nextCard(state, now = new Date(), { content: c = null, upTo = nu
     else if (card.foundation && n >= FIX_MIN) { tier = 1; reason = 'fix'; }
     else if (weakCards.has(card.id)) { tier = 1; reason = 'probe'; }
     else if (!season && inFocus(card)) { tier = 2; reason = focusReason; }
-    else { tier = 3; reason = season ? 'exam' : 'order'; }
+    else { tier = 3; reason = season ? 'exam' : card.preview ? 'preview' : 'order'; }
     list.push({ card, part, tier, reason, n, tags, lead: focusCards.includes(card) });
   }
   // the season goes wide (the first day of every card before any second day); otherwise one card's two days, then the next
@@ -644,6 +717,24 @@ export function nextCard(state, now = new Date(), { content: c = null, upTo = nu
 // app.js asks for today's card this way: grammarState(kv) carries kv 'progress', upTo is the textbook unit
 export function todayCard(gstate, now = new Date(), { content: c = null, upTo = null } = {}) {
   return nextCard(gstate, now, { content: c, upTo });
+}
+
+// The cards a unit brings (its own, in teaching order) and the ones they lean on (the "foundations" of those cards, and the
+// topic's leans), for unit-flow.js's 进 Unit X 了 page. A preview card counts with its unit but says so (preview: true).
+export function unitCards(unitId, state = null, { content: c = null } = {}) {
+  const ct = c || cached;
+  const id = String(unitId || '');
+  if (!ct || !id) return { unit: id, topic: null, cards: [], foundations: [], note: '' };
+  const g = gOf(state) || { cards: {} };
+  const topics = topicsOf(state, g, ct);
+  const topic = Object.keys(topics).find(k => topics[k] === id) || null;
+  const def = topic ? (ct.topics || DEFAULT_TOPICS)[topic] || {} : {};
+  const brief = card => ({ id: card.id, title: card.title, label: card.label || '', status: cardStatus(stateOf(g, card.id)), preview: !!card.preview });
+  const own = ct.cards.filter(card => !card.foundation && cardUnit(card, topics) === id).sort(byOrder);
+  const needs = new Set([...own.flatMap(card => card.foundations || []), ...(def.leans || [])]);
+  const ownIds = new Set(own.map(x => x.id));
+  const leans = ct.cards.filter(card => !ownIds.has(card.id) && (card.points || []).some(p => needs.has(p))).sort(byOrder);
+  return { unit: id, topic, cards: own.map(brief), foundations: leans.map(brief), note: def.note || '' };
 }
 
 // ---------------------------------------------------------------- new sentences for reviews and the warm-up
@@ -747,7 +838,7 @@ export function summary(gstate, now = new Date(), { content: c = cached, tags = 
       for (const t of it.tags || []) tagN[t] = (tagN[t] || 0) + 1;
     }
     return {
-      id: card.id, title: card.title, unit: card.unit, label: card.label || '', foundation: !!card.foundation, status: cardStatus(s, now),
+      id: card.id, title: card.title, unit: cardUnit(card, gstate && gstate.topics), label: card.label || '', foundation: !!card.foundation, status: cardStatus(s, now),
       parts: { 1: !!(s.parts['1'] && s.parts['1'].done), 2: !!(s.parts['2'] && s.parts['2'].done) },
       answered: vals.length, ...count,
       reviewsDue: s.reviews.filter(r => r.due <= day).length, reviewsPending: s.reviews.length,

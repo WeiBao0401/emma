@@ -65,6 +65,14 @@ import { createKidMeView } from './ui-kid-me.js';
 import { createReviewRequestView } from './ui-review-request.js';
 import * as MX from './mistakes.js';
 import { createMistakesTab } from './ui-mistakes.js';
+// 0.8.0 (第 6 批): 接着练 (a layer over the app, its center on 今天 and the wrap), 每日阅读 (written in the background, read
+// from 接着练 and from 读一段 once the six episodes are done), 进新单元, 会写复查, the teacher's plan reaching the lesson
+import { createPracticeHub } from './ui-practice.js';
+import { trimOld as practiceTrim } from './practice.js';
+import { createDailyRead } from './ui-daily-read.js';
+import { createUnitFlow } from './ui-unit-flow.js';
+import * as E from './encounters.js';
+import { teacherTune, applyKnobs, referWrongCount } from './teach-tune.js';
 
 const params = new URLSearchParams(location.search);
 // ?mock=offline: mock mode where every model call fails like a dropped connection (tests the dictionary fallback)
@@ -160,19 +168,30 @@ function clozeReadyNow(now) {
 const PICK_TYPES = ['lookup', 'read_help', 'ask'];
 let recentEvents = [];
 let recentAt = 0;
+// 0.8.0: the last 7 days of answers and dictation marks (指代题 for the teacher's tune, 学校听写 for dictWarm)
+let weekAnswers = [];
 function refreshRecent() {
   recentAt = Date.now();
   const since = new Date(Date.now() - 14 * 864e5);
-  return events.query({ since, type: PICK_TYPES, limit: 20000 }).then(list => { recentEvents = Array.isArray(list) ? list : []; })
-    .catch(e => console.warn('recent events:', (e && e.message) || e));
+  const since7 = new Date(Date.now() - 7 * 864e5);
+  return Promise.all([
+    events.query({ since, type: PICK_TYPES, limit: 20000 }).then(list => { recentEvents = Array.isArray(list) ? list : []; }),
+    events.query({ since: since7, type: ['answer', 'dictation'], limit: 20000 }).then(list => { weekAnswers = Array.isArray(list) ? list : []; }),
+  ]).catch(e => console.warn('recent events:', (e && e.message) || e));
+}
+// 0.8.0 the teacher's plan reaching the lesson (teach-tune.js): the weekly think's 下周怎么教, 她卡在哪, the reading triage
+function tuneNow(now) {
+  try {
+    return teacherTune({ week: T.latestWeek(kv), stuck: T.readStuck(kv), triage: R.triageSummary(kv, { now, days: 7 }), referWrong: referWrongCount(weekAnswers, now), now });
+  } catch (e) { console.warn('plan state: teacher tune:', (e && e.message) || e); return null; }
 }
 let curriculumGen = 0;
 
 // The v1 fields of the plan's state (CONTRACTS.md 9.3). Each part is optional: whatever fails is left out and plan.js
 // falls back (sprint.js's own grammar questions and card order, no busy day, no boost).
-function v1State(now, progress) {
+function v1State(now, progress, tune = null) {
   const out = { outline: kv.peek('outline', null) };
-  let focus = [];
+  let focus = tune ? tune.points.slice() : [];
   try {
     const d = app.intake();
     const t = Date.parse(d.updated || d.at || '');
@@ -190,17 +209,27 @@ function v1State(now, progress) {
       const weak = S.weakFoundations(kv);
       focus = [...focus, ...weak.points];
       weakCards = weak.cards;
-      out.weakCards = weakCards;
       out.probeItems = S.probeItems(kv, now, { max: 2 });
       const inBook = words.favorites().map(e => e.headword).filter(Boolean);
       out.screenItems = S.screenItems(kv, now, { max: S.SCREEN_MAX, skip: inBook });
     }
   } catch (e) { console.warn('plan state: screen:', (e && e.message) || e); }
+  // 0.8.0: the cards the teacher's weekly think picked come forward like a weak foundation
+  if (tune && tune.cards.length) weakCards = [...new Set([...weakCards, ...tune.cards])];
+  if (weakCards.length) out.weakCards = weakCards;
   // 我问过的 (teacher.js): a grammar point 问老师 explained comes back first among the warm-up grammar questions; a word
   // comes back as a word card (only when it is in her word book)
   let asked = [];
   try { asked = T.askedReviewItems(kv, now) || []; } catch (e) { console.warn('plan state: asked:', (e && e.message) || e); }
   out.askedWords = asked.filter(x => x.type === 'word').map(x => x.slug).filter(slug => { const e = words.get(slug); return !!(e && e.favorited && e.fsrs); });
+  // 0.8.0: the quiz's grammar questions come from the cards (sprint.js cardQuizItems)
+  try { if (G.content()) out.grammarContent = G.content(); } catch (e) { /* fallback questions */ }
+  // 0.8.0: words the school's dictation marked wrong (mistakes.js) and the 会写 rechecks due (encounters.js)
+  try {
+    const has = slug => { const e = words.get(slug); return !!(e && e.favorited && e.fsrs); };
+    out.dictWarm = (MX.dictWarmSlugs(kv, now, { events: weekAnswers, max: 6 }) || []).filter(has);
+    out.recheck = E.recheckDue(E.readRecheck(kv), now, { max: 3 }).map(x => x.slug).filter(has);
+  } catch (e) { console.warn('plan state: dictation / recheck:', (e && e.message) || e); }
   // grammar.js content loaded: its progress decides the warm-up items and today's card (null = no card today).
   // nextCard puts a foundation card first when her recent wrong answers (or the parent's form, or the probes) point at it.
   let gs = null;
@@ -303,9 +332,11 @@ const app = {
     const dayRec = kv.peek('day:' + day, {}) || {};
     const progress = kv.peek('progress', {}) || {};
     // 0.7.0: what she said about the difficulty (kid-me.js) and what she picked to practise first today
+    const tune = tuneNow(now);
     let kid = {};
-    try { const difficulty = K.difficulty(kv, now); kid = { difficulty, knobs: K.knobs(difficulty), todayChoice: K.todayChoice(kv, now) }; }
+    try { const difficulty = K.difficulty(kv, now); kid = { difficulty, knobs: applyKnobs(K.knobs(difficulty), tune), todayChoice: K.todayChoice(kv, now) }; }
     catch (e) { console.warn('plan state: kid-me:', (e && e.message) || e); }
+    if (tune) kid.teacherTune = tune;
     // 0.7.0: two mistakes from 错题 due again today go into the warm-up (mistakes.js)
     try { kid.mistakeItems = MX.mistakeReviewItems(kv, now, { max: 2 }); } catch (e) { console.warn('plan state: mistakes:', (e && e.message) || e); }
     let unitRanks;
@@ -321,12 +352,18 @@ const app = {
       weekGoal: (kv.peek('profile', {}) || {}).weeklyGoal || 0,
       lessonDays: lessonDays(kv),
       unitRanks: unitRanks && Object.keys(unitRanks).length ? unitRanks : undefined,
-      ...v1State(now, progress),
+      ...v1State(now, progress, tune),
       ...kid,
       ...extra,
     };
   },
-  todayPlan: (extra = {}) => planToday(app.planState(extra), new Date()),
+  todayPlan: (extra = {}) => {
+    const st = app.planState(extra);
+    const p = planToday(st, new Date());
+    // 0.8.0: what the teacher's plan changed (teach-tune.js), for the parent area next to plan.js's own tune
+    if (p && st.teacherTune && st.teacherTune.why.length) p.tune = [...(Array.isArray(p.tune) ? p.tune : []), ...st.teacherTune.why];
+    return p;
+  },
   // errors Emma sees (kid-errors.js); "家长" becomes what the parent asked to be called (kv profile.parentCall)
   parentName: () => parentName(),
   kidError: (err, opts) => kidMessage(err, opts).replace(/家长/g, parentName()),
@@ -409,6 +446,9 @@ function showRoute(name, { force = false, params: p = null } = {}) {
   if (route === 'lesson' && lesson && r.name !== 'lesson' && lesson.hide) lesson.hide();   // the story stops reading aloud
   if (route === 'capture' && capture && r.name !== 'capture') capture.hide(); // leaving 拍课本 drops the photo
   if (app.textread) app.textread.hide();                                    // 课文陪读's layer closes (it drops the photo)
+  if (app.practice) app.practice.hide();                                    // 0.8.0: 接着练's round, 每日阅读, 进新单元
+  if (app.dailyRead) app.dailyRead.hide();
+  if (app.unitFlow) app.unitFlow.hide();
   if (route === 'revise' && revise && r.name !== 'revise') revise.hide();   // the review stops reading aloud
   if (route === 'mistakes' && mistakes && r.name !== 'mistakes') mistakes.hide(); // drops the photo, stops the request
   const from = route;
@@ -422,6 +462,21 @@ function showRoute(name, { force = false, params: p = null } = {}) {
   if (mod && mod.show) mod.show(p || {}, { from });
   chrome();
   window.scrollTo(0, p ? 0 : scrollPos[route] || 0);
+  // 0.8.0: after a lesson the 会写 rechecks are settled; back on 今天, 进 Unit X 了 when a new unit starts
+  if (from === 'lesson' && r.name !== 'lesson') settleWrite();
+  if (r.name === 'home' && app.unitFlow && !(onboard && onboard.needed()) && (kv.peek('onboard', {}) || {}).handed) {
+    Promise.resolve(app.unitFlow.check()).catch(e => console.warn('unit flow:', (e && e.message) || e));
+  }
+}
+// 每日阅读 (daily-read.js prepare): writes today's piece (or tomorrow's after 19:00); returns at once when offline,
+// over budget, already writing or failed lately, and never throws
+function prepareDaily() {
+  import('./daily-read.js').then(D => D.prepare(app)).catch(e => console.warn('daily reading:', (e && e.message) || e));
+}
+function settleWrite() {
+  const since = new Date(Date.now() - 60 * 864e5);
+  events.query({ since, limit: 100000 }).then(list => E.update(kv, { events: list, now: new Date() }))
+    .catch(e => console.warn('recheck:', (e && e.message) || e));
 }
 function reselect() {
   const a = reselectAction(route);
@@ -525,7 +580,9 @@ function isIdle() {
     !(app.textread && (app.textread.inSession() || app.textread.holding())) && // 课文陪读: a photo, a page being prepared or read
     !(kidme && kidme.holding()) && !(revise && revise.inSession()) &&      // 0.7.0: “我” not saved, a review running
     !(mistakes && (mistakes.inSession() || mistakes.holding())) &&          // the teacher reading or explaining, questions not kept
-    !(lib && lib.inSession && lib.inSession());                             // 单词本's 练一下
+    !(lib && lib.inSession && lib.inSession()) &&                           // 单词本's 练一下
+    !(app.practice && app.practice.inSession()) && !(app.dailyRead && app.dailyRead.inSession()) && // 0.8.0
+    !(app.unitFlow && app.unitFlow.inSession());
 }
 // Stricter, for a reload while the app is in use: nothing being read either.
 const isQuiet = () => isIdle() && !(look && look.hasResult()) && !(lib && lib.inDetail());
@@ -621,6 +678,15 @@ async function boot() {
   MX.loadBank({ fetchJSON }).catch(e => console.warn('mistakes bank:', (e && e.message) || e));
   // 课文陪读: its own full-screen layer over whatever page is open (ui-textread.js); 今天 and 问老师 open it
   app.textread = createTextRead(app);
+  // 0.8.0: 接着练, 每日阅读 and 进新单元 lay their own layers over the app like 课文陪读
+  try { app.practice = createPracticeHub(app); } catch (e) { console.warn('practice:', (e && e.message) || e); }
+  try { app.dailyRead = createDailyRead(app); } catch (e) { console.warn('daily reading:', (e && e.message) || e); }
+  try { app.unitFlow = createUnitFlow(app); } catch (e) { console.warn('unit flow:', (e && e.message) || e); }
+  // keys for desktop testing go to the 接着练 round when it is open
+  document.addEventListener('keydown', ev => {
+    if (!app.practice || !app.practice.inSession() || (ev.target && /INPUT|TEXTAREA/.test(ev.target.tagName))) return;
+    try { if (app.practice.onKey(ev)) ev.preventDefault(); } catch (e) { /* ignore */ }
+  });
   renderStatus();
   updateBadge();
   showRoute(onboard.needed() ? 'onboard' : 'home', { force: true });
@@ -635,11 +701,18 @@ async function boot() {
     renderStatus();
     if (home && home.onChange) home.onChange();
     onResumeSW();
+    prepareDaily();
   });
   document.documentElement.dataset.ready = '1';
   // lessons that ended without ui-lesson settling them (closed mid-way) are counted for the weekly page
   // 我问过的 (teacher.js): the questions 问老师 explained are checked against what she answered since
-  setTimeout(() => { weeklyCatchUp(app).catch(() => {}); T.syncAsked(app).catch(() => {}); }, 3000);
+  setTimeout(() => {
+    weeklyCatchUp(app).catch(() => {}); T.syncAsked(app).catch(() => {});
+    // 0.8.0: today's reading written in the background, old 接着练 days trimmed, the 会写 rechecks settled
+    prepareDaily();
+    practiceTrim(kv).catch(() => {});
+    settleWrite();
+  }, 3000);
   // the dictionary loads after the first paint, in small slices; views that rendered before it get the extras
   dict.ready.then(() => {
     for (const v of views) v.update();

@@ -73,7 +73,7 @@ import { endOfDay, retrievability, State, daysBetween, localMidnight } from './f
 import * as Choice from './modes/choice.js';
 import { flashcard } from './ui-review.js';
 import { dayOf, CELL_LABELS as PLAN_LABELS } from './plan.js';
-import { lessonDays, dayNumber, dictationToday } from './ui-home.js';
+import { lessonDays, dayNumber, dictationToday, talkCtx, learnBlock } from './ui-home.js';
 import { isoLocal } from './events.js';
 // 0.7.0: 今天想先练什么 at the start, 太简单 / 正好 / 太难 after each part (kid-me.js, ui-kid-me.js)
 import * as KM from './kid-me.js';
@@ -116,6 +116,10 @@ export const V1_MODULES = {
   forms: './modes/forms.js',
   // 0.7.0: 错题 due again today, in the warm-up after 变形配对
   mistakesUI: './ui-mistakes.js',
+  // 0.8.0 (第 6 批): 读出来 after the reading, 每日阅读 once the six episodes are done, 周末课
+  readaloud: './ui-readaloud.js',
+  dailyUI: './ui-daily-read.js',
+  weekend: './weekend.js',
 };
 // loadV1() -> Promise<{ listen, spell, grammar, grammarUI, phonics, sprint }>; a module that is missing or throws is null.
 // The browser's import is cached for the page's life; tests pass their own importer and get a fresh load.
@@ -491,6 +495,8 @@ export function createLessonView(ctx) {
   let light = false;
   let kind = 'standard';
   let sprint = false;
+  let weekendFull = false;   // 0.8.0: today's lesson gets the weekend extras (weekend.js fullDay)
+  let readAloudN = 0;        // 0.8.0: sentences read aloud and recorded this lesson
   let exam = { season: false, eve: false, days: null };
   let t0 = 0;
   let step = null;          // 'warmup' | 'read' | 'write' | 'wrap' while this lesson runs
@@ -644,6 +650,22 @@ export function createLessonView(ctx) {
     const wq0 = cellOf('write');
     sprint = !!(plan.quizDay || (wq0 && wq0.quiz && wq0.status === 'ready' && writeKind(wq0, mods)));
     kind = sprint ? 'sprint' : plan.kind || (light ? 'easy' : (now.getDay() === 0 || now.getDay() === 6) ? 'weekend' : 'standard');
+    // 0.8.0 周末课 (weekend.js): the first weekend lesson that is not 句型转换 does 本周语法 10 题 in 写几个词; the wrap
+    // offers 本周 10 词纸上写 and asks what to practise next week
+    weekendFull = false;
+    try {
+      const WK = mods.weekend;
+      if (!sprint && !again && WK) {
+        weekendFull = WK.fullDay(plan, now);
+        const wc = cellOf('write');
+        const cq = fnOf(mods.sprint, 'cardQuizItems');
+        if (cq && wc && wc.status !== 'done' && WK.wantsGrammar(plan, ctx.kv, now)) {
+          const items = cq(ctx.planState({ light: false }), now, WK.GRAMMAR_N);
+          const cell = WK.weekGrammarCell(wc, items);
+          if (cell !== wc && writeKind(cell, mods)) cells = cells.map(c => (c.id === 'write' ? cell : c));
+        }
+      }
+    } catch (err) { console.warn('lesson: weekend:', (err && err.message) || err); }
     sid = ctx.events.sessionId();
     t0 = Date.now();
     results = new Map();
@@ -668,6 +690,7 @@ export function createLessonView(ctx) {
     fQueue = [];
     mQueue = [];
     mistakesRight = 0;
+    readAloudN = 0;
     pendingFb = null;
     wq = null;
     writeK = '';
@@ -1169,6 +1192,24 @@ export function createLessonView(ctx) {
     if (rk) { startRead(r); return; }
     afterRead();
   }
+  // 0.8.0 读出来 (ui-readaloud.js): after the episode or today's reading, two sentences with its target words, heard,
+  // read aloud and played back. Not on a light lesson, after 21:00, or for the quiz's 期中阅读小篇.
+  function readAloudThen(res, cell) {
+    const list = res && res.done && Array.isArray(res.readAloud) ? res.readAloud.filter(x => x && x.en) : [];
+    const fn = fnOf(mods.readaloud, 'renderReadAloud');
+    if (!fn || !list.length || light || (cell && cell.short) || new Date().getHours() >= 21) { afterRead(); return; }
+    step = 'read';
+    cur = null;
+    view = null;
+    const box = h('div', { className: 'lesson-module lesson-module-readaloud' });
+    paint('读出来', 'read', box);
+    let finished = false;
+    try {
+      reading = fn(box, watchCtx('read'), { sentences: list, sid, step: 'read', label: '读出来', doneLabel: '接着上课',
+        onDone: r => { if (finished || step !== 'read') return; finished = true; reading = null; readAloudN += (r && r.recorded) || 0; afterRead(); } });
+      if (reading && typeof reading.onKey === 'function') view = { onKey: reading.onKey, stop: reading.stop };
+    } catch (err) { console.warn('lesson: read aloud:', (err && err.message) || err); reading = null; afterRead(); }
+  }
   function afterRead() {
     const w = cellOf('write');
     const k = writeKind(w, mods);
@@ -1195,6 +1236,8 @@ export function createLessonView(ctx) {
 
   // one episode: ui-reader draws it all and logs its own events (sid, step 'read'); we only learn when it is over
   function startRead(cell) {
+    // 0.8.0: all six episodes read (readCell again): today's reading (每日阅读, a bit harder) instead of one read again
+    if (cell.again && fnOf(mods.dailyUI, 'renderDailyRead')) { startDaily(cell); return; }
     step = 'read';
     cur = null;
     view = null;
@@ -1208,7 +1251,7 @@ export function createLessonView(ctx) {
       readRes = res || null;
       if (res && res.done && !stepsDone.includes('read')) stepsDone.push('read');
       if (res) pendingFb = { part: 'read', item: 'ep:' + cell.episodeId, mode: 'read' };
-      afterRead();
+      readAloudThen(res, cell);
     };
     try {
       reading = fnOf(mods.reader, 'renderEpisode')(box, watchCtx('read'), {
@@ -1221,6 +1264,27 @@ export function createLessonView(ctx) {
       reading = null;
       done(null);
     }
+  }
+
+  function startDaily(cell) {
+    step = 'read';
+    cur = null;
+    view = null;
+    const box = h('div', { className: 'lesson-module lesson-module-read' });
+    paint('今天的阅读', 'read', box);
+    let finished = false;
+    const done = res => {
+      if (finished || step !== 'read') return;
+      finished = true;
+      reading = null;
+      readRes = res && res.done ? { ...res, daily: true } : null;
+      if (res && res.done && !stepsDone.includes('read')) stepsDone.push('read');
+      readAloudThen(res, cell);
+    };
+    try {
+      reading = fnOf(mods.dailyUI, 'renderDailyRead')(box, watchCtx('read'), { sid, step: 'read', doneLabel: '接着上课', onDone: done });
+      if (reading && typeof reading.onKey === 'function') view = { onKey: reading.onKey };
+    } catch (err) { console.warn('lesson: daily reading:', (err && err.message) || err); reading = null; done(null); }
   }
 
   // ---- 0.5.0: the quiz day's 期中阅读小篇 (reader.js loadPassages, ui-reader.js renderPassage): questions only, the text
@@ -1395,7 +1459,8 @@ export function createLessonView(ctx) {
 
   const cellLabel = id => ((cellOf(id) || {}).label || LABELS[id]);
   // the title over 写几个词 says what it is today
-  const writeTitle = () => ({ grammar: '语法卡', phonics: '语音小卡', quiz: '考前小卷', order: '连词成句', transform: '句型转换' })[writeK] || cellLabel('write');
+  const writeTitle = () => (writeK === 'quiz' && ((cellOf('write') || {}).quiz || {}).kind === 'weekend' ? '本周语法 10 题'
+    : ({ grammar: '语法卡', phonics: '语音小卡', quiz: '考前小卷', order: '连词成句', transform: '句型转换' })[writeK] || cellLabel('write'));
 
   // 语法卡 / 语音小卡: the module draws the whole card, logs its own answers and says when it is done.
   //   ui-grammar.js renderGrammarCard(container, ctx, { cardId, part, onDone, sid, step, doneLabel })
@@ -1448,6 +1513,7 @@ export function createLessonView(ctx) {
   function endWrite(did = true, whole = false) {
     const any = did && (whole || spelled.size || gResults.size || (wq && wq.done));   // gResults also holds 连词成句 sentences
     if (any && !stepsDone.includes('write')) stepsDone.push('write');
+    if (any && writeK === 'quiz' && ((cellOf('write') || {}).quiz || {}).kind === 'weekend' && mods.weekend) mods.weekend.mark(ctx.kv, 'grammar').catch(() => {});
     if (any && writeK !== 'quiz') {
       const wc = cellOf('write');
       pendingFb = writeK === 'grammar' ? { part: 'grammar', item: 'g:' + ((wc && ((wc.card && typeof wc.card === 'object' ? wc.card.id : wc.card) || wc.point)) || ''), mode: 'grammar' } : { part: 'write', mode: writeK };
@@ -1588,12 +1654,14 @@ export function createLessonView(ctx) {
     if (transformRight) out.push(h('p', { className: 'small', text: `自己转对了 ${transformRight} 个句子。` }));
     if (verbRight) out.push(h('p', { className: 'small', text: `一下就找到了 ${verbRight} 句话的动词。` }));
     if (formsRight) out.push(h('p', { className: 'small', text: `一下就配对了 ${formsRight} 对变形词。` }));
-    if (readRes && readRes.done && readRes.passage) out.push(h('p', { className: 'small', text: '做完了一篇期中阅读。' }));
+    if (readRes && readRes.done && readRes.daily) out.push(h('p', { className: 'small', text: '读完了今天的阅读。' }));
+    else if (readRes && readRes.done && readRes.passage) out.push(h('p', { className: 'small', text: '做完了一篇期中阅读。' }));
     else if (readRes && readRes.done) {
       const n = readRes.n || ((cellOf('read') || {}).n);
       const got = Array.isArray(readRes.passedWords) ? readRes.passedWords : [];
       out.push(h('p', { className: 'small', text: `读完了第 ${n} 集。` + (got.length ? `故事里的 ${got.slice(0, 3).join('、')} 都认出来了。` : '') }));
     }
+    if (readAloudN) out.push(h('p', { className: 'small', text: `读出声了 ${readAloudN} 句。` }));
     if (missed) out.push(h('p', { className: 'small', text: '没做对的几个，明天热身再见。' }));
     else if (plan && plan.first && knew.length) out.push(h('p', { className: 'small', text: '明天接着来。' }));
     return out;
@@ -1628,7 +1696,11 @@ export function createLessonView(ctx) {
     const lineCtx = { name: name(), day: dayN, hour: now.getHours(), exam: exam.phase || undefined };
     const scene = closeScene(exam);
     const eveLine = scene !== 'close' ? pickLine(scene, lineCtx) : null;
-    const close = eveLine || pickLine('close', lineCtx);
+    // 0.8.0 “老师说 + 学一点” (lines.js talk) instead of the plain goodbye; the eve line stays as it is
+    let talkT = null;
+    if (!eveLine) { try { talkT = ctx.lines.talk ? ctx.lines.talk(scene, talkCtx(ctx, now)) : null; } catch (err) { talkT = null; } }
+    if (talkT) { try { const r = ctx.events.log(ctx.lines.talkEvent(talkT, 'show', { step: 'wrap' })); if (r && r.catch) r.catch(() => {}); } catch (err) { /* fine */ } }
+    const close = eveLine || talkT || pickLine('close', lineCtx);
     // the night before the exam (DESIGN 2.2): plan.js gives the wrap cell its line; the exam date says so too.
     // The teacher's eve line already says it (with its Chinese), so then it is not said twice.
     const wc = cellOf('wrap');
@@ -1653,9 +1725,54 @@ export function createLessonView(ctx) {
         askAboutReading(),
         retellSlot,
         askBlock(dayN),
+        weekendBlock(),
         lineBlock(close, 'lesson-line lesson-bye'),
+        talkT ? learnBlock(ctx, talkT, { step: 'wrap', cls: 'lesson-learn' }) : null,
         sleep ? h('p', { className: 'lesson-sleep', text: sleep }) : null,
-        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: '回到今天', on: { click: () => ctx.go('home') } }))));
+        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: '回到今天', on: { click: () => ctx.go('home') } })),
+        practiceSlot()));
+  }
+
+  // 0.8.0 接着练 (ui-practice.js) under the wrap: the teacher's next pick and the entries she can tap any time
+  function practiceSlot() {
+    const P = ctx.practice;
+    if (!P || typeof P.mount !== 'function') return null;
+    const slot = h('div', { className: 'lesson-practice' });
+    try { P.mount(slot); } catch (err) { console.warn('lesson: practice:', (err && err.message) || err); return null; }
+    return slot;
+  }
+
+  // 0.8.0 周末课 (weekend.js): 本周 10 词纸上写 (the paper dictation with this week's words) and 下周想练什么, once a week
+  function weekendBlock() {
+    const WK = mods.weekend;
+    if (!WK || !weekendFull) return null;
+    const now = new Date();
+    const rec = WK.readWeekend(ctx.kv, now);
+    const parts = [];
+    if (!rec.paper) {
+      const paperSlot = h('div', { className: 'lesson-weekend-paper' });
+      parts.push(paperSlot);
+      const since = new Date(now.getTime() - 7 * 864e5);
+      Promise.resolve(ctx.events.query({ since, type: ['answer', 'review', 'spell', 'dictation'], limit: 20000 })).then(list => {
+        const slugs = WK.weekWords(list, s => ctx.words.get(s), now);
+        if (slugs.length < 4 || !paperSlot.isConnected) return;
+        const words = slugs.map(slug => { const e = ctx.words.get(slug) || {}; return { slug, w: e.headword || slug, cn: (e.brief_cn || e.cn || '') }; });
+        paperSlot.replaceChildren(h('p', { className: 'small', text: `周末把这周的 ${words.length} 个词在纸上写一遍：老师读中文，你写英文，写完自己打勾。` }),
+          h('button', { type: 'button', className: 'text-btn accent', text: '本周 10 词纸上写', on: { click: () => { WK.mark(ctx.kv, 'paper').catch(() => {}); ctx.go('dictation', { week: true, words }); } } }));
+      }).catch(() => {});
+    }
+    if (!rec.wish) {
+      const note = h('p', { className: 'small' });
+      const row = h('div', { className: 'lesson-opts', role: 'group', 'aria-label': '选一个' }, WK.WISH_OPTIONS.map(o => h('button', { type: 'button', className: 'lesson-opt', text: o.zh, on: { click: ev => {
+        for (const b of row.children) b.disabled = true;
+        ev.currentTarget.classList.add('on');
+        WK.mark(ctx.kv, 'wish', o.id).catch(() => {});
+        log({ ...WK.wishEvent(o.id), sid });
+        note.textContent = '记下了，下周老师多排一点。';
+      } } })));
+      parts.push(h('section', { className: 'lesson-ask', 'aria-label': '下周想练什么' }, h('p', { className: 'small', text: '下周想多练什么？' }), row, note));
+    }
+    return parts.length ? h('div', { className: 'lesson-weekend' }, ...parts) : null;
   }
 
   // ---------------------------------------------------------------- leaving

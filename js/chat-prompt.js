@@ -170,6 +170,8 @@ export function buildSystemPrompt(ctx = {}) {
   else if (lv && (lvOf('grammar') >= 1 || lvOf('warmup') >= 1)) facts.push('她最近觉得太简单：小题可以出变式或让她自己造句。');
   out.push(...facts.map(f => '- ' + f));
   if (typeof c.prefs === 'string' && c.prefs.trim()) out.push(c.prefs.trim());
+  // 0.8.0: 读到哪、她最吃力的一句（reader.js chatReading）；举例时可以用她读过的句子
+  if (typeof c.reading === 'string' && c.reading.trim()) out.push(c.reading.trim().slice(0, 400));
 
   const misses = list(c.misses, 8);
   if (misses.length) {

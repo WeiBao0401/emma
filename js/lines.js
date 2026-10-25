@@ -61,6 +61,31 @@
 //     all() -> { lines, questions }
 //   kv 'lines.seen' = { id: { n: 见过几次, zh: 点过“看中文”, last: ISO } }（句子和问题共用）
 //
+// “老师说 + 学一点”（Wei 10-25，界面怎么摆见 wip/b6/lines-needs.md）
+//   lines.json 的 talks：[{ id, kind, scene: [open | close | back | late | exam], en, zh, learn: { text, zh, kind, say?, add? },
+//     words, level: 1-3, unit?: 'S' | 'U1'…, topic?: kid-me TOPICS 的 id, when? }]；talk_make 是个性化几类的填空句；talk_kinds 中文名
+//   TALK_KINDS、TALK_SCENES、TALK_KEY（kv 'lines.talk'）
+//   talk(scene | [scene], ctx) -> Talk | null
+//       ctx: { name, hour, now?: Date, unit?: 'U2'（她学到的单元）| unitOrder?: 2, level?: kid-me 难度 -1..2 | maxLevel?: 1-3,
+//              topics?: ['cats', ...]（kid.prefs.topics）, slips?: slipsFrom(...) 的结果, unitWords?: [{ w, cn, slug? }]（刚学的单元词）,
+//              streak?: 连着学了几天, exam?: examPhase, recent?: [id] }
+//       Talk = { id, scene, kind, kindZh, en, zh, showZh, learn: { text, zh, kind, say, add: { w, cn, phrase } | null },
+//                generated: '' | 'slip' | 'word' | 'likes' | 'streak' }
+//       挑法：先挑没见过的（句库轮完一遍才重复，按 lines.seen 的 n），同一 kind 不连着两次（只剩这一种时除外）；
+//       节日当天的句子最先；back / late / exam 先用本场景的句子（back 不够时借 open 的）；kind 按最久没出的轮，
+//       她喜欢的话题、当前单元的句子靠前。个性化的句子（她最近的错、连着学的天数、刚学的单元词、她的喜好）每 3 次最多 1 次，
+//       同一条在冷却期内不重复（错的 2 天、单元词 14 天、喜好 10 天、打卡 3 天）；late、exam 不出个性化的
+//   markTalk(talk | id) -> void            显示过一次：lines.seen 加 1（生成的不记），kv 'lines.talk' 记一条
+//                                          （markSeen(id) 对 talk 的 id 一样有效）
+//   talkEvent(talk, action, extra?) -> event   { type: 'line', item: 'line:<id>', line_id, scene, kind, action, learn, generated, w? }
+//       action：'show' 显示 | 'listen' 点“听一遍” | 'add' 点“加进单词本” | 'zh' 看中文；交给 ctx.events.log
+//   wordbookEntry(talk) -> { w, cn, phrase, where } | null   “加进单词本”给单词本的词（地道说法是短语，phrase: true）
+//   slipsFrom(events, { now, days: 3, word?: slug => { w, cn } }) -> [Slip]
+//       最近 days 天第一次就答错、带误解标签的作答，按标签合并：{ key, tag, n, last, ago（几天前）, slug?, other?, w?, cn?, ow?, ocn? }，
+//       新的在前。语法标签（tags.json kind grammar）和 talk_make.slip.tips 对上才能生成；词的标签（form / sound / meaning / category）
+//       要有她选错的那个词（distractor 或 choice_slug）
+//   kv 'lines.talk' = { v: 1, recent: [{ id, kind, gen, at }]（最近 60 条，新的在前）, updated }
+//
 // 依赖：无 DOM。kv 是 app.js 的 { get, set, peek }；fetchJSON 是 app.js 的同名函数。
 
 export const SCENES = ['open', 'ask', 'praise', 'close', 'back', 'late', 'easy', 'dictation', 'exam'];
@@ -73,8 +98,18 @@ export const FEATURES = ['story', 'grammar', 'listen', 'tiles', 'dictation'];
 export const TONES = ['specific', 'self', 'short', 'fact'];
 export const EXAM_SEASON_DAYS = 14;
 export const EXAM_PHASES = ['season', 'quiz', 'eve', 'day', 'done'];
+export const TALK_KINDS = ['idiom', 'unit', 'cat', 'mix', 'day', 'origin', 'twister', 'word', 'likes', 'streak'];
+export const TALK_SCENES = ['open', 'close', 'back', 'late', 'exam'];
+export const TALK_KEY = 'lines.talk';
 const SEEN_KEY = 'lines.seen';
 const ASK_KEY = 'ask.answers';
+const TALK_KEEP = 60;
+const DAY_MS = 864e5;
+const WORD_TAGS = ['form', 'sound', 'meaning', 'category'];
+const COOL_DAYS = { slip: 2, word: 14, likes: 10, streak: 3 };
+const KIND_ZH = { idiom: '地道说法', unit: '课本小知识', cat: '猫咪时间', mix: '易混词', day: '今天的日子', origin: '单词来历',
+  twister: '绕口令', word: '刚学的词', likes: '你喜欢的', streak: '连着学' };
+const TIMES_ZH = ['', '一次', '两次', '三次'];
 
 // Shown when the bank has nothing for a scene (a broken or missing file)
 const FALLBACK = {
@@ -138,6 +173,86 @@ export function weekStart(date = new Date()) {
   return d;
 }
 
+// ---------------------------------------------------------------- 老师说 + 学一点: helpers
+
+const isoDay = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const weekdayOf = d => ((d.getDay() + 6) % 7) + 1;   // 1 Monday … 7 Sunday
+export function unitOrd(u) {
+  if (typeof u === 'number' && Number.isFinite(u)) return u;
+  const s = String(u ?? '').trim().toUpperCase();
+  if (!s) return null;
+  if (s === 'S' || s === 'STARTER') return 0;
+  const m = /(\d+)/.exec(s);
+  return m ? Number(m[1]) : null;
+}
+// a day within [target - before, target]
+function nearOK(dates, before, today) {
+  const t0 = midnight(today).getTime();
+  return dates.some(s => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if (!m) return false;
+    const gap = Math.round((new Date(+m[1], +m[2] - 1, +m[3]).getTime() - t0) / DAY_MS);
+    return gap >= 0 && gap <= before;
+  });
+}
+// a talk's when: weekday, month, near, dates, before are read here; the rest as in whenOK
+function talkWhenOK(when, ctx, date) {
+  if (!when || typeof when !== 'object') return true;
+  const rest = {};
+  for (const [k, want] of Object.entries(when)) {
+    if (k === 'weekday') { if (!listOf(want).map(Number).includes(weekdayOf(date))) return false; }
+    else if (k === 'month') {
+      const m = date.getMonth() + 1;
+      const [a, b] = want;
+      if (!(a < b ? m >= a && m < b : m >= a || m < b)) return false;
+    } else if (k === 'near') {
+      const y = date.getFullYear();
+      const md = String(want);
+      if (!nearOK([y - 1, y, y + 1].map(x => `${x}-${md}`), Number(when.before) || 0, date)) return false;
+    } else if (k === 'dates') { if (!nearOK(listOf(want), Number(when.before) || 0, date)) return false; }
+    else if (k !== 'before') rest[k] = want;
+  }
+  return whenOK(rest, ctx);
+}
+const timely = t => !!(t.when && (t.when.near || t.when.dates));
+function hashOf(s) {
+  let h = 2166136261;
+  for (const ch of String(s)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  return h;
+}
+const timesZh = n => TIMES_ZH[n] || `${n} 次`;
+const agoZh = d => (d <= 0 ? '今天' : d === 1 ? '昨天' : '这几天');
+
+// her recent first-try mistakes with a misconception tag, merged by tag (and by the two words for word tags)
+export function slipsFrom(events, { now = new Date(), days = 3, word = null } = {}) {
+  const t0 = midnight(new Date(now)).getTime();
+  const from = t0 - (Math.max(1, days) - 1) * DAY_MS;
+  const by = new Map();
+  for (const e of Array.isArray(events) ? events : []) {
+    if (!e || e.type !== 'answer' || e.correct !== false || !e.misconception || e.first_try === false) continue;
+    const at = Date.parse(e.at);
+    if (!Number.isFinite(at) || at < from || at > new Date(now).getTime() + DAY_MS) continue;
+    const tag = String(e.misconception);
+    const isWord = WORD_TAGS.includes(tag);
+    const other = isWord ? (e.distractor || e.choice_slug || '') : '';
+    if (isWord && (!e.slug || !other || other === e.slug)) continue;
+    const key = isWord ? `${tag}:${e.slug}:${other}` : tag;
+    const s = by.get(key) || { key, tag, n: 0, last: '' };
+    s.n++;
+    if (!s.last || at > Date.parse(s.last)) s.last = new Date(at).toISOString();
+    if (isWord) {
+      s.slug = e.slug; s.other = other;
+      let a = null, b = null;
+      try { a = word ? word(e.slug) : null; b = word ? word(other) : null; } catch (err) { /* no lookup */ }
+      s.w = (a && a.w) || e.slug; s.cn = (a && a.cn) || '';
+      s.ow = (b && b.w) || other; s.ocn = (b && b.cn) || '';
+    }
+    by.set(key, s);
+  }
+  return [...by.values()].map(s => ({ ...s, ago: Math.round((t0 - midnight(new Date(s.last)).getTime()) / DAY_MS) }))
+    .sort((a, b) => Date.parse(b.last) - Date.parse(a.last) || b.n - a.n);
+}
+
 // ---------------------------------------------------------------- lines
 
 export function createLines({ data = {}, questions: qdata = null, kv = null, now = () => new Date(), fetchJSON = null } = {}) {
@@ -162,6 +277,10 @@ export function createLines({ data = {}, questions: qdata = null, kv = null, now
 
   async function load() {
     try { const v = kv && (await kv.get(SEEN_KEY)); seen = v && typeof v === 'object' ? v : {}; } catch (e) { seen = {}; }
+    try {
+      const v = kv && (await kv.get(TALK_KEY));
+      talkLog = v && typeof v === 'object' && Array.isArray(v.recent) ? v.recent.filter(x => x && x.id) : [];
+    } catch (e) { talkLog = []; }
     if (fetchJSON && !qdata) {
       try { setQuestions(await fetchJSON(QUESTIONS_FILE)); } catch (e) { console.warn('questions:', (e && e.message) || e); }
     }
@@ -173,6 +292,172 @@ export function createLines({ data = {}, questions: qdata = null, kv = null, now
 
   const shouldShowZh = id => { const s = seen[id]; return !s || !!s.zh || (s.n || 0) < ZH_FADE_AFTER; };
   const lastUsed = id => Math.max(used.get(id) || 0, (seen[id] && Date.parse(seen[id].last)) || 0);
+
+  // ---------------------------------------------------------------- 老师说 + 学一点
+
+  const talks = Array.isArray(data && data.talks) ? data.talks.filter(t => t && t.id && t.en && t.learn && t.learn.text) : [];
+  const talkById = new Map(talks.map(t => [t.id, t]));
+  const make = (data && data.talk_make) || {};
+  const kindZh = { ...KIND_ZH, ...((data && data.talk_kinds) || {}) };
+  let talkLog = [];               // kv 'lines.talk'.recent, newest first
+  const issued = new Map();       // id -> Talk handed out in this session (generated ones live only here)
+  let sessionKind = '';
+  const saveTalk = () => {
+    if (!kv) return;
+    const v = { v: 1, recent: talkLog.slice(0, TALK_KEEP), updated: now().toISOString() };
+    Promise.resolve().then(() => kv.set(TALK_KEY, v)).catch(e => console.warn('lines:', (e && e.message) || e));
+  };
+  function logTalk(id) {
+    const t = issued.get(id) || talkById.get(id);
+    if (!t) return;
+    talkLog.unshift({ id, kind: t.kind, gen: t.genKey || '', at: now().toISOString() });
+    talkLog = talkLog.slice(0, TALK_KEEP);
+    saveTalk();
+  }
+  const lastKind = () => sessionKind || (talkLog[0] && talkLog[0].kind) || '';
+  // a generated key shown within `days` days (prefix match for streak: one a few days whatever the count)
+  const cooling = (key, days, date) => talkLog.some(x => x.gen && (x.gen === key || (key.endsWith(':') && x.gen.startsWith(key)))
+    && date.getTime() - (Date.parse(x.at) || 0) < days * DAY_MS);
+  const pickOf = (list, seed) => (list && list.length ? list[hashOf(seed) % list.length] : '');
+  const fillT = (s, vals) => String(s || '').replace(/\{(\w+)\}/g, (m, k) => (vals[k] != null ? String(vals[k]) : m));
+
+  // the personal lines (talk_make), best first: her recent mistakes, the days in a row, a word from her unit, what she likes
+  function personal(c, date) {
+    const out = [];
+    const day = isoDay(date);
+    const slip = make.slip || {}, ws = make.word_slip || {};
+    for (const s of listOf(c.slips)) {
+      if (!s || !s.tag) continue;
+      const key = 'slip:' + (s.key || s.tag);
+      if (cooling(key, COOL_DAYS.slip, date)) continue;
+      const when = agoZh(Number(s.ago) || 0), times = timesZh(Math.max(1, Number(s.n) || 1));
+      if (WORD_TAGS.includes(s.tag)) {
+        const w = s.w || s.slug, ow = s.ow || s.other;
+        const ens = ws.en && ws.en[s.tag];
+        if (!w || !ow || !ens || !ens.length) continue;
+        const i = hashOf(key + day) % ens.length;
+        const meanings = [s.cn ? `${w}：${s.cn}` : '', s.ocn ? `${ow}：${s.ocn}` : ''].filter(Boolean).join('；');
+        out.push({ kind: 'mix', generated: 'slip', genKey: key, en: fillT(ens[i], { w, other: ow }), zh: fillT((ws.zh || {})[s.tag], { w, other: ow }),
+          learn: { text: `${w} / ${ow}`, zh: fillT(ws.learn_zh, { when, w, other: ow, times, meanings: meanings ? meanings + '。' : '' }).trim(),
+            add: s.cn ? { w, cn: s.cn, phrase: false } : null } });
+      } else {
+        const tip = slip.tips && slip.tips[s.tag];
+        if (!tip || !slip.en || !slip.en.length) continue;
+        const i = hashOf(key + day) % slip.en.length;
+        out.push({ kind: 'mix', generated: 'slip', genKey: key, en: fillT(slip.en[i], { pair: tip.pair }), zh: fillT((slip.zh || [])[i], { pair: tip.pair }),
+          learn: { text: tip.text, zh: fillT(slip.learn_zh, { when, pair: tip.pair, times, tip: tip.zh }), add: null } });
+      }
+    }
+    const st = make.streak || {};
+    const n = Math.floor(Number(c.streak) || 0);
+    if (n >= (st.min || 3) && st.lines && st.lines.length && !cooling('streak:', COOL_DAYS.streak, date)) {
+      const l = st.lines[n % st.lines.length];
+      out.push({ kind: 'streak', generated: 'streak', genKey: 'streak:' + n, en: fillT(l.en, { n }), zh: fillT(l.zh, { n }),
+        learn: { text: l.text, zh: l.learn_zh, add: { w: l.text, cn: l.learn_zh.split('。')[0], phrase: true } } });
+    }
+    const uw = make.unit_word || {};
+    for (const x of listOf(c.unitWords)) {
+      const w = x && String(x.w || x.headword || '').trim();
+      if (!w || !uw.en || !uw.en.length) continue;
+      const key = 'word:' + w.toLowerCase();
+      if (cooling(key, COOL_DAYS.word, date)) continue;
+      const i = hashOf(key + day) % uw.en.length;
+      const cn = String(x.cn || x.brief_cn || '').trim();
+      out.push({ kind: 'word', generated: 'word', genKey: key, en: fillT(uw.en[i], { w }), zh: fillT((uw.zh || [])[i], { w }),
+        learn: { text: w, zh: fillT(uw.learn_zh, { cn: cn || w, letters: [...w].filter(ch => ch !== ' ').join(' ') }),
+          say: w, add: { w, cn, phrase: /\s/.test(w) } } });
+      break;
+    }
+    const lk = make.likes || {};
+    for (const id of listOf(c.topics)) {
+      const tp = lk.topics && lk.topics[id];
+      if (!tp || !lk.lines || !lk.lines.length) continue;
+      const i = lk.lines.findIndex((l, j) => !cooling(`likes:${id}:${j}`, COOL_DAYS.likes, date));
+      if (i < 0) continue;
+      const l = lk.lines[i], v = { topic: tp[0], topic_zh: tp[1] };
+      const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+      out.push({ kind: 'likes', generated: 'likes', genKey: `likes:${id}:${i}`, topic: id,
+        en: cap(fillT(l.en, v)), zh: fillT(l.zh, v), learn: { text: fillT(l.text, v), zh: fillT(l.learn_zh, v), add: null } });
+      break;
+    }
+    return out;
+  }
+
+  function talk(scene, ctx = {}) {
+    const scenes = [...new Set(listOf(scene).map(sceneOf))].filter(s => TALK_SCENES.includes(s));
+    if (!scenes.length) return null;
+    const date = ctx.now ? new Date(ctx.now) : now();
+    const c = { name: 'Emma', hour: date.getHours(), ...ctx };
+    const S = new Set(scenes);
+    const cur = unitOrd(c.unitOrder ?? c.unit);
+    const curUnit = cur == null ? 1 : cur;
+    const maxLevel = Number(c.maxLevel) || Math.min(3, Math.max(1, 2 + Math.round(Number(c.level) || 0)));
+    const topics = new Set(listOf(c.topics));
+    const recent = new Set(listOf(c.recent));
+    const last = lastKind();
+    let pool = talks.filter(t => {
+      const sc = listOf(t.scene);
+      const inScene = sc.some(s => S.has(s)) || (S.has('back') && sc.includes('open'));
+      if (!inScene || !talkWhenOK(t.when, c, date) || !slotsOf(t).every(k => has(c[k]))) return false;
+      // exam-only asks: lines without a phase only in the long stretch (season, quiz), never the night before or the day
+      if (!sc.some(s => S.has(s) && s !== 'exam') && !(t.when && t.when.exam) && !['season', 'quiz'].includes(c.exam)) return false;
+      if (t.unit != null && (unitOrd(t.unit) ?? 0) > curUnit) return false;
+      return true;
+    });
+    const leveled = pool.filter(t => (Number(t.level) || 2) <= maxLevel);
+    if (leveled.length) pool = leveled;
+    const avoid = pool.filter(t => !recent.has(t.id));
+    if (avoid.length) pool = avoid;
+
+    // a personal line, one in three at most (late and exam stay calm)
+    if (!S.has('late') && !S.has('exam') && !talkLog.slice(0, 2).some(x => x.gen) && !(issued.size && [...issued.values()].pop().generated)) {
+      const p = personal(c, date).find(x => x.kind !== last);
+      if (p) return hand({ ...p, id: 'gen-' + p.genKey.replace(/[^\w:-]+/g, '-') + '-' + isoDay(date), scene: scenes[0], level: 1 }, c);
+    }
+
+    if (!pool.length) return null;
+    const other = pool.filter(t => t.kind !== last);
+    if (other.length) pool = other;
+    const age = new Map();
+    talkLog.forEach((x, i) => { if (!age.has(x.kind)) age.set(x.kind, i + 1); });
+    if (sessionKind) age.set(sessionKind, 0);
+    const kindAge = k => (age.has(k) ? age.get(k) : 999) + (k === 'cat' && topics.has('cats') ? 3 : 0);
+    const spec = t => listOf(t.scene).some(s => S.has(s) && (s === 'back' || s === 'late' || s === 'exam'));
+    const fresh = t => timely(t) && !(seen[t.id] && date.getTime() - (Date.parse(seen[t.id].last) || 0) < 30 * DAY_MS) && !used.has(t.id);
+    const n = t => (seen[t.id] && seen[t.id].n) || 0;
+    const near = t => (t.unit != null && unitOrd(t.unit) === curUnit ? 0 : 1) + (t.topic && topics.has(t.topic) ? 0 : 1);
+    const order = pool.map(t => ({ t, f: fresh(t) ? 0 : 1, n: n(t) + (used.has(t.id) ? 1 : 0), s: spec(t) ? 0 : 1, a: kindAge(t.kind),
+      u: near(t), l: lastUsed(t.id), h: hashOf(t.id) }))
+      .sort((x, y) => x.f - y.f || x.n - y.n || x.s - y.s || y.a - x.a || x.u - y.u || x.l - y.l || x.h - y.h);
+    const t = order[0].t;
+    return hand({ ...t, scene: listOf(t.scene).find(s => S.has(s)) || scenes[0], generated: '' }, c);
+  }
+
+  function hand(t, c) {
+    const learn = { text: fill(t.learn.text, c), zh: fill(t.learn.zh, c), kind: t.kind, say: fill(t.learn.say || t.learn.text, c), add: t.learn.add || null };
+    const out = { id: t.id, scene: t.scene, kind: t.kind, kindZh: kindZh[t.kind] || '', en: fill(t.en, c), zh: fill(t.zh, c),
+      showZh: t.generated ? true : shouldShowZh(t.id), learn, generated: t.generated || '' };
+    issued.set(t.id, { ...out, genKey: t.genKey || '' });
+    used.set(t.id, stamp());
+    sessionKind = t.kind;
+    return out;
+  }
+
+  const markTalk = t => markSeen(typeof t === 'string' ? t : t && t.id);
+
+  function talkEvent(t, action, extra = {}) {
+    const x = t && typeof t === 'object' ? t : issued.get(t) || talkById.get(t) || { id: String(t) };
+    const add = x.learn && x.learn.add;
+    return { type: 'line', item: `line:${x.id}`, line_id: x.id, scene: x.scene || null, kind: x.kind || null, action: String(action || 'show'),
+      learn: (x.learn && x.learn.text) || '', generated: x.generated || '', ...(add && add.w ? { w: add.w } : {}), ...extra };
+  }
+
+  function wordbookEntry(t) {
+    const x = t && typeof t === 'object' ? t : issued.get(t) || talkById.get(t);
+    const add = x && x.learn && x.learn.add;
+    if (!add || !add.w) return null;
+    return { w: add.w, cn: add.cn || '', phrase: !!add.phrase, where: `老师说：${fill(x.en, { name: 'Emma' })}` };
+  }
 
   function pick(scene, ctx = {}) {
     const scenes = [...new Set(listOf(scene).map(sceneOf))];
@@ -206,6 +491,8 @@ export function createLines({ data = {}, questions: qdata = null, kv = null, now
 
   function markSeen(id) {
     if (!id) return;
+    if (talkById.has(id) || issued.has(id)) logTalk(id);
+    if (issued.has(id) && issued.get(id).generated) return;   // generated talks: the history only
     const s = seen[id] || (seen[id] = { n: 0, zh: false });
     s.n = (s.n || 0) + 1;
     s.last = now().toISOString();
@@ -291,5 +578,6 @@ export function createLines({ data = {}, questions: qdata = null, kv = null, now
   }
 
   return { load, pick, markSeen, tapZh, markZhTapped: tapZh, shouldShowZh, questionsForDay, question, weekly, weeklyQuestion, answerEvent,
-    all: () => ({ lines, questions }) };
+    talk, markTalk, talkEvent, wordbookEntry, talkHistory: () => talkLog.slice(),
+    all: () => ({ lines, questions, talks }) };
 }
