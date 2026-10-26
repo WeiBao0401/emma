@@ -564,8 +564,11 @@ export function renderCloze(container, q, { onAnswer, onDone, onMiss, say, retry
     const got = low(attempt.typed);
     const other = got && got !== low(q.word);
     if (other) feedback.textContent += `这句里写 ${q.word}，${got} 是另一种写法，也对。`;
+    // the whole word typed in small letters (christmas): still right, but a name keeps its capital letter
+    const caps = !other && /[A-Z]/.test(q.word) && attempt.typed !== q.word;
+    if (caps) feedback.textContent += `注意大写：要写成 ${q.word}。` + (/^[A-Z][a-z]/.test(q.word) ? '人名、地名、节日、星期、月份，第一个字母都要大写。' : '');
     speak(q.say);
-    timer = setTimeout(next, other ? Math.max(autoNextMs, 2500) : autoNextMs);
+    timer = setTimeout(next, other || caps ? Math.max(autoNextMs, 2500) : autoNextMs);
     nextBtn.hidden = false;
   }
   function showAnswer() {
