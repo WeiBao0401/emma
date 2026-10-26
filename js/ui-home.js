@@ -13,6 +13,17 @@
 //   “再读 Unit 1 · 第 8 页”（textread.js listSaved，最近的一页）；写几个词多“句型转换”（3 个句子），小卷日读一段是“期中阅读”。
 //   周日晚上起“这周小结出来了”一行（weekly.js 的 hasNewWeekly(kv, now)，点了 go('weekly')，页面是 ui-weekly.js）。
 //   weekly.js 是别的 agent 同时写的，按需 import()：文件没有、函数没有、nav 里没有 weekly 路由时这一行不出现。
+// 0.9.0（Wei 10-26：每日阅读和接着练找不到，不要死板的固定流程）：招呼下面三张并排的卡，随时都能点，不用先上完课：
+//   ① 今天的课：约几分钟、先练什么（plan.summary）、为什么，原来的四格缩成一行小字（cellLine），“这周又能写出 N 个词。”，
+//      按钮“开始”（小卷日“开始小卷”，做了一半“接着上”），轻松版 / 标准版一个小入口；上完了“做完了”，按钮“再来一节”。
+//   ② 今天的阅读（daily-read.js）：写好了是题目、话题和约几分钟、要学的词（最多 5 个），“去读”打开 app.dailyRead；
+//      还在写或今天没写成，“老师正在写今天这篇。先读番外第 N 集。”，“去读”直接用接着练的一轮读那一集（pickFallback）；
+//      读完了“再来一篇”（当天最多 3 篇）和“读读别的”。
+//   ③ 接着练（ui-practice.js 的 card 模式）：老师推荐的下一件事一句话和“开始”；下面一行小入口：练不熟的词、错题、语法、
+//      听写、复习考试（复习做到一半是“接着复习”）。
+//   老师会先推的那张卡（primaryCard：课没上完是 ①，上完了今天的阅读写好没读是 ②，否则 ③）按钮实心、顶上一道主题色线，别的描边。
+//   iPad 竖屏 ① 占一整行、② ③ 并排；横屏（宽 1000 以上）整页放宽到约 1100，三张一排，“学一点”挪到招呼右边。
+//   底部一行：问老师、查词、课文陪读、这周 N 天。听写挪进了 ③，“我要复习考试”“有 N 道错题今天再考”两行变成 ③ 的小入口。
 // 负责：今天标签 UI agent（ui-home.js、ui-lesson.js、ui-dictation.js、css/home.css、css/lesson.css、css/dictation.css）。
 //
 // 导出
@@ -36,23 +47,31 @@
 //                                              correct 为真；这周以前写对过的不算
 //     gainText(n) -> string                   “这周又能写出 N 个词。”，0 个时为 ''
 //     optionalModule(path) -> Promise<module | null>   按需 import()，失败返回 null（ui-dictation、ui-parent 也用）
+//     0.9.0 三张卡：cellLine(plan) -> [{ id, name, status }]、lessonState(plan) -> 'todo' | 'going' | 'done'、
+//       cardStart(plan) -> 按钮字、pieceWords(piece, max = 5) -> [{ w, zh }]、
+//       readModel(dayState, homeLine, fallback) -> 第二张卡的内容、primaryCard(lessonState, readStatus) -> 'lesson' | 'read' | 'practice'、
+//       whenHidden(el, fn)（每日阅读那一层关上以后重画）
 //
 // 用到的 ctx（CONTRACTS.md）：todayPlan({ lessonDays, standard })、lines.pick / markSeen / shouldShowZh / tapZh、say、
 // go('lesson', { light | sprint }) / go('dictation', params) / go('look') / go('weekly')、kv.peek / keys、
-// events.query、statusSlot(el)、curriculum、toast、currentRoute。
+// events.query、statusSlot(el)、curriculum、toast、currentRoute；0.9.0 practice（mount 的 card 模式、start）、
+// dailyRead（open、el）、textread（open）、settings / mockForced（模拟模式下每日阅读在内存里）。
 // 样式写在 css/home.css，类名一律以 home- 开头。
 import { h, icon } from './ui-dom.js';
 import { dayOf, CELL_LABELS } from './plan.js';
 import { ROUTES } from './nav.js';
 import * as D from './dictation.js';
 import { examPhase as examPhaseOf } from './lines.js';
-import { listSaved as textreadSaved } from './textread.js';
-// 0.7.0: 我要复习考试 (review.js) and 错题 due again today (mistakes.js) get a row under the four cells
-import { activePlan as reviewActive, todayIndex as reviewToday, summaryLine as reviewLine, unitList as reviewUnits } from './review.js';
+// 0.7.0: 我要复习考试 (review.js) and 错题 due again today (mistakes.js); 0.9.0 they are small entries on the 接着练 card
+import { activePlan as reviewActive } from './review.js';
 import { summary as mistakesSummary } from './mistakes.js';
 // 0.8.0 (第 6 批): “老师说 + 学一点” (lines.js talk), her difficulty and topics for it (kid-me.js), adding a phrase to her word book
 import { difficulty as kidDifficulty, readPrefs as kidPrefs } from './kid-me.js';
 import { ownCandidate, ownExport } from './wordbook.js';
+// 0.9.0 three cards: today's reading (daily-read.js; the story it falls back on comes from reader.js), words about to slip (practice.js)
+import * as DR from './daily-read.js';
+import * as RD from './reader.js';
+import { fadingWords } from './practice.js';
 
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -276,6 +295,74 @@ export function learnBlock(ctx, t, { step = 'look', cls = 'home-learn' } = {}) {
       add));
 }
 
+// ---- 0.9.0 the three cards (今天的课 · 今天的阅读 · 接着练)
+
+// the four cells of the day as one small line in card ①: [{ id, name, status }]
+export function cellLine(plan) {
+  return ((plan && plan.cells) || []).filter(c => c && c.id).map(c => ({ id: c.id, name: slotText(c).name, status: c.status || 'ready' }));
+}
+// 'todo' nothing done yet, 'going' part of it done, 'done' the wrap is done
+export function lessonState(plan) {
+  const cells = (plan && plan.cells) || [];
+  if (cells.some(c => c && c.id === 'wrap' && c.status === 'done')) return 'done';
+  return cells.some(c => c && c.status === 'done') ? 'going' : 'todo';
+}
+// the button on card ①
+export function cardStart(plan) {
+  const st = lessonState(plan);
+  if (st === 'done') return '再来一节';
+  if (isQuizDay(plan)) return st === 'going' ? '接着做小卷' : '开始小卷';
+  return st === 'going' ? '接着上' : '开始';
+}
+// the words today's reading teaches: the new ones first, then the ones it brings back; five at most
+export function pieceWords(piece, max = 5) {
+  const seen = new Set();
+  const list = Array.isArray(piece && piece.targets) ? piece.targets : [];
+  const order = t => (t && t.kind === 'review' ? 1 : 0);
+  return list.filter(t => t && t.w).slice().sort((a, b) => order(a) - order(b))
+    .filter(t => { const k = String(t.w).toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; })
+    .slice(0, max).map(t => ({ w: t.w, zh: t.zh || '' }));
+}
+// card ② from daily-read.js dayState (st) and homeLine (line); fb is the story it falls back on ({ episodeId, n, again })
+//   -> { status: 'ready' | 'writing' | 'none' | 'done', title, text, sub, words, go, more, wait?, fb, fbLabel }
+//   wait: the first one is read and the next one is being written (the daily page waits for it)
+export function readModel(st, line = null, fb = null) {
+  const story = fb && fb.episodeId && fb.n ? fb : null;
+  const fbLabel = story ? `${story.again ? '再读' : ''}番外第 ${story.n} 集` : '';
+  const base = { status: 'none', title: '', text: '', sub: '', words: [], go: '去读', more: false, fb: story, fbLabel };
+  const fbSub = story ? (story.again ? `先再读一遍番外第 ${story.n} 集。` : `先读番外第 ${story.n} 集。`) : '先读一篇现成的。';
+  const pieces = st && Array.isArray(st.pieces) ? st.pieces : [];
+  if (st && st.ready) {
+    const p = st.ready;
+    const sub = line && line.status === 'ready' && line.sub ? line.sub : (p.topic && p.topic.zh) || '';
+    return { ...base, status: 'ready', title: (p.passage && p.passage.title) || '', text: (p.passage && p.passage.title_zh) || '', sub, words: pieceWords(p), fb: null, fbLabel: '' };
+  }
+  if (st && st.writing) {
+    if (pieces.length) return { ...base, status: 'writing', text: '老师在写下一篇。', sub: '写好了就能读。', go: '去看看', wait: true, fb: null, fbLabel: '' };
+    return { ...base, status: 'writing', text: '老师正在写今天这篇。', sub: fbSub };
+  }
+  if (pieces.length) {
+    const read = pieces.filter(p => p && p.read && p.read.done);
+    const last = read[read.length - 1] || pieces[pieces.length - 1];
+    const n = Number(st.readCount) || read.length;
+    return { ...base, status: 'done', title: (last && last.passage && last.passage.title) || '', text: n ? `今天读了 ${n} 篇。` : '今天的读过了。',
+      sub: st.canMore ? '还想读，老师再写一篇。' : '今天读够了，明天有新的。', go: st.canMore ? '再来一篇' : '读读别的', more: !!st.canMore, fb: null, fbLabel: '' };
+  }
+  return { ...base, text: '今天这篇还没写好。', sub: fbSub };
+}
+// which card the teacher would pick first: the lesson until it is done, then today's reading, then 接着练
+export function primaryCard(lesson, read) {
+  if (lesson !== 'done') return 'lesson';
+  return read === 'ready' ? 'read' : 'practice';
+}
+// call fn once when a layer (the daily reading's) is hidden again
+export function whenHidden(el, fn) {
+  if (!el || typeof fn !== 'function' || typeof MutationObserver !== 'function') return false;
+  const mo = new MutationObserver(() => { if (el.hidden || !el.isConnected) { mo.disconnect(); fn(); } });
+  mo.observe(el, { attributes: true, attributeFilter: ['hidden'] });
+  return true;
+}
+
 // ---------------------------------------------------------------- view
 
 export function createHomeTab(ctx) {
@@ -377,104 +464,167 @@ export function createHomeTab(ctx) {
       h('button', { type: 'button', className: 'text-btn accent', text: '看一眼', on: { click: () => ctx.go('dictation', { glance: true }) } }));
   }
 
-  function planBlock(now, plan) {
-    const n = x => h('span', { className: 'n', text: String(x) });
-    const wrapCell = plan.cells.find(c => c.id === 'wrap');
-    if (wrapCell && wrapCell.status === 'done') {
-      const again = plan.counts && plan.counts.total > 0;
-      // 0.8.0: the lesson done, 今天 becomes the 接着练 center (ui-practice.js): the teacher's next pick and the entries
-      const hub = practiceSlot(false);
-      return h('section', { className: 'home-plan' },
-        h('p', { className: 'lede', text: '今天的课上完了。' }),
-        hub ? null : h('p', { className: 'home-summary', text: '明天见。' }),
-        gainLine(),
-        hub || (again ? h('div', { className: 'home-actions' },
-          h('button', { type: 'button', className: 'text-btn accent', text: '再练一会儿', on: { click: () => ctx.go('lesson', { light: true, again: true }) } })) : null),
-        textreadRow(), moreRows());
+  // ---- 0.9.0 three cards under the greeting (Wei 10-26: 每日阅读和接着练要一眼看到，不要死板的固定流程):
+  // ① 今天的课 ② 今天的阅读 ③ 接着练. Each can be tapped any time; the one the teacher would pick first gets the filled
+  // button and the accent line on top (primaryCard). The four cells of the day shrink to one small line in ①.
+  const cardCls = (kind, primary) => `home-card home-card-${kind}${primary ? ' primary' : ''}`;
+  const goCls = primary => 'btn home-go' + (primary ? '' : ' home-quiet');
+
+  function cellsLine(plan) {
+    const cells = cellLine(plan);
+    if (!cells.length) return null;
+    const out = [];
+    cells.forEach((c, i) => {
+      if (i) out.push(h('span', { className: 'home-cells-dot', 'aria-hidden': 'true', text: '·' }));
+      out.push(h('span', { className: `home-cell ${c.status}` }, c.status === 'done' ? icon('check') : null, h('span', { text: c.name })));
+    });
+    return h('p', { className: 'home-cells', 'aria-label': '今天的四步：' + cells.map(c => c.name + (c.status === 'done' ? '做完了' : '')).join('、') }, ...out);
+  }
+
+  function lessonCard(plan, primary) {
+    const st = lessonState(plan);
+    const label = h('p', { className: 'home-card-label', text: '今天的课' });
+    if (st === 'done') {
+      const again = !!(plan.counts && plan.counts.total > 0);
+      return h('section', { className: cardCls('lesson', primary), 'aria-label': '今天的课' },
+        label,
+        h('p', { className: 'home-card-big', text: '做完了' }),
+        h('p', { className: 'home-card-text', text: again ? '还想练，就再来一节轻松的。' : '明天见。' }),
+        cellsLine(plan), gainLine(),
+        again ? h('div', { className: 'home-card-go' },
+          h('button', { type: 'button', className: goCls(primary), text: '再来一节', on: { click: () => ctx.go('lesson', { light: true, again: true }) } })) : null);
     }
     // plan.js decides the light lesson (DESIGN 2.2, 2.3): after 21:00, a dictation night, the day before the exam,
     // coming back after a gap, a heavy homework day (parent's form). Only those two defaults can be switched back.
     // 考前小卷 (plan.quiz / plan.sprint): ui-lesson.js reads the same plan; params.sprint is its own name for it
     const quiz = isQuizDay(plan);
-    const start = h('button', { type: 'button', className: 'btn home-start', text: startLabel(plan),
+    const start = h('button', { type: 'button', className: goCls(primary), text: cardStart(plan),
       on: { click: () => ctx.go('lesson', quiz ? { light: false, sprint: true } : { light: !!plan.light }) } });
     let alt = null;
-    if (plan.light && (plan.lightReason === 'comeback' || plan.lightReason === 'busy')) {
+    if (st === 'todo' && plan.light && (plan.lightReason === 'comeback' || plan.lightReason === 'busy')) {
       const std = ctx.todayPlan({ ...planExtra(), standard: true });
-      if (!std.light && std.minutes) alt = h('button', { type: 'button', className: 'text-btn accent', text: `标准版 · ${std.minutes} 分钟`, on: { click: () => ctx.go('lesson', { standard: true }) } });
-    } else if (!plan.light && plan.lightMinutes && plan.lightMinutes < plan.minutes) {
-      alt = h('button', { type: 'button', className: 'text-btn accent', text: `轻松版 · ${plan.lightMinutes} 分钟`, on: { click: () => ctx.go('lesson', { light: true }) } });
+      if (!std.light && std.minutes) alt = h('button', { type: 'button', className: 'text-btn accent home-alt', text: `标准版 · ${std.minutes} 分钟`, on: { click: () => ctx.go('lesson', { standard: true }) } });
+    } else if (st === 'todo' && !plan.light && plan.lightMinutes && plan.lightMinutes < plan.minutes) {
+      alt = h('button', { type: 'button', className: 'text-btn accent home-alt', text: `轻松版 · ${plan.lightMinutes} 分钟`, on: { click: () => ctx.go('lesson', { light: true }) } });
     }
+    const n = x => h('span', { className: 'n', text: String(x) });
     const why = plan.reason || plan.why || '';
-    return h('section', { className: 'home-plan' },
-      plan.minutes ? h('p', { className: 'home-minutes' }, plan.light ? '今晚约 ' : '今天约 ', n(plan.minutes), ' 分钟') : h('p', { className: 'home-minutes', text: '今天的课准备好了' }),
-      plan.summary ? h('p', { className: 'home-summary', text: plan.summary }) : null,
-      why ? h('p', { className: 'home-why', text: why }) : null,
-      gainLine(),
-      slots(plan),
-      h('div', { className: 'home-actions' }, start, alt),
-      textreadRow(), moreRows(), practiceSlot(true));
+    return h('section', { className: cardCls('lesson', primary), 'aria-label': '今天的课' },
+      label,
+      plan.minutes ? h('p', { className: 'home-card-big' }, plan.light ? '今晚约 ' : '约 ', n(plan.minutes), ' 分钟')
+        : h('p', { className: 'home-card-big', text: '准备好了' }),
+      plan.summary ? h('p', { className: 'home-card-text', text: plan.summary }) : null,
+      why ? h('p', { className: 'home-card-sub', text: why }) : null,
+      cellsLine(plan), gainLine(),
+      h('div', { className: 'home-card-go' }, start, alt));
   }
 
-  // 0.8.0 接着练 (ui-practice.js, app.practice): compact = only the entries (before the lesson, under the four cells)
+  // ② today's reading (daily-read.js). Ready: its title, topic, minutes and the new words. Still being written (or not
+  // written today): the story it falls back on, read straight away through 接着练's reading round.
+  const mockOn = () => { try { return !!((ctx.settings && ctx.settings()) || {}).mock || !!(ctx.mockForced && ctx.mockForced()); } catch (e) { return false; } };
+  let readTimer = null;
+  function readNow(now) {
+    const mock = mockOn();
+    let st = null, line = null, fb = null;
+    try { st = DR.dayState(mock ? null : ctx.kv, now, { mock }); line = DR.homeLine(mock ? null : ctx.kv, now, { mock }); } catch (e) { st = null; }
+    if (!st || !st.ready) {
+      try {
+        const c = RD.content();
+        const f = c ? DR.pickFallback({ kv: ctx.kv, content: c, passages: [], now }) : null;
+        if (f && f.kind === 'story') { const ep = c.episode(f.episodeId); if (ep) fb = { ...f, n: ep.n }; }
+      } catch (e) { fb = null; }
+    }
+    return readModel(st, line, fb);
+  }
+  function openDaily(params = {}) {
+    const dr = ctx.dailyRead;
+    if (!dr || typeof dr.open !== 'function') { if (ctx.practice) ctx.practice.start('read'); return; }
+    dr.open(params);
+    whenHidden(dr.el, () => { if (ctx.currentRoute() === 'home') render(); });
+  }
+  function readGo(m) {
+    if (m.status === 'ready') return openDaily();
+    if (m.status === 'done') return m.more ? openDaily({ more: true }) : (ctx.practice ? ctx.practice.start('read') : openDaily());
+    if (m.wait) return openDaily();
+    // not written yet: the story it falls back on, at once (the reading round of 接着练); anything else, the daily page's own fallback
+    if (m.fb && ctx.practice && typeof ctx.practice.start === 'function') {
+      ctx.practice.start('read', { option: { kind: 'episode', id: m.fb.episodeId, label: m.fbLabel, again: !!m.fb.again, minutes: 6 } });
+      return;
+    }
+    openDaily({ fallback: true });
+  }
+  function readCard(m, primary) {
+    const words = m.words.length ? h('div', { className: 'home-words' },
+      h('p', { className: 'home-words-label', text: `要学的 ${m.words.length} 个词` }),
+      h('ul', { className: 'home-chips' }, ...m.words.map(w => h('li', { className: 'home-chip' },
+        h('span', { className: 'home-chip-w', lang: 'en', text: w.w }), w.zh ? h('span', { className: 'home-chip-zh', text: w.zh }) : null)))) : null;
+    const other = m.status === 'done' && m.more && ctx.practice
+      ? h('button', { type: 'button', className: 'text-btn accent home-alt', text: '读读别的', on: { click: () => ctx.practice.start('read') } }) : null;
+    return h('section', { className: cardCls('read', primary), 'aria-label': '今天的阅读' },
+      h('p', { className: 'home-card-label', text: '今天的阅读' }),
+      m.title ? h('p', { className: 'home-card-title', lang: 'en', text: m.title }) : null,
+      m.text ? h('p', { className: 'home-card-text', text: m.text }) : null,
+      m.sub ? h('p', { className: 'home-card-sub', text: m.sub }) : null,
+      words,
+      h('div', { className: 'home-card-go' },
+        h('button', { type: 'button', className: goCls(primary), text: m.go, on: { click: () => readGo(m) } }), other));
+  }
+
+  // ③ 接着练 (ui-practice.js, app.practice): the hub draws the teacher's pick (card mode); compact = not the first pick,
+  // so its button is an outline. The small entries under it are drawn here.
   function practiceSlot(compact) {
     const P = ctx.practice;
     if (!P || typeof P.mount !== 'function') return null;
     const slot = h('div', { className: 'home-practice' });
-    try { P.mount(slot, { compact }); } catch (e) { console.warn('home: practice:', (e && e.message) || e); return null; }
+    try { P.mount(slot, { card: true, compact, onClose: () => { if (ctx.currentRoute() === 'home') render(); } }); } catch (e) { console.warn('home: practice:', (e && e.message) || e); return null; }
     return slot;
   }
-
-  // 课文陪读 (0.5.0, ui-textread.js): photograph a page of the textbook and read it sentence by sentence with the teacher;
-  // the page read last can be opened again
-  function textreadRow() {
-    const tr = ctx.textread;
-    if (!tr || typeof tr.open !== 'function') return null;
-    let last = null;
-    try { last = textreadSaved(ctx.kv)[0] || null; } catch (e) { last = null; }
-    return h('div', { className: 'home-textread' },
-      h('button', { type: 'button', className: 'text-btn accent home-textread-open', on: { click: () => tr.open() } },
-        h('b', { text: '课文陪读' }), h('span', { text: '：拍一页课文，一句一句读懂' })),
-      last && typeof tr.openSaved === 'function' ? h('button', { type: 'button', className: 'text-btn home-textread-again', text: `再读 ${last.label}`, on: { click: () => tr.openSaved(last.id) } }) : null);
+  function miniEntries(now) {
+    const P = ctx.practice && typeof ctx.practice.start === 'function' ? ctx.practice : null;
+    const btn = (text, click, n = 0) => h('button', { type: 'button', className: 'text-btn home-mini-btn', on: { click } },
+      h('span', { text }), n > 0 ? h('span', { className: 'home-mini-n', text: String(n) }) : null);
+    const items = [];
+    let fading = 0, due = 0, rp = null;
+    try { fading = fadingWords(ctx.words.favorites(), now).length; } catch (e) { fading = 0; }
+    try { due = (mistakesSummary(ctx.kv, now) || {}).due || 0; } catch (e) { due = 0; }
+    try { rp = reviewActive(ctx.kv, now); } catch (e) { rp = null; }
+    if (P) items.push(btn('练不熟的词', () => P.start('words'), fading));
+    // mistakes due today go to the 错题 tab's own review (it counts for the 1, 3, 7 days); otherwise a free round here
+    items.push(btn('错题', () => (due > 0 || !P ? ctx.go('mistakes', { review: true }) : P.start('mistakes')), due));
+    if (P) items.push(btn('语法', () => P.start('grammar')));
+    items.push(btn('听写', () => ctx.go('dictation')));
+    items.push(rp ? btn('接着复习', () => ctx.go('revise', { start: true })) : btn('复习考试', () => ctx.go('revise')));
+    return h('nav', { className: 'home-mini', 'aria-label': '自己挑一样练' }, ...items);
+  }
+  function practiceCard(now, primary) {
+    const slot = primary ? practiceSlot(false) : practiceSlot(true);
+    return h('section', { className: cardCls('practice', primary), 'aria-label': '接着练' },
+      h('p', { className: 'home-card-label', text: '接着练' }),
+      slot || h('p', { className: 'home-card-text', text: '挑一样，练几分钟。' }),
+      miniEntries(now));
   }
 
-  // 0.7.0: 我要复习考试 (接着复习 when a review is under way) and the mistakes due again today
-  function moreRows() {
-    const now = new Date();
-    const rows = [];
-    try {
-      const rp = reviewActive(ctx.kv, now);
-      const i = rp ? reviewToday(rp, now) : -1;
-      if (rp) {
-        const units = Array.isArray(rp.units) ? reviewUnits(rp.units) : '';
-        rows.push(h('button', { type: 'button', className: 'text-btn accent home-row', on: { click: () => ctx.go('revise', { start: true }) } },
-          h('b', { text: units ? `接着复习 ${units}` : '接着复习' }), i >= 0 ? h('span', { text: '：' + reviewLine(rp, i) }) : null));
-      } else {
-        rows.push(h('button', { type: 'button', className: 'text-btn accent home-row', on: { click: () => ctx.go('revise') } },
-          h('b', { text: '我要复习考试' }), h('span', { text: '：说考哪几个单元，老师排几天的复习' })));
-      }
-    } catch (e) { console.warn('home: review row:', (e && e.message) || e); }
-    try {
-      const due = (mistakesSummary(ctx.kv, now) || {}).due || 0;
-      if (due > 0) rows.push(h('button', { type: 'button', className: 'text-btn accent home-row', on: { click: () => ctx.go('mistakes', { review: true }) } },
-        h('b', { text: `有 ${due} 道错题今天再考` })));
-    } catch (e) { console.warn('home: mistakes row:', (e && e.message) || e); }
-    return rows.length ? h('div', { className: 'home-textread home-more' }, ...rows) : null;
+  // the piece is written in the background (app.js prepareDaily, about a minute): while it is not there yet, look again
+  // every 5 seconds and redraw only when card ② would change; 'none' gives up after about 3 minutes
+  let readKey = '', readTicks = 0;
+  function watchRead(m) {
+    readKey = m.status + '|' + m.title;
+    if (readTimer || !(m.status === 'writing' || m.status === 'none')) return;
+    if (m.status === 'none' && readTicks >= 36) return;
+    readTimer = setTimeout(() => {
+      readTimer = null;
+      readTicks++;
+      if (ctx.currentRoute() !== 'home') return;
+      const n = readNow(new Date());
+      if (n.status + '|' + n.title !== readKey) render(); else watchRead(n);
+    }, 5000);
   }
-
-  // the four cells of the day in one row (DESIGN 2.0): a line on top, dark for what she can do today, light for what
-  // has not opened yet (v0: 读一段、写几个词 “下周开播”)
-  // v1: the write cell names what today holds (拼几个词 / 语法卡 / 语音小卡), see slotText
-  function slots(plan) {
-    const cells = (plan.cells || []).filter(c => c && c.id);
-    if (!cells.length) return null;
-    return h('div', { className: 'home-slots', role: 'list', 'aria-label': '今天的四格' },
-      ...cells.map(c => {
-        const t = slotText(c);
-        return h('div', { className: `home-slot ${c.status}`, role: 'listitem' },
-          h('div', { className: 'home-slot-name', text: t.name }),
-          h('div', { className: 'home-slot-note', text: t.note }));
-      }));
+  function cards(now, plan) {
+    const m = readNow(now);
+    watchRead(m);
+    const first = primaryCard(lessonState(plan), m.status);
+    return h('div', { className: 'home-cards' },
+      lessonCard(plan, first === 'lesson'), readCard(m, first === 'read'), practiceCard(now, first === 'practice'));
   }
 
   // ---- v1: the weekly gain and the weekly summary, both found asynchronously and drawn when they arrive
@@ -531,10 +681,13 @@ export function createHomeTab(ctx) {
       const list = weekList(days, now).map(d => { const [y, m, dd] = d.split('-').map(Number); return WEEK[new Date(y, m - 1, dd).getDay()]; });
       ctx.toast(list.length ? `这周练了：${list.join('、')}` : (goal ? `这周的目标是 ${goal} 天` : '这周还没开始'), 2400);
     };
+    // 0.9.0: 听写 moved onto the 接着练 card; 课文陪读 (0.5.0, ui-textread.js: photograph a page of the textbook and read it
+    // sentence by sentence; its first page lists the pages read before) is one link here
+    const tr = ctx.textread && typeof ctx.textread.open === 'function' ? ctx.textread : null;
     return h('nav', { className: 'home-links', 'aria-label': '其他入口' },
-      h('button', { type: 'button', className: 'text-btn home-link', text: '明天有听写？', on: { click: () => ctx.go('dictation') } }),
       ROUTES.chat ? h('button', { type: 'button', className: 'text-btn home-link', text: '问老师', on: { click: () => ctx.go('chat') } }) : null,
       h('button', { type: 'button', className: 'text-btn home-link', text: '查词', on: { click: () => ctx.go('look') } }),
+      tr ? h('button', { type: 'button', className: 'text-btn home-link', text: '课文陪读', on: { click: () => tr.open() } }) : null,
       h('button', { type: 'button', className: 'text-btn home-week', on: { click: tapWeek } }, h('span', { text: week })));
   }
 
@@ -550,11 +703,11 @@ export function createHomeTab(ctx) {
     phase.textContent = season ? (season.label || phaseText({ unit: prog.unit }, now, titleOf)) : phaseText(prog, now, titleOf);
     let notice = null;
     try { notice = dictationNotice(ctx.kv, now); } catch (e) { console.warn('home: dictation notice:', (e && e.message) || e); }
-    body.replaceChildren(...[noticeRow(notice), weeklyRow(), greeting(), planBlock(now, plan), links(now, days, plan)].filter(Boolean));
+    body.replaceChildren(...[noticeRow(notice), weeklyRow(), greeting(), cards(now, plan), links(now, days, plan)].filter(Boolean));
   }
 
   return {
-    show() { render(); refresh(true); },
+    show() { readTicks = 0; render(); refresh(true); },
     onChange() { if (ctx.currentRoute() === 'home') { render(); refresh(false); } },
   };
 }

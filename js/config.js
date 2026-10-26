@@ -1,5 +1,5 @@
 // Keep VERSION identical to VERSION in sw.js; bump both on every release (tests/run.mjs checks).
-export const VERSION = '0.8.1';
+export const VERSION = '0.9.0';
 
 export const API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
 
@@ -35,7 +35,7 @@ export const POE_MODEL_CHOICES = [
 ];
 // Poe needs max_tokens: Claude models on Poe spend part of it on hidden reasoning and may still say "stop", so a
 // reply that used the whole budget counts as cut off and is asked for once more with double (same as server.py).
-export const POE_BUDGET = { core: 3000, lexicon: 4500, practice: 4000, zh: 3500, story: 3500 };
+export const POE_BUDGET = { core: 3000, lexicon: 4500, practice: 4000, zh: 3500, story: 3500, memo: 2000 };
 export const POE_MAX_BUDGET = 9000;
 
 // 我的 → 模型 → 测一下速度: the real core prompt for this word, once per model, with this timeout each
@@ -45,7 +45,7 @@ export const SPEED_TIMEOUT_MS = 30000;
 // No max_tokens: the Bailian json-mode doc says not to set it with structured output. A reply cut off anyway
 // (finish_reason "length") is asked for once more, then reported (ai.js).
 export const RETRY_DELAYS = [1500, 3000];
-export const TIMEOUT_MS = { core: 40000, lexicon: 60000, practice: 60000, zh: 45000, story: 60000 };
+export const TIMEOUT_MS = { core: 40000, lexicon: 60000, practice: 60000, zh: 45000, story: 60000, memo: 40000 };
 
 // Emma's data (SPEC.md, CONTRACTS.md). Same origin as Wei's dictionary (weibao0401.github.io), so every name here
 // must differ from its "wordcoach" ones. DB_VERSION never goes down (IndexedDB cannot downgrade); version 1 already

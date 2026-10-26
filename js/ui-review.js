@@ -9,7 +9,8 @@
 //   mode.render(entry, ctx) -> { el, footer, onKey(ev) }
 //   ctx: { rate(rating, {fromSwipe}), openFull(), say(text, button), app, position: {n, total, isNew}, isTall() }
 import { h, icon, marked, toast, prefersReducedMotion, dateCn } from './ui-dom.js';
-import { headwordNode, metaLine, dictFor } from './ui-entry.js';
+import { headwordNode, metaLine, dictFor, noteOf } from './ui-entry.js';
+import { memoryOf } from './word-notes.js';
 import { previewIntervals, endOfDay, State } from './fsrs.js';
 import { createSession, minutesFor } from './session.js';
 
@@ -49,6 +50,8 @@ export const flashcard = {
 
     function backSide() {
       const ss = (e.senses || []).slice(0, 3);
+      let memo = '';
+      try { const m = memoryOf(e, noteOf(ctx.app, e.headword)); memo = (m && m.mem[0] && m.mem[0].text) || ''; } catch (err) { memo = e.mnemonic || ''; }
       const mixed = ss.some(x => x && x.pos && x.pos !== ss[0].pos);
       return [
         h('p', { className: 'brief', style: '--i:0', text: e.brief_cn || '' }),
@@ -59,7 +62,8 @@ export const flashcard = {
             s.en && i === 0 ? h('p', { className: 'def', lang: 'en', text: s.en }) : null,
             s.example && i === 0 && !(quote && quote.text === s.example) ? h('p', { className: 'example', lang: 'en' }, marked(s.example, e.headword)) : null))),
         quote ? h('div', { className: 'blk', style: '--i:4' }, quoteBlock(quote, e.headword)) : null,
-        e.mnemonic ? h('p', { className: 'mnemo blk', style: '--i:5', text: e.mnemonic }) : null,
+        // 0.9.0: the first memory trick (the offline notes, else the model's mem, else the old one-line mnemonic)
+        memo ? h('p', { className: 'mnemo blk', style: '--i:5', text: memo }) : null,
         e.note ? h('p', { className: 'small blk card-note', style: '--i:6', text: '笔记：' + e.note }) : null,
         h('button', { type: 'button', className: 'text-btn accent more', style: '--i:7', on: { click: ev => { ev.stopPropagation(); ctx.openFull(); } } }, '看完整讲解', icon('chev'))];
     }

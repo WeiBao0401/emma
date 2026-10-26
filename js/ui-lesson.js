@@ -23,6 +23,10 @@
 //          设置 spellMode 'keys' 用键盘），算“写对了”；热身格的 forms（变形配对，modes/forms.js renderForms，找动词后面、连词成句前面）
 //          和 contrast（对比小卡，ui-grammar.js renderContrast，和语法题一起铺开、排在最后）。语法卡的换个讲法（kind 'alt'、intro）
 //          由 renderGrammarItem 自己画。
+//   0.9.0（Wei 10-26：会写、知道词性、巧记）：热身格的 pos（词性题，pos.js renderPos，变形配对后面）；小卷的 quiz.pos 画在拼写后面；
+//          字母块卡用 pos.js posSpellMode（题面多一行“n. 名词”，事件多 pos）。新词第一次出现、答错的词给一屏巧记
+//          （word-notes.js noteFor 的离线小本，没有就用词条上模型给的 mem、旧的 mnemonic；四选一、听音选词答错时直接挂在题下面），
+//          点“记住了”再往下走；一节课里一个词只出一次。收尾多“认对了 N 个词的词性”。
 //   收尾   老师夸一句（lines 'praise'，填今天写对的一个具体的词，带 spelled；没写对的就填认出的），
 //          “今天写对了 N 个”加最多 3 个词（DESIGN 2.2），再见用 'close'，期中季用 'exam'（没有就退回 'close'）。
 //          轻松版开头老师先说一句 'easy' 场景的话。考前一天加一句“今天早点睡。”
@@ -72,12 +76,15 @@ import { createSession } from './session.js';
 import { endOfDay, retrievability, State, daysBetween, localMidnight } from './fsrs.js';
 import * as Choice from './modes/choice.js';
 import { flashcard } from './ui-review.js';
-import { dayOf, CELL_LABELS as PLAN_LABELS } from './plan.js';
+import { dayOf, CELL_LABELS as PLAN_LABELS, MEMO_NEW_MAX } from './plan.js';
 import { lessonDays, dayNumber, dictationToday, talkCtx, learnBlock } from './ui-home.js';
 import { isoLocal } from './events.js';
 // 0.7.0: 今天想先练什么 at the start, 太简单 / 正好 / 太难 after each part (kid-me.js, ui-kid-me.js)
 import * as KM from './kid-me.js';
 import { renderFeedback, renderTodayAsk } from './ui-kid-me.js';
+// 0.9.0: the memory tricks (the offline notes and the entry's own), drawn like the word page's 巧记 block
+import { memoryBlock, noteOf, ensureNotes, headwordNode, sayBtn } from './ui-entry.js';
+import { memoryOf } from './word-notes.js';
 
 export const ENOUGH_MIN = 25;
 export const ASK_KEY = 'ask.answers';
@@ -120,6 +127,8 @@ export const V1_MODULES = {
   readaloud: './ui-readaloud.js',
   dailyUI: './ui-daily-read.js',
   weekend: './weekend.js',
+  // 0.9.0: 词性 (the warm-up's 词性题, the quiz's, and the spelling tiles with the part of speech on top)
+  pos: './pos.js',
 };
 // loadV1() -> Promise<{ listen, spell, grammar, grammarUI, phonics, sprint }>; a module that is missing or throws is null.
 // The browser's import is cached for the page's life; tests pass their own importer and get a fresh load.
@@ -144,7 +153,9 @@ const modeOf = (mod, ...names) => {
   return typeof mod.render === 'function' ? mod : null;
 };
 const listenModeOf = mods => modeOf(mods && mods.listen, 'listenMode', 'mode');
-const spellModeOf = mods => modeOf(mods && mods.spell, 'spellMode', 'tilesMode', 'mode');
+// 0.9.0: with pos.js there, the tiles show the part of speech on top (posSpellMode, same interface as spellMode)
+const spellModeOf = mods => (mods && mods.spell && mods.pos && mods.pos.posSpellMode && typeof mods.pos.posSpellMode.render === 'function'
+  ? mods.pos.posSpellMode : modeOf(mods && mods.spell, 'spellMode', 'tilesMode', 'mode'));
 const clozeModeOf = mods => modeOf(mods && mods.cloze, 'clozeMode');
 const fnOf = (mod, ...names) => { if (!mod) return null; for (const n of names) if (typeof mod[n] === 'function') return mod[n]; return null; };
 // the events name of what a mode drew: spellMode says modeId 'spell' / eventMode 'tiles', or 'mc4' when it fell back
@@ -311,6 +322,14 @@ export function warmExtras(cell) {
     .map(f => ({ kind: f.kind === 'mc4' ? 'mc4' : 'match', items: f.items.slice() })).slice(0, 1);
   const contrast = (list('contrast').length ? list('contrast') : cards('contrast')).filter(x => x && x.id).slice(0, 1);
   return { probe: list('probe'), screen: list('screen'), verb: list('verb').filter(x => typeof x === 'string'), asked: list('asked'), forms, contrast };
+}
+// 0.9.0: the 词性题 the plan put in (warm-up cell.pos, or one { type: 'pos', items } card; the quiz's quiz.pos)
+export function posRefs(cell) {
+  if (!cell) return [];
+  const ok = x => x && typeof x === 'object' && (x.kind === 'word' || x.kind === 'sentence' || x.kind === 'write') && (x.item || x.slug || x.sid);
+  if (Array.isArray(cell.pos)) return cell.pos.filter(ok);
+  const card = Array.isArray(cell.cards) ? cell.cards.find(c => c && c.type === 'pos' && Array.isArray(c.items)) : null;
+  return card ? card.items.filter(ok) : [];
 }
 // the 连词成句 sentence the plan put at the end of the warm-up (cell.order, or { type: 'order' } cards)
 export function orderRefs(cell) {
@@ -497,6 +516,10 @@ export function createLessonView(ctx) {
   let sprint = false;
   let weekendFull = false;   // 0.8.0: today's lesson gets the weekend extras (weekend.js fullDay)
   let readAloudN = 0;        // 0.8.0: sentences read aloud and recorded this lesson
+  let pQueue = [];           // 0.9.0: the warm-up's 词性题 (cell.pos), after 变形配对
+  let posRight = 0;          // 词性题 right first time
+  let memoSeen = new Set();  // 0.9.0: words whose 巧记 she has seen in this lesson (once a word)
+  let memoNew = 0;           // how many of them were new words answered right (plan.js MEMO_NEW_MAX)
   let exam = { season: false, eve: false, days: null };
   let t0 = 0;
   let step = null;          // 'warmup' | 'read' | 'write' | 'wrap' while this lesson runs
@@ -691,6 +714,11 @@ export function createLessonView(ctx) {
     mQueue = [];
     mistakesRight = 0;
     readAloudN = 0;
+    pQueue = [];
+    posRight = 0;
+    memoSeen = new Set();
+    memoNew = 0;
+    ensureNotes(ctx);
     pendingFb = null;
     wq = null;
     writeK = '';
@@ -801,8 +829,9 @@ export function createLessonView(ctx) {
     vQueue = fnOf(mods.verb, 'renderVerb') ? ex.verb : [];
     fQueue = fnOf(mods.forms, 'renderForms') ? ex.forms : [];
     mQueue = ready && fnOf(mods.mistakesUI, 'renderMistakeReview') && Array.isArray(warm.mistakes) ? warm.mistakes.filter(x => x && x.id) : [];
+    pQueue = ready && fnOf(mods.pos, 'renderPos') ? posRefs(warm) : [];
     askedSet = new Set(ex.asked);
-    if (!queue.length && !gQueue.length && !oQueue.length && !sQueue.length && !vQueue.length && !fQueue.length && !mQueue.length) { afterWarmup(); return; }
+    if (!queue.length && !gQueue.length && !oQueue.length && !sQueue.length && !vQueue.length && !fQueue.length && !mQueue.length && !pQueue.length) { afterWarmup(); return; }
     pool = buildPool(queue);
     session = queue.length ? createSession({
       queue,
@@ -835,6 +864,7 @@ export function createLessonView(ctx) {
     if (!slug && sQueue.length) { drawScreen(sQueue.splice(0)); return; }
     if (!slug && vQueue.length) { drawVerb(vQueue.splice(0)); return; }
     if (!slug && fQueue.length) { drawForms(fQueue.splice(0, 1)[0]); return; }
+    if (!slug && pQueue.length) { drawPos(pQueue.splice(0), 'warmup'); return; }
     if (!slug && mQueue.length) { drawMistakes(mQueue.splice(0)); return; }
     if (!slug && oQueue.length) { drawOrder(oQueue.splice(0, 1), 'warmup'); return; }
     if (!slug) { endWarmup(); return; }
@@ -871,8 +901,8 @@ export function createLessonView(ctx) {
     const pf = e.fsrs && e.fsrs.state !== State.New ? round2(retrievability(e.fsrs, now)) : null;
     // a word she got wrong earlier in this lesson comes back as four-choice (DESIGN 5.1 rule 4)
     const want = results.has(slug) ? 'mc4' : (modeBySlug.get(slug) || 'mc4');
-    cur = { kind: 'word', slug, item: 'w:' + slug, mode: want, p: 0.5, pf, t: Date.now(), answered: false };
     const position = { n: s.done + 1, total: s.total, isNew: !e.fsrs || e.fsrs.state === State.New };
+    cur = { kind: 'word', slug, item: 'w:' + slug, mode: want, p: 0.5, pf, t: Date.now(), answered: false, isNew: position.isNew };
     const base = { app: ctx, pool, say, position, rate: g => rate(g), onAnswer: ev => onAnswer(e, ev), distractor: distractorOf(cellOf('warmup'), slug) };
     const r = renderWord(e, want, base);
     if (!r) { skipped.add(slug); drawWarm(); return; }
@@ -897,7 +927,60 @@ export function createLessonView(ctx) {
       if (stepNow === 'warmup' && !results.has(ev.slug)) results.set(ev.slug, { first: !!ev.correct, p: cur.p, mode: cur.mode });
       // 句子里回想: an answer after 提示 (the sentence's Chinese was shown and read aloud) is not a clean first try
       if (WRITE_MODES.has(cur.mode) && !spelled.has(ev.slug)) spelled.set(ev.slug, { first: !!ev.correct && ev.first_try !== false && !(ev.hint_level > 0), p: cur.p });
+      // 0.9.0: a wrong four-choice or listening answer shows the right one already: its 巧记 goes right under it
+      if (!ev.correct && (cur.mode === 'mc4' || cur.mode === 'listen')) memoInline(e);
     }
+  }
+
+  // ---- 0.9.0 巧记 (Wei 10-26): a new word the first time it shows up, and a word she just got wrong, get their memory
+  // tricks: the offline notes (word-notes.js noteFor), else the entry's own (the model's mem, the old one-line mnemonic).
+  // Once a word in a lesson. Never while she still has to recall the word: a spelling card shows them after it is done.
+  function memoOf(e) {
+    if (!e || !e.headword) return null;
+    try { const m = memoryOf(e, noteOf(ctx, e.headword)); return m && (m.mem.length || m.trap || m.use) ? m : null; } catch (err) { return null; }
+  }
+  function memoInline(e) {
+    if (!e || memoSeen.has(e.slug) || !view || !view.el) return;
+    const m = memoOf(e);
+    if (!m) return;
+    try {
+      const box = memoryBlock(ctx, m, { word: e.headword });
+      if (!box) return;
+      memoSeen.add(e.slug);
+      box.classList.add('lesson-memo-inline');
+      view.el.append(box);
+    } catch (err) { /* the card works without it */ }
+  }
+  // one screen: the word, its part of speech and meaning, the 巧记 block, “记住了”
+  // a wrong one always; a new word answered right not on the first lesson (it ends on right answers, quickly), at most
+  // MEMO_NEW_MAX a lesson
+  function memoWanted(c, g) {
+    if (!c || !c.slug || memoSeen.has(c.slug)) return false;
+    if (g !== 1 && !(c.isNew && !(plan && plan.first) && memoNew < MEMO_NEW_MAX)) return false;
+    return !!memoOf(ctx.words.get(c.slug));
+  }
+  function showMemo(c, g, then) {
+    const e = ctx.words.get(c.slug);
+    const m = memoOf(e);
+    if (!m) { then(); return; }
+    memoSeen.add(c.slug);
+    if (g !== 1) memoNew++;
+    let gone = false;
+    const go = () => { if (gone) return; gone = true; then(); };
+    let pl = null;
+    try { const fn = fnOf(mods.pos, 'posLine'); pl = fn ? fn(e, { curriculum: ctx.curriculum }) : null; } catch (err) { pl = null; }
+    const cn = Choice.meaningOf(e) || m.cn || '';
+    const box = h('article', { className: 'lesson-module lesson-memo' },
+      h('p', { className: 'small lesson-memo-why', text: g === 1 ? '没关系，记一记，下次就对了。' : '新词，先记一记。' }),
+      h('div', { className: 'lesson-memo-head' }, headwordNode({ headword: e.headword }, { tag: 'p', syl: false }), sayBtn(ctx, e.headword, '听一遍')),
+      h('p', { className: 'lesson-memo-cn' },
+        pl && pl.abbr ? h('i', { className: 'pos', lang: 'en', text: pl.abbr }) : null,
+        pl && pl.zh ? h('span', { className: 'pos-zh', text: pl.zh }) : null,
+        cn ? h('span', { className: 'lesson-memo-mean', text: cn }) : null),
+      memoryBlock(ctx, m, { word: e.headword }),
+      h('div', { className: 'btn-row lesson-memo-go' }, h('button', { type: 'button', className: 'btn', text: '记住了', on: { click: go } })));
+    view = { onKey: ev => { if (ev.metaKey || ev.ctrlKey || ev.altKey) return; if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } } };
+    paint(step === 'write' ? writeTitle() : LABELS.warmup, step || 'warmup', box);
   }
 
   async function rate(g) {
@@ -920,6 +1003,8 @@ export function createLessonView(ctx) {
       if (!results.has(c.slug)) results.set(c.slug, { first: g >= 3, p: c.p, mode: c.mode });
       if (WRITE_MODES.has(c.mode) && !spelled.has(c.slug)) spelled.set(c.slug, { first: g >= 3, p: c.p });
     }
+    // 0.9.0: a new word the first time, or a word she got wrong: its 巧记 first, then on
+    if (!c.memo && memoWanted(c, g)) { c.memo = true; showMemo(c, g, () => { if (cur === c) rate(g); }); return; }
     lastGrade = g;
     let r = null;
     try { r = await s.rate(g, { modeId: c.mode }); } catch (err) { toast('这一下没记上，再点一次。'); return; }
@@ -1041,6 +1126,37 @@ export function createLessonView(ctx) {
       if (r && typeof r.onKey === 'function') view = { onKey: r.onKey, stop: r.stop };
       if (!r) done(null);
     } catch (err) { console.warn('lesson: forms:', (err && err.message) || err); done(null); }
+  }
+
+  // ---- 0.9.0: 词性题 (pos.js renderPos): a word or an underlined word in a sentence, which part of speech. It logs its own
+  // answer / hint events (mode 'pos', no slug); watchCtx gives each its predict (four options, 0.63)
+  function drawPos(items, where, after = null) {
+    const fn = fnOf(mods.pos, 'renderPos');
+    const box = h('article', { className: 'lesson-module lesson-module-pos' });
+    cur = { kind: 'pos', item: 'pos', mode: 'pos', t: Date.now(), answered: false };
+    view = null;
+    paint(where === 'write' ? writeTitle() : LABELS.warmup, where, box);
+    let finished = false;
+    const done = res => {
+      if (finished) return;
+      finished = true;
+      cur = null;
+      view = null;
+      for (const r of (res && res.results) || []) {
+        if (r.item && !gResults.has(r.item)) gResults.set(r.item, { first: !!r.clean });
+        if (r.clean) posRight++;
+        wrongStreak = r.clean ? 0 : wrongStreak + 1;
+      }
+      if (after) { after(); return; }
+      if (step === 'warmup') drawWarm();
+    };
+    const list = Array.isArray(items) ? items.filter(Boolean) : [];
+    if (!fn || !list.length) { done(null); return; }
+    try {
+      const r = fn(box, watchCtx(where), { items: list, sid, step: where, onDone: done });
+      if (r && typeof r.onKey === 'function') view = { onKey: r.onKey, stop: r.stop };
+      if (!r) done(null);
+    } catch (err) { console.warn('lesson: pos:', (err && err.message) || err); done(null); }
   }
 
   // ---- 0.7.0: 错题再考 (ui-mistakes.js renderMistakeReview writes kv 'mistake:<id>' and its own answer events)
@@ -1409,6 +1525,9 @@ export function createLessonView(ctx) {
       const all = k === 'quiz' ? quizItems(cell.quiz || { items: cell.items }) : [...new Set(cell.items || [])].map(slug => ({ kind: 'spell', slug }));
       const canSpell = !!spellModeOf(mods);
       const queue = all.filter(x => (x.kind === 'grammar' ? !!x.q : canSpell && !!ctx.words.get(x.slug)));
+      // 0.9.0: the quiz's 词性题 come right after its spelling, before the grammar
+      const qp = k === 'quiz' && fnOf(mods.pos, 'renderPos') ? posRefs(cell.quiz || {}) : [];
+      if (qp.length) { const at = queue.filter(x => x.kind === 'spell').length; queue.splice(at, 0, { kind: 'pos', items: qp }); }
       if (!queue.length) { endWrite(false); return; }
       wq = { queue, retried: new Set(), done: 0, total: queue.length, quiz: k === 'quiz' };
       drawWrite();
@@ -1424,6 +1543,7 @@ export function createLessonView(ctx) {
     const x = wq.queue[0];
     if (!x) { endWrite(); return; }
     if (x.kind === 'grammar') { if (!x.item) x.item = x.q.item; drawGrammar(x); return; }
+    if (x.kind === 'pos') { drawPos(x.items, 'write', () => { if (step !== 'write' || !wq) return; wq.queue.shift(); wq.done++; drawWrite(); }); return; }
     const slug = x.slug;
     const e = ctx.words.get(slug);
     if (!e) { wq.queue.shift(); drawWrite(); return; }
@@ -1446,11 +1566,14 @@ export function createLessonView(ctx) {
   function writeRate(g) {
     if (!wq || !cur || cur.kind !== 'word') return;
     const slug = cur.slug;
+    const c = cur;
     if (!cur.answered) {
       cur.answered = true;
       wrongStreak = g >= 2 ? 0 : wrongStreak + 1;
       if (!spelled.has(slug)) spelled.set(slug, { first: g >= 3, p: cur.p });
     }
+    // 0.9.0: spelled wrong: its 巧记 before the next word
+    if (g === 1 && !c.memo && memoWanted(c, g)) { c.memo = true; showMemo(c, g, () => { if (cur === c) writeRate(g); }); return; }
     wq.queue.shift();
     wq.done++;
     if (g === 1 && !wq.retried.has(slug)) { wq.retried.add(slug); wq.queue.splice(Math.min(2, wq.queue.length), 0, { kind: 'spell', slug }); }
@@ -1648,8 +1771,9 @@ export function createLessonView(ctx) {
     } else {
       out.push(h('p', { className: 'lede', text: sprint ? '小卷做完了' : results.size || spelled.size ? `今天练了 ${results.size || spelled.size} 个词` : '今天的课上完了' }));
     }
-    const gOnly = firstOf(gResults).filter(([k]) => !/^[otvf]:/.test(k)).length;
+    const gOnly = firstOf(gResults).filter(([k]) => !/^([otvf]|pos):/.test(k)).length;
     if (gOnly) out.push(h('p', { className: 'small', text: `语法题做对了 ${gOnly} 道。` }));
+    if (posRight) out.push(h('p', { className: 'small', text: `认对了 ${posRight} 个词的词性。` }));
     if (orderRight) out.push(h('p', { className: 'small', text: `自己排对了 ${orderRight} 个句子。` }));
     if (transformRight) out.push(h('p', { className: 'small', text: `自己转对了 ${transformRight} 个句子。` }));
     if (verbRight) out.push(h('p', { className: 'small', text: `一下就找到了 ${verbRight} 句话的动词。` }));

@@ -1,6 +1,6 @@
 # 模块接口约定（v1，0.6.0）
 
-给并行开发的 agent 看。v1（0.2.0，期中季）各模块已接通；0.3.0 加了第 4 个标签“问老师”和语音输入，删了家长数字码和安全话题拦截（Wei 10-24）；0.4.0 接了第 2 批：读一段（期中番外 6 集和阅读器）、8 张语法卡（先补地基）、连词成句、家长区“学得怎么样”；0.5.0 接了第 3 批（`../../design/teacher-next.md`）：阅读题方法和句子主干、求助分诊、课文陪读、期中阅读小篇、问老师接进老师的笔记本和每周想一次、地基探针和 505 摸底、找动词、句型转换；0.6.0 接了第 4 批（teacher-next 4.3、5）：句子里回想、变形配对、她点过问过的词排进复习前面、语法卡的第二讲法和对比小卡、豆包流式边说边出字、期中阅读小篇加到 6 篇。下面的表是现在代码的样子。先读这一页，再读自己负责的文件顶部注释（那里有参数和返回值的细节）。设计在 `../../DESIGN.md`，老师笔记本在 `../../design/teacher-memory.md`。
+给并行开发的 agent 看。v1（0.2.0，期中季）各模块已接通；0.3.0 加了第 4 个标签“问老师”和语音输入，删了家长数字码和安全话题拦截（Wei 10-24）；0.4.0 接了第 2 批：读一段（期中番外 6 集和阅读器）、8 张语法卡（先补地基）、连词成句、家长区“学得怎么样”；0.5.0 接了第 3 批（`../../design/teacher-next.md`）：阅读题方法和句子主干、求助分诊、课文陪读、期中阅读小篇、问老师接进老师的笔记本和每周想一次、地基探针和 505 摸底、找动词、句型转换；0.6.0 接了第 4 批（teacher-next 4.3、5）：句子里回想、变形配对、她点过问过的词排进复习前面、语法卡的第二讲法和对比小卡、豆包流式边说边出字、期中阅读小篇加到 6 篇；0.7.0、0.8.0 见第 12 到 14 节；0.9.0（Wei 10-26）接了巧记、会写和词性、首页三张卡（第 15 节）。下面的表是现在代码的样子。先读这一页，再读自己负责的文件顶部注释（那里有参数和返回值的细节）。设计在 `../../DESIGN.md`，老师笔记本在 `../../design/teacher-memory.md`。
 
 **三条规矩**
 1. 只改分配给自己的文件（见第 1 节）。需要别人文件里的改动，写进返回值的 `needs`，由接线 agent 合并。
@@ -32,9 +32,10 @@
 | 问老师（0.3.0） | `chat.js`、`chat-prompt.js`、`ui-chat.js`、`../css/chat.css`、`tests/chat.test.mjs`；0.5.0 `teacher.js`、`ui-teacher.js`、`../css/teacher.css`（类名 `teacher-`）、`tests/teacher.test.mjs` | 自由对话：老师先给结论、一次讲一个点、只用她学过的词举例、最后问一道小题；可以拍题；流式；对话存 kv `chat:日期`。0.5.0：“我问过的”第 2、5 天再考、换个讲法、讲对（语法卡原文当准绳、例句查词）、每周想一次（teacher-next 6.1、6.3-6.5） |
 | 语音输入（0.3.0） | `voice-input.js`、`tests/voice-input.test.mjs`、`../../research/09-voice-input.md`；0.6.0 `voice-stream.js`（豆包流式 2.0 适配器）、`pcm-tap-worklet.js`（同源 AudioWorklet，CSP 拦 Blob 网址）、`tests/voice-stream.test.mjs`、`../../tools/doubao-stream/`（真凭据手动试：`try-stream.mjs`、两段样音、笔记） | 按住说话：录音转 16 kHz WAV，百炼 `qwen-audio-3.0-asr-flash` 或豆包录音文件极速版识别成文字。0.6.0：用豆包时边说边出字（流式），连不上时提示“换个方式听写。”，把录好的整段交给百炼 |
 | 单词从认得到会用（0.6.0） | `modes/cloze.js`（句子里回想、`pickedWords`）、`modes/forms.js`（变形配对）、`../css/cloze.css`（类名 `cloze-`、`forms-`）、`../curriculum/forms.json`、`tests/cloze.test.mjs`、`tests/forms.test.mjs` | 热身里把几张拼写卡放进她读过的句子里（首字母加这句的中文）；原形和变形连线或四选一（66 对：复数、三单、过去式）；她自己点过、问过的词排进复习（teacher-next 5） |
-| 孩子版报错与查词 | `kid-errors.js`、`prompts.js` | 孩子看到的报错；初一版查词提示词（课本义项在前，1-2 个义项，例句只用她认识的词） |
+| 孩子版报错与查词 | `kid-errors.js`、`prompts.js`；0.9.0 `word-notes.js`、`../css/entry-memory.css`（类名 `pos-`、`mem-`）、`tests/word-notes.test.mjs`；巧记小本 `../curriculum/word-notes-a.json`、`word-notes-b.json`（`tests/word-notes-b.test.mjs`） | 孩子看到的报错；初一版查词提示词（课本义项在前，1-2 个义项，例句只用她认识的词）。0.9.0：查词页的词性写全、释义后面的巧记块（离线小本先，模型的 `mem` 再，旧的 `mnemonic` 最后） |
+| 词性（0.9.0） | `pos.js`、`../curriculum/pos-guide.json`、`tests/pos.test.mjs` | 词性小卡（是干什么的、一个画面、怎么认）、给词选词性和句子里画线的词选词性、字母块题面的词性一行（`posSpellMode`） |
 | 体检页 | `../check/`、`../../tests/check-page.test.mjs` | DESIGN 10.2 的七项；`check/` 独立能打开，永远不建 `emma` 库 |
-| 接线 | `app.js`、`nav.js`、`config.js`、`db.js`、`ai.js`、`words.js`、`banners.js`、`ui-look.js`、`ui-lib.js`、`ui-entry.js`、`ui-dom.js`、`../index.html`、`../sw.js`、`../manifest.webmanifest`、本文件、`tests/run.mjs`、`scaffold.test.mjs`、`wiring.test.mjs`、`all.mjs`、`lib.mjs`；0.5.0 `modes/verb.js`（找动词）、`../css/verb.css`（类名 `vb-`）、`tests/b3-wiring.test.mjs`；0.6.0 `tests/b4-wiring.test.mjs` | 合并 needs |
+| 接线 | `app.js`、`nav.js`、`config.js`、`db.js`、`ai.js`、`words.js`、`banners.js`、`ui-look.js`、`ui-lib.js`、`ui-entry.js`、`ui-dom.js`、`../index.html`、`../sw.js`、`../manifest.webmanifest`、本文件、`tests/run.mjs`、`scaffold.test.mjs`、`wiring.test.mjs`、`all.mjs`、`lib.mjs`；0.5.0 `modes/verb.js`（找动词）、`../css/verb.css`（类名 `vb-`）、`tests/b3-wiring.test.mjs`；0.6.0 `tests/b4-wiring.test.mjs`；0.9.0 `tests/b7-wiring.test.mjs`、`tests/audio-session.test.mjs` | 合并 needs |
 | 锁定，不改 | `dict.js`、`fsrs.js`、`session.js`、`speech.js`、`tts.js` | 和 Wei 的词典逐字一致（`tests/base-verbatim.test.mjs`）。要改先问 Wei |
 
 新加文件尽量不要。确实要加，写进 needs：接线 agent 要把它加进 `sw.js` 的 SHELL（不加的话 `run.mjs` 的“SHELL is missing”会失败，这是预期的）。`web/curriculum/` 里新加公开 JSON，还要加进 `run.mjs` 那条 `no API key, textbook file or word data inside web/` 的 `PUBLIC_JSON`。
@@ -167,6 +168,7 @@
 | `book_pos` | 书上的词性（拍课本，v1） | 拍课本 |
 | `needs_core: true` | 还没有 AI 讲解，第一次打开时补 | 课本导入 |
 | `level` | 词页上的等级标签，由程序定（`prompts.levelLabel`：“课本 Unit 3 / 小学词 / 初中词 / 课外词”），模型回的值不用 | `words.js`（`levelFor`） |
+| `posZh`、`mem`、`trap`、`use`（0.9.0） | 巧记：`posZh` 词性中文名；`mem: [{ kind: 'picture' \| 'split' \| 'link' \| 'story' \| 'sound' \| '', text }]`（最多 2 条）；`trap` 容易错；`use` 最常用的一个搭配（英文加全角括号里的中文）。存的时候已经过 `prompts.cleanMemory` | `words.js`（core 回复，或 `fillMemory` 的 memo 回复；只补空的字段） |
 
 别的模块要改词条，只能走 `words.patch(slug, fields)`：只认 `PATCH_FIELDS`（`write`、`write_at`、`write_from`、`scope`），存库后触发 `onChange`（type `'patch'`）。
 
@@ -288,6 +290,11 @@ v1 拍课本另加：`units[i].words[j]` 可带 `pos`、`source: 'photo'`、`cn_
 - 语法卡：`answer` 的 `kind` 多 `'alt'`（第二讲法的题，item `g:<卡>:a01` 这样）和 `'contrast'`（对比小卡的快判断，mode `'grammar'`，item `gc:<卡 id>:<q>`，另带 `contrast: <卡 id>`，选错时 `misconception` 是那一题的标签）。对比小卡的 `predict` 由 ui-lesson 补记，`p_base` 0.75（两个选项）
 - `teacher.js` `MODE_ZH` 多 `forms: '变形配对'`，`cloze` 叫“句子里回想”
 
+**0.9.0 加的字段**（只加不改，不加新事件类型）
+- 词性题：`answer` mode `'pos'`（`MODES` 加了，`GUESS.pos = 0.25`），item `'pos:w:<slug>'` 或 `'pos:s:<句子 id>'`，字段 `kind`（`word` / `sentence`）、`pos`（对的词性）、`choice`（她选的词性）、`word`、`sentence?`，**不带 slug**（不算进单词的“认得 / 会写了”），结束那条带 `done`、`grade`；`hint` 带 mode `'pos'`、`level: 1`、`auto: true`。`predict` 由 ui-lesson / 复习考试的 `watchCtx` 补记，`p_base` 0.63。`weekly.js`、`teacher.js` 的 `WORD_MODES` 不加 `'pos'`
+- 字母块（`posSpellMode`）的 `answer` 多 `pos`
+- 上课里的巧记一屏不记事件
+
 `log(event)` 写失败不抛错，返回 `null`：作答不能因为记录失败卡住。
 
 ---
@@ -305,7 +312,7 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 ## 8. CSS
 
 - 共用的颜色、字号、间距（`--ink`、`--paper`、`--accent`、`--rule`、`--serif`、`--gutter`、`--col` 等）和词典原来的样式都在 `../index.html` 里，别重新定义。
-- 每个 UI agent 只写自己的文件，`index.html` 已经引用：`css/home.css`（类名 `home-`）、`lesson.css`（`lesson-`）、`dictation.css`（`dict-`）、`choice.css`（`mc4-`）、`parent.css`（`parent-`）、`onboard.css`（`onboard-`）；v1：`spell.css`（`spell-`、`listen-`）、`grammar.css`（`gram-`）、`phonics.css`（`ph-`）、`weekly.css`（`weekly-`）、`capture.css`（`cap-`）；0.3.0：`chat.css`（`chat-`）；0.4.0：`reader.css`（`rd-`）、`order.css`（`ord-`）；0.5.0：`textread.css`（`tr-`）、`teacher.css`（`teacher-`）、`screen.css`（`scr-`，地基探针借 `gram-` 样式）、`verb.css`（`vb-`）。
+- 每个 UI agent 只写自己的文件，`index.html` 已经引用：`css/home.css`（类名 `home-`）、`lesson.css`（`lesson-`）、`dictation.css`（`dict-`）、`choice.css`（`mc4-`）、`parent.css`（`parent-`）、`onboard.css`（`onboard-`）；v1：`spell.css`（`spell-`、`listen-`）、`grammar.css`（`gram-`）、`phonics.css`（`ph-`）、`weekly.css`（`weekly-`）、`capture.css`（`cap-`）；0.3.0：`chat.css`（`chat-`）；0.4.0：`reader.css`（`rd-`）、`order.css`（`ord-`）；0.5.0：`textread.css`（`tr-`）、`teacher.css`（`teacher-`）、`screen.css`（`scr-`，地基探针借 `gram-` 样式）、`verb.css`（`vb-`）；0.9.0：`entry-memory.css`（`pos-`、`mem-`，查词页和上课里的巧记块）；词性题借 `mc4-`、`ord-mark`、`.pos`，不另加文件；上课里的巧记一屏 `lesson-memo*` 在 `lesson.css`。
 - 现成可用的类：`.btn`（一屏一个实心按钮）、`.text-btn`、`.text-btn.accent`、`.lede`（大号衬线句子）、`.small`、`.runhead`、`.say`（朗读小按钮）、`.serif`、`.num`。
 - iPad 竖屏一栏，最宽 `--col`（720px），横屏居中。主题色由 `:root[data-accent]` 换 `--accent` 和 `--tag-bg`。
 - 风格：词典的安静干净（衬线词头、细线、留白），不要卡通吉祥物。文案中文为主，弯引号“ ”，不用破折号，句子短。
@@ -343,12 +350,13 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 - 0.5.0 state 新字段：`probeItems`、`screenItems`、`verbItems`、`askedWords`、`transformItems`、`readTune`、`examPassages`、`examReading`、`weakCards`（给 grammar.js）。常量：`PROBE_WARM = { standard: 2, light: 1 }`、`SCREEN_WARM = { standard: 12, season: 6, words: 15, tight: 6 }`、`VERB_WARM = { standard: 1, sentences: 2 }`、`ASKED_WORDS = { standard: 2, light: 1 }`。第一节课、小卷日、考前一天不放这几样；摸底另外轻松版和考试当天不放，找动词轻松版不放。`readTune.hard === 'words'` 或 `main === 'word'` 摸底给 15 个，`'sentences'` / `'sentence'` 找动词出 2 道。时长超了的顺序见 `plan.js` 的注释（摸底先减，再字母块、语法题减到 1 道、探针减到 1 道……），有故事的上学日守在 15 分钟
 - 0.6.0 state 新字段：`clozeReady`（`cloze.clozeReady`，app.js 每天算一次，只算复习卡）、`formsItem`（`forms.formsItems`）、`contrastItems`（`grammar.contrastItems`）、`picked`（`cloze.pickedSlugs`：14 天内的 lookup / read_help / ask 事件和 kv，只留单词本里有的，复习过了就不算）。常量：`CLOZE_WARM = { standard: 2, season: 3, light: 1, lightSeason: 2 }`、`PICKED_WORDS = { standard: 2, light: 1 }`、`CONTRAST_WARM = 1`。句子里回想不挑第一张、新词、读前见一面和问过的词，期中季先挑重点词，别的日子先挑“写得出”线开着的（字母块卡优先换）；第一节课、小卷日、考前一天不出（和字母块一样）。变形配对、对比小卡轻松版也不放。`picked` 像 `boost` 一样在同一档里排前面（排在家长说的错词后面），没到期的补进热身（不补新词和今天复习过的），有故事的日子减认词卡时不减它们。
 - 0.6.0 时长超了的固定顺序（接在 0.5.0 的后面）：留到明天的认词卡 → 连词成句那句 → 摸底减到 6 个（期中季不摸）→ 字母块换回四选一 → 句子里回想减到 1 张 → 有探针或对比小卡时语法题减到 1 道 → 不摸底 → 探针减到 1 道 → 不出变形配对 → 不出对比小卡 → 句子里回想换回四选一 → 语法题 → 找动词 → 探针。语法题里 `intro: true` 的换个讲法多算 40 秒
+- 0.9.0 state 新字段：`entryOf(slug)`（词条，词性题用）、`curriculum`（课标详表的词性）、`posEvents`（最近 7 天的 answer / dictation 事件，她选错的词性先）。Plan：热身格多 `pos: [PosItem]`（`cards` 里最后一组 `{ type: 'pos', id: 'pos', item: 'pos', mode: 'pos', items }`，变形配对后面），`counts.pos`、`counts.written`（热身里写出来的卡）。常量 `MEMO_SECONDS = 10`、`MEMO_NEW_MAX = 6`（上课里新词的巧记一屏，每个新词多算 10 秒，最多 6 个）。热身至少一半写出来：`eligible` 用 `writeEligible`，两处 `assignModes` 传 `minShare: WRITE_SHARE`（今天不拼的日子是 0）；读前见一面的卡固定四选一（不落到听音）。时长超了的顺序：有故事的日子留认词卡 → 多出一半的字母块换回四选一 → 连词成句那句 → 摸底减到 6 个（她说“生词太多”时这一步挪到留认词卡后面）→ 期中季不摸 → 没故事的日子也留认词卡（最少 12 张）→ 字母块、句子里回想换回四选一，但写出来的不低于一半 → 有探针时语法题减到 1 道 → 词性题减到 1 道 → 不摸底 → 探针 1 道 → 变形配对 → 对比小卡 → 句子里回想（不低于一半）→ 语法题 → 找动词 → 探针 → 错题 1 道 → 还超才让写出来的低于一半
 - 字段的细节见文件注释。`ctx.planState()` 负责拼 state；要加 state 字段写进 needs。
 
 ### 9.3.1 `sprint.js`（v1，期中季）
 - 导出和形状都在文件顶部注释：`SPRINT_DAYS`、`QUIZ_DAYS`、`SPELL_PER_DAY`、`WRITE_SPELL`、`PULL_MAX`、`QUIZ_SPELL`、`QUIZ_GRAMMAR`、`DEFAULT_RANGE`、`MODE_SECONDS`、`WRITE_MINUTES`、`WRITE_ROTATION`、`UNIT_CARDS`、`GRAMMAR_FALLBACK`、`dayOf`、`unitRank`、`unitName`、`examPhase`、`outlineList`、`keyWords`、`sprintOf`、`tileable`、`assignModes`、`grammarWarm`、`grammarQuiz`、`writePlan`、`wordsOf`、`buildQuiz(state, now, { force?, sprint?, mode? })`、`weeklyGains(events, now)`
 - `GRAMMAR_FALLBACK` 的答案都在 `options` 第一个：直接用要先打乱（ui-lesson 的 `shuffleOptions`）
-- 0.5.0：`MODE_SECONDS` 加 `probe: 25`、`screen: 5`、`verb: 20`、`transform: 50`，`WRITE_MINUTES.transform = 3`；`TRANSFORM_DAYS`、`writeModeOf(dow, season)`（星期六句型转换，期中季另加星期四；没有句子退回那天原来的）；`quizPassage(state, now)`、`QUIZ_SPELL_WITH_READ = 6`、`QUIZ_GRAMMAR_WITH_READ = 4`，Quiz 多 `passage: { id, label, minutes }`。0.6.0：`MODE_SECONDS` 加 `cloze: 30`、`forms: 45`、`contrast: 60`、`alt_intro: 40`；这周增量（`weeklyGains`）的“写出”算上看提示以前拼对的句子里回想。期中阅读小篇里多数题的答案在第一个选项：只经过阅读器（`passagesOf` / `createContent` 会打乱）出题
+- 0.5.0：`MODE_SECONDS` 加 `probe: 25`、`screen: 5`、`verb: 20`、`transform: 50`，`WRITE_MINUTES.transform = 3`；`TRANSFORM_DAYS`、`writeModeOf(dow, season)`（星期六句型转换，期中季另加星期四；没有句子退回那天原来的）；`quizPassage(state, now)`、`QUIZ_SPELL_WITH_READ = 6`、`QUIZ_GRAMMAR_WITH_READ = 4`，Quiz 多 `passage: { id, label, minutes }`。0.6.0：`MODE_SECONDS` 加 `cloze: 30`、`forms: 45`、`contrast: 60`、`alt_intro: 40`；这周增量（`weeklyGains`）的“写出”算上看提示以前拼对的句子里回想。0.9.0（0.8.2 写的）：`WRITE_SHARE = 0.5`、`POS_WARM = { standard: 2, light: 1 }`、`QUIZ_POS = 4`、`QUIZ_POS_WITH_READ = 3`、`MODE_SECONDS.pos = 15`、`writeEligible(w, { season, isKey, skip })`（见过一次以上的必会词、“写得出”线开着的、期中季重点词能拼）、`assignModes(…, { minShare })`；`buildQuiz` 的 Quiz 多 `pos: [PosItem]`（认 `state.posItems`、`state.entryOf`）。`sprint.js` import `pos.js`，`pos.js` 引用 `modes/spell.js`、`modes/choice.js`，没有循环期中阅读小篇里多数题的答案在第一个选项：只经过阅读器（`passagesOf` / `createContent` 会打乱）出题
 
 ### 9.4 `events.js`
 - `createEvents({ store, now }) -> { log(event), query({ since, until, type, slug, unit, mode, limit }), recent(n), count(), sessionId(), trim(days), predict(entry, { mode }), logPrediction(...), stats(), predictionStats(), weekDays(), lessonDays() }`
@@ -386,7 +394,7 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 - 路由：`route(kind, settings)`、`routingOf(settings)`、`ROUTE_TASKS`；读 `settings.routing = { core, lexicon, practice, zh, tts }`，每行 `{ provider, model }`，没写就按 `models` 三个槽；`saveSettings` 按任务合并 `routing`。任务 `hint`（答错后的一句巧记，花费类别 hint）跟 core
 - `AIError.code` 一览：`nokey`、`badkey`、`billing`、`budget`、`budget-day`、`model`、`forbidden`、`inspection`、`ratelimit`、`server`、`timeout`、`network`、`empty`、`truncated`、`incomplete`、`http`、`abort`。`err.message` 是给家长区看的，孩子看的一律走 `ctx.kidError(err)`。
 - Poe 代码保留，`config.js` `POE_ENABLED = false`：家长区不显示 Poe，存过的 `provider: 'poe'` 读成百炼。
-- `prompts.js`：`levelLabel(word, curriculum)`、`lookupHints(word, { curriculum, progress })`、`userMsg(q, context, fromCn, hints)`、`zhUserMsg(q, scene, { known })`、`storyUserMsg(words, hints)`、`hintUserMsg(...)`。`words.js` 经 `createWords({ hintsFor, levelFor })` 用它们：等级和课本义项由程序定，查词不再生成巧记。
+- `prompts.js`：`levelLabel(word, curriculum)`、`lookupHints(word, { curriculum, progress })`、`userMsg(q, context, fromCn, hints)`、`zhUserMsg(q, scene, { known })`、`storyUserMsg(words, hints)`、`hintUserMsg(...)`。`words.js` 经 `createWords({ hintsFor, levelFor })` 用它们：等级和课本义项由程序定。0.9.0 起 core 要 `mem` / `trap` / `use` / `posZh`（`MEMORY_KEYS` 并进了 `CORE_KEYS`）；`SYSTEM.memo` + `memoUserMsg(entry, hints)` 给旧词条单独补（`ai.askJSON('memo', …)`，走 core 那一行和模型、超时不重试、花费记 `lookup`，`TIMEOUT_MS.memo`、`POE_BUDGET.memo`）；`cleanMemory(raw)`（认不出的 kind 留空、最多 2 条、去重、破折号换逗号、直角引号换弯引号，旧的 `mnemonic` 也算一条）、`MEMORY_KEYS`、`MEM_KINDS`。`words.fillMemory(slug)` -> Promise<entry>：已经有 `mem` 的直接回，同一个词同一时间只发一次，只补空字段，存库后 `emit('entry')`
 
 ### 9.10 UI 工厂
 
@@ -394,6 +402,7 @@ v1：“写几个词”开放，`ready` 时 `mode` 是 `'spell'`（`items` 要�
 |---|---|---|
 | `ui-home.js` | `createHomeTab(ctx)`；纯函数 `lessonDays(kv)`、`dictationToday(kv)`、`dictationNotice(kv, now)`、`phaseText` 等；v1 `slotText`、`isQuizDay`、`startLabel`、`writtenThisWeek`、`gainText`、`optionalModule`、`WRITE_KINDS`（0.4.0 加 `order: '连词成句'`，0.5.0 加 `transform: '句型转换'`）；0.5.0 四格下面一行“课文陪读”（`ctx.textread.open()` / `openSaved(id)`）；0.4.0 `readNote(cell)`（“第 2 集”“第 2 集 · 2 道题”“再读第 4 集”） | 无 |
 | `ui-lesson.js` | `createLessonView(ctx)` -> `{ show, inSession, hide, onChange }`；v1 按需加载 `V1_MODULES`（listen、spell、grammar、ui-grammar、ui-phonics、sprint；0.4.0 加 reader = `ui-reader.js`、story = `reader.js`、order = `modes/order.js`；0.5.0 加 screen = `screen.js`、screenUI = `ui-screen.js`、verb = `modes/verb.js`、teacher = `teacher.js`；0.6.0 加 cloze = `modes/cloze.js`、forms = `modes/forms.js`：单词卡 mode `'cloze'` 按 cloze → 字母块 → 四选一 → 闪卡退，`EVENT_MODE.cloze = 'cloze'`，写对的算进收尾的“写对了”；热身格的 `forms` 用 `renderForms` 画在找动词后面，`contrast` 用 ui-grammar 的 `renderContrast` 和语法题一起铺开；`warmExtras` 多 `forms`、`contrast`；收尾多“一下就配对了 N 对变形词”；纯函数 `warmExtras(cell)`，`readKind` 多 `'passage'`，`writeKind` 多 `'transform'`，`sprintCells` 把小卷的 `passage` 放进读一段格；开课后台调 `maybeThinkWeek`，收尾调 `syncAsked`，讲过又错了的点给“老师想换个讲法再说一遍” → `go('chat', { retell })`；小卷日读完小篇写 kv `exam.reading`；收尾多“自己转对了 N 个句子”“一下就找到了 N 句话的动词”“做完了一篇期中阅读”），收尾调 `weekly.settleLesson`；0.4.0 纯函数 `readKind`、`orderRefs`，收尾“读完了第 N 集”“自己排对了 N 个句子”，看了整句中文才懂的那句给“问老师这句为什么这样说”（0.4.1：`go('chat', { ask, send: full })`，full 带 App 的中文、前一句、谁说的、主角和猫的名字） | `{ light, standard?（回归日或作业多的日子点了标准版）, again?（今天上完了再练一会儿）, first?（第一次打开直接进来）, sprint?（她自己点了考前小卷） }` |
+| `ui-lesson.js`（0.9.0 补） | `V1_MODULES.pos = './pos.js'`；纯函数 `posRefs(cell)`（热身格的 `pos`，或 `{ type: 'pos', items }` 卡；小卷的 `quiz.pos`）。热身的 `cell.pos` 用 `Pos.renderPos(box, watchCtx('warmup'), { items, sid, step: 'warmup', onDone })` 画在变形配对后面；小卷（mode `'quiz'`）拼写后面插一项 `{ kind: 'pos', items: quiz.pos }`；`spellModeOf` 有 `pos.js` 时用 `posSpellMode`。新词第一次出现（四选一答完，第一节课不算，最多 `MEMO_NEW_MAX` 个）和答错的词：`rate` / `writeRate` 先画一屏巧记（`showMemo`：词头、词性、中文、`ui-entry.memoryBlock`、“记住了”），四选一和听音选词答错时直接挂在题下面（`memoInline`）；一节课一个词一次。收尾多“认对了 N 个词的词性。”，语法题的计数不算 `pos:` | |
 | `ui-dictation.js` | `createDictationView(ctx)`；纯函数 `intakeMethod`、`defaultMethod`、`pickLine` | `{ unit?, retry?（再写一次错的）, glance?（出门前看一眼）, method? }` |
 | `ui-weekly.js`（v1） | `createWeeklyView(ctx)`；`buildBackup(ctx)`（发给家长附的备份，和家长区导出一样） | `{ week?: 'YYYY-MM-DD'（那周的周一） }` |
 | `ui-capture.js`（v1） | `createCaptureView(ctx)`，另有 `hide()`；纯函数 `rowsFrom`、`unitChoices`、`summaryText`、`savedText`、`photoStatus` | 无 |
@@ -517,7 +526,7 @@ await run();
 ## 12. 第 5 批（0.7.0）接线记录
 - 文件：孩子端“我” `kid-me.js` / `ui-kid-me.js` / `css/kid-me.css`（`km-`）；复习考试 `review.js` / `ui-review-request.js` / `css/review-request.css`（`rvq-`）；错题 `mistakes.js` / `ui-mistakes.js` / `css/mistakes.css`（`mx-`）；单词本 `wordbook.js` / `css/wordbook.css`（`wb-`）；老师头像 `teacher-96.png`、`teacher-256.png`
 - 路由：`mistakes`（第 3 个标签，params `{ id?, review?, take? }`）、`kidme`（今天下面，不藏标签栏，首页右上角“我”进）、`revise`（今天下面，全屏，params `{ units?, date?, start? }`）
-- kv 新键：`kid.prefs`、`kid.level`、`kid.today`、`review:plan`、`mistake:<id>`、`wordbook.own`；`progress.by` 是 `'emma'` 或 `'parent'`
+- kv 新键：`kid.prefs`、`kid.level`、`kid.today`、`review:plan`、`mistake:<id>`、`wordbook.own`；`progress.by` 是 `'emma'` 或 `'parent'`。0.9.0：`review:plan` 的 `misses` 多 `pos: { item: { pos, n, day, fixed? } }`（老的读成空的）；Review 的单词格和小测多 `pos: [PosItem]`
 - 事件：新类型 `feedback`；新题型 `mistake`；`ask qid 'today'`（上课前的选择）、`ask about 'chat:review'`；step 多 `review`、`mistakes`、`wordbook`
 - plan.js 的 state 多 `difficulty`、`knobs`、`todayChoice`、`mistakeItems`（app.js planState 给）；Plan 多 `today`、`difficulty`、热身格 `mistakes`、`counts.mistakes`，读一段格可能带 `challenge`、`autoTrunk`、`selfFirst`（阅读器还没读）
 - sprint.js `writePlan` 认 `state.writeFirst`（先试哪种）和 `state.writeDelta`（多或少几个）
@@ -540,5 +549,22 @@ await run();
 - **kv 新键**（都随备份走）：`daily:<日期>`、`daily.fallback`、`practice:<日期>`（留 30 天）、`mistake.dictation`、`write.recheck`、`unit.flow`、`lines.talk`、`weekend:<周一>` = `{ v: 1, week, grammar, paper, wish, updated }`。`progress` 多 `nextFrom`、`nextFor`、`unitFrom`
 - **事件**：新类型 `read_aloud`；`ask` 新 qid `unit_intro`、`unit_order`、`weekend_next`（answer `read | words | grammar | speak`）；`line` 类型开始用（老师说 + 学一点）；step 新值 `practice`、`unit`；`dictation` 多 `pass: 'school'`
 - **ui-lesson**：读一段番外读完（`cell.again`）改读每日阅读；读完（不是轻松版、21:00 以前、不是期中小篇）接读出来 2 句；周末第一节不是句型转换的课，写几个词换成“本周语法 10 题”（`sprint.cardQuizItems`，quiz.kind `'weekend'`）；周末收尾多“本周 10 词纸上写”（`go('dictation', { week: true, words })`）和“下周想多练什么”；收尾的再见换成“老师说 + 学一点”，下面挂接着练
-- **ui-home**：招呼先用 `lines.talk`（下面一段“学一点”，`learnBlock` 也给收尾用）；没上完课时四格下面挂 `practice.mount(el, { compact: true })`，上完课换成整个接着练中心；读一段格番外读完写“今天的阅读”
+- **ui-home**：招呼先用 `lines.talk`（下面一段“学一点”，`learnBlock` 也给收尾用）；读一段格番外读完写“今天的阅读”。（0.9.0 起首页改成三张卡，见第 15 节）
 - 还没接：遇见计数的显示（`ui-entry` 词条页、单词本列表）、`wordbook.buildFacts` 的 `applyBack`、语法卡借故事句子（`reader.storyExamples`）、首页“进 Unit X 了”的再看入口
+
+## 15. 0.9.0 接线记录（Wei 10-26：巧记、会写和词性、首页三张卡）
+- **新文件**（都进了 SHELL）：`word-notes.js`、`pos.js`、`../css/entry-memory.css`、`../curriculum/word-notes-a.json`、`word-notes-b.json`、`pos-guide.json`（三个 JSON 进了 `run.mjs` 的 `PUBLIC_JSON`：原创巧记和词性说明，不带单元号）。`index.html` 在 `unit-flow.css` 后面引用 `entry-memory.css`
+- **app.js**：启动时和别的内容一起 `loadWordNotes({ fetchJSON })`（读不到就算了，ui-entry 也会懒加载）；建好界面后 `Pos.loadPos(app)`（不等，顺带 `curriculum.loadDetails()`）；`planState` 多 `entryOf`、`curriculum`、`posEvents`
+- **ai.js / config.js / budget.js**：kind `'memo'`（`SLOT_OF.memo = 'core'`，`modelFor` 用 `models.core`，超时不重试；模拟回复给 `mem`，core 的模拟回复也带 `posZh`、`mem`、`trap`、`use`）；`TIMEOUT_MS.memo = 40000`、`POE_BUDGET.memo = 2000`；`budget.js` `AI_KIND.memo = 'lookup'`
+- **words.js**：`fillMemory(slug)`（见 9.9）；core 回复里有 `mem` 时存之前过一遍 `cleanMemory`
+- **word-notes.js**（查词讲解 agent）：`NOTE_FILES`、`POS_FILE`、`loadNotes`、`loadPosGuide`、`loadAll({ fetchJSON })`（重复调只读一次）、`useNotes`、`addNotes`、`usePosGuide`、`noteFor(word, { lemma })`（原样 → `note.forms` → lemma → 常见不规则变化 → 去词尾，词尾规则要词性对得上）、`notesReady`、`notesVersion`、`onNotes`、`posKey`、`posKeys`、`posInfo`、`posListOf(entry, note?)`、`memoryOf(entry, note?)` -> `{ mem, trap, use, posZh, cn, from: 'note' | 'model' | 'old' } | null`、`MEM_KIND_ZH`、`POS_ZH`。词性多 `abbr`（No.）、`modal`（would）、`phr`
+- **ui-entry.js** 新导出：`memoryBlock(app, m, { word })`、`posBlock(keys, { src, open, onToggle })`、`posWhatNode(key)`、`splitUse(s)`、`ensureNotes(app)`、`noteOf(app, word)`、`memorySkeleton()`、`memoryRetry(onRetry)`；`metaLine` 多第 4 个参数 `{ posNode }`，旧的调用方式不变。先猜再看时不显示巧记
+- **pos.js**：导出见文件顶部注释（`loadPos`、`posInfo`、`posLine`、`posItems`、`renderPos`、`posSpellMode`、`kindInfo`、`suffixTip`、`weakKinds`……）。别的模块：`review.js`（复习考试每份 3-5 道，写出来的至少六成，`noteResult` 认 kind `'pos'`）、`sprint.js`（小卷 3-4 道）、`ui-dictation.js`、`wordbook.js`（标词性，单词卡的“词性”一块，“练一下”用 `posSpellMode`）
+- **plan.js**：见 9.3 的 0.9.0 那条
+- **ui-lesson.js**：见 9.10 的 0.9.0 那行
+- **ui-review-request.js**：单词格的词卡做完接 `cell.pos`（`startPos`，`P.renderPos`，step `'review'`），每道结果 `noteResult({ kind: 'pos', item, pos, correct: clean })` 再存；小测先拼 `quiz.spell`，再 `quiz.pos`，再语法题、阅读；字母块用 `posSpellMode`。`loadReviewData` 的 `posGuide` 原样传给 `buildReview`
+- **ui-review.js**：闪卡背面的一句换成 `memoryOf(e, noteOf(ctx.app, e.headword))` 的第一条（没有就是旧的 `mnemonic`）
+- **events.js**：`MODES` 加 `'pos'`，`GUESS.pos = 0.25`
+- **首页三张卡**（`ui-home.js`、`css/home.css`、`ui-practice.js`、`css/practice.css`、`tests/home-cards.test.mjs`，首页 agent）：招呼下面三张随时能点：① 今天的课 ② 今天的阅读 ③ 接着练。`ctx.practice.mount(el, { compact, card, onClose })`：`card: true` 只画推荐一句和一个按钮，`compact` 在卡片里表示不是首推（描边按钮），`onClose` 在盖的那一层关上以后调一次。首页还用 `ctx.dailyRead.open({ more | fallback })` 和 `ctx.dailyRead.el`（`fallback` 现在被忽略，首页平时直接用接着练读番外第 N 集；首页靠 MutationObserver 盯 `dailyRead.el` 的 hidden 重画）。ui-home 新 import `daily-read.js`（`dayState`、`homeLine`、`pickFallback`）、`reader.js`（`content`）、`practice.js`（`fadingWords`），新导出 `cellLine`、`lessonState`、`cardStart`、`pieceWords`、`readModel`、`primaryCard`、`whenHidden`
+- **测试**：`tests/b7-wiring.test.mjs`（热身至少一半写出来、词性题、memo、fillMemory、接线）、`tests/audio-session.test.mjs`（0.8.1 的录音音频模式：有没有 `navigator.audioSession` 都不报错、先切再要麦克风、占用时等 250 毫秒重试一次、被拒不重试）。b3、b4、b5、sprint 的几条排课测试按“至少一半写出来”改了期望；`ui-lesson.test` 的模块表多 `pos`
+- 还没接：`ui-daily-read.js` 的 `open({ fallback: true })` 直接进兜底、`open` 的 `onClose` 回调（首页现在用 MutationObserver）；`modes/choice.js` 的“再看一次”还是例句或旧的 `mnemonic`（巧记会透出意思，所以没换）

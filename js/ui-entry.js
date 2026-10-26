@@ -3,12 +3,20 @@
 // and a fixed action bar (发音 / 加进单词本 / 笔记) in place of the tab bar.
 // The page is split into slots; on every data change only the slots whose content changed are rebuilt,
 // so a quiz answer, an open index row or a note being typed survive the lexicon/practice parts arriving.
+//
+// 0.8.2（Wei 10-26）：这是帮她记住单词的老师，不只是词典。
+// - 词头下面的词性写全：缩写 + 中文（adj. 形容词），点一下出“形容词是干什么的”（curriculum/pos-guide.json 的 what、image、tip）
+// - 释义后面紧跟一块“巧记”，不收起：1-2 种记法（想画面 / 拆开记 / 连中文 / 小故事 / 听声音）、容易错、最常用的一个搭配。
+//   有离线巧记小本（word-notes.js）的词马上出（离线词典那一层也出）；没有的用模型给的（core 的 mem）；旧词条两样都没有时
+//   调 app.words.fillMemory(slug)（words.js，见 needs）单独补一次，失败了给“让老师想一个”
+// 样式在 css/entry-memory.css（类名 mem-、pos-）。
 import { h, icon, marked, toast, ymd, md, localYmd, dateCn, skBars } from './ui-dom.js';
 import { hasLexicon, hasPractice, lookupEvents, relookups } from './words.js';
 import { endOfDay } from './fsrs.js';
 import { TAG_CN } from './dict.js';
+import { loadAll, noteFor, onNotes, notesVersion, posInfo, posKeys, posListOf, memoryOf, MEM_KIND_ZH, POS_ZH } from './word-notes.js';
 
-const ORDER = ['notice', 'head', 'guess', 'note', 'cn', 'ns', 'senses', 'err', 'ctx', 'mnemo', 'index',
+const ORDER = ['notice', 'head', 'guess', 'note', 'cn', 'ns', 'senses', 'mnemo', 'err', 'ctx', 'index',
   'ix-coll', 'ix-syn', 'ix-family', 'ix-ant', 'ix-conf', 'ix-usage', 'ix-read', 'foot', 'log'];
 
 const sig = (...parts) => JSON.stringify(parts);
@@ -82,13 +90,119 @@ export function phoneticNode(e, d) {
   return null;
 }
 
-// phonetic, level tag, part of speech: the same line on the word page and the flashcard
-export function metaLine(e, d, extra = null) {
+// phonetic, level tag, part of speech: the same line on the word page and the flashcard.
+// The part of speech is written out: “adj. 形容词” (0.8.2). posNode: the word page's tappable chips in its place.
+export function metaLine(e, d, extra = null, { posNode = null } = {}) {
   const pos = e.senses && e.senses[0] && e.senses[0].pos;
   const kind = e.kind && e.kind !== 'word' ? String(e.kind).replace('_', ' ') : '';
-  return h('p', { className: 'hw-meta' }, phoneticNode(e, d), e.level ? h('span', { className: 'tag', text: e.level }) : null,
-    pos || kind ? h('i', { className: 'pos', lang: 'en', text: pos || kind }) : null, extra);
+  let posEl = posNode;
+  if (!posEl && (pos || kind)) {
+    const info = pos ? posInfo(pos) : null;
+    const zh = info ? posZhFor(info.key, [info.key], e) || info.zh : '';
+    posEl = h('span', { className: 'pos-plain' }, h('i', { className: 'pos', lang: 'en', text: pos || kind }), zh ? h('span', { className: 'pos-zh', text: zh }) : null);
+  }
+  return h('p', { className: 'hw-meta' }, phoneticNode(e, d), e.level ? h('span', { className: 'tag', text: e.level }) : null, posEl, extra);
 }
+
+// ---------------------------------------------------------------- 0.8.2: the offline notes, parts of speech, memory help
+
+let notesAsked = null, notesDone = false;
+// the notes and the part-of-speech guide, read once (app.js may already have started it at boot: loadAll is idempotent)
+export function ensureNotes(app) {
+  if (!notesAsked) {
+    const fetchJSON = app && typeof app.fetchJSON === 'function' ? app.fetchJSON : undefined;
+    notesAsked = loadAll({ fetchJSON }).catch(() => {}).then(() => { notesDone = true; });
+  }
+  return notesAsked;
+}
+const lemmaOf = app => (app && app.dict && typeof app.dict.lemma === 'function' ? q => app.dict.lemma(q) : null);
+export const noteOf = (app, word) => (word ? noteFor(word, { lemma: lemmaOf(app) }) : null);
+
+// the Chinese name on a chip: the note's or the model's own (名词短语) when it names this one part of speech, else the standard one
+function posZhFor(key, keys, src) {
+  const own = String((src && src.posZh) || '').trim();
+  if (!own || keys.length !== 1) return '';
+  if (own.includes(POS_ZH[key] || '\u0000') || (key === 'phr' && own.includes('短语'))) return own;
+  return posKeys(own)[0] === key ? own : '';
+}
+
+// the line under a chip: what this part of speech does, its picture, how to spot it
+export function posWhatNode(key) {
+  const info = posInfo(key);
+  if (!info) return null;
+  return h('div', { className: 'pos-what', role: 'note' },
+    h('p', { className: 'pos-what-1' }, h('b', { text: info.zh }), info.what ? ' ' + info.what : ''),
+    info.image ? h('p', { className: 'pos-what-img', text: info.image }) : null,
+    info.tip ? h('p', { className: 'pos-what-tip' }, h('span', { className: 'mem-lab', text: '怎么认' }), h('span', { text: info.tip })) : null);
+}
+
+// chips “adj. 形容词”, each opens the line above (one at a time); open / onToggle let the word page keep the open one
+// across rebuilds. -> { chips, panel }: chips go in the meta line, the panel right under it.
+export function posBlock(keys, { src = null, open = '', onToggle = null } = {}) {
+  const panel = h('div', { className: 'pos-panel' });
+  const btns = [];
+  let cur = keys.includes(open) ? open : '';
+  const paint = () => {
+    for (const b of btns) {
+      const on = b.dataset.pos === cur;
+      if (on) b.classList.add('on'); else b.classList.remove('on');
+      b.setAttribute('aria-expanded', String(on));
+    }
+    const node = cur ? posWhatNode(cur) : null;
+    panel.replaceChildren(...(node ? [node] : []));
+    panel.hidden = !node;
+  };
+  const chips = h('span', { className: 'pos-row' }, keys.map(k => {
+    const info = posInfo(k);
+    if (!info) return null;
+    const zh = posZhFor(k, keys, src) || info.zh;
+    const b = h('button', { type: 'button', className: 'pos-btn', dataset: { pos: k }, 'aria-expanded': 'false',
+      'aria-label': `${info.abbr} ${zh}，看看${info.zh}是干什么的`,
+      on: { click: ev => { if (ev && ev.stopPropagation) ev.stopPropagation(); cur = cur === k ? '' : k; if (onToggle) onToggle(cur); paint(); } } },
+    h('i', { className: 'pos', lang: 'en', text: info.abbr }), zh ? h('span', { className: 'pos-zh', text: zh }) : null);
+    btns.push(b);
+    return b;
+  }));
+  paint();
+  return { chips, panel };
+}
+
+// “a strict teacher 严格的老师”, “Don't forget your homework!（别忘了带作业！）” -> { en, cn }
+export function splitUse(s) {
+  const t = String(s ?? '').replace(/\s+/g, ' ').trim();
+  if (!t) return { en: '', cn: '' };
+  const m = t.match(/^(.*?)\s*[（(]([^（）()]*[一-鿿][^（）()]*)[）)]\s*[。.]?$/);
+  if (m && /[A-Za-z]/.test(m[1])) return { en: m[1].trim(), cn: m[2].trim() };
+  const i = t.search(/[一-鿿]/);
+  if (i > 0 && /[A-Za-z]/.test(t.slice(0, i))) return { en: t.slice(0, i).trim().replace(/[，,：:]$/, ''), cn: t.slice(i).trim() };
+  return /[一-鿿]/.test(t) ? { en: '', cn: t } : { en: t, cn: '' };
+}
+
+const memHead = () => h('h2', { className: 'mem-h' }, h('span', { text: '巧记' }));
+// The 巧记 block: never folded. m = memoryOf(entry, note): { mem: [{ kind, text }], trap, use, from }.
+export function memoryBlock(app, m, { word = '' } = {}) {
+  if (!m || !(m.mem.length || m.trap || m.use)) return null;
+  const use = m.use ? splitUse(m.use) : null;
+  return h('section', { className: 'mem-box' + (m.from === 'note' ? ' from-note' : ''), 'aria-label': '巧记' },
+    memHead(),
+    m.mem.length ? h('ol', { className: 'mem-list' }, m.mem.map(x => h('li', { className: 'mem-row mem-item' + (x.kind ? ' k-' + x.kind : '') },
+      h('span', { className: 'mem-kind', text: MEM_KIND_ZH[x.kind] || '记一记' }),
+      h('div', { className: 'mem-body' },
+        h('p', { className: 'mem-text', text: x.text }),
+        // a sound-alike is only a hook: the real sound is one tap away
+        x.kind === 'sound' && word ? h('p', { className: 'mem-real' }, h('span', { text: '听听真正的读音' }), sayBtn(app, word, '听真正的读音')) : null)))) : null,
+    m.trap ? h('div', { className: 'mem-row mem-trap' }, h('span', { className: 'mem-lab', text: '容易错' }), h('p', { className: 'mem-body', text: m.trap })) : null,
+    use && (use.en || use.cn) ? h('div', { className: 'mem-row mem-use' }, h('span', { className: 'mem-lab', text: '最常用' }),
+      h('p', { className: 'mem-body' },
+        use.en ? h('span', { className: 'mem-en', lang: 'en', text: use.en }) : null,
+        use.en ? sayBtn(app, use.en.replace(/：/g, ': '), '朗读搭配') : null,
+        use.cn ? h('span', { className: 'mem-cn', text: use.cn }) : null)) : null);
+}
+export const memorySkeleton = () => h('section', { className: 'mem-box writing', 'aria-label': '巧记', 'aria-busy': 'true' },
+  h('h2', { className: 'mem-h' }, h('span', { text: '巧记' }), h('span', { className: 'st', text: '老师在想' })), skBars([92, 70, 48]));
+export const memoryRetry = onRetry => h('section', { className: 'mem-box empty', 'aria-label': '巧记' }, memHead(),
+  h('p', { className: 'mem-none' }, h('span', { text: '这个词的巧记还没想好。' }),
+    h('button', { type: 'button', className: 'text-btn accent', text: '让老师想一个', on: { click: onRetry } })));
 
 // The headword: 44px serif, stepping down for long words; a saved word carries the highlighter stroke.
 // sweep draws the stroke once (the moment it is saved); syl shows the syllable dots (only when known beforehand).
@@ -110,16 +224,30 @@ export function headwordNode(e, { fav = false, sweep = false, syl = true, tag = 
 
 // Tier 1 of a lookup, and the fallback when the model cannot be reached: the dictionary's word, phonetic,
 // marks and short meaning, labeled 离线词典. wrap: the fallback shows the whole meaning, tier 1 one line.
+// 0.8.2: the parts of speech written out, and a word in the offline notes gets its 巧记 right away (a fragment:
+// the head, then the block), offline too.
 export function dictHead(app, d, { wrap = false, levelSkeleton = false } = {}) {
+  ensureNotes(app);
   const via = d.via && d.via.toLowerCase() !== d.word.toLowerCase() ? d.via : '';
-  return h('section', { className: 'ehead' },
+  const note = noteOf(app, d.word) || (via ? noteOf(app, via) : null);
+  // only the note's parts of speech: the dictionary lists them in its own order (ready: n. first), not by how common they are
+  const keys = note && note.pos.length ? note.pos.slice(0, 3) : [];
+  const pb = keys.length ? posBlock(keys, { src: note }) : null;
+  const head = h('section', { className: 'ehead' },
     headwordNode({ headword: d.word }),
     h('p', { className: 'hw-meta' },
       d.phonetic ? h('span', { className: 'phonetic', lang: 'en', text: `/${ipaLook(d.phonetic)}/` }) : null,
       levelSkeleton ? h('span', { className: 'pill', 'aria-hidden': 'true' }) : null,
+      pb ? pb.chips : null,
       via ? h('span', { className: 'small', text: `“${via}”的原形` }) : null),
+    pb ? pb.panel : null,
     dictChips(d),
     h('p', { className: 'brief offline' + (wrap ? ' wrap' : '') }, h('span', { className: 'ln', text: d.cn }), h('span', { className: 'src', text: '离线词典' })));
+  const box = note ? memoryBlock(app, memoryOf(null, note), { word: d.word }) : null;
+  if (!box) return head;
+  const frag = document.createDocumentFragment();
+  frag.append(head, box);
+  return frag;
 }
 // kept for callers that want the meaning as its own block
 export function dictMeaning(d) {
@@ -141,7 +269,7 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
   const slots = {};
   let entry = null;
   const state = { guess: false, notice: '', pulled: false, zhBack: null, regenArm: 0, regenBusy: false, syl: true,
-    sweep: false, confirm: false, noteOpen: false, closed: new Set() };
+    sweep: false, confirm: false, noteOpen: false, closed: new Set(), posOpen: '' };
   let armTimer = 0, noteTimer = 0, revealTimer = 0;
   let flushNote = null;   // saves a note still waiting for its debounce
   let noteEl = null;
@@ -149,6 +277,12 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
   const onPageHide = () => { if (flushNote) flushNote(); };
   document.addEventListener('visibilitychange', onHide);
   window.addEventListener('pagehide', onPageHide);
+  // the offline notes may land after the first paint: the head and the 巧记 block are drawn again
+  let alive = true;
+  const offNotes = onNotes(() => { if (alive) update(); });
+  ensureNotes(app).then(() => { if (alive) update(); });
+  // memory help for an old entry that has none (words.fillMemory): one try per word per page, then a button
+  const memo = { tried: new Set(), slug: '', state: '' };
 
   function flags(e) {
     const st = app.words.enrichStatus(e.slug);
@@ -196,10 +330,16 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
       const rl = relookups(e).length;
       const d = dictFor(app, e);
       const fav = !!e.favorited;
-      return [sig(e.headword, e.syllables, e.phonetic, e.senses && e.senses[0] && e.senses[0].pos, e.level, e.kind, fav, rl, e.brief_cn, f.guess, dictSig(d), state.syl), () => {
+      const note = noteOf(app, e.headword);
+      const keys = posListOf(e, note);
+      const posSrc = note && note.posZh ? note : e;
+      return [sig(e.headword, e.syllables, e.phonetic, e.senses && e.senses[0] && e.senses[0].pos, e.level, e.kind, fav, rl, e.brief_cn, f.guess, dictSig(d), state.syl,
+        keys, posSrc.posZh || '', notesVersion()), () => {
+        const pb = keys.length ? posBlock(keys, { src: posSrc, open: state.posOpen, onToggle: k => { state.posOpen = k; } }) : null;
         const node = h('section', { className: 'ehead' },
           headwordNode(e, { fav, sweep: state.sweep, syl: state.syl }),
-          metaLine(e, d),
+          metaLine(e, d, null, { posNode: pb ? pb.chips : null }),
+          pb ? pb.panel : null,
           dictChips(d),
           rl && !f.guess ? h('p', { className: 'small relook', text: `收藏后又查了 ${rl} 次` }) : null,
           f.guess ? null : h('p', { className: 'brief', text: e.brief_cn || '' }));
@@ -311,12 +451,18 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
           note ? h('p', { className: 'ctx-note', text: note }) : null);
       }];
     },
+    // 巧记, right under the meanings and never folded (0.8.2): the offline note first, then the model's, then an old
+    // one-line mnemonic; while a core is being written, or words.fillMemory is asking, a skeleton
     mnemo(e, f) {
+      const m = memoryOf(e, noteOf(app, e.headword));
       const writing = !!e.needs_core && f.loading;
-      return [sig(e.mnemonic, writing, f.guess), () => {
+      const ask = memo.slug === e.slug ? memo.state : '';
+      return [sig(m, writing, f.guess, ask, e.headword), () => {
         if (f.guess) return null;
-        if (e.mnemonic) return sec('巧记', h('p', { className: 'mnemo', text: e.mnemonic }));
-        return writing ? sec('巧记', h('div', { className: 'mnemo' }, skBars([94, 88, 40]))) : null;
+        if (m) return memoryBlock(app, m, { word: e.headword });
+        if (writing || ask === 'running') return memorySkeleton();
+        if (ask === 'failed') return memoryRetry(() => askMemory(e, true));
+        return null;
       }];
     },
     index() { return ['static', () => ixBox]; },
@@ -493,6 +639,32 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
     }
   }
 
+  // An entry with an explanation but no memory help (looked up before 0.8.2, or the model left it out): ask once.
+  // Waits for the offline notes, so a word they cover never costs a call; nothing while 先猜再看 hides the meaning.
+  function maybeAskMemory(e, f) {
+    if (!notesDone || f.guess || e.needs_core || e.not_standard || !e.headword || memo.tried.has(e.slug)) return;
+    if (!app.words || typeof app.words.fillMemory !== 'function') return;
+    if (memoryOf(e, noteOf(app, e.headword))) return;
+    askMemory(e, false);
+  }
+  function askMemory(e, manual) {
+    if (!app.words || typeof app.words.fillMemory !== 'function') return;
+    const slug = e.slug;
+    memo.tried.add(slug);
+    Object.assign(memo, { slug, state: 'running' });
+    Promise.resolve().then(() => app.words.fillMemory(slug)).then(rec => {
+      if (memo.slug !== slug) return;
+      memo.state = rec && memoryOf(rec) ? '' : 'failed';
+      if (alive) update(entry && entry.slug === slug && rec ? rec : undefined);
+    }, err => {
+      if (memo.slug !== slug) return;
+      memo.state = 'failed';
+      if (manual) toast((app.kidError && app.kidError(err, { where: 'look' })) || '再试一次。');
+      if (alive) update();
+    });
+    if (alive) update();
+  }
+
   function update(next) {
     if (next) entry = next;
     const e = entry;
@@ -509,6 +681,7 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
     }
     ixBox.hidden = !ixBox.querySelector('.ix');
     renderBar(e);
+    maybeAskMemory(e, f);
   }
 
   return {
@@ -522,6 +695,7 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
       state.pulled = !!opts.pulled;
       state.zhBack = opts.zhBack || null;
       state.syl = opts.syl !== false;
+      state.posOpen = '';
       // the first paint cascades in; later updates (lexicon, practice) must not replay it
       body.classList.add('reveal');
       clearTimeout(revealTimer);
@@ -532,6 +706,8 @@ export function createEntryView(app, { where = 'look', back = null, session = ''
     setNotice(text) { state.notice = text || ''; update(); },
     setSession: t => shell.setSession(t),
     destroy() {
+      alive = false;
+      offNotes();
       if (flushNote) flushNote();
       flushNote = null;
       clearTimeout(armTimer); clearTimeout(noteTimer); clearTimeout(revealTimer);

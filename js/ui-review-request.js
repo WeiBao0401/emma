@@ -3,6 +3,8 @@
 // 每格调现成题型的 render：单词卡 modes/choice.js choiceMode、modes/listen.js listenMode、modes/spell.js spellMode、
 // modes/cloze.js clozeMode（出不了题一路退到四选一、闪卡，和上课一样）；语法 ui-grammar.js renderGrammarItem、renderContrast；
 // 阅读 ui-reader.js renderPassage；小测先拼写（spellMode，line 'write'），再语法题，再一篇只做题的阅读。
+// 0.9.0（词性，Wei 10-26）：字母块换成 pos.js posSpellMode（题面多一行“n. 名词”，事件多 pos）；单词格的词卡做完接 cell.pos
+// 的词性题（pos.js renderPos），小测拼完接 quiz.pos 的词性题再出语法题；每道词性题的结果记进 plan（noteResult kind 'pos'）。
 // 负责：复习考试 agent。样式 css/review-request.css（类名 rvq-），四格外壳借 lesson.css。
 //
 // 导出
@@ -57,6 +59,9 @@ const modeOf = (mod, ...names) => {
   return null;
 };
 const fnOf = (mod, name) => (mod && typeof mod[name] === 'function' ? mod[name] : null);
+// 0.9.0: the spelling tiles with the part-of-speech line on top (pos.js posSpellMode), else spell.js's own
+const spellOf = mods => (mods && mods.spell && mods.pos && mods.pos.posSpellMode && typeof mods.pos.posSpellMode.render === 'function'
+  ? mods.pos.posSpellMode : modeOf(mods && mods.spell, 'spellMode'));
 
 export function createReviewRequestView(ctx, { root = null } = {}) {
   let host = root || (typeof document !== 'undefined' ? document.getElementById('tab-revise') : null);
@@ -281,7 +286,7 @@ export function createReviewRequestView(ctx, { root = null } = {}) {
       try {
         if (m === 'card') v = flashcard.render(e, { ...base, openFull: () => ctx.openSheet(e.slug, { back: '回到复习' }), isTall: () => false, busy: () => !!(session && session.busy) });
         else {
-          const mode = m === 'mc4' ? Choice.choiceMode : m === 'listen' ? modeOf(mods.listen, 'listenMode') : m === 'cloze' ? modeOf(mods.cloze, 'clozeMode') : modeOf(mods.spell, 'spellMode');
+          const mode = m === 'mc4' ? Choice.choiceMode : m === 'listen' ? modeOf(mods.listen, 'listenMode') : m === 'cloze' ? modeOf(mods.cloze, 'clozeMode') : spellOf(mods);
           if (!mode) continue;
           v = mode.render(e, base);
         }
@@ -292,7 +297,7 @@ export function createReviewRequestView(ctx, { root = null } = {}) {
   }
   function startWords(c) {
     const queue = (c.items || []).filter(s => ctx.words.get(s));
-    if (!queue.length) { finishCell(c); return; }
+    if (!queue.length) { startPos(c, c.pos, () => finishCell(c)); return; }
     const pool = poolOf(queue);
     const modes = c.modes || {};
     session = createSession({
@@ -305,7 +310,7 @@ export function createReviewRequestView(ctx, { root = null } = {}) {
     const draw = () => {
       if (!running) return;
       const slug = session.current();
-      if (!slug) { session = null; finishCell(c); return; }
+      if (!slug) { session = null; startPos(c, c.pos, () => finishCell(c)); return; }
       const e = ctx.words.get(slug);
       // wrong once today: back as four-choice (DESIGN 5.1 rule 4, as in the lesson)
       const want = tally.wrongWords.has(slug) ? 'mc4' : (modes[slug] || 'mc4');
@@ -367,6 +372,36 @@ export function createReviewRequestView(ctx, { root = null } = {}) {
         skipped.add(cur.slug);
         if (session && cellAt >= 0) { cur = null; const c = day.cells[cellAt]; if (c.id === 'words') { session = null; startWords({ ...c, items: c.items.filter(s => !skipped.has(s) && !firstSeen.has(s)) }); } }
       } } }));
+  }
+
+  // ---- 0.9.0 词性题 (pos.js renderPos): after the word cards and after the quiz's spelling. Each result goes into the
+  // plan (noteResult kind 'pos'), so a part of speech she picked wrong comes first in the next day's share
+  function startPos(c, items, done) {
+    const fn = fnOf(mods.pos, 'renderPos');
+    const list = Array.isArray(items) ? items.filter(Boolean) : [];
+    if (!fn || !list.length) { done(); return; }
+    const box = h('article', { className: 'lesson-module lesson-module-pos' });
+    cur = { kind: 'pos', item: '', mode: 'pos', t: Date.now(), answered: false };
+    view = null;
+    paint(c, box);
+    let finished = false;
+    const end = res => {
+      if (finished) return;
+      finished = true;
+      cur = null;
+      view = null;
+      for (const r of (res && res.results) || []) {
+        tally.gtotal++;
+        if (r.clean) tally.gright++; else tally.wrongItems.add(r.item);
+        note({ kind: 'pos', item: r.item, pos: r.pos, correct: !!r.clean });
+      }
+      done();
+    };
+    try {
+      const v = fn(box, watchCtx(), { items: list, sid, step: 'review', onDone: end });
+      if (v && typeof v.onKey === 'function') view = { onKey: v.onKey, stop: v.stop };
+      if (!v) end(null);
+    } catch (err) { console.warn('review: pos:', (err && err.message) || err); end(null); }
   }
 
   // ---- 语法: grammar.js WarmItems through ui-grammar renderGrammarItem, then the 对比小卡
@@ -462,13 +497,14 @@ export function createReviewRequestView(ctx, { root = null } = {}) {
   // ---- 小测: spelling (no FSRS rating here, as 写几个词), then the grammar, then one reading with the questions only
 
   function startQuiz(c) {
-    const spell = modeOf(mods.spell, 'spellMode');
+    const spell = spellOf(mods);
     const queue = spell ? (c.spell || []).filter(s => ctx.words.get(s)) : [];
     const total = queue.length;
     let done = 0;
     const retried = new Set();
     const pool = poolOf(queue);
-    const afterSpell = () => startGrammar(c, () => (c.passage ? startRead(c, c.passage, () => finishCell(c)) : finishCell(c)), { items: c.grammar || [], contrast: null });
+    // 0.9.0: spelling, then the 词性题, then the grammar, then the reading
+    const afterSpell = () => startPos(c, c.pos, () => startGrammar(c, () => (c.passage ? startRead(c, c.passage, () => finishCell(c)) : finishCell(c)), { items: c.grammar || [], contrast: null }));
     const draw = () => {
       if (!running) return;
       const slug = queue[0];

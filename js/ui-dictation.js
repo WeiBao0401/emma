@@ -5,7 +5,10 @@
 // v1：默认考法来自家长问卷“听写怎么考”（intake.js，按需 import()；没有就直接读 kv 'parent.intake' 的 dictation_way，
 // 再没有用上一次的考法，最后是读中文写英文）；选词页和“再写一次错的”开头有老师的一句（lines 的 dictation 场景，
 // phase 'before'），写完那页有一句（phase 'after'，带 wrong / perfect）；短语考法只出短语，英译汉不勾没有中文的词。
-// 负责：今天标签 UI agent（ui-home.js、ui-lesson.js、ui-dictation.js、css/dictation.css）。
+// 0.8.2（Wei 10-26：会写，还要知道词性）：选词页、听写时的题面、对答案、出门前看一眼都带上这个词的词性（pos.js posLine：
+// 词条讲解的词性，没有就用课标详表的；词性小卡和课标详表第一次用时 loadPos 读进来，读到了重画选词页）。听写时题面下面一行
+// “n. 名词”，她写的时候就把词和词性连在一起记。短语不标。
+// 负责：今天标签 UI agent（ui-home.js、ui-lesson.js、ui-dictation.js、css/dictation.css）；0.8.2 词性那几处是词性 agent 加的。
 //
 // 导出
 //   createDictationView(ctx) -> { show(params), inSession(), holding() }
@@ -31,6 +34,7 @@ import * as D from './dictation.js';
 import { meaningOf } from './modes/choice.js';
 import { dayOf } from './plan.js';
 import { latestDictation, optionalModule } from './ui-home.js';
+import * as P from './pos.js';
 
 export function wordsForUnit(curriculum, unit, method = 'zh2en', entryOf = null) {
   if (!curriculum || !unit) return [];
@@ -105,6 +109,9 @@ export function createDictationView(ctx) {
   let line = null;         // the teacher's line on this screen (lines 'dictation' scene)
   let I = null;            // intake.js, once loaded
   optionalModule('./intake.js').then(m => { I = m; });
+  let screen = '';         // 'setup' | 'writing' | 'check' | 'done' | 'glance'
+  // 0.8.2: the 词性 cards and the 课标 details (parts of speech) once; the setup list is drawn again when they come in
+  P.loadPos(ctx).then(() => { if (screen === 'setup') drawSetup(); });
 
   const header = (title, onEnd = end) => h('header', { className: 'runhead session' },
     h('button', { type: 'button', className: 'text-btn', text: '结束', on: { click: onEnd } }),
@@ -115,6 +122,13 @@ export function createDictationView(ctx) {
   const setBusy = on => { if (on !== busy) { busy = on; ctx.busy(on ? +1 : -1); } };
   const minutes = () => Math.round((Date.now() - t0) / 60000);
   const name = () => (ctx.kv.peek('profile', {}) || {}).name || 'Emma';
+  // 0.8.2: the word's part of speech (n. / v. …): what her word book says, else the 课标 list; nothing for a phrase
+  const posOf = x => {
+    if (!x || !x.w || /\s/.test(x.w)) return null;
+    try { return P.posLine((ctx.words && ctx.words.get ? ctx.words.get(x.slug) : null) || { headword: x.w }, { curriculum: ctx.curriculum, headword: x.w }); } catch (e) { return null; }
+  };
+  const posTag = x => { const p = posOf(x); return p ? h('i', { className: 'pos', lang: 'en', title: p.zh, text: p.abbr }) : null; };
+  const posCue = x => { const p = posOf(x); return p ? h('p', { className: 'small dict-pos' }, h('i', { className: 'pos', lang: 'en', text: p.abbr }), ` ${p.zh}`) : null; };
 
   // the teacher's line, like 今天's: “老师说”, the English line, the Chinese until it fades, 听一遍 and 看中文
   function say1(scene, c, fit) {
@@ -216,6 +230,7 @@ export function createDictationView(ctx) {
       count.textContent = countText();
       go.disabled = !picked.size;
     };
+    screen = 'setup';
     stage.replaceChildren(header(weekWords ? '本周 10 词纸上写' : '明天有听写', () => ctx.go('home')),
       h('section', { className: 'dict-setup' },
         teacherLine(line),
@@ -242,7 +257,7 @@ export function createDictationView(ctx) {
             const b = h('button', { type: 'button', className: 'dict-word', 'aria-pressed': picked.has(x.slug) ? 'true' : 'false' },
               h('span', { className: 'box', 'aria-hidden': 'true' }, icon('check')),
               h('span', { className: 'w', lang: 'en', text: x.w }),
-              h('span', { className: 'cn', text: x.cn || (method === 'en2zh' ? '还没有中文' : '') }));
+              h('span', { className: 'cn' }, posTag(x), posOf(x) ? ' ' : null, x.cn || (method === 'en2zh' ? '还没有中文' : '')));
             b.addEventListener('click', () => toggle(x, b));
             return h('li', {}, b);
           })) : h('p', { className: 'small', text: method === 'phrase' ? '这个单元没有短语。换个单元或考法试试。' : '这里还没有词。' })),
@@ -280,10 +295,12 @@ export function createDictationView(ctx) {
     const pr = d.progress ? d.progress() : { n: d.index + 1, total: d.words.length };
     const last = pr.n >= pr.total;
     const again = h('button', { type: 'button', className: 'text-btn accent dict-again', on: { click: ev => say(ev.currentTarget) } }, icon('speak'), '再听一遍');
+    screen = 'writing';
     stage.replaceChildren(header(d.kind === 'main' ? '听写' : '再写一遍'),
       h('section', { className: 'dict-run' },
         h('p', { className: 'dict-count' }, '第 ', h('span', { className: 'num', text: String(pr.n) }), ' / ', h('span', { className: 'num', text: String(pr.total) }), ' 个'),
         p.show ? h('p', { className: 'dict-prompt', lang: p.lang, text: p.show }) : h('p', { className: 'dict-prompt listen', text: '听老师读' }),
+        d.method === 'phrase' ? null : posCue(w),
         again,
         h('div', { className: 'dict-run-foot' },
           h('button', { type: 'button', className: 'btn dict-next', on: { click: () => { d.next(); draw(); } } }, last ? '写完了' : '下一个', last ? null : icon('arrow')),
@@ -300,6 +317,7 @@ export function createDictationView(ctx) {
     const markBtn = (w, ok) => h('button', { type: 'button', className: 'dict-mark ' + (ok ? 'ok' : 'bad'), 'aria-pressed': w.mark === ok ? 'true' : 'false',
       'aria-label': `${w.w} ${ok ? '写对了' : '写错了'}`, text: ok ? '对' : '错', on: { click: () => mark(w, ok) } });
     const left = rows.filter(w => w.mark === null).length;
+    screen = 'check';
     stage.replaceChildren(header('对一下'),
       h('section', { className: 'dict-check' },
         h('p', { className: 'dict-label', text: '对一下，写对的打勾' }),
@@ -308,7 +326,7 @@ export function createDictationView(ctx) {
           return h('li', { className: 'dict-item' + (w.mark === true ? ' ok' : w.mark === false ? ' bad' : '') },
             h('span', { className: 'a', lang: zhAnswer ? 'zh-CN' : 'en', text: w.answer || (zhAnswer ? '（还没有中文）' : w.w) }),
             markBtn(w, true), markBtn(w, false),
-            other ? h('span', { className: 'b', lang: zhAnswer ? 'en' : 'zh-CN', text: other }) : null);
+            other || posOf(w) ? h('span', { className: 'b', lang: zhAnswer ? 'en' : 'zh-CN' }, posTag(w), other && posOf(w) ? ' ' : null, other || '') : null);
         })),
         checkFoot(left)));
   }
@@ -356,13 +374,15 @@ export function createDictationView(ctx) {
     setBusy(false);
     const perfect = !bad.length;
     line = say1('dictation', { phase: 'after', wrong: bad.length, perfect }, fitAfter(bad.length, perfect));
+    screen = 'done';
     stage.replaceChildren(header('听写', () => ctx.go('home')),
       h('section', { className: 'dict-done' },
         h('p', { className: 'lede', text: !bad.length ? '全对了。' : tonight ? '又写了一遍。' : '今天的听写写完了。' }),
         teacherLine(line),
         bad.length && !tonight ? h('p', { className: 'dict-next-line', text: `${D.REMIND_AFTER_MIN || 10} 分钟后再写一次错的，首页会提醒你。` }) : null,
         h('p', { className: 'small', text: bad.length ? '明天早上出门前，再看一眼这几个词。' : '明天听写顺利。' }),
-        bad.length ? h('ul', { className: 'dict-mini' }, bad.map(w => h('li', {}, h('span', { className: 'serif', lang: 'en', text: w.w }), h('span', { className: 'small', text: w.cn })))) : null,
+        bad.length ? h('ul', { className: 'dict-mini' }, bad.map(w => h('li', {}, h('span', { className: 'serif', lang: 'en', text: w.w }),
+          h('span', { className: 'small' }, posTag(w), posOf(w) ? ' ' : null, w.cn || '')))) : null,
         h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: '回到今天', on: { click: () => ctx.go('home') } }))));
   }
 
@@ -409,6 +429,7 @@ export function createDictationView(ctx) {
     };
     // lines.js 'morning': one line before school
     line = say1('dictation', { phase: 'morning' }, w => w.phase === 'morning');
+    screen = 'glance';
     stage.replaceChildren(header('出门前看一眼', () => ctx.go('home')),
       h('section', { className: 'dict-glance' },
         teacherLine(line),
@@ -416,8 +437,8 @@ export function createDictationView(ctx) {
         h('ul', { className: 'dict-glance-list' }, words.map(w => h('li', {},
           h('span', { className: 'w', lang: 'en' }, w.w,
             h('button', { type: 'button', className: 'say', 'aria-label': '听一遍', on: { click: ev => ctx.say(w.w, ev.currentTarget) } }, icon('speak'))),
-          h('span', { className: 'cn', text: w.cn })))),
-        h('p', { className: 'small', text: '心里拼一遍，看看自己记住没有。' }),
+          h('span', { className: 'cn' }, posTag(w), posOf(w) ? ' ' : null, w.cn || '')))),
+        h('p', { className: 'small', text: '心里拼一遍，也想想它是什么词性，看看自己记住没有。' }),
         h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: '看完了', on: { click: done } }))));
   }
 

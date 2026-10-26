@@ -166,9 +166,10 @@
 import { endOfDay, State, retrievability, daysBetween, localMidnight } from './fsrs.js';
 import {
   dayOf, unitRank, unitName, sprintOf, assignModes, grammarWarm, writePlan, buildQuiz, weeklyGains, tileable,
-  MODE_SECONDS, PULL_MAX, SPELL_PER_DAY, WRITE_SPELL, WRITE_ROTATION,
+  MODE_SECONDS, PULL_MAX, SPELL_PER_DAY, WRITE_SPELL, WRITE_ROTATION, writeEligible, WRITE_SHARE, POS_WARM,
 } from './sprint.js';
 import { todayMix } from './kid-me.js';
+import { posItems } from './pos.js';
 
 export { dayOf, unitRank, unitName };
 
@@ -201,6 +202,12 @@ export const PICKED_WORDS = { standard: 2, light: 1 };
 export const DICT_WARM_MAX = 6;
 export const RECHECK_MAX = 3;
 export const CONTRAST_WARM = 1;
+// 0.9.0 (Wei 10-26: 会写、知道词性、巧记): a new word gets a 巧记 screen after its card in the lesson (ui-lesson showMemo)
+export const MEMO_SECONDS = 10;
+export const MEMO_NEW_MAX = 6;          // at most this many new words get their 巧记 screen in one lesson (wrong ones always do)
+export const NEW_KEEP = 3;              // when time is short, textbook words still new wait for tomorrow, but this many stay
+// what counts as writing the word in the warm-up (spelling tiles, the keyboard, 句子里回想)
+const WRITTEN = new Set(['tiles', 'keys', 'cloze']);
 
 export const isWeekend = d => d.getDay() === 0 || d.getDay() === 6;
 
@@ -501,17 +508,24 @@ export function planToday(state = {}, now = new Date()) {
       : season ? SPELL_PER_DAY - (spellDay ? WRITE_SPELL : 0) : TILES.regular;
     if (tilesMax) tilesMax = Math.max(0, tilesMax + kNum(kw.tilesDelta) + (mix ? kNum(mix.warmup.tilesDelta) : 0));
     const preSet = new Set([...preteach, ...asked]);
-    const eligible = w => !preSet.has(w.slug) && (season ? isKey(w) || !!w.write : !!w.write);
-    let am = assignModes(cards, { first, tilesMax, eligible });
+    // 0.9.0: a 必会词 is spelled from the second time she sees it (sprint.js writeEligible), and at least half of the warm-up's
+    // word cards are written (minShare WRITE_SHARE) whenever spelling is on today (not the first lesson, the quiz day, the night
+    // before the exam, or when she said spelling is too hard)
+    const eligible = w => !preSet.has(w.slug) && writeEligible(w, { season, isKey });
+    const share = tilesMax > 0 ? WRITE_SHARE : 0;
+    let am = assignModes(cards, { first, tilesMax, eligible, minShare: share });
 
     // ---- 写几个词
     const writeFirst = mixId === 'words' || mixId === 'exam' ? 'spell' : mixId === 'grammar' ? (state.grammarCard === null ? 'transform' : 'grammar') : '';
     const writeDelta = kNum(kwr.itemsDelta) + (mix ? kNum(mix.write.itemsDelta) : 0);
     const write = writePlan({ now, state: writeFirst || writeDelta ? { ...state, writeFirst, writeDelta } : state, sprint: sp, words, warm: new Set(cards.map(w => w.slug)), light: isLight, first, quiz: quizDay ? quiz : null, isKey });
     // a spelling day with nothing left to spell there (every key word is already in the warm-up): the warm-up spells them all
-    if (season && spellDay && write.mode !== 'spell') am = assignModes(cards, { first, tilesMax: SPELL_PER_DAY, eligible });
+    if (season && spellDay && write.mode !== 'spell') am = assignModes(cards, { first, tilesMax: SPELL_PER_DAY, eligible, minShare: share });
     cards = am.cards;
     const modes = am.modes;
+    // 读前见一面 is one four-choice card (DESIGN 5.6), not a listening one: with more spelling cards the every-third
+    // listening card can land on it
+    if (preteach.length) { const ps = new Set(preteach); cards.forEach((w, i) => { if (ps.has(w.slug) && modes[i] === 'listen') modes[i] = 'mc4'; }); }
     // ---- 0.6.0 句子里回想 (modes/cloze.js): a few of the word cards are spelled inside a sentence she has read. Not the
     // first card, a new word, a target word before the story or a word 问老师 explained; the exam season takes the outline's
     // key words first, other days the words on the 写得出 line (a tiles card before a four-choice one), then the most reviewed
@@ -548,6 +562,9 @@ export function planToday(state = {}, now = new Date()) {
     let forms = noExtras || isLight || !formsSpec ? [] : [formsSpec];
     let contrast = noExtras || isLight || !Array.isArray(state.contrastItems) ? []
       : state.contrastItems.filter(x => x && x.id).slice(0, CONTRAST_WARM);
+    // ---- 0.9.0: 1-2 词性题 (pos.js posItems) after 变形配对; not on the first lesson, the quiz day (the quiz brings its own)
+    // or the night before the exam. The questions are picked from the final cards at the end.
+    let posN = noExtras || !cards.length ? 0 : isLight ? POS_WARM.light : POS_WARM.standard;
 
     // ---- keep to time (DESIGN 2.3): on a story day some recognition cards wait for tomorrow first; then the 连词成句 extra
     // goes, then tiles back to multiple choice, then fewer grammar questions. A school day with the story is about 13-15 minutes.
@@ -555,7 +572,8 @@ export function planToday(state = {}, now = new Date()) {
     const warmSec = () => modes.reduce((a, m) => a + secOf(m), 0) + grammar.length * secOf('grammar') + order.length * secOf('order')
       + probe.length * secOf('probe') + screen.length * secOf('screen') + verb.length * secOf('verb')
       + forms.length * secOf('forms') + contrast.length * secOf('contrast') + mistakes.length * secOf('grammar') * 2
-      + grammar.filter(g => g && g.intro).length * secOf('alt_intro');
+      + grammar.filter(g => g && g.intro).length * secOf('alt_intro')
+      + posN * secOf('pos') + (first ? 0 : Math.min(MEMO_NEW_MAX, cards.filter(w => w.isNew).length) * MEMO_SECONDS);
     const total = () => minOf(warmSec()) + (read.status === 'ready' ? read.minutes : 0) + (write.status === 'ready' ? write.minutes : 0) + WRAP_MINUTES;
     // a story day: recognition cards from the end of the list (lowest band, put off to tomorrow) go first, before the
     // 连词成句 sentence and before the spelling, so the key words are still written and one sentence is still ordered;
@@ -568,28 +586,73 @@ export function planToday(state = {}, now = new Date()) {
         cards.splice(i, 1); modes.splice(i, 1); trimmed++;
       }
     }
+    // 0.9.0: spelling cards above the half the warm-up must write (a story day's trim leaves more) turn back first
+    const written = () => modes.filter(x => WRITTEN.has(x)).length;
+    const floor = () => (share ? Math.ceil(share * cards.length) : 0);
+    if (share) while (total() > limit && modes.includes('tiles') && written() > floor()) modes[modes.lastIndexOf('tiles')] = 'mc4';
     if (total() > limit) order = [];
     // 0.5.0: then fewer 摸底 words (none in the exam season, where spelling the key words matters more), tiles back to
     // multiple choice, one grammar question besides the probes, no 摸底, one probe, no grammar, no 找动词, no probe
     // 0.6.0 adds, in this fixed order: after the tiles, 句子里回想 down to one card; the 对比小卡 counts like a probe (one
     // grammar question is enough beside it); after the second probe, no 变形配对, then no 对比小卡, then no 句子里回想,
     // all before the last grammar question goes (变形配对 helps her read saw / children, so it stays longer than the 摸底)
-    if (total() > limit && screen.length > SCREEN_WARM.tight) screen = screen.slice(0, SCREEN_WARM.tight);
+    // 0.9.0: when she said there were too many new words, her 15 小学词 wait until recognition cards have gone first
+    if (total() > limit && screen.length > SCREEN_WARM.tight && !tuneWords) screen = screen.slice(0, SCREEN_WARM.tight);
     if (total() > limit && season) screen = [];
-    while (total() > limit && modes.includes('tiles')) modes[modes.lastIndexOf('tiles')] = 'mc4';
-    while (total() > limit && modes.filter(x => x === 'cloze').length > 1) modes[modes.lastIndexOf('cloze')] = 'mc4';
+    // 0.9.0: the written cards stay at least half. Recognition cards wait for tomorrow first (from the end, never below
+    // WARM_MIN, never the first card, a new word, a target word, a word 问老师 explained, one she picked or one that must be
+    // spelled); then a tile turns back into four-choice only while the written ones stay above half
+    if (share && total() > limit) {
+      const preSet2 = new Set(preteach);
+      for (let i = cards.length - 1; i > 0 && total() > limit && cards.length > WARM_MIN; i--) {
+        if (WRITTEN.has(modes[i]) || cards[i].isNew || preSet2.has(cards[i].slug) || asked.includes(cards[i].slug) || pickedSet.has(cards[i].slug) || spellMust.has(cards[i].slug)) continue;
+        cards.splice(i, 1); modes.splice(i, 1); trimmed++;
+      }
+    }
+    if (total() > limit && screen.length > SCREEN_WARM.tight) screen = screen.slice(0, SCREEN_WARM.tight);
+    while (total() > limit && modes.includes('tiles') && written() > floor()) modes[modes.lastIndexOf('tiles')] = 'mc4';
+    while (total() > limit && modes.filter(x => x === 'cloze').length > 1 && written() > floor()) modes[modes.lastIndexOf('cloze')] = 'mc4';
     // the probes are grammar questions too: with them in, one grammar question is enough (the first one stays: 我问过的)
     if (total() > limit && (probe.length || contrast.length) && grammar.length > 1 && !quizDay) grammar = grammar.slice(0, 1);
+    // 0.9.0: one 词性题 is enough when time is short (it never goes to none)
+    if (total() > limit && posN > 1) posN = 1;
     if (total() > limit) screen = [];
     if (total() > limit && probe.length > 1) probe = probe.slice(0, 1);
     if (total() > limit) forms = [];
     if (total() > limit) contrast = [];
-    while (total() > limit && modes.includes('cloze')) modes[modes.lastIndexOf('cloze')] = 'mc4';
+    // 0.9.0: then textbook words that are still new wait for tomorrow (from the end; NEW_KEEP stay, never below WARM_MIN;
+    // never a target word, a word 问老师 explained, one she picked or one that must be spelled), before the written half
+    // or the last grammar question goes. They come back in tomorrow's share of textbook words.
+    let introCut = 0;
+    if (share && total() > limit) {
+      const keep = Math.min(NEW_KEEP, cards.filter(w => w.isNew).length);
+      const protect = new Set([...preteach, ...asked, ...pickedSet, ...spellMust]);
+      for (let i = cards.length - 1; i > 0 && total() > limit && cards.length > WARM_MIN; i--) {
+        if (cards.filter(w => w.isNew).length <= keep) break;
+        const w = cards[i];
+        if (!w.isNew || !w.unit || WRITTEN.has(modes[i]) || protect.has(w.slug)) continue;
+        cards.splice(i, 1); modes.splice(i, 1); introCut++;
+      }
+    }
+    while (total() > limit && modes.includes('cloze') && written() > floor()) modes[modes.lastIndexOf('cloze')] = 'mc4';
     while (total() > limit && grammar.length && !quizDay) grammar = grammar.slice(0, -1);
     if (total() > limit) verb = [];
     if (total() > limit) probe = [];
     if (total() > limit && mistakes.length > 1) mistakes = mistakes.slice(0, 1);
+    // last resort, so a lesson never runs long: the written cards go below half after all
+    while (total() > limit && modes.includes('tiles')) modes[modes.lastIndexOf('tiles')] = 'mc4';
+    while (total() > limit && modes.includes('cloze')) modes[modes.lastIndexOf('cloze')] = 'mc4';
     forceSpell();   // the time trims turn tiles back into four-choice; these stay spelled
+    // the 词性题: words from today's cards (their part of speech is known), the rest sentences from pos-guide.json; the part
+    // of speech she picked wrong lately first (state.posEvents: the last days' answers), the same set all day
+    let pos = [];
+    if (posN) {
+      try {
+        pos = posItems({ words: cards, entryOf: typeof state.entryOf === 'function' ? state.entryOf : null, curriculum: state.curriculum || null,
+          n: posN, seed: Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 864e5),
+          events: Array.isArray(state.posEvents) ? state.posEvents : Array.isArray(state.history) ? state.history : [], now });
+      } catch (e) { pos = []; }
+    }
 
     const wcards = cards.map((w, i) => ({ type: 'word', slug: w.slug, mode: modes[i], ...(kw.distractor && kw.distractor !== 'normal' ? { distractor: kw.distractor } : {}) }));
     // grammar questions and probes spread through the word cards together (probes after the grammar ones)
@@ -603,6 +666,7 @@ export function planToday(state = {}, now = new Date()) {
     for (const x of screen) wcards.push({ type: 'screen', id: x.id });
     for (const id of verb) wcards.push({ type: 'verb', id, item: id, mode: 'verb' });
     for (const f of forms) wcards.push({ type: 'forms', id: 'forms', item: 'forms', mode: 'forms', kind: f.kind, items: f.items.slice() });
+    if (pos.length) wcards.push({ type: 'pos', id: 'pos', item: 'pos', mode: 'pos', items: pos.slice() });
     for (const id of order) wcards.push({ type: 'order', id, item: 'o:' + id, mode: 'order' });
     const tuned = [];
     if (tuneWords && screen.length > SCREEN_WARM.standard) tuned.push({ id: 'screen', why: `${tune.hard === 'words' ? '她说生词太多' : '读的时候多卡在词上'}：今天多认几个小学词（${screen.length} 个）。` });
@@ -611,7 +675,8 @@ export function planToday(state = {}, now = new Date()) {
     const picked = cards.filter(w => pickedSet.has(w.slug)).map(w => w.slug);
     const dictWarm = cards.filter(w => dictList.includes(w.slug)).map(w => w.slug);
     const recheck = cards.filter(w => spellMust.has(w.slug) && recheckList.includes(w.slug)).map(w => w.slug);
-    return { cards, modes, grammar, order, preteach, asked, probe, screen, verb, forms, contrast, cloze, picked, dictWarm, recheck, tuned, wcards, mistakes, write, read, pick, pulled, quizDay, R, I, Fp, trimmed, warmMin: minOf(warmSec()) };
+    const warmMin = minOf(warmSec() - posN * secOf('pos') + pos.length * secOf('pos'));
+    return { cards, modes, grammar, order, preteach, asked, probe, screen, verb, forms, contrast, cloze, picked, dictWarm, recheck, tuned, wcards, mistakes, pos, write, read, pick, pulled, quizDay, R, I, Fp, trimmed, introCut, warmMin };
   }
 
   const m = build(light);
@@ -628,7 +693,7 @@ export function planToday(state = {}, now = new Date()) {
   const r = m.read;
   const readExtra = { mode: r.mode || 'story', note: r.note || '' };
   for (const k of ['episodeId', 'passageId', 'n', 'of', 'title', 'titleZh', 'short', 'again', 'resume', 'challenge', 'autoTrunk', 'selfFirst']) if (r[k] !== undefined) readExtra[k] = r[k];
-  const extras = m.mistakes.length + m.probe.length + m.screen.length + m.verb.length + m.forms.length + m.contrast.length;
+  const extras = m.mistakes.length + m.probe.length + m.screen.length + m.verb.length + m.forms.length + m.contrast.length + m.pos.length;
   const cells = [
     cell('warmup', items.length || m.grammar.length || extras ? 'ready' : 'skip', m.warmMin, items, {
       mode: 'mc4',
@@ -648,6 +713,7 @@ export function planToday(state = {}, now = new Date()) {
       mistakes: m.mistakes,
       dictWarm: m.dictWarm || [],
       recheck: m.recheck || [],
+      pos: m.pos || [],
     }),
     cell('read', r.status, r.minutes, [], readExtra),
     cell('write', w.status, w.minutes, w.items, writeExtra),
@@ -684,10 +750,10 @@ export function planToday(state = {}, now = new Date()) {
       fresh: newIn,
       total: items.length,
       reviews: items.length - newIn,
-      intro: first ? newIn : m.pick.I.length,
+      intro: first ? newIn : m.pick.I.length - (m.introCut || 0),
       newWords: first ? 0 : m.pick.F.length,
       deferred: first ? reviews.length : m.R.length - m.pick.R.length + m.trimmed,
-      cutNew: first ? 0 : m.I.length + m.Fp.length - m.pick.I.length - m.pick.F.length,
+      cutNew: first ? 0 : m.I.length + m.Fp.length - m.pick.I.length - m.pick.F.length + (m.introCut || 0),
       grammar: m.grammar.length,
       spell: spellN,
       pulled: m.pulled.length,
@@ -704,6 +770,8 @@ export function planToday(state = {}, now = new Date()) {
       mistakes: m.mistakes.length,
       dictWarm: (m.dictWarm || []).length,
       recheck: (m.recheck || []).length,
+      pos: (m.pos || []).length,
+      written: m.modes.filter(x => WRITTEN.has(x)).length,
     },
     tune: m.tuned,
     kind: light ? 'easy' : weekend ? 'weekend' : 'standard',

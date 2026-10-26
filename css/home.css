@@ -1,12 +1,12 @@
 /* 今天（ui-home.js）. Owner: 今天标签 UI agent. Class names start with home-. Tokens (--ink, --accent, --rule...) come from
    index.html :root; do not redefine them here. Layout follows the home prototype Wei approved on 10-24
    (design/prototype/home-prototype.dc.html): masthead and yellow tag, “老师说” and a large serif English line with two
-   pills, minutes, plan and reason, the four cells in a row, one full-width button, a quiet row of links at the bottom. */
+   pills, then (0.9.0) three cards: 今天的课 · 今天的阅读 · 接着练, and a quiet row of links at the bottom. */
 .home{min-height:100vh;min-height:100dvh;padding:var(--top) var(--gutter) calc(var(--tabbar) + 16px);display:flex;flex-direction:column}
 .home .runhead{border-bottom:0}
 .home-phase{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55%;font-size:14px;line-height:1.2;color:var(--ink);background:var(--tag-bg);border-radius:14px;padding:6px 12px}
 .home-phase:empty{display:none}
-.home-body{flex:1;display:flex;flex-direction:column;padding-top:16px}
+.home-body{flex:1;display:flex;flex-direction:column;padding-top:12px}
 
 /* the dictation reminder: one line between rules, above the greeting */
 .home-notice{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;min-height:52px;margin-top:12px;padding:8px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font-size:16px;line-height:1.45;color:var(--ink)}
@@ -18,7 +18,7 @@
 .home-notice+.home-notice{margin-top:0;border-top:0}
 
 /* the teacher's English line, Chinese under it until it fades (DESIGN 2.5) */
-.home-hello{display:flex;flex-direction:column;gap:12px;margin-top:48px}
+.home-hello{display:flex;flex-direction:column;gap:12px;margin-top:32px}
 .home-label{font-size:15px;color:var(--muted)}
 .home-en{font:600 32px/1.22 var(--serif);letter-spacing:-.01em;text-wrap:pretty}
 .home-zh{font-size:17px;line-height:1.5;color:var(--muted)}
@@ -28,64 +28,94 @@
 .home-pill:active{background:var(--tag-bg)}
 @media (prefers-color-scheme: dark){.home-pill{background:color-mix(in srgb,var(--ink) 7%,var(--paper))}}
 
-/* minutes, what today holds, why */
-.home-plan{display:flex;flex-direction:column;margin-top:48px}
-.home-minutes{font-size:26px;font-weight:600;line-height:1.3}
-.home-minutes .n{font-variant-numeric:lining-nums tabular-nums}
-.home-summary{margin-top:10px;font-size:17px;line-height:1.55;color:var(--ink);text-wrap:pretty}
-.home-why{margin-top:6px;font-size:15px;line-height:1.55;color:var(--muted);text-wrap:pretty}
+/* 0.8.0 “学一点” under the teacher's line (the lesson's wrap draws the same block with its own class) */
+.home-learn{margin-top:8px;padding-top:14px;border-top:1px solid color-mix(in srgb,var(--ink) 12%,transparent);display:flex;flex-direction:column;gap:8px}
+.home-learn-label{font:13px/1.3 var(--sans);color:var(--muted);letter-spacing:.04em}
+.home-learn-text{font:20px/1.4 var(--serif);color:var(--ink)}
+.home-learn-zh{font:15px/1.6 var(--sans);color:var(--ink-2, var(--ink))}
+
+/* 0.9.0 three cards: ① 今天的课 on its own row in portrait, ② 今天的阅读 and ③ 接着练 side by side; three in a row when wide.
+   Every card can be tapped any time. The one the teacher would pick first: an accent line on top and a filled button. */
+.home-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:36px 0 24px}
+.home-card{display:flex;flex-direction:column;gap:6px;min-width:0;padding:16px 18px 16px;border:1px solid color-mix(in srgb,var(--ink) 11%,transparent);border-radius:14px;background:#FFFFFF}
+.home-card.primary{border-top:3px solid var(--accent);padding-top:14px}
+.home-card-lesson{grid-column:1 / -1}
+@media (prefers-color-scheme: dark){.home-card{background:color-mix(in srgb,var(--ink) 5%,var(--paper))}}
+.home-card-label{font-size:14px;line-height:1.3;color:var(--muted);letter-spacing:.04em}
+.home-card-big{font-size:26px;font-weight:600;line-height:1.25;color:var(--ink)}
+.home-card-big .n{font-variant-numeric:lining-nums tabular-nums}
+.home-card-title{font:600 22px/1.3 var(--serif);color:var(--ink);text-wrap:pretty;overflow-wrap:anywhere}
+.home-card-text{font-size:16px;line-height:1.55;color:var(--ink);text-wrap:pretty}
+.home-card-sub{font-size:14px;line-height:1.55;color:var(--muted);text-wrap:pretty}
+.home-card-go{margin-top:auto;padding-top:12px;display:flex;flex-direction:column;align-items:stretch;gap:2px}
+.btn.home-go{width:100%;min-height:54px;border-radius:12px;font-size:18px}
+.btn.home-go.home-quiet{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.btn.home-go.home-quiet:active{background:var(--tag-bg)}
+.home-card-go .text-btn.home-alt{align-self:center;margin:0;font-size:15px;min-height:44px}
+
+/* card ①: the four cells of the day as one small line; done ones in the accent with a tick */
+.home-cells{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;margin-top:4px;font-size:13px;line-height:1.5;color:var(--muted)}
+.home-cell{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.home-cell.done{color:var(--accent);font-weight:600}
+.home-cell.soon,.home-cell.skip{color:var(--faint)}
+.home-cell .icon{width:14px;height:14px}
+.home-cells-dot{color:var(--faint)}
 /* v1: the weekly gain (“这周又能写出 9 个词。”), a plain line, no countdown, no bar (DESIGN 6.4) */
-.home-gain{margin-top:6px;font-size:16px;line-height:1.5;font-weight:500;color:var(--accent);font-variant-numeric:lining-nums tabular-nums}
-.home-plan .lede+.home-summary+.home-gain{margin-top:10px}
+.home-gain{font-size:14px;line-height:1.5;font-weight:500;color:var(--accent);font-variant-numeric:lining-nums tabular-nums}
 
-/* the four cells: 热身 · 读一段 · 写几个词 · 收尾 */
-.home-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}
-.home-slot{border-top:2.5px solid var(--rule);padding-top:10px;min-width:0}
-.home-slot.ready,.home-slot.done{border-top-color:var(--accent)}
-.home-slot-name{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.home-slot.soon .home-slot-name,.home-slot.skip .home-slot-name{font-weight:500;color:var(--muted)}
-.home-slot-note{margin-top:2px;font-size:13px;color:var(--muted)}
+/* card ②: the words today's reading teaches */
+.home-words{margin-top:6px}
+.home-words-label{font-size:13px;line-height:1.4;color:var(--muted);margin-bottom:6px}
+.home-chips{display:flex;flex-wrap:wrap;gap:6px}
+.home-chip{display:inline-flex;align-items:baseline;gap:5px;padding:4px 10px;border-radius:12px;background:var(--tag-bg);line-height:1.3}
+.home-chip-w{font:600 15px/1.3 var(--serif);color:var(--ink)}
+.home-chip-zh{font-size:12px;color:var(--muted)}
 
-.home-actions{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin-top:36px}
-.btn.home-start{width:100%;min-height:62px;border-radius:14px;font-size:20px;font-weight:600}
-.home-actions .text-btn{align-self:center;margin:0;font-size:16px;min-height:44px}
+/* card ③: the hub draws the pick (practice.css, .pr-hub-card); the small entries under it */
+.home-practice{flex:1;display:flex;flex-direction:column}
+.home-mini{display:flex;flex-wrap:wrap;align-items:center;gap:0 12px;margin-top:10px;padding-top:2px;border-top:1px solid var(--rule)}
+.home-mini .text-btn.home-mini-btn{margin:0;padding:0 1px;min-width:0;min-height:44px;font-size:14px;gap:4px;color:var(--ink)}
+.home-mini-n{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--accent);color:var(--btn-ink);font:600 12px/1 var(--sans);font-variant-numeric:tabular-nums}
 
-/* bottom row: 明天有听写？  查词  这周 3 / 5 天 */
+/* bottom row: 问老师  查词  课文陪读  这周 3 / 5 天 */
 .home-links{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 24px;margin-top:auto;padding:10px 0 0;border-top:1px solid var(--rule)}
 .home-links .text-btn{font-size:16px;min-height:48px;margin:0;padding:0 4px}
 .home-links .text-btn.home-link{color:var(--ink)}
 .home-links .text-btn.home-week{color:var(--muted);font-variant-numeric:tabular-nums}
 
 @media (min-width:700px){
-  .home-hello{margin-top:80px}
+  .home-hello{margin-top:36px}
   .home-en{font-size:40px}
-  .home-plan{margin-top:72px}
-  .home-minutes{font-size:28px}
-  .home-summary{font-size:18px}
-  .home-why{font-size:16px}
-  .home-gain{font-size:17px}
-  .home-slots{gap:14px;margin-top:28px}
-  .home-actions{margin-top:52px}
-  .btn.home-start{min-height:66px;font-size:21px}
+  .home-cards{gap:16px;margin-top:36px}
+  .home-card{padding:18px 20px 18px}
+  .home-card.primary{padding-top:16px}
+  .home-card-big{font-size:28px}
   .home-links .text-btn{font-size:17px}
+  /* card ① spans the row in portrait: the text on the left, the button on the right */
+  .home-card-lesson{display:grid;grid-template-columns:minmax(0,1fr) 230px;column-gap:28px;row-gap:6px;align-content:start}
+  .home-card-lesson>*{grid-column:1}
+  .home-card-lesson>.home-card-go{grid-column:2;grid-row:1 / span 7;align-self:center;margin:0;padding:0}
 }
 
-/* 0.5.0 课文陪读: one quiet line under the start button (ui-textread.js opens a full-screen layer) */
-.home-textread{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px;margin-top:22px;padding-top:14px;border-top:1px solid var(--rule)}
-.home-textread-open{min-height:var(--btn-h);text-align:left}
-.home-textread-open b{font-weight:600}
-.home-textread-again{min-height:var(--btn-h);color:var(--muted)}
-/* 0.7.0: 孩子端“我” in the top right corner; the rows for 我要复习考试 and 错题 */
+/* a narrow window (split view): one card per row */
+@media (max-width:560px){
+  .home-cards{grid-template-columns:minmax(0,1fr)}
+}
+
+/* iPad landscape: the page widens past the 720 column so the three cards sit in one row; 学一点 moves to the right of
+   the greeting so the cards stay in view */
+@media (min-width:1000px) and (orientation:landscape){
+  .home{width:min(1100px,100vw);margin-left:calc(50% - min(550px,50vw))}
+  .home-hello{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);column-gap:44px;row-gap:12px;align-items:start;margin-top:28px}
+  .home-hello>*{grid-column:1}
+  .home-hello>.home-learn{grid-column:2;grid-row:1 / span 4;margin-top:0;padding:4px 0 0 28px;border-top:0;border-left:1px solid color-mix(in srgb,var(--ink) 12%,transparent)}
+  .home-cards{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:32px}
+  .home-card-lesson{grid-column:auto;display:flex}
+  .home-card-lesson>.home-card-go{margin-top:auto;padding-top:12px;align-self:stretch}
+}
+
+/* 0.7.0: 孩子端“我” in the top right corner */
 .home-head-r{display:flex;align-items:center;gap:10px;min-width:0;max-width:62%}
 .home-head-r .home-phase{max-width:none;min-width:0}
 .home-me{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid var(--rule);background:var(--paper);color:var(--ink);font:600 16px var(--sans);display:flex;align-items:center;justify-content:center}
 .home-me:active{background:var(--tag-bg)}
-.home-more{margin-top:0;padding-top:0;border-top:0}
-.home-row{min-height:var(--btn-h);text-align:left}
-.home-row b{font-weight:600}
-/* 0.8.0 “学一点” under the teacher's line, and 接着练 on 今天 (ui-practice.js draws inside .home-practice) */
-.home-learn{margin-top:8px;padding-top:14px;border-top:1px solid color-mix(in srgb,var(--ink) 12%,transparent);display:flex;flex-direction:column;gap:8px}
-.home-learn-label{font:13px/1.3 var(--sans);color:var(--muted);letter-spacing:.04em}
-.home-learn-text{font:20px/1.4 var(--serif);color:var(--ink)}
-.home-learn-zh{font:15px/1.6 var(--sans);color:var(--ink-2, var(--ink))}
-.home-practice{margin-top:24px}

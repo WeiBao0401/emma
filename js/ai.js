@@ -4,7 +4,7 @@
 //
 // 导出
 //   createAI({ getSettings, budget, fetchImpl?, sleep?, random?, timeouts?, now?, poeEnabled? }) -> {
-//     askJSON(kind, user, { signal }) -> Promise<object>   kind：core | lexicon | practice | zh | story | hint
+//     askJSON(kind, user, { signal }) -> Promise<object>   kind：core | lexicon | practice | zh | story | hint | memo
 //     speedTest({ choices, word, timeoutMs, onResult })     家长区“测一下速度”
 //     recent(n = 50) -> [{ at, kind, provider, model, ms, usage, yuan, ok, code }]   最近的请求（只在内存，给家长区看）
 //   }
@@ -15,7 +15,7 @@
 //
 // 路由（DESIGN 10.8、teacher-memory 11）：settings.routing = { core: { provider, model }, lexicon, practice, zh, tts }，
 // provider 是 'bailian' 或 'poe'（中转站，OpenAI 兼容）。没写的任务、没写的 model 按老设置走（provider + models 三个槽），
-// 所以不填 routing 就是词典原来的样子。story 跟 practice、hint 跟 core 走（routing 里写了 story / hint 就用自己的）。
+// 所以不填 routing 就是词典原来的样子。story 跟 practice、hint 和 memo（0.9.0 给旧词条补巧记）跟 core 走（routing 里写了 story / hint 就用自己的）。
 // 'poe' 只在 POE_ENABLED（或 createAI 的 poeEnabled）为真时生效，否则一律读成百炼，原来给 Poe 写的模型名也不带过去：
 // v0 她实时用的功能全走百炼，Poe 以后由家长区打开。tts 永远百炼（tts.js 自己发请求，这里只给家长区显示用）。
 //
@@ -75,9 +75,9 @@ export function providerOf(s) {
 
 export const ROUTE_TASKS = ['core', 'lexicon', 'practice', 'zh', 'tts'];
 // ask kinds without a row of their own borrow one
-const SLOT_OF = { core: 'core', lexicon: 'lexicon', practice: 'practice', zh: 'zh', story: 'practice', hint: 'core', tts: 'tts' };
+const SLOT_OF = { core: 'core', lexicon: 'lexicon', practice: 'practice', zh: 'zh', story: 'practice', hint: 'core', memo: 'core', tts: 'tts' };
 // the old three model slots (the dictionary's 我的 → 模型)
-const modelFor = (kind, models) => (kind === 'core' || kind === 'hint' ? models.core : kind === 'zh' ? models.zh : models.extras);
+const modelFor = (kind, models) => (kind === 'core' || kind === 'hint' || kind === 'memo' ? models.core : kind === 'zh' ? models.zh : models.extras);
 
 // Which provider and model answer this kind of call. Bailian unless the row (or the old global switch) says Poe and
 // Poe is enabled; a Poe row read as Bailian drops its Poe model name too.
@@ -275,7 +275,7 @@ export function createAI({ getSettings, fetchImpl, sleep = sleepMs, random = Mat
     throw new AIError(args.p.networkMsg, 'network');
   }
 
-  // kind: core | lexicon | practice | zh | story | hint
+  // kind: core | lexicon | practice | zh | story | hint | memo
   async function askJSON(kind, user, { signal } = {}) {
     const s = getSettings() || {};
     const mock = !!s.mock;
@@ -303,7 +303,7 @@ export function createAI({ getSettings, fetchImpl, sleep = sleepMs, random = Mat
         text = mock
           ? await mockReply(kind, user, { sleep, random, signal })
           : await callWithRetry({ p, model, system: SYSTEM[kind], user, signal, timeoutMs: timeouts[kind] || 60000, maxTokens, kind,
-            retryTimeout: kind !== 'core' && kind !== 'zh' && kind !== 'hint' });
+            retryTimeout: kind !== 'core' && kind !== 'zh' && kind !== 'hint' && kind !== 'memo' });
       } catch (e) {
         if (e instanceof Truncated) {
           if (++cuts >= 2) throw new AIError(`模型“${model}”的回答太长，两次都被截断了：再试一次，或者到“单词 → 家长”里换个模型。`, 'truncated');
@@ -423,7 +423,7 @@ const hintOf = (user, label) => { const m = String(user).match(new RegExp('^' + 
 
 export async function mockReply(kind, user, { sleep = sleepMs, random = Math.random, signal } = {}) {
   // 0.5-1.5 s; core comes back first so the three tiers fill in visibly, like the real thing
-  const [lo, span] = kind === 'core' || kind === 'hint' ? [500, 400] : kind === 'zh' ? [700, 600] : [900, 600];
+  const [lo, span] = kind === 'core' || kind === 'hint' || kind === 'memo' ? [500, 400] : kind === 'zh' ? [700, 600] : [900, 600];
   await sleep(lo + Math.floor(random() * span));
   if (signal && signal.aborted) throw new AIError('已取消', 'abort');
   if (kind === 'story' || user.includes('Target words:')) {
@@ -460,8 +460,10 @@ export async function mockReply(kind, user, { sleep = sleepMs, random = Math.ran
       brief_cn: book || '模拟释义·' + q.slice(0, 4),
       senses,
       context_note: user.includes('Context') ? '（模拟）这句话里就是课本上的意思。' : '',
+      posZh: '名词', mem: [{ kind: 'picture', text: `（模拟）想一想 ${lq} 放在你书包里的样子。` }], trap: '（模拟）别漏了最后一个字母。', use: `my ${lq}（我的）`,
     });
   }
+  if (kind === 'memo') return JSON.stringify({ posZh: '名词', mem: [{ kind: 'split', text: `（模拟）把 ${q} 拆开读两遍。` }], trap: '', use: '' });
   if (kind === 'lexicon') {
     return JSON.stringify({
       collocations: [{ phrase: `a new ${lq}`, cn: '一个新的' }, { phrase: `my ${lq}`, cn: '我的' }, { phrase: `${lq} and pen`, cn: '和笔' }],

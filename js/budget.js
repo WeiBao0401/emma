@@ -65,7 +65,7 @@ export const PRICES = {
 export const FALLBACK_PRICE = [12, 36];
 
 
-const AI_KIND = { core: 'lookup', lexicon: 'lookup', practice: 'lookup', zh: 'lookup', story: 'story', hint: 'hint',
+const AI_KIND = { core: 'lookup', lexicon: 'lookup', practice: 'lookup', zh: 'lookup', story: 'story', hint: 'hint', memo: 'lookup',
   reflect: 'reflect', photo: 'photo', tts: 'tts', chat: 'chat', asr: 'asr' };
 export const budgetKindOf = aiKind => AI_KIND[aiKind] || (KINDS.includes(aiKind) ? aiKind : 'other');
 

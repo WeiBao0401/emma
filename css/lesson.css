@@ -90,3 +90,13 @@
 .lesson-weekend{display:flex;flex-direction:column;gap:16px;margin-top:8px}
 .lesson-weekend-paper{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 .lesson-practice{margin-top:28px}
+
+/* 0.9.0 巧记 in the lesson (ui-lesson showMemo / memoInline): the word, its part of speech and meaning, the word page's
+   巧记 block (css/entry-memory.css), then “记住了”. A wrong four-choice answer gets the block right under the card. */
+.lesson-memo-why{color:var(--muted)}
+.lesson-memo-head{display:flex;align-items:center;gap:6px;margin-top:10px}
+.lesson-memo-cn{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin-top:8px;font:500 20px/1.5 var(--sans);color:var(--ink)}
+.lesson-memo-cn .pos-zh{margin-right:4px}
+.lesson-memo .mem-box{margin-top:22px}
+.lesson-memo .lesson-memo-go{margin-top:28px}
+.mc4 .lesson-memo-inline,.lesson-memo-inline.mem-box{margin-top:22px}

@@ -1,21 +1,32 @@
 // 提示词：初一孩子版（DESIGN 5.9、8.5）。查词讲解给一个北京初一、英语基础弱的学生看：课本里的那个意思在前，
 // 1-2 个义项，例句只用她认识的词（小学 505 词 + 已学单元的课本词），等级由程序传入（“课本 Unit 3 / 初中词 /
-// 课外词”），不让模型猜。谐音巧记不在查词里生成，答错后才用 SYSTEM.hint 单独要（v0 可以不接）。
+// 课外词”），不让模型猜。
+// 0.8.2（Wei 10-26）：查词要给巧记。App 是帮她用好方法记住单词的老师，不是只给释义和例句的词典：core 另要
+// 词性中文名（posZh）、1-2 种巧记（mem：想画面 / 拆开记 / 连中文 / 小故事，谐音只在自然、不误导读音时用，并提醒真正的读音）、
+// 容易错（trap）、最常用的一个搭配（use）。字段名和离线巧记小本（word-notes.js，curriculum/word-notes-*.json）一样。
+// 旧词条没有巧记时，查词页用 SYSTEM.memo 单独补一次（words.js fillMemory，见 CONTRACTS needs）。
 // 负责：孩子版查词 agent（kid-errors.js、prompts.js）。
 //
 // JSON 的字段和词典版一样（words.js、ui-entry.js、db.js 直接接得上）：
-//   core      status, headword, suggestions, kind, level, phonetic, syllables, brief_cn, senses[{pos, cn, en, example, example_cn}], context_note
+//   core      status, headword, suggestions, kind, level, phonetic, syllables, brief_cn, senses[{pos, cn, en, example, example_cn}], context_note,
+//             0.8.2 起另有 posZh, mem[{kind, text}], trap, use
 //   lexicon   collocations, synonyms, antonyms, word_family, roots, confusables, usage_tip（数量变少，可以是空的）
 //   practice  reading{title, text, cn}, quiz[3 道 choice]
 //   zh        status, query, translation, explain, options[{en, pos, cn, nuance, example, example_cn, level}], best
 //   story     title, text（**word** 标出目标词）, cn, questions[{q, a}]
-//   hint      mnemonic（新：答错后的巧记，一句中文）
-// core 不再要 mnemonic；CORE_KEYS 里留着它，旧词条和导入合并（db.js mergeEntry）照旧。
+//   hint      mnemonic（答错后的巧记，一句中文）
+//   memo      posZh, mem[{kind, text}], trap, use（0.8.2：给已经有讲解、还没有巧记的词补巧记）
+// 旧词条的 mnemonic（一句话巧记）留在 CORE_KEYS 里，旧词条和导入合并（db.js mergeEntry）照旧；查词页把它当一条巧记显示。
 //
 // 导出
-//   SYSTEM[kind]                               系统提示词，kind：core | lexicon | practice | zh | story | hint
+//   SYSTEM[kind]                               系统提示词，kind：core | lexicon | practice | zh | story | hint | memo
 //   CORE_KEYS / LEXICON_KEYS / PRACTICE_KEYS   从回答里拷进词条的字段（白名单）
+//   MEMORY_KEYS                                ['posZh', 'mem', 'trap', 'use']：巧记那几个字段（core 和 memo 都给）
+//   MEM_KINDS                                  ['picture', 'split', 'link', 'story', 'sound']
+//   cleanMemory(raw) -> { posZh, mem, trap, use }   模型或小本给的巧记清洗一遍：kind 认不出的留空、最多 2 条、去破折号和直角引号；
+//                                              没有 mem 但有旧的 mnemonic 时变成一条 kind 为 '' 的巧记
 //   userMsg(q, context, fromCn, hints?)        查词的用户消息。第一行永远是 “Input: <q>”（模拟模式和测试靠它）
+//   memoUserMsg({ headword, brief_cn, senses }, hints?)   补巧记的用户消息，第一行也是 “Input: <词>”
 //   zhUserMsg(q, scene, hints?)                中译英的用户消息
 //   storyUserMsg(words, hints?)                写故事的用户消息
 //   hintUserMsg({ word, cn, chose })           答错后要巧记
@@ -31,13 +42,33 @@ export const COMMON = [
   'You are a patient English teacher for a Grade 7 student (初一, about 12 years old) in China whose English is weak. She uses a Chinese junior middle school textbook.',
   'What she knows: the ~505 primary-school words of the Chinese national curriculum (very common words: numbers, colors, family, body, food, fruit, animals, school things, days, months, weather, clothes, rooms, simple verbs like be, have, go, come, like, want, can, eat, play, see, look, read, write, help), plus the textbook words listed in the message as known.',
   'Return ONLY one JSON object, no markdown fences, no extra text.',
-  'Chinese: short and plain, like a kind teacher talking to a 12-year-old. No grammar jargon beyond 名词、动词、形容词、单数、复数、过去式. Use curly quotes “ ” in Chinese, never 「」. Do not use em dashes.',
+  'Chinese: short and plain, like a kind teacher talking to a 12-year-old. No grammar jargon beyond the part-of-speech names (名词、动词、形容词、副词、代词、介词、连词、数词、冠词) and 单数、复数、过去式. Use curly quotes “ ” in Chinese, never 「」. Do not use em dashes.',
   'English examples: 4-10 words, simple present tense unless the word needs another tense, and ONLY words she knows plus the target word. Topics: school, classmates, family, home, food, animals, sports, hobbies, weather, holidays. Never work, office, meetings, emails, business or technology.',
   'Every real English word gets a normal explanation, including words like die, dead, kill, hunt, fight, sad, cry and hate that appear in school texts: use plain, everyday examples.',
 ].join('\n');
 
+// The memory part (Wei 10-26): the same fields as the offline notes (word-notes.js), asked for in the lookup (core)
+// and, for an old entry that has none yet, on its own (memo).
+const MEMORY_SCHEMA = `  "posZh": "sense 1 的词性中文名：名词 / 动词 / 形容词 / 副词 / 代词 / 介词 / 连词 / 数词 / 冠词 / 感叹词 / 短语",
+  "mem": [{"kind": "picture" | "split" | "link" | "story" | "sound", "text": "一两句中文巧记"}],
+  "trap": "最容易拼错或用错的地方，一句中文；没有就空字符串",
+  "use": "最常用的一个搭配或句型，英文在前、中文放在括号里，例如 a strict teacher（严格的老师）"`;
+
+export const MEMORY_RULES = `Memory help ("mem") matters most: she must still remember this word, how to spell it and what it means tomorrow. A meaning and an example sentence alone are not enough.
+- 1 or 2 tricks. Pick the kinds that really fit this word; never force one:
+  picture: a concrete scene she can see in her head (her classroom, her teacher, her family, a cat, Hello Kitty), tied to the meaning and, when you can, to the letters;
+  split: cut the word into parts she already knows (class + room, any + thing) and say what each part means;
+  link: link it to Chinese: the Chinese meaning, a Chinese word it looks or sounds like, the shape of the letters;
+  story: a one- or two-sentence little story that carries the meaning and the spelling;
+  sound: a Chinese sound-alike (谐音), ONLY when it is natural and close to the real pronunciation (bus 巴士, sofa 沙发), and remind her of the real sound, e.g. “真正读 /bʌs/”. Never a sound-alike that teaches a wrong pronunciation, and never a rude, scary or silly one.
+- Each "text": 15-80 Chinese characters, concrete and vivid, something a 12-year-old sees at once. Not a definition, not “多读几遍”. English inside it: only the target word, its letters and words she knows.
+- Example for strict: [{"kind": "picture", "text": "王老师站在讲台上，眉毛一竖：“Be quiet!” strict 开头 s-t-r 三个辅音挤在一起，就像她把每个人都管得紧紧的。"}, {"kind": "split", "text": "str（拉紧，像 string 绳子）+ ict：绳子拉得紧紧的，管得很严，就是“严格的”。"}]. This example is for strict only: every word gets its own scene.
+- "trap": a spelling trap (a silent letter, a double letter, letters she may swap, a sound written in an unusual way) or a usage trap (a / an, plural, the word that goes after it). Empty string when there is none.
+- "use": the one most common collocation or short sentence pattern, only words she knows, English first, then the Chinese in （）.
+- "posZh": the Chinese name of the part of speech of sense 1.`;
+
 export const CORE_SYSTEM = COMMON + `
-She typed an English word or phrase. First check it, then explain it simply.
+She typed an English word or phrase. First check it, then explain it simply, then help her remember it.
 Schema:
 {
   "status": "ok" | "typo" | "invalid",
@@ -49,13 +80,23 @@ Schema:
   "syllables": "syllable breaks with middle dots, e.g. ba·na·na (phrases: keep spaces)",
   "brief_cn": "最核心的中文意思，8 字以内；给了课本意思就用课本的",
   "senses": [{"pos": "n.", "cn": "中文意思，短", "en": "a very simple English explanation using only words she knows, or empty string", "example": "short example sentence", "example_cn": "中文翻译"}],
-  "context_note": "如果给了原句：这里是什么意思，一两句话；否则空字符串"
+  "context_note": "如果给了原句：这里是什么意思，一两句话；否则空字符串",
+${MEMORY_SCHEMA}
 }
 Rules:
 - "typo": a misspelling of a real word/phrase; fill suggestions, other fields may be empty.
 - "invalid": gibberish, random characters, a full sentence with no clear target word, or not English.
 - 1 or 2 senses, never more. If a textbook meaning is given, sense 1 is exactly that meaning. Otherwise, if a context sentence is given, the sense used there comes first. Add a second sense only when it is very common (for example the sense used in the context sentence, when it is not the textbook one).
-- Do not add memory tricks or homophones (谐音) here.`;
+- The memory help is about sense 1.
+${MEMORY_RULES}`;
+
+export const MEMO_SYSTEM = COMMON + `
+She already has a short explanation of this English word or phrase (the meaning is given). Help her remember it: its meaning, its spelling and its part of speech. If the input is not a real English word or phrase, return {"invalid": true}.
+Schema:
+{
+${MEMORY_SCHEMA}
+}
+${MEMORY_RULES}`;
 
 export const LEXICON_SYSTEM = COMMON + `
 Show a few useful connections of the dictionary form (lemma) of the given English word or phrase, at her level. If the input is not a real English word or phrase, return {"invalid": true}.
@@ -119,13 +160,58 @@ export const SYSTEM = {
   zh: ZH_SYSTEM + JSON_NOTE,
   story: STORY_SYSTEM + JSON_NOTE,
   hint: HINT_SYSTEM + JSON_NOTE,
+  memo: MEMO_SYSTEM + JSON_NOTE,
 };
 
 export const LEXICON_KEYS = ['collocations', 'synonyms', 'antonyms', 'word_family', 'roots', 'confusables', 'usage_tip'];
 export const PRACTICE_KEYS = ['reading', 'quiz'];
+// the memory fields, same names as the offline notes (word-notes.js): in the core reply and the memo reply
+export const MEMORY_KEYS = ['posZh', 'mem', 'trap', 'use'];
 // Core fields copied into an entry (headword is handled separately); anything else the model returns is ignored.
-// mnemonic stays listed for old entries and import merges (db.js), though the core prompt no longer asks for it.
-export const CORE_KEYS = ['kind', 'level', 'phonetic', 'syllables', 'brief_cn', 'senses', 'context_note', 'mnemonic'];
+// mnemonic stays listed for old entries and import merges (db.js); the kid prompt asks for mem instead (0.8.2).
+export const CORE_KEYS = ['kind', 'level', 'phonetic', 'syllables', 'brief_cn', 'senses', 'context_note', 'mnemonic', ...MEMORY_KEYS];
+
+// ---------------------------------------------------------------- memory help, cleaned
+
+export const MEM_KINDS = ['picture', 'split', 'link', 'story', 'sound'];
+// what a model may write instead of the five kinds
+const KIND_ALIAS = { image: 'picture', scene: 'picture', imagine: 'picture', parts: 'split', break: 'split', root: 'split', roots: 'split',
+  chinese: 'link', connect: 'link', association: 'link', homophone: 'sound', '谐音': 'sound', '画面': 'picture', '拆开': 'split', '故事': 'story' };
+const MEM_MAX = 2;
+const clip = (s, n) => { const a = Array.from(s); return a.length > n ? a.slice(0, n).join('') + '…' : s; };
+// her app never shows a dash used as a pause or corner quotes
+function tidy(s, n = 160) {
+  const t = String(s ?? '').replace(/\s+/g, ' ').trim()
+    .replace(/\s*(——|—|--)\s*/g, '，').replace(/「/g, '“').replace(/」/g, '”').replace(/，{2,}/g, '，').replace(/^，|，$/g, '');
+  return clip(t, n);
+}
+function memKind(k) {
+  const s = String(k ?? '').trim().toLowerCase();
+  if (MEM_KINDS.includes(s)) return s;
+  return KIND_ALIAS[s] || '';
+}
+
+// raw: a core or memo reply, an entry, or an offline note. Never throws; missing parts come back empty.
+export function cleanMemory(raw) {
+  const r = raw && typeof raw === 'object' ? raw : {};
+  let list = r.mem;
+  if (typeof list === 'string') list = [{ kind: '', text: list }];
+  if (list && !Array.isArray(list) && typeof list === 'object') list = [list];
+  const mem = [];
+  const seen = new Set();
+  for (const x of Array.isArray(list) ? list : []) {
+    const item = typeof x === 'string' ? { kind: '', text: x } : x && typeof x === 'object' ? x : null;
+    if (!item) continue;
+    const text = tidy(item.text ?? item.tip ?? '');
+    if (!text || seen.has(text)) continue;
+    seen.add(text);
+    mem.push({ kind: memKind(item.kind), text });
+    if (mem.length >= MEM_MAX) break;
+  }
+  // an old entry's one-line mnemonic is still a memory trick
+  if (!mem.length && typeof r.mnemonic === 'string' && r.mnemonic.trim()) mem.push({ kind: '', text: tidy(r.mnemonic) });
+  return { posZh: tidy(r.posZh, 24), mem, trap: tidy(r.trap, 120), use: tidy(r.use, 120) };
+}
 
 // ---------------------------------------------------------------- what the program tells the model
 
@@ -151,6 +237,18 @@ export function userMsg(q, context, fromCn = '', hints = {}) {
   if (context) msg += `\nContext sentence where she saw it: ${context}`;
   if (fromCn) msg += `\nShe reached this word from the Chinese “${fromCn}”; put the sense matching it first.`;
   return msg + hintLines(hints);
+}
+
+// An entry that has its explanation but no memory help yet (looked up before 0.8.2): the word, its meaning and part of speech.
+export function memoUserMsg(entry = {}, hints = {}) {
+  const e = entry || {};
+  const s0 = Array.isArray(e.senses) && e.senses[0] ? e.senses[0] : {};
+  const cn = oneLine(s0.cn || (hints && hints.textbookCn) || e.brief_cn || '');
+  const pos = oneLine(s0.pos || '');
+  let msg = `Input: ${oneLine(e.headword || e.w || '')}`;
+  if (cn) msg += `\nMeaning (sense 1): ${cn}`;
+  if (pos) msg += `\nPart of speech: ${pos}`;
+  return msg + knownLine(hints && hints.known);
 }
 
 export function zhUserMsg(q, scene, hints = {}) {

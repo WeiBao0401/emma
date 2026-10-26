@@ -73,6 +73,10 @@ import { createDailyRead } from './ui-daily-read.js';
 import { createUnitFlow } from './ui-unit-flow.js';
 import * as E from './encounters.js';
 import { teacherTune, applyKnobs, referWrongCount } from './teach-tune.js';
+// 0.9.0 (Wei 10-26): 巧记 for every textbook word (word-notes.js reads curriculum/word-notes-a.json, -b.json and the
+// part-of-speech guide) and 词性 (pos.js: the part-of-speech cards, its questions in the warm-up, the quiz and the review)
+import { loadAll as loadWordNotes } from './word-notes.js';
+import * as Pos from './pos.js';
 
 const params = new URLSearchParams(location.search);
 // ?mock=offline: mock mode where every model call fails like a dropped connection (tests the dictionary fallback)
@@ -352,6 +356,11 @@ const app = {
       weekGoal: (kv.peek('profile', {}) || {}).weeklyGoal || 0,
       lessonDays: lessonDays(kv),
       unitRanks: unitRanks && Object.keys(unitRanks).length ? unitRanks : undefined,
+      // 0.9.0: 词性题 in the warm-up and the quiz pick words by their entry and the 课标 detail list; posEvents (the last
+      // 7 days of answers) puts the part of speech she got wrong first
+      entryOf: slug => words.get(slug),
+      curriculum,
+      posEvents: weekAnswers,
       ...v1State(now, progress, tune),
       ...kid,
       ...extra,
@@ -653,6 +662,8 @@ async function boot() {
       // 变形配对 reads curriculum/forms.json. Either failing just leaves it out of the warm-up.
       import('./modes/cloze.js').then(m => { Cz = m; }).catch(e => console.warn('cloze:', (e && e.message) || e)),
       import('./modes/forms.js').then(m => { Fm = m; return m.loadForms({ fetchJSON }); }).catch(e => console.warn('forms:', (e && e.message) || e)),
+      // 0.9.0: the memory cards, so the dictionary layer of the first lookup already has them (ui-entry also loads them lazily)
+      loadWordNotes({ fetchJSON }).catch(e => console.warn('word notes:', (e && e.message) || e)),
       refreshRecent(),
     ]);
   } catch (e) {
@@ -676,6 +687,8 @@ async function boot() {
   revise = createReviewRequestView(app);
   mistakes = createMistakesTab(app);
   MX.loadBank({ fetchJSON }).catch(e => console.warn('mistakes bank:', (e && e.message) || e));
+  // 0.9.0: the part-of-speech cards and the 课标 detail list (word book, dictation and review also load them on demand)
+  Pos.loadPos(app).catch(e => console.warn('pos:', (e && e.message) || e));
   // 课文陪读: its own full-screen layer over whatever page is open (ui-textread.js); 今天 and 问老师 open it
   app.textread = createTextRead(app);
   // 0.8.0: 接着练, 每日阅读 and 进新单元 lay their own layers over the app like 课文陪读

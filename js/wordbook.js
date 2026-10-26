@@ -49,8 +49,12 @@
 // 导出（界面，ctx 是 app.js 的 ctx）
 //   renderAdd(container, ctx, { onAdded(slug), onClose, onOpen(slug) }) -> { el, focus() }
 //   renderCard(container, ctx, entry, facts, { onPractice(slugs), onFull(slug) }) -> { el }
+//     0.8.2（Wei 10-26）：卡片上多一块“词性”：n. 名词、它是干什么的、一个记得住的画面、词尾规律（-ous 结尾多半是形容词），
+//     还能作别的词性的写“也可以作动词”（pos.js posLine；词性小卡和课标详表第一次打开卡片时读进来，读到了重画这张卡）
+//   cardPos(entry, curriculum) -> pos.js posLine 的结果 | null（短语、没有词性的词是 null）
 //   createPractice(container, ctx, { slugs, onExit(results) }) -> Promise<{ el, onKey(ev), stop(), inSession() }>
-//     题型用现有的 choice / listen / spell / cloze（动态加载，和上课一样的 mode 接口）。每判一次记 events 'answer'
+//     题型用现有的 choice / listen / spell / cloze（动态加载，和上课一样的 mode 接口；0.8.2 字母块换成 pos.js posSpellMode，
+//     题面多一行词性）。每判一次记 events 'answer'
 //     （step 'wordbook'、sid、unit）。不给 FSRS 评分（复习的日子还是热身说了算），所以随便练不打乱复习；
 //     她的答题照样算进“会写了”。第一次没对的词最后再出一次。
 import { h, icon } from './ui-dom.js';
@@ -58,6 +62,7 @@ import { State, retrievability } from './fsrs.js';
 import { slugify, localIso, lookupEvents } from './words.js';
 import { metDays, TALLY_KEY } from './weekly.js';
 import * as R from './reader.js';
+import { posLine, loadPos } from './pos.js';
 
 export const KV_KEY = 'wordbook.own';
 export const SOURCES = [['self', '我自己加的'], ['story', '故事'], ['textread', '课文陪读'], ['chat', '问老师'], ['look', '查词'],
@@ -457,6 +462,20 @@ export function renderAdd(container, ctx, { onAdded = () => {}, onClose = () => 
 
 // ---------------------------------------------------------------- 界面：一个词的卡片
 
+export function cardPos(e, curriculum = null) {
+  if (!e || /\s/.test(str(e.headword).trim()) || e.phrase) return null;
+  try { return posLine(e, { curriculum }); } catch (err) { return null; }
+}
+function posSection(p) {
+  if (!p) return null;
+  return h('section', { className: 'wb-sec wb-pos' },
+    h('h3', { className: 'wb-sec-h', text: '词性' }),
+    h('p', { className: 'wb-pos-line' }, h('i', { className: 'pos', lang: 'en', text: p.abbr }), ' ', h('b', { text: p.zh }), `：${p.what}`),
+    p.image ? h('p', { className: 'small', text: '记一记：' + p.image }) : null,
+    p.tip ? h('p', { className: 'small', text: p.tip }) : null,
+    p.alsoText ? h('p', { className: 'small', text: p.alsoText }) : null);
+}
+
 const LEVEL_SUB = { new: '还没在复习里认出来过', know: '看到能认出来', write: '跨好几天都拼对了' };
 export function renderCard(container, ctx, e, facts, { onPractice = () => {}, onFull = () => {} } = {}) {
   const info = call(ctx.dict && ctx.dict.find, e.headword) || null;
@@ -471,17 +490,20 @@ export function renderCard(container, ctx, e, facts, { onPractice = () => {}, on
   try { met = sentencesMet(e, sentencePool({ kv: ctx.kv, entry: e }), { lemma: w => call(ctx.dict && ctx.dict.lemma, w) }); } catch (err) { met = []; }
   const say = (t, b) => { try { ctx.say(t, b); } catch (err) { /* ignore */ } };
   const flags = flagsOf(e, facts);
+  const pos = cardPos(e, facts.curriculum || ctx.curriculum);
 
   const el = h('article', { className: 'wb-card' },
     h('header', { className: 'wb-card-top' },
       h('h2', { className: 'wb-card-w', lang: 'en', text: e.headword }),
       h('button', { type: 'button', className: 'say wb-card-say', 'aria-label': '听一遍', on: { click: ev => say(e.headword, ev.currentTarget) } }, icon('speak'))),
     ph ? h('p', { className: 'wb-card-ph', lang: 'en', text: `/${ph}/` }) : null,
-    h('p', { className: 'wb-card-cn', text: cn || '中文第一次打开完整讲解时补上' }),
+    h('p', { className: 'wb-card-cn' }, pos ? h('i', { className: 'pos', lang: 'en', title: pos.zh, text: pos.abbr }) : null, pos ? ' ' : null,
+      cn || '中文第一次打开完整讲解时补上'),
     book ? h('p', { className: 'small', text: `${book.label} 里的意思` }) : null,
     h('div', { className: 'wb-card-level' },
       h('span', { className: 'wb-lv wb-lv-' + level, text: LEVELS[level] }),
       h('span', { className: 'small', text: LEVEL_SUB[level] + (flags.fading ? '，最近有点要忘' : '') })),
+    posSection(pos),
     h('section', { className: 'wb-sec' },
       h('h3', { className: 'wb-sec-h', text: '从哪来' }),
       srcs.length ? h('p', { className: 'wb-srcs' }, srcs.map(s => h('span', { className: 'wb-src wb-src-' + s.kind, text: s.label }))) : h('p', { className: 'small', text: '单词本里的词' }),
@@ -502,12 +524,19 @@ export function renderCard(container, ctx, e, facts, { onPractice = () => {}, on
       h('button', { type: 'button', className: 'btn wb-big', on: { click: () => onPractice([e.slug]) } }, '现在练一下'),
       h('button', { type: 'button', className: 'text-btn accent', on: { click: () => onFull(e.slug) } }, '看完整讲解', icon('chev'))));
   container.replaceChildren(el);
+  // the 词性 cards and the 课标 details (parts of speech) the first time a card opens: draw it again once they are in
+  if (!posReady) {
+    posReady = loadPos(ctx);
+    posReady.then(() => { if (container.firstChild === el) renderCard(container, ctx, e, facts, { onPractice, onFull }); });
+  }
   return { el };
 }
+let posReady = null;
 
 // ---------------------------------------------------------------- 界面：练一下
 
-const MODE_FILES = { mc4: ['./modes/choice.js', 'choiceMode'], listen: ['./modes/listen.js', 'listenMode'], tiles: ['./modes/spell.js', 'spellMode'], cloze: ['./modes/cloze.js', 'clozeMode'] };
+// 0.8.2: the tiles show the word's part of speech too (pos.js posSpellMode wraps spell.js spellMode, same interface)
+const MODE_FILES = { mc4: ['./modes/choice.js', 'choiceMode'], listen: ['./modes/listen.js', 'listenMode'], tiles: ['./pos.js', 'posSpellMode'], cloze: ['./modes/cloze.js', 'clozeMode'] };
 const EVENT_MODE = { mc4: 'mc4', listen: 'listen', spell: 'tiles', tiles: 'tiles', cloze: 'cloze', card: 'card', keys: 'keys' };
 
 export async function createPractice(container, ctx, { slugs = [], onExit = () => {} } = {}) {

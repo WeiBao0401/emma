@@ -36,8 +36,15 @@
 //   keyWords(state, phase?) -> { slugs, source: 'outline' | 'unit' | '' }   重点词（只认单词本里有的词）
 //   sprintOf(state, now) -> Sprint = examPhase(...) 加 { keys: [slug], keySource, spellPerDay }
 //   tileable(word) -> bool                 能出字母块：单个词、只有字母、2-12 个
-//   assignModes(cards, { first, tilesMax, eligible }) -> { cards, modes }   热身每张卡的题型（第一张和新词四选一），
-//                                          字母块和别的题型交错排
+//   assignModes(cards, { first, tilesMax, eligible, minShare? }) -> { cards, modes }   热身每张卡的题型（第一张和新词四选一），
+//                                          字母块和别的题型交错排。0.8.2 minShare（0 到 1，默认 0 = 照旧）：能拼的卡够的话，
+//                                          字母块至少占这么多（tilesMax 跟着往上抬），每天热身写出来的不少于一半就传 WRITE_SHARE
+//   0.8.2（Wei 10-26：会写、知道词性）
+//   WRITE_SHARE = 0.5      日常热身写出来的（字母块、句子里回想）至少占几成
+//   POS_WARM = { standard: 2, light: 1 }   热身里几道词性题（pos.js posItems / renderPos）
+//   QUIZ_POS = 4、QUIZ_POS_WITH_READ = 3   考前小卷里几道词性题
+//   writeEligible(w, { season, isKey, skip }) -> bool   这张卡能不能出拼写：她见过一次以上的必会词（reps ≥ 1，第二次见就拼），
+//                                          “写得出”线开着的，期中季的重点词；新词、拼不了的（短语、带符号）、skip 里的不出
 //   grammarWarm(state, now, n, sprint?) -> [GrammarItem | WarmItem]   热身里的语法题：state.grammarWarm（数组）
 //                                          或 state.grammarWarmItems（grammar.js 的函数，按它的写法 fn(state, now, { max }) 调，
 //                                          state.grammar 是 grammarState(kv)）给了就用，空的也算数；都没给或者出错才用兜底题
@@ -53,7 +60,9 @@
 //       state 是 plan 的 state，或 ui-lesson 手上的 { entries, words, curriculum, kv, grammar, plan, now }；
 //       state.plan.quiz 有了就直接返回它（首页和上课看到的是同一份）
 //       Quiz = { id: 'quiz:YYYY-MM-DD', date, kind: 'quiz', title, minutes, items: [slug], spell: [{ slug, headword, mode }],
-//                grammar: [GrammarItem], note, passage?: { id, label, minutes } }   passage：0.5.0 期中阅读小篇（plan 放进读一段格）
+//                grammar: [GrammarItem], note, passage?: { id, label, minutes }, pos: [PosItem] }   passage：0.5.0 期中阅读小篇（plan 放进读一段格）
+//       0.8.2 pos：3 到 4 道词性题（pos.js posItems：小卷拼的词里词性定得下来的先，不够用 pos-guide.json 的句子题）。
+//         state.posItems 给了数组就用它；词条从 state.entryOf(slug)、words.js 实例的 get、或 state.entries 找，都没有只出句子题
 //   weeklyGains(events, now) -> { since, written, writtenSlugs, recognized, recognizedSlugs, line }
 //       这周（周一起）第一次写对的词、第一次认出的词；line 是孩子看的一句：“这周又能写出 9 个词”，没有就是 ''
 //
@@ -62,9 +71,10 @@
 //   WarmItem（grammar.js 给的）= { item: 'g:<卡>:<题>', card, qid, kind, ... }，没有题面，ui-lesson 用 grammar.js resolveWarmItem 取题
 //       q 里的空用 ____（和 grammar.js 的 BLANK 一样）；tags 的标签在 curriculum/tags.json；answer 一定在 options 里（测试检查）
 //
-// 依赖：fsrs.js（daysBetween、localMidnight、retrievability、State）。
+// 依赖：fsrs.js（daysBetween、localMidnight、retrievability、State）；0.8.2 pos.js（posItems，小卷的词性题）。
 
 import { daysBetween, localMidnight, retrievability, State } from './fsrs.js';
+import { posItems, SECONDS as POS_SECONDS } from './pos.js';
 
 export const SPRINT_DAYS = 14;
 export const QUIZ_DAYS = 3;
@@ -79,7 +89,9 @@ export const MODE_SECONDS = { mc4: 15, listen: 15, card: 15, tiles: 25, keys: 25
   probe: 25, screen: 5, verb: 20, transform: 50,
   // 0.6.0: 句子里回想 (a spelling card in a sentence), 变形配对 (one group), 对比小卡 (one screen, 3 quick judgments), and the
   // 换个讲法 screen before the first alt question of a card (counted on top of that question's 25)
-  cloze: 30, forms: 45, contrast: 60, alt_intro: 40 };
+  cloze: 30, forms: 45, contrast: 60, alt_intro: 40,
+  // 0.8.2: one 词性题 (a word or a sentence with one word underlined, four kinds to choose from)
+  pos: 15 };
 export const WRITE_MINUTES = { spell: 2, grammar: 3, phonics: 3, order: 3, transform: 3 };
 export const WRITE_ROTATION = ['spell', 'grammar', 'grammar', 'order', 'phonics', 'spell', 'grammar'];   // 周日..周六
 // 0.5.0 句型转换 takes some days of the rotation without making it longer: Saturday (a grammar day) all year, and in the
@@ -91,6 +103,11 @@ export const writeModeOf = (dow, season = false) =>
 export const QUIZ_SPELL_WITH_READ = 6;
 export const QUIZ_GRAMMAR_WITH_READ = 4;
 export const UNIT_CARDS = { U1: 'pronoun', U2: 'there_be', U3: 'possessive_s' };   // grammar.json 的卡 id
+// 0.8.2 (Wei 10-26): the teacher wants the words written and their part of speech known, not just their meaning recognised
+export const WRITE_SHARE = 0.5;
+export const POS_WARM = { standard: 2, light: 1 };
+export const QUIZ_POS = 4;
+export const QUIZ_POS_WITH_READ = 3;
 
 const pad = n => String(n).padStart(2, '0');
 export const dayOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -212,11 +229,22 @@ export function tileable(w) {
   return /^[a-z]{2,12}$/i.test(s);
 }
 
+// 0.8.2: a 必会词 is spelled from the second time she meets it (seen once: reps ≥ 1), not only once the 写得出 line is open
+export function writeEligible(w, { season = false, isKey = () => false, skip = null } = {}) {
+  if (!w || w.isNew || !tileable(w)) return false;
+  if (skip && skip.has && skip.has(w.slug)) return false;
+  if (w.write) return true;
+  if (season && isKey(w)) return true;
+  return w.tier === 'required' && (w.reps || 0) >= 1;
+}
+
 // cards come in plan order (the first one is the surest). Returns the cards re-ordered so spelling tiles alternate
-// with the other kinds, and the mode of each.
-export function assignModes(cards = [], { first = false, tilesMax = 0, eligible = () => false } = {}) {
+// with the other kinds, and the mode of each. minShare (0.8.2) lifts tilesMax so the spelled cards are at least that share
+// of the cards, as far as there are cards she can spell
+export function assignModes(cards = [], { first = false, tilesMax = 0, eligible = () => false, minShare = 0 } = {}) {
   if (!cards.length) return { cards: [], modes: [] };
   if (first) return { cards: cards.slice(), modes: cards.map(() => 'mc4') };
+  if (minShare > 0) tilesMax = Math.max(tilesMax, Math.ceil(Math.min(1, minShare) * cards.length));
   let tiles = 0;
   const kind = cards.map((w, i) => {
     if (i === 0 || w.isNew) return 'other';     // the first card and a new word: just recognise it first
@@ -567,6 +595,7 @@ export function buildQuiz(state = {}, now = new Date(), opts = {}) {
   if (state.now) now = new Date(state.now);
   // ui-lesson passes the plan it already showed: the same quiz, not a second draw
   if (!opts.force && state.plan && state.plan.quiz && state.plan.quiz.kind === 'quiz') return state.plan.quiz;
+  const entryOf = entryLookup(state);
   const words = wordsOf(state, now);
   state = { ...state, words, progress: progressOf(state), outline: outlineOf(state) };
   const sp = opts.sprint || sprintOf(state, now);
@@ -592,7 +621,18 @@ export function buildQuiz(state = {}, now = new Date(), opts = {}) {
   const spell = [];
   for (let i = 0; i < pool.length && spell.length < nSpell; i++) spell.push(pool[(start + i) % pool.length]);
   const grammar = grammarQuiz(state, now, passage ? QUIZ_GRAMMAR_WITH_READ : QUIZ_GRAMMAR, sp);
-  const sec = spell.length * 45 + grammar.length * 30 + (passage ? passage.minutes * 60 : 0);
+  // 0.8.2: 词性题, the quiz's own words first
+  const nPos = passage ? QUIZ_POS_WITH_READ : QUIZ_POS;
+  let pos = [];
+  if (Array.isArray(state.posItems)) pos = state.posItems.filter(Boolean).slice(0, nPos);
+  else {
+    try {
+      pos = posItems({ words: [...spell, ...pool], entryOf, curriculum: state.curriculum || null, n: nPos, seed: dayNumber(now) + k,
+        events: Array.isArray(state.history) ? state.history : Array.isArray(state.events) ? state.events : [], now });
+    } catch (e) { pos = []; }
+  }
+  const sec = spell.length * 45 + grammar.length * 30 + pos.reduce((a, it) => a + (it.kind === 'word' ? POS_SECONDS.word : POS_SECONDS.sentence), 0)
+    + (passage ? passage.minutes * 60 : 0);
   const minutes = Math.min(15, Math.max(5, Math.round(sec / 60)));
   const date = dayOf(now);
   return {
@@ -605,8 +645,17 @@ export function buildQuiz(state = {}, now = new Date(), opts = {}) {
     items: spell.map(w => w.slug),
     spell: spell.map(w => ({ slug: w.slug, headword: w.headword || w.slug, mode })),
     grammar,
+    pos,
     note: '写错的也没关系，明天热身再见。',
   };
+}
+
+// a slug -> entry lookup from what the caller has: state.entryOf, the words.js instance (its get), or raw state.entries
+function entryLookup(state) {
+  if (typeof state.entryOf === 'function') return state.entryOf;
+  if (state.words && !Array.isArray(state.words) && typeof state.words.get === 'function') return s => { try { return state.words.get(s); } catch (e) { return null; } };
+  if (Array.isArray(state.entries)) { const m = new Map(state.entries.filter(e => e && e.slug).map(e => [e.slug, e])); return s => m.get(s) || null; }
+  return null;
 }
 
 // 0.5.0 期中阅读小篇 (curriculum/exam-reading.json, design/teacher-next.md 3.4): one passage in each quiz. state.examPassages

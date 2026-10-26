@@ -1,6 +1,6 @@
 // Lookup and library rules, mirroring server.py (api_lookup, store_lookup, record_lookup, enrich).
 // No DOM access: the store (IndexedDB or an in-memory fake) and the AI client are injected.
-import { userMsg, zhUserMsg, LEXICON_KEYS, PRACTICE_KEYS, CORE_KEYS } from './prompts.js';
+import { userMsg, zhUserMsg, memoUserMsg, cleanMemory, LEXICON_KEYS, PRACTICE_KEYS, CORE_KEYS, MEMORY_KEYS } from './prompts.js';
 import * as F from './fsrs.js';
 import { planImport, buildExport } from './db.js';
 
@@ -224,6 +224,7 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
     // allowlist: an unexpected key from the model must never overwrite favorited, note, fsrs, slug...
     const fields = { headword: core.headword };
     for (const k of CORE_KEYS) if (k in core) fields[k] = core[k];
+    if ('mem' in core) Object.assign(fields, cleanMemory(core));   // 0.9.0: the memory help is stored already cleaned
     fields.level = levelOf(core.headword, fields.level);
     if (fields.level === undefined) delete fields.level;
     let rec = entries.get(slug);
@@ -356,6 +357,7 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
         const parts = {};
         if ((r.data.status || 'ok') === 'ok') {   // invalid: nothing copied in
           for (const k of CORE_KEYS) if (k in r.data) parts[k] = r.data[k];
+          if ('mem' in r.data) Object.assign(parts, cleanMemory(r.data));
           const lv = levelOf(rec.headword, parts.level);
           if (lv !== undefined) parts.level = lv;
         }
@@ -381,6 +383,32 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
     if (Object.keys(errors).length) { enrichErrors.set(slug, errors); enrichCauses.set(slug, causes); }
     else { enrichErrors.delete(slug); enrichCauses.delete(slug); }
     return { entry: entries.get(slug), errors };
+  }
+
+  // 0.9.0: an old entry (looked up before the lookup asked for memory help) gets its memory tricks on its own, once.
+  // Only fills fields that are still empty; one request per slug at a time. ui-entry calls it when it exists.
+  const memoFlight = new Map();
+  function fillMemory(slug) {
+    const rec = entries.get(slug);
+    if (!rec) return Promise.reject(new Error('找不到这个词。'));
+    if (Array.isArray(rec.mem) && rec.mem.length) return Promise.resolve(rec);
+    if (memoFlight.has(slug)) return memoFlight.get(slug);
+    const p = ai.askJSON('memo', memoUserMsg(rec, hints(rec.headword))).then(async data => {
+      const cur = entries.get(slug);
+      if (!cur || !data || data.invalid) return cur || null;
+      const m = cleanMemory(data);
+      if (!m.mem.length) return cur;
+      for (const k of MEMORY_KEYS) {
+        const has = Array.isArray(cur[k]) ? cur[k].length : cur[k];
+        if (m[k] && (k === 'mem' ? m.mem.length : true) && !has) cur[k] = m[k];
+      }
+      cur.updated = localIso(now());
+      await save(cur);
+      emit('entry', slug);
+      return cur;
+    }).finally(() => memoFlight.delete(slug));
+    memoFlight.set(slug, p);
+    return p;
   }
 
   async function favorite(slug, on = true) {
@@ -553,7 +581,7 @@ export function createWords({ store, ai, dict = null, now = () => new Date(), ha
   }
 
   return {
-    load, lookup, enrich, favorite, setNote, patch, review, reviewQueue, dueCount, tomorrowCount, stats,
+    load, lookup, enrich, fillMemory, favorite, setNote, patch, review, reviewQueue, dueCount, tomorrowCount, stats,
     exportData, importData, previewImport, reviewedToday, recent, favorites,
     get: slug => entries.get(slug),
     all: () => [...entries.values()],

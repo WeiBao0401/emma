@@ -2,7 +2,7 @@
 // Keep VERSION identical to VERSION in js/config.js and bump both on every release, or the iPad keeps the old files.
 // Same origin as Wei's dictionary (its own scope and caches): every cache here starts with "emma-" and only "emma-" caches are ever
 // deleted, so neither app touches the other's. The check page (check/) has its own worker and "emma-check-" caches.
-const VERSION = '0.8.1';
+const VERSION = '0.9.0';
 const CACHE = 'emma-' + VERSION;
 // The offline dictionary (data/, about 4.6 MB, 2 MB gzipped) changes rarely, so it lives in its own cache that
 // survives app updates and is only downloaded when missing. Bump DATA_VERSION whenever a file in data/ changes.
@@ -34,6 +34,8 @@ const SHELL = [
   'js/daily-read.js', 'js/ui-daily-read.js', 'js/practice.js', 'js/ui-practice.js', 'js/rec.js', 'js/ui-readaloud.js',
   'js/unit-flow.js', 'js/ui-unit-flow.js', 'js/encounters.js', 'js/weekend.js', 'js/teach-tune.js',
   'css/daily-read.css', 'css/practice.css', 'css/readaloud.css', 'css/unit-flow.css',
+  // 0.9.0: 巧记小本 and 词性 (ui-entry, review, sprint, wordbook and ui-dictation import them; ui-lesson import()s pos.js)
+  'js/word-notes.js', 'js/pos.js', 'css/entry-memory.css',
   'css/home.css', 'css/lesson.css', 'css/dictation.css', 'css/choice.css', 'css/parent.css', 'css/onboard.css',
   'css/spell.css', 'css/grammar.css', 'css/phonics.css', 'css/weekly.css', 'css/capture.css', 'css/chat.css', 'css/reader.css', 'css/order.css',
   'css/textread.css', 'css/teacher.css', 'css/screen.css', 'css/verb.css', 'css/cloze.css',
@@ -42,6 +44,7 @@ const SHELL = [
   'curriculum/stories.json', 'curriculum/order.json',
   'curriculum/exam-reading.json', 'curriculum/probes.json', 'curriculum/transform.json',
   'curriculum/forms.json', 'curriculum/contrast.json',
+  'curriculum/word-notes-a.json', 'curriculum/word-notes-b.json', 'curriculum/pos-guide.json',
   'data/dict.txt', 'data/lemma.txt', 'data/ECDICT-LICENSE.txt',
 ];
 const isData = u => u.startsWith('data/');

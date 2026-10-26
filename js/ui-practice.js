@@ -5,8 +5,12 @@
 //
 // 导出
 //   createPracticeHub(ctx, { root? }) -> Hub
-//     Hub = { el, mount(container, { compact }), refresh(), start(kind, params), show(params), hide(), inSession(), holding(), onKey(ev) }
-//     mount：把“接着练”中心画进 container（首页课上完以后、收尾页）。compact: true 只画那排入口（首页还没上课时放在下面）。
+//     Hub = { el, mount(container, { compact, card, onClose }), refresh(), start(kind, params), show(params), hide(), inSession(), holding(), onKey(ev) }
+//     mount：把“接着练”中心画进 container（收尾页）。compact: true 只画那排入口。
+//       card: true（0.9.0 首页第三张卡“接着练”）：只画老师推荐的一句、为什么、一个“开始”和约几分钟；“今天的阅读”有自己的卡，
+//       所以这里先不推“再读一篇”（实在没别的可推才推）。compact 在卡片里是“不是首推”：按钮用描边的，不用实心的。
+//       卡片下面那行小入口（练不熟的词、错题、语法、听写、复习考试）首页自己画，点了调 start(kind)。
+//       onClose：盖的那一层关上以后调一次（首页拿它重画三张卡）。
 //       同一个 Hub 可以 mount 到不同的地方，后一次替换前一次。
 //     refresh()：重新算推荐和入口上的小字（onChange、回到首页时调）。
 //     start(kind, params)：直接开始一小轮；kind 是 practice.js KINDS 之一。dictation / revise / chat 直接 ctx.go 过去。
@@ -41,7 +45,7 @@ export function createPracticeHub(ctx = {}, { root = null } = {}) {
   const log = ev => safe(() => quiet(ctx.events && ctx.events.log ? ctx.events.log(ev) : null), null);
   const sidNow = () => safe(() => ctx.events.sessionId(), '');
   const say = (t, b) => safe(() => ctx.say && ctx.say(t, b || null));
-  let host = null, compact = false;
+  let host = null, compact = false, cardMode = false, onClosed = null;
   let overlay = null, stage = null, headLabel = null;
   let ctl = null;            // the running round's controller { onKey, stop }
   let round = null;          // { kind, sid, t0, params, finished }
@@ -106,13 +110,29 @@ export function createPracticeHub(ctx = {}, { root = null } = {}) {
       h('p', { className: 'pr-label pr-label-2', text: '或者自己选' }),
       entries(now));
   }
+  // 0.9.0 the third card on 今天: one line of what the teacher picks next, why, one button. 今天的阅读 has its own card,
+  // so reading goes to the back of the queue here (recommendNext still falls back to it when nothing else is left).
+  function cardView({ primary = false } = {}) {
+    const now = new Date();
+    const rec = P.recommendNext(ctx, now, opts(['read']));
+    const link = !!P.LINK_KINDS[rec.kind];
+    return h('div', { className: 'pr-card-in' },
+      h('p', { className: 'pr-card-title', text: rec.title }),
+      rec.why ? h('p', { className: 'pr-card-why', text: rec.why }) : null,
+      h('div', { className: 'pr-card-row' },
+        h('button', { type: 'button', className: 'btn pr-card-go' + (primary ? '' : ' pr-quiet'), text: link ? '去看看' : rec.minutes ? `开始 · 约 ${rec.minutes} 分钟` : '开始',
+          on: { click: () => start(rec.kind, rec.params) } })));
+  }
   function draw() {
     if (!host) return;
-    el.replaceChildren(hubView({ compactView: compact }));
+    el.className = cardMode ? 'pr-hub pr-hub-card' : 'pr-hub';
+    el.replaceChildren(cardMode ? cardView({ primary: !compact }) : hubView({ compactView: compact }));
   }
-  function mount(container, { compact: c = false } = {}) {
+  function mount(container, { compact: c = false, card = false, onClose = null } = {}) {
     host = container || root;
     compact = !!c;
+    cardMode = !!card;
+    onClosed = typeof onClose === 'function' ? onClose : null;
     if (host) { host.replaceChildren(el); draw(); loadAsync(); }
     return el;
   }
@@ -135,9 +155,11 @@ export function createPracticeHub(ctx = {}, { root = null } = {}) {
   }
   function close() {
     stopCtl();
+    const had = !!overlay;
     if (overlay) { safe(() => overlay.remove()); overlay = null; stage = null; }
     setBusy(false);
     draw();
+    if (had && onClosed) safe(() => onClosed());
   }
   function stopCtl() { if (ctl && typeof ctl.stop === 'function') safe(() => ctl.stop()); ctl = null; safe(() => ctx.voice && ctx.voice.stop && ctx.voice.stop()); }
   function quit() {

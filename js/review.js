@@ -4,20 +4,26 @@
 // 一套复习 = 每天一份，每份还是四格的样子：单词 → 语法 → 阅读 → 小测。
 //   单词  这几个单元的必会词（单词本里有的）。她还不会写的在前：复习提纲上的、“写得出”线开着的、最近没拼对过的、
 //         忘过的、记得最差的；问老师说的 focus 词最前。题型用现成的四种：四选一 mc4、听音选词 listen、字母块 tiles、
-//         句子里回想 cloze。还不会写的轮流出字母块和句子里回想，会写的出四选一和听音；第一张和新词四选一。
+//         句子里回想 cloze。0.8.2（Wei 10-26：老师要她会写、知道词性，不是只认得意思）：能拼的必会词和小学词一律
+//         “看中文写出来”，轮流字母块和句子里回想（字母块的题面多一行词性，pos.js posSpellMode）；每份写的至少六成
+//         （WRITE_SHARE），短语、认读词、新词才四选一和听音，只当辅助；第一张四选一只在不掉到六成以下时留着。
+//         单词格另带 3 到 5 道词性题（pos.js：给词选词性、句子里画线的词选词性），见下面 pos。
 //   语法  这几个单元的语法卡（grammar.json 的 unit），加上她最近错过的地基卡（卡的 fixes 对上她的误解）。出备用题（spares）：
 //         到期的 1/3/7 天复习先，错过的那一类先，没做过的先，一类一道轮着来；题由 ui-grammar.js renderGrammarItem 画（WarmItem 的形状），
 //         答错照常进 grammar.js 的 1、3、7 天复习。后面一张对比小卡（这几张卡相关的，她错得多的先）。
 //   阅读  1 篇：期中阅读小篇（exam-reading.json）或番外的一集（stories.json），按这几个单元的词在文里出现了几个、
 //         语法点对不对得上来挑；ui-reader.js renderPassage 画（不写番外进度）。
-//   小测  最后一份 10 到 15 分钟：拼几个词（字母块）、几道语法题、1 篇阅读只做题（原文开着）。
+//   小测  最后一份 10 到 15 分钟：拼几个词（字母块）、几道词性题、几道语法题、1 篇阅读只做题（原文开着）。
 // 按离考试几天排（date 是考试那天）：
-//   今天考（0 天）   只看一眼：8 个词认一认、2 道语法，5 分钟左右，不做阅读和小测。
+//   今天考（0 天）   只看一眼：6 个左右最要紧的词写一写、3 道词性、2 道语法，5 分钟左右，不做阅读和小测。
 //   明天考（1 天）   一份，20 分钟以内：最要紧的词、3 道语法 + 1 张对比小卡、小测（含阅读）；阅读格并进小测。
 //   还有 2 天以上    分 n = min(天数, 5) 天，每天一份：前 n-1 天学（单词、语法、阅读），最后一天（考前一天）是小测日
 //                    （前几天错的词和题先练一下，再做小测）。每份 20 分钟以内。
-// 前几天答错的词和语法题记进 plan.misses，后面几天和小测先出它们（dayFor）；单词同时照常进 FSRS 复习（ui 那边 words.review 评 1 分），
-// 小测拼错的开“写得出”线（words.patch write，write_from 'review'）。
+// 前几天答错的词、语法题和词性题记进 plan.misses，后面几天和小测先出它们（dayFor；词性错了换一句同一个词性的）；单词同时照常
+// 进 FSRS 复习（ui 那边 words.review 评 1 分），小测拼错的开“写得出”线（words.patch write，write_from 'review'）。
+// 词性题每份 3 到 5 道（BUDGET 的 pos / quizPos）：今天考 3 道；学的日子 4 道放单词格；明天考和小测日单词格 2 道、小测 3 道。
+//   题从这几个单元她单词本里的词挑（词性定得下来的，pos.js posItems），不够的用 pos-guide.json 的句子题；她最近选错的词性先，
+//   每天不同，整套复习里不重复。
 //
 // kv 'review:plan'（新键，随备份走）：一次只存一套，再要一套就换掉。形状 = buildReview 的返回值，另加 misses、done：
 //   { v: 1, id: 'review:<考试日>:<单元>', units: ['U1', 'U2'], date: 'YYYY-MM-DD' | '', made, gap, kind: 'today' | 'cram' | 'days',
@@ -25,20 +31,24 @@
 //     done: { '<第几份>': { cells: { words: true, ... }, at } }, stats: { words, cantWrite, cards, readings }, focus, updated }
 //   Day = { n, of, day: 'YYYY-MM-DD', kind: 'learn' | 'quiz' | 'cram' | 'today', title, minutes, cells: [Cell × 4] }
 //   Cell = { id: 'words' | 'grammar' | 'read' | 'quiz', label, status: 'ready' | 'skip', minutes, note,
-//            words:   items: [slug], modes: { slug: 'mc4' | 'listen' | 'tiles' | 'cloze' }
+//            words:   items: [slug], modes: { slug: 'mc4' | 'listen' | 'tiles' | 'cloze' }, pos: [PosItem]（0.8.2，没有就是 []）
 //            grammar: items: [WarmItem], contrast: ContrastItem | null
 //            read:    passage: Reading | null
-//            quiz:    spell: [slug], grammar: [WarmItem], passage: Reading | null }
+//            quiz:    spell: [slug], grammar: [WarmItem], passage: Reading | null, pos: [PosItem] }
+//   PosItem = pos.js 的 { id, item: 'pos:w:<slug>' | 'pos:s:<句子 id>', mode: 'pos', kind: 'word' | 'sentence', slug?, sid?, w, pos }
+//   misses 另有 pos: { item: { pos, n, day, fixed? } }（0.8.2；老的复习没有这一项，读成空的）
 //   WarmItem = { item: 'g:<卡>:<题>', card, qid, family, unit, mode: 'grammar', kind: 'practice' | 'review', of? }（grammar.js 的形状）
 //   ContrastItem = { id, item: 'gc:<id>', mode: 'contrast', kind: 'contrast', title, tags, cards, why }
 //   Reading = { id, source: 'exam' | 'story', label, title, mode: 'read' | 'questions', minutes, hits: [词] }
 //
 // 导出
 //   REVIEW_KEY = 'review:plan'；MAX_DAYS = 5；DAY_MAX_MIN = 20；QUIZ_MIN = [10, 15]；SECONDS；BUDGET；CELL_LABELS
+//   WRITE_SHARE = 0.6（每份单词里写出来的至少占几成）；writeShare(cell) -> 这一格写出来的占几成
 //   normUnit(x) -> 'S' | 'U1' ... | ''；unitName(id)；unitList(ids) -> 'Unit 1 和 Unit 2'
 //   addDays(day, n)、gapDays(from, to)、dayOf(date)
-//   loadReviewData(ctx) -> Promise<{ grammar, contrast, stories, passages, events }>   读语法卡、对比小卡、故事、期中阅读、最近 60 天的事件
-//   buildReview(ctx, { units, date, focus?, now?, grammar?, contrast?, stories?, passages?, events?, entries? }) -> Review | null
+//   loadReviewData(ctx) -> Promise<{ grammar, contrast, stories, passages, events, posGuide }>   读语法卡、对比小卡、故事、期中阅读、
+//     最近 60 天的事件，0.8.2 另读词性小卡（pos.js loadPos，顺带课标详表的词性）
+//   buildReview(ctx, { units, date, focus?, now?, grammar?, contrast?, stories?, passages?, events?, entries?, posGuide? }) -> Review | null
 //     ctx 用到 words（favorites）、curriculum（unitOf、unitWords、tierOf、isRequired）、kv（peek 'outline'、'exam.reading'、'grammar:*'、
 //     'contrast.state'）。数据没给就用各模块已经缓存的（grammar.js content()、reader.js content()）。units 一个都认不出来返回 null。
 //     focus：'words' | 'grammar' | 'reading'（多给这一块时间），或 { words: [词], cards: [卡 id] }（这些排最前）。
@@ -49,7 +59,7 @@
 //   todayIndex(plan, now) -> 第几份（0 起）| -1   今天该做哪一份：小测日当天做小测；不然先补错过的那份，再是今天的；
 //                                                 今天的做完了可以提前做下一份；都做完了、考完了 -1
 //   dayFor(plan, i, { content, now }) -> Day   第 i 份，把前面错的词和题排进去（单词格、小测、小测日的语法格）
-//   noteResult(plan, { kind: 'word' | 'grammar', slug?, item?, card?, family?, correct, now }) -> plan   记对错（纯函数）
+//   noteResult(plan, { kind: 'word' | 'grammar' | 'pos', slug?, item?, card?, family?, pos?, correct, now }) -> plan   记对错（纯函数）
 //   markCell(plan, i, cellId, now) -> plan；dayDone(plan, i) -> bool；isFinished(plan) -> bool
 //   readPlan(kv) -> plan | null；activePlan(kv, now) -> plan | null（考试日还没过、还有没做完的）；savePlan(kv, plan) -> Promise
 //   parseReviewText(text, { now, current?, progress? }) -> { units, date, exam? } | null
@@ -65,6 +75,7 @@
 import { wordsOf, tileable, unitRank, MODE_SECONDS, outlineList } from './sprint.js';
 import * as G from './grammar.js';
 import * as R from './reader.js';
+import * as P from './pos.js';
 
 export const REVIEW_KEY = 'review:plan';
 export const MAX_DAYS = 5;
@@ -73,14 +84,17 @@ export const QUIZ_MIN = [10, 15];
 export const SECONDS = {
   mc4: MODE_SECONDS.mc4, listen: MODE_SECONDS.listen, tiles: MODE_SECONDS.tiles, cloze: MODE_SECONDS.cloze,
   grammar: MODE_SECONDS.grammar, contrast: MODE_SECONDS.contrast, quizSpell: 45, quizGrammar: 30,
+  posWord: P.SECONDS.word, posSentence: P.SECONDS.sentence,
 };
-// seconds (words, grammar) and counts per kind of day
+// seconds (words, grammar) and counts per kind of day; pos = 词性题 in the word cell, quizPos = in the quiz (0.8.2: 3 to 5 a day)
 export const BUDGET = {
-  today: { words: 150, grammar: 2, contrast: 0 },
-  cram: { words: 300, grammar: 3, contrast: 1, spell: 6, quizGrammar: 3 },
-  learn: { words: 420, grammar: 5, contrast: 1 },
-  quiz: { words: 240, grammar: 2, contrast: 0, spell: 6, quizGrammar: 4 },
+  today: { words: 170, grammar: 2, contrast: 0, pos: 3 },
+  cram: { words: 300, grammar: 3, contrast: 1, spell: 6, quizGrammar: 3, pos: 2, quizPos: 3 },
+  learn: { words: 420, grammar: 5, contrast: 1, pos: 4 },
+  quiz: { words: 240, grammar: 2, contrast: 0, spell: 6, quizGrammar: 4, pos: 2, quizPos: 3 },
 };
+// 0.8.2 (Wei 10-26): of each day's word cards, at least this share is written (看中文写出来), not just recognised
+export const WRITE_SHARE = 0.6;
 export const CELL_LABELS = { words: '单词', grammar: '语法', read: '阅读', quiz: '小测' };
 const CELL_IDS = ['words', 'grammar', 'read', 'quiz'];
 
@@ -142,6 +156,7 @@ export async function loadReviewData(ctx) {
   const contrast = G.contrastContent() || await safe(() => G.loadContrast({ fetchJSON }));
   const stories = R.content() || await safe(() => R.loadStories({ fetchJSON }));
   const passages = await safe(() => R.loadPassages({ fetchJSON })) || [];
+  const posGuide = await safe(() => P.loadPos(ctx));
   let events = [];
   try {
     if (ctx && ctx.events && typeof ctx.events.query === 'function') {
@@ -149,7 +164,7 @@ export async function loadReviewData(ctx) {
       events = (await ctx.events.query({ since, limit: 5000 })) || [];
     }
   } catch (e) { events = []; }
-  return { grammar, contrast, stories, passages, events };
+  return { grammar, contrast, stories, passages, events, posGuide };
 }
 
 // ---------------------------------------------------------------- words
@@ -218,48 +233,76 @@ export function rankWords(ctx, units, { now = new Date(), events = [], focus = n
   return out;
 }
 
-// the mode of each card of one day: the first card and new words are recognised first; words she cannot write yet
-// alternate 字母块 and 句子里回想; the rest alternate 四选一 and 听音选词
-function assignWordModes(list) {
+// a card she writes: a word that can be spelled (必会词 and 小学词, one word, letters only) and is not new to her
+const writable = w => !!(w && w.spellable && !w.isNew);
+const WRITE_MODES_SET = new Set(['tiles', 'cloze', 'keys']);
+// 0.8.2: every word she can write is written: 字母块 and 句子里回想 in turn; phrases, recognise-only words and new words
+// are 四选一 and 听音选词. The first card stays 四选一 (the surest one, to start easy) only while the written ones are still
+// WRITE_SHARE of the day.
+function assignWordModes(list, { share = WRITE_SHARE } = {}) {
   const modes = {};
+  const canW = list.filter(writable).length;
+  const firstEasy = list.length > 1 && (!writable(list[0]) || (canW - 1) / list.length >= share);
   let spell = 0, know = 0;
   list.forEach((w, i) => {
-    if (i === 0 || w.isNew) { modes[w.slug] = 'mc4'; return; }
-    if (w.cantWrite && w.spellable) { modes[w.slug] = spell++ % 2 === 0 ? 'tiles' : 'cloze'; return; }
-    modes[w.slug] = know++ % 2 === 0 ? 'mc4' : 'listen';
+    if (i === 0 && firstEasy) { modes[w.slug] = 'mc4'; return; }
+    if (writable(w)) { modes[w.slug] = spell++ % 2 === 0 ? 'tiles' : 'cloze'; return; }
+    modes[w.slug] = w.isNew ? 'mc4' : know++ % 2 === 0 ? 'mc4' : 'listen';
   });
   return modes;
 }
+export function writeShare(cell) {
+  const items = arr(cell && cell.items);
+  if (!items.length) return 0;
+  const modes = (cell && cell.modes) || {};
+  return items.filter(s => WRITE_MODES_SET.has(modes[s])).length / items.length;
+}
 const wordSeconds = (list, modes) => list.reduce((a, w) => a + (SECONDS[modes[w.slug]] || SECONDS.mc4), 0);
+const posSeconds = items => arr(items).reduce((a, it) => a + (it && it.kind === 'word' ? SECONDS.posWord : SECONDS.posSentence), 0);
 // the surest word first (the lesson does the same), then the rest in rank order
+// 0.8.2: “surest” also means not a word she still cannot write (the first card may be the one 四选一 of the day)
 function orderDay(list) {
   if (list.length < 2) return list.slice();
+  const sure = w => (w.isNew ? -1 : (w.r ?? 0) - (w.write ? 0.05 : 0) - (w.miss ? 0.05 : 0) - (w.cantWrite ? 0.02 : 0));
   let best = 0;
-  list.forEach((w, i) => { if (!w.isNew && (w.r ?? 0) > (list[best].r ?? 0)) best = i; });
+  list.forEach((w, i) => { if (sure(w) > sure(list[best])) best = i; });
   return [list[best], ...list.filter((_, i) => i !== best)];
 }
-// fill one day's word cell up to `budget` seconds from the ranked list; `skip` holds slugs already used that day
-function fillWords(ranked, budget, { skip = new Set(), recognizeOnly = false } = {}) {
-  const pick = [];
-  let sec = 0;
-  for (const w of ranked) {
-    if (skip.has(w.slug) || pick.some(x => x.slug === w.slug)) continue;
-    const cost = recognizeOnly ? SECONDS.mc4 : (w.cantWrite && w.spellable ? SECONDS.cloze : SECONDS.mc4);
-    if (sec + cost > budget && pick.length) break;
-    pick.push(w);
-    sec += cost;
-  }
-  return pick;
+// fill one day's word cell up to `budget` seconds from the ranked list; `skip` holds slugs already used that day.
+// 0.8.2: a card that is only recognised (a phrase, a recognise-only word, a new word) comes in only while the written ones
+// stay `share` of the cell; the ones left out wait for another day. With nothing she can write, the cell is all recognising.
+function fillWords(ranked, budget, { skip = new Set(), recognizeOnly = false, share = WRITE_SHARE } = {}) {
+  const cost = w => (recognizeOnly || !writable(w) ? SECONDS.mc4 : SECONDS.cloze);
+  const run = limit => {
+    const pick = [];
+    let sec = 0, other = 0;
+    for (const w of ranked) {
+      if (skip.has(w.slug) || pick.some(x => x.slug === w.slug)) continue;
+      const c = cost(w);
+      if (sec + c > budget && pick.length) break;
+      const recog = recognizeOnly || !writable(w);
+      if (recog && limit > 0 && other + 1 > Math.floor((pick.length + 1) * (1 - limit) + 1e-9)) continue;
+      pick.push(w);
+      sec += c;
+      if (recog) other++;
+    }
+    return pick;
+  };
+  const pick = run(recognizeOnly ? 0 : share);
+  return pick.length ? pick : run(0);
 }
-function wordCell(list, { recognizeOnly = false, note = '' } = {}) {
+function wordCell(list, { recognizeOnly = false, note = '', pos = [] } = {}) {
   const ordered = orderDay(list);
   const modes = recognizeOnly
     ? Object.fromEntries(ordered.map((w, i) => [w.slug, i % 3 === 2 ? 'listen' : 'mc4']))
     : assignWordModes(ordered);
-  const sec = wordSeconds(ordered, modes);
-  if (!ordered.length) return { id: 'words', label: CELL_LABELS.words, status: 'skip', minutes: 0, note: note || '没有要练的词', items: [], modes: {} };
-  return { id: 'words', label: CELL_LABELS.words, status: 'ready', minutes: Math.max(1, Math.round(sec / 60)), note: `${ordered.length} 个词`, items: ordered.map(w => w.slug), modes, sec };
+  const posList = arr(pos).filter(Boolean);
+  const sec = wordSeconds(ordered, modes) + posSeconds(posList);
+  if (!ordered.length && !posList.length) return { id: 'words', label: CELL_LABELS.words, status: 'skip', minutes: 0, note: note || '没有要练的词', items: [], modes: {}, pos: [] };
+  return { id: 'words', label: CELL_LABELS.words, status: 'ready', minutes: Math.max(1, Math.round(sec / 60)), note: wordNote(ordered.length, posList.length),
+    items: ordered.map(w => w.slug), modes, pos: posList, sec };
 }
+const wordNote = (n, p) => [n ? `${n} 个词` : '', p ? `${p} 道词性题` : ''].filter(Boolean).join('、');
 
 // ---------------------------------------------------------------- grammar
 
@@ -410,13 +453,15 @@ function readCell(r, { mode = 'read', note = '' } = {}) {
 
 // ---------------------------------------------------------------- the quiz
 
-function quizCell(spell, grammar, reading) {
+function quizCell(spell, grammar, reading, pos = []) {
   const passage = asReading(reading, 'questions');
-  const sec = spell.length * SECONDS.quizSpell + grammar.length * SECONDS.quizGrammar + (passage ? passage.minutes * 60 : 0);
-  if (!spell.length && !grammar.length && !passage) return { id: 'quiz', label: CELL_LABELS.quiz, status: 'skip', minutes: 0, note: '', spell: [], grammar: [], passage: null };
-  return { id: 'quiz', label: CELL_LABELS.quiz, status: 'ready', minutes: Math.max(1, Math.round(sec / 60)), note: '词、语法、阅读', spell: spell.slice(), grammar: grammar.slice(), passage, sec };
+  const posList = arr(pos).filter(Boolean);
+  const sec = spell.length * SECONDS.quizSpell + grammar.length * SECONDS.quizGrammar + posSeconds(posList) + (passage ? passage.minutes * 60 : 0);
+  if (!spell.length && !grammar.length && !passage) return { id: 'quiz', label: CELL_LABELS.quiz, status: 'skip', minutes: 0, note: '', spell: [], grammar: [], passage: null, pos: [] };
+  return { id: 'quiz', label: CELL_LABELS.quiz, status: 'ready', minutes: Math.max(1, Math.round(sec / 60)), note: posList.length ? '写词、词性、语法、阅读' : '词、语法、阅读',
+    spell: spell.slice(), grammar: grammar.slice(), passage, pos: posList, sec };
 }
-const skipCell = (id, note) => ({ id, label: CELL_LABELS[id], status: 'skip', minutes: 0, note, items: [], ...(id === 'quiz' ? { spell: [], grammar: [], passage: null } : {}), ...(id === 'read' ? { passage: null } : {}), ...(id === 'grammar' ? { contrast: null } : {}) });
+const skipCell = (id, note) => ({ id, label: CELL_LABELS[id], status: 'skip', minutes: 0, note, items: [], ...(id === 'quiz' ? { spell: [], grammar: [], passage: null, pos: [] } : {}), ...(id === 'read' ? { passage: null } : {}), ...(id === 'grammar' ? { contrast: null } : {}) });
 const dayMinutes = cells => cells.filter(c => c.status === 'ready').reduce((a, c) => a + (c.sec ? c.sec / 60 : c.minutes), 0);
 
 // ---------------------------------------------------------------- the whole review
@@ -448,13 +493,29 @@ export function buildReview(ctx, opts = {}) {
   const exams = rpool.filter(r => r.source === 'exam');
   const days = [];
   let kind = 'days';
+  // 0.8.2 词性题: from the day's own words first, then the rest of these units' words, then the guide's sentences;
+  // never the same question twice in one review
+  const posGuide = opts.posGuide && opts.posGuide.kinds && opts.posGuide.sentences && typeof opts.posGuide.sentence === 'function'
+    ? opts.posGuide : (opts.posGuide ? P.setGuide(opts.posGuide) : P.guide());
+  const entryOf = slug => { try { return ctx && ctx.words && typeof ctx.words.get === 'function' ? ctx.words.get(slug) : null; } catch (e) { return null; } };
+  const posUsed = new Set();
+  const seed0 = Math.round(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 864e5);
+  const posFor = (list, n, k) => {
+    if (!(n > 0)) return [];
+    const got = P.posItems({ words: [...list, ...ranked], entryOf, curriculum: ctx && ctx.curriculum, guide: posGuide, n, seed: seed0 + k,
+      skip: [...posUsed], events: opts.events || [], now });
+    got.forEach(x => posUsed.add(x.item));
+    return got;
+  };
 
   if (gap === 0) {
     // 今天考：只看一眼
     kind = 'today';
     const B = BUDGET.today;
+    // 0.8.2: even the last look writes the words that matter most (it used to be recognising only)
+    const list = fillWords(ranked, B.words * wordsK);
     const cells = [
-      wordCell(fillWords(ranked, B.words * wordsK, { recognizeOnly: true }), { recognizeOnly: true, note: noWords }),
+      wordCell(list, { note: noWords, pos: posFor(list, B.pos, 0) }),
       grammarCell(takeGrammar(gpool, Math.round(B.grammar * gramK)), null),
       skipCell('read', '今天不读长文'),
       skipCell('quiz', '今天不做小测'),
@@ -469,10 +530,13 @@ export function buildReview(ctx, opts = {}) {
     const quizG = takeGrammar(gpool, B.quizGrammar);
     const quizR = focus.part === 'reading' ? rpool[0] : (exams[0] || rpool[0]);
     let wordsList = fillWords(ranked, B.words * wordsK);
-    let cells = [wordCell(wordsList, { note: noWords }), grammarCell(gItems, contrast),
-      skipCell('read', quizR ? '放进小测里' : '没有合适的文章'), quizCell(spellList(B.spell), quizG, quizR || null)];
+    const spellQ = spellList(B.spell);
+    const quizPos = posFor(ranked.filter(w => spellQ.includes(w.slug)), B.quizPos, 1);
+    const wordPos = posFor(wordsList, B.pos, 0);
+    let cells = [wordCell(wordsList, { note: noWords, pos: wordPos }), grammarCell(gItems, contrast),
+      skipCell('read', quizR ? '放进小测里' : '没有合适的文章'), quizCell(spellQ, quizG, quizR || null, quizPos)];
     // stay inside 20 minutes: fewer word cards first, then the contrast card
-    while (dayMinutes(cells) > DAY_MAX_MIN && wordsList.length > 4) { wordsList = wordsList.slice(0, -1); cells[0] = wordCell(wordsList, { note: noWords }); }
+    while (dayMinutes(cells) > DAY_MAX_MIN && wordsList.length > 4) { wordsList = wordsList.slice(0, -1); cells[0] = wordCell(wordsList, { note: noWords, pos: wordPos }); }
     if (dayMinutes(cells) > DAY_MAX_MIN && contrast) cells[1] = grammarCell(gItems, null);
     days.push({ n: 1, of: 1, day: today, kind: 'cram', title: '明天考，今天练最要紧的', cells });
   } else {
@@ -494,19 +558,26 @@ export function buildReview(ctx, opts = {}) {
       const gItems = takeGrammar(gpool, Math.round(B.grammar * gramK));
       const contrast = cpool.length ? cpool[i % cpool.length] : null;
       const r = rpool.length ? rpool[i % rpool.length] : null;
-      const cells = [wordCell(list, { note: noWords }), grammarCell(gItems, contrast), readCell(r, { mode: 'read', note: '没有合适的文章' }), skipCell('quiz', '最后一天做')];
+      const cells = [wordCell(list, { note: noWords, pos: posFor(list, B.pos, i) }), grammarCell(gItems, contrast), readCell(r, { mode: 'read', note: '没有合适的文章' }), skipCell('quiz', '最后一天做')];
       days.push({ n: i + 1, of: n, day: dates[i], kind: 'learn', title: `复习第 ${i + 1} 天`, cells });
     }
     // the quiz day: the weak words once more (the ones she gets wrong before then go first, see dayFor), then the quiz
     const B = BUDGET.quiz;
     const lastLearn = new Set(days.length ? days[days.length - 1].cells[0].items : []);
-    const weak = ranked.filter(w => (w.cantWrite || w.write || w.key || (w.r ?? 1) < 0.7) && !lastLearn.has(w.slug));
+    const weakAll = ranked.filter(w => w.cantWrite || w.write || w.key || (w.r ?? 1) < 0.7);
+    let weak = weakAll.filter(w => !lastLearn.has(w.slug));
+    // 0.8.2: a short review (two days) did nearly every word yesterday; the ones she still cannot write come round again
+    // rather than leaving the day with nothing to write
+    if (!weak.some(writable)) weak = [...weak, ...weakAll.filter(w => lastLearn.has(w.slug) && writable(w))];
     const qWords = fillWords(weak.length ? weak : ranked, B.words * wordsK);
     const gItems = takeGrammar(gpool, B.grammar);
     const quizG = takeGrammar(gpool, B.quizGrammar);
     const readIds = new Set(days.map(d => d.cells[2].passage && d.cells[2].passage.id).filter(Boolean));
     const quizR = exams.find(r => !readIds.has(r.id)) || rpool.find(r => !readIds.has(r.id)) || exams[0] || rpool[0] || null;
-    const cells = [wordCell(qWords, { note: noWords }), grammarCell(gItems, null), skipCell('read', quizR ? '放进小测里' : '没有合适的文章'), quizCell(spellList(B.spell), quizG, quizR)];
+    const spellQ = spellList(B.spell);
+    const quizPos = posFor(ranked.filter(w => spellQ.includes(w.slug)), B.quizPos, n + 1);
+    const cells = [wordCell(qWords, { note: noWords, pos: posFor(qWords, B.pos, n) }), grammarCell(gItems, null), skipCell('read', quizR ? '放进小测里' : '没有合适的文章'),
+      quizCell(spellQ, quizG, quizR, quizPos)];
     days.push({ n, of: n, day: dates[learnN], kind: 'quiz', title: '考前小测', cells });
   }
   for (const d of days) d.minutes = Math.round(dayMinutes(d.cells));
@@ -518,9 +589,9 @@ export function buildReview(ctx, opts = {}) {
     title: `复习 ${names}`,
     focus: opts.focus || null,
     days,
-    misses: { words: {}, grammar: {} },
+    misses: { words: {}, grammar: {}, pos: {} },
     done: {},
-    stats: { words: ranked.length, cantWrite: ranked.filter(w => w.cantWrite).length, cards: gpool.cards.slice(), readings: rpool.length },
+    stats: { words: ranked.length, cantWrite: ranked.filter(w => w.cantWrite).length, cards: gpool.cards.slice(), readings: rpool.length, pos: posUsed.size },
     updated: now.toISOString(),
   };
 }
@@ -552,6 +623,7 @@ export function todayIndex(plan, now = new Date()) {
 
 const openWordMisses = plan => Object.entries((plan && plan.misses && plan.misses.words) || {}).filter(([, r]) => r && !r.fixed).sort((a, b) => (b[1].n || 0) - (a[1].n || 0)).map(([slug]) => slug);
 const openGrammarMisses = plan => Object.entries((plan && plan.misses && plan.misses.grammar) || {}).filter(([, r]) => r && !r.fixed).map(([item, r]) => ({ item, ...r }));
+const openPosMisses = plan => Object.entries((plan && plan.misses && plan.misses.pos) || {}).filter(([, r]) => r && !r.fixed && r.pos).sort((a, b) => (b[1].n || 0) - (a[1].n || 0)).map(([item, r]) => ({ item, ...r }));
 
 // the i-th day with what she got wrong on the days before it put first: missed words lead the word cell (as spelling when
 // they can be spelled) and the quiz's spelling; on the quiz day, missed grammar families get a new sentence each
@@ -571,7 +643,7 @@ export function dayFor(plan, i, { content = null, now = new Date() } = {}) {
       w.items = [...misses.slice(0, 8), ...rest].slice(0, keep);
       w.modes = { ...(w.modes || {}) };
       misses.forEach((s, k) => { if (!w.modes[s] || w.modes[s] === 'mc4' || w.modes[s] === 'listen') w.modes[s] = k === 0 && !rest.length ? 'mc4' : 'tiles'; });
-      if (w.items.length) { w.status = 'ready'; w.note = `${w.items.length} 个词`; }
+      if (w.items.length) { w.status = 'ready'; w.note = wordNote(w.items.length, arr(w.pos).length); }
     }
     const q = d.cells.find(c => c.id === 'quiz');
     if (q && q.status === 'ready') {
@@ -597,13 +669,41 @@ export function dayFor(plan, i, { content = null, now = new Date() } = {}) {
       g.note = [`${g.items.length} 道题`, g.contrast ? '1 张对比小卡' : ''].filter(Boolean).join('、');
     }
   }
+  // 0.8.2: a 词性 she chose wrong on an earlier day comes back first, as a new sentence of the same kind (the quiz on the
+  // quiz day, otherwise the word cell)
+  const pm = openPosMisses(plan).filter(m => m.day !== dayOf(now));
+  const pg = P.guide();
+  if (pm.length && pg && d.kind !== 'today') {
+    const q = d.cells.find(c => c.id === 'quiz' && c.status === 'ready');
+    const target = q || d.cells.find(c => c.id === 'words');
+    if (target) {
+      const inPlan = new Set(plan.days.flatMap(x => x.cells.flatMap(c => arr(c.pos).map(it => it && it.item))).filter(Boolean));
+      const extra = [];
+      for (const m of pm.slice(0, 2)) {
+        const s = pg.sentences.find(x => x.pos === m.pos && !inPlan.has('pos:s:' + x.id) && !extra.some(e => e.sid === x.id));
+        if (s) extra.push({ ...P.sentenceItem(s), again: m.item });
+      }
+      if (extra.length) {
+        const old = arr(target.pos);
+        target.pos = [...extra, ...old.filter(x => !extra.some(e => e.item === x.item))].slice(0, Math.max(old.length, extra.length));
+        if (target.id === 'words') { target.status = 'ready'; target.note = wordNote(arr(target.items).length, target.pos.length); }
+      }
+    }
+  }
   return d;
 }
 
-export function noteResult(plan, { kind = 'word', slug = '', item = '', card = '', family = '', correct = false, now = new Date() } = {}) {
+export function noteResult(plan, { kind = 'word', slug = '', item = '', card = '', family = '', pos = '', correct = false, now = new Date() } = {}) {
   if (!plan) return plan;
-  const p = { ...plan, misses: { words: { ...((plan.misses && plan.misses.words) || {}) }, grammar: { ...((plan.misses && plan.misses.grammar) || {}) } } };
+  const p = { ...plan, misses: { words: { ...((plan.misses && plan.misses.words) || {}) }, grammar: { ...((plan.misses && plan.misses.grammar) || {}) },
+    pos: { ...((plan.misses && plan.misses.pos) || {}) } } };
   const day = dayOf(now);
+  if (kind === 'pos' && item) {
+    const r = p.misses.pos[item];
+    if (!correct) p.misses.pos[item] = { pos: pos || (r && r.pos) || '', n: ((r && r.n) || 0) + 1, day };
+    // right on a later day, this question or another one of the same kind: that kind is fixed
+    else for (const [k, m] of Object.entries(p.misses.pos)) if (m && !m.fixed && m.day !== day && (k === item || (pos && m.pos === pos))) p.misses.pos[k] = { ...m, fixed: day };
+  }
   if (kind === 'word' && slug) {
     const r = p.misses.words[slug];
     if (!correct) p.misses.words[slug] = { n: ((r && r.n) || 0) + 1, day };
@@ -648,7 +748,7 @@ export function summaryLine(plan, i) {
   const parts = [];
   for (const c of d.cells) {
     if (c.status !== 'ready') continue;
-    if (c.id === 'words') parts.push(`单词 ${c.items.length} 个`);
+    if (c.id === 'words') { if (c.items.length) parts.push(`单词 ${c.items.length} 个`); if (arr(c.pos).length) parts.push(`词性 ${c.pos.length} 道`); }
     if (c.id === 'grammar') parts.push(c.items.length ? `语法 ${c.items.length} 道` : '一张对比小卡');
     if (c.id === 'read') parts.push('读一篇');
     if (c.id === 'quiz') parts.push('一份小测');
