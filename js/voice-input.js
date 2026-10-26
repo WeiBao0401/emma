@@ -39,6 +39,7 @@
 // 依赖：ai.js（AIError）、voice-stream.js（createDoubaoStream）。ctx 用到：settings()、mockForced()、budget（blockReason / record）、
 //   kv（peek）、parentName()、toast(msg, ms)。
 
+import { micGetter, forPlayback } from './audio-session.js';
 import { AIError } from './ai.js';
 import { createDoubaoStream, STREAM_URL, STREAM_RESOURCE } from './voice-stream.js';
 
@@ -307,7 +308,7 @@ function micDenied() { const x = new Error('mic'); x.name = 'NotAllowedError'; r
 
 export function createVoiceInput(ctx = {}, deps = {}) {
   const nav = globalThis.navigator || {};
-  const getUserMedia = deps.getUserMedia || (nav.mediaDevices && nav.mediaDevices.getUserMedia ? c => nav.mediaDevices.getUserMedia(c) : null);
+  const getUserMedia = micGetter(deps.getUserMedia || (nav.mediaDevices && nav.mediaDevices.getUserMedia ? c => nav.mediaDevices.getUserMedia(c) : null));
   const Recorder = deps.MediaRecorder || globalThis.MediaRecorder || null;
   const fetchImpl = deps.fetchImpl || ((...a) => globalThis.fetch(...a));
   const wav = deps.toWav || toWav;
@@ -330,6 +331,7 @@ export function createVoiceInput(ctx = {}, deps = {}) {
   function release(r) {
     if (!r) return;
     clearTimeout(r.timer);
+    setTimeout(forPlayback, 0);
     try { if (r.recorder && r.recorder.state !== 'inactive') r.recorder.stop(); } catch (e) { /* stopped */ }
     try { for (const t of (r.stream && r.stream.getTracks ? r.stream.getTracks() : [])) t.stop(); } catch (e) { /* gone */ }
   }

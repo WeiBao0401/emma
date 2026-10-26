@@ -1,3 +1,4 @@
+import { micGetter } from './audio-session.js';
 // 豆包流式语音识别 2.0（火山引擎 v3 sauc）的浏览器适配器：按住说话，边说边出字。
 // 不依赖别的文件。voice-input.js 在 asrProvider='doubao'（或自动选到豆包）时调用，失败时它把 wav() 交给百炼整段识别。
 // 负责：语音输入（和 voice-input.js 同一个人）。worklet 用同源的 pcm-tap-worklet.js（voice-input 传 workletUrl），内容和 WORKLET_SOURCE 一样。
@@ -458,7 +459,7 @@ export function createDoubaoStream(opts = {}) {
     const WS = o.WebSocketImpl || globalThis.WebSocket;
     if (typeof WS !== 'function') throw streamError('nodevice', { detail: '没有 WebSocket', fallback: true });
     const nav = globalThis.navigator || {};
-    const getMedia = o.getMedia || (nav.mediaDevices && nav.mediaDevices.getUserMedia ? x => nav.mediaDevices.getUserMedia(x) : null);
+    const getMedia = micGetter(o.getMedia || (nav.mediaDevices && nav.mediaDevices.getUserMedia ? x => nav.mediaDevices.getUserMedia(x) : null));
     if (!getMedia) throw streamError('nodevice', { detail: '没有 getUserMedia', fallback: false });
     const s = {
       t0: now(), cb, state: 'starting', partial: '', finalText: '', error: null, done: false, dead: false, stopping: false,
