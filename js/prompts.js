@@ -176,12 +176,24 @@ export const CORE_KEYS = ['kind', 'level', 'phonetic', 'syllables', 'brief_cn', 
 export const MEM_KINDS = ['picture', 'split', 'link', 'story', 'sound'];
 // what a model may write instead of the five kinds
 const KIND_ALIAS = { image: 'picture', scene: 'picture', imagine: 'picture', parts: 'split', break: 'split', root: 'split', roots: 'split',
-  chinese: 'link', connect: 'link', association: 'link', homophone: 'sound', '谐音': 'sound', '画面': 'picture', '拆开': 'split', '故事': 'story' };
+  chinese: 'link', connect: 'link', association: 'link', homophone: 'sound', '谐音': 'sound', '画面': 'picture', '拆开': 'split', '故事': 'story',
+  // 10-26: the Chinese names the page shows (a model may copy them) and other ways to say sound-alike
+  '想画面': 'picture', '拆开记': 'split', '连中文': 'link', '小故事': 'story', '听声音': 'sound', '谐音记': 'sound',
+  'sound-alike': 'sound', soundalike: 'sound', sound_alike: 'sound', sounds: 'sound' };
+// a sound-alike whose kind did not come through is still one: the page then adds “听听真正的读音” under it
+const SOUNDS_LIKE = /谐音|听起来像|读起来像|发音像|念起来像/;
 const MEM_MAX = 2;
 const clip = (s, n) => { const a = Array.from(s); return a.length > n ? a.slice(0, n).join('') + '…' : s; };
+// text from whatever the model sent: a string or number as it is, a list or an object's values joined (never “[object Object]”)
+function flat(x) {
+  if (typeof x === 'string' || typeof x === 'number') return String(x);
+  if (Array.isArray(x)) return x.map(flat).filter(Boolean).join('；');
+  if (x && typeof x === 'object') return Object.values(x).map(flat).filter(Boolean).join(' ');
+  return '';
+}
 // her app never shows a dash used as a pause or corner quotes
 function tidy(s, n = 160) {
-  const t = String(s ?? '').replace(/\s+/g, ' ').trim()
+  const t = flat(s).replace(/\s+/g, ' ').trim()
     .replace(/\s*(——|—|--)\s*/g, '，').replace(/「/g, '“').replace(/」/g, '”').replace(/，{2,}/g, '，').replace(/^，|，$/g, '');
   return clip(t, n);
 }
@@ -196,16 +208,20 @@ export function cleanMemory(raw) {
   const r = raw && typeof raw === 'object' ? raw : {};
   let list = r.mem;
   if (typeof list === 'string') list = [{ kind: '', text: list }];
-  if (list && !Array.isArray(list) && typeof list === 'object') list = [list];
+  // { picture: '…', split: '…' } (the kinds as keys) as well as one { kind, text }
+  if (list && !Array.isArray(list) && typeof list === 'object') {
+    list = ['kind', 'text', 'tip', 'content'].some(k => k in list) ? [list]
+      : Object.entries(list).map(([kind, text]) => ({ kind, text }));
+  }
   const mem = [];
   const seen = new Set();
   for (const x of Array.isArray(list) ? list : []) {
     const item = typeof x === 'string' ? { kind: '', text: x } : x && typeof x === 'object' ? x : null;
     if (!item) continue;
-    const text = tidy(item.text ?? item.tip ?? '');
+    const text = tidy(item.text ?? item.tip ?? item.content ?? '');
     if (!text || seen.has(text)) continue;
     seen.add(text);
-    mem.push({ kind: memKind(item.kind), text });
+    mem.push({ kind: memKind(item.kind) || (SOUNDS_LIKE.test(text) ? 'sound' : ''), text });
     if (mem.length >= MEM_MAX) break;
   }
   // an old entry's one-line mnemonic is still a memory trick

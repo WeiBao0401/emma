@@ -2,7 +2,7 @@
 // Keep VERSION identical to VERSION in js/config.js and bump both on every release, or the iPad keeps the old files.
 // Same origin as Wei's dictionary (its own scope and caches): every cache here starts with "emma-" and only "emma-" caches are ever
 // deleted, so neither app touches the other's. The check page (check/) has its own worker and "emma-check-" caches.
-const VERSION = '0.9.0';
+const VERSION = '0.9.1';
 const CACHE = 'emma-' + VERSION;
 // The offline dictionary (data/, about 4.6 MB, 2 MB gzipped) changes rarely, so it lives in its own cache that
 // survives app updates and is only downloaded when missing. Bump DATA_VERSION whenever a file in data/ changes.

@@ -66,7 +66,7 @@
 // noteMiss、spellMode）、reader.js / grammar.js / modes/order.js（只读它们已经加载的内容）。不直接写数据库：评分走 ctx.rate，事件走 ctx.onAnswer。
 import { h, icon } from '../ui-dom.js';
 import { meaningOf, isRetry } from './choice.js';
-import { canSpell, chunksFor, decoysFor, spellHint, noteMiss, spellMode } from './spell.js';
+import { canSpell, chunksFor, decoysFor, spellHint, noteMiss, spellMode, spellingAlts } from './spell.js';
 import * as R from '../reader.js';
 import * as G from '../grammar.js';
 import * as O from './order.js';
@@ -324,6 +324,7 @@ export function makeCloze(entry, sources, { input = 'tiles', curriculum, now = n
     slug: entry.slug,
     headword,
     word: text,
+    alts: spellingAlts(text, curriculum),
     unit: unit || entry.unit || null,
     input: keys ? 'keys' : 'tiles',
     kind,
@@ -354,6 +355,8 @@ export function createClozeAttempt(q, { now = () => Date.now(), retry = false } 
   const max = MAX_TRIES[keys ? 'keys' : 'tiles'];
   const byId = new Map(q.tiles.map(t => [t.id, t]));
   const word = low(q.word);
+  // 10-26: another spelling the 课标 lists (gray for grey, center for centre) is right too
+  const alts = Array.isArray(q.alts) ? q.alts : [];
   let placed = [], typedRaw = '', tries = 0, hintLevel = 0, hint = null, result = null;
   const events = [];
   // the whole word she has: the given letter plus what she placed, or what she typed (the rest, or all of it)
@@ -362,7 +365,7 @@ export function createClozeAttempt(q, { now = () => Date.now(), retry = false } 
     if (!keys) return q.given + placed.map(id => byId.get(id).text).join('');
     const t = String(typedRaw).replace(/\s+/g, '');
     if (!t) return '';
-    return low(t) === word ? t : q.given + t;
+    return low(t) === word || alts.includes(low(t)) ? t : q.given + t;
   };
   const event = (correct, extra = {}) => {
     const ev = {
@@ -413,7 +416,7 @@ export function createClozeAttempt(q, { now = () => Date.now(), retry = false } 
       if (result || !typed() || (!keys && !placed.length)) return null;
       tries++;
       const got = typed();
-      if (low(got) === word) return finish(true, false, event(true));
+      if (low(got) === word || alts.includes(low(got))) return finish(true, false, event(true));
       if (tries >= max) {
         hintLevel = Math.max(hintLevel, 2);
         return finish(false, true, event(false, { revealed: true }));
@@ -557,8 +560,12 @@ export function renderCloze(container, q, { onAnswer, onDone, onMiss, say, retry
     lockInput();
     showZh();
     feedback.textContent = r.grade === 3 ? '拼对了。' : '对了。';
+    // another spelling (gray for grey): right; the blank shows the sentence's spelling, and this says so
+    const got = low(attempt.typed);
+    const other = got && got !== low(q.word);
+    if (other) feedback.textContent += `这句里写 ${q.word}，${got} 是另一种写法，也对。`;
     speak(q.say);
-    timer = setTimeout(next, autoNextMs);
+    timer = setTimeout(next, other ? Math.max(autoNextMs, 2500) : autoNextMs);
     nextBtn.hidden = false;
   }
   function showAnswer() {

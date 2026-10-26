@@ -35,10 +35,14 @@
 //   ensureDetails(ctx) -> Promise            只读课标详表，读过就算了，从不抛错
 //   kindInfo(kind, guide?) -> { kind, zh, abbr, what, image, tip, try, frame, check, examples }（小卡没读到时只有 zh、abbr、what）
 //   posLabel(kind) -> '名词 n.'
-//   posInfo(entry, { curriculum, headword }) -> { main, all: [kind], from: 'book' | 'entry' | 'sense' | 'kebiao' | 'cn' | '', phrase }
+//   posInfo(entry, { curriculum, headword }) -> { main, all: [kind], from: 'book' | 'entry' | 'sense' | 'kebiao' | 'cn' | '', phrase,
+//                known: [kind]（这个词自己的：词条、它自己那行课标、巧记小本）, note: [kind]（小本的）, firm（自己那行课标只有一个词性） }
 //   wordPos(entry, opts) -> main | ''
 //   posLine(entry, { curriculum, guide }) -> { main, abbr, zh, label, what, image, tip, also: [kind], alsoText } | null
-//       单词卡、听写用：main 没定下来但课标详表有的，main 用详表的第一个、also 是其余的
+//       单词卡、听写用：main 没定下来时看中文（“……的”形容词、“……地”副词），再看巧记小本的第一个，都没有就是 null；
+//       also 是这个词自己的别的词性（借原形那行课标的不算）
+//   shownPos(entry, { curriculum }) -> kind | ''   卡片上那个中文意思（meaningOf）的词性：讲解第一个义项和 brief_cn 不是一个意思时，
+//       用和 brief_cn 对得上的那个义项的，都对不上就是 ''（字母块那行“n. 名词”就不写）
 //   suffixTip(word, kind, guide?) -> '' | 一句（-ous 结尾多半是形容词；lonely 这种例外也说）
 //   frameLine(kind, word, guide?) -> '' | 'my cat'
 //   wordItem(entry, { curriculum }) -> PosItem | null；sentenceItem(s) -> PosItem
@@ -49,8 +53,8 @@
 //       slug?（给词的题）, sid?（句子题）, w, pos, zh? }
 //   writeItem(entry, { curriculum }) -> PosItem（kind 'write'，item 'w:<slug>'）| null   “看中文和词性写出英文”，renderPos 也能画
 //   optionsFor(right, { exclude, rng }) -> [kind × 4]
-//   makePosQuestion(item, { entryOf, curriculum, guide, rng }) -> PosQuestion | null
-//       PosQuestion = { id, item, kind, w, slug?, sid?, pos, options: [kind], answer: 下标, prompt: { en, mark: { start, end } | null,
+//   makePosQuestion(item, { entryOf, curriculum, guide, rng, dict? }) -> PosQuestion | null   dict（ctx.dict）给了，离线词典那行的词性也不当干扰项
+//       PosQuestion = { id, item, kind, w, slug?, sid?, pos, all?, firm?（给词的题：这个词所有已知的词性、有没有自己那行课标）, options: [kind], answer: 下标, prompt: { en, mark: { start, end } | null,
 //                       zh, say }, ask, why, image, tip, unit? }
 //   createPosAttempt(q, { now }) -> { pick(i) -> Result | null, done, correct, grade, tries, hintLevel, wrong: Set<下标>, events }
 //       Result = { correct, done, grade, event, hint: '' | 一句 }
@@ -64,9 +68,20 @@
 //   canSpell   spell.js 的，转出来给单词本“练一下”用
 //
 // 样式：借四选一的 mc4- 类（choice.css）、画线借 ord-mark（order.css）、词性缩写用全局的 .pos，不加新 CSS 文件。
+//
+// 不教错（10-26 核对后补的）
+//   课标详表只认这个词自己那一行（或那一行列出的写法 / 不规则变化）：writing 不借 write 的 v.（课本里 writing 是“文字”）。
+//   离线巧记小本（word-notes.js，只认原词）的词性、few / much / my 这类既算形容词又算代词的词，都不当干扰项。
+//   情态动词（can、must……）讲解写成 “v.” 也不出题，也不会说出 “I can can”。
+//   给词的题，中文和词性取自同一个义项（讲解第一个义项和 brief_cn 说的不是一个意思时，题面用义项的中文）。
+//   “my cat 说不通”这种句子只在一定说不通的时候说：It is coffee、It is mine、It is away、I can email 都是对的英语，不拿来判错；
+//   It is same、It is few 这类不成立的也不当“说得通”；专有名词（Christmas、British）不改成小写。
+//   单词卡、听写的词性：没有义项、课标详表又列了好几个时，不再拿详表的第一个（ready 会写成 n.），先看中文是不是“……的 / ……地”，
+//   再看巧记小本；都定不下来就不写词性。
 import { h, icon } from './ui-dom.js';
 import { meaningOf } from './modes/choice.js';
 import * as S from './modes/spell.js';
+import { noteFor } from './word-notes.js';
 
 export const FILE = 'curriculum/pos-guide.json';
 export const MODE = 'pos';
@@ -86,6 +101,23 @@ const CONFUSE = { n: ['v', 'adj', 'pron'], v: ['n', 'adj', 'adv'], adj: ['adv', 
   prep: ['adv', 'conj', 'v'], art: ['pron', 'num', 'adj'], num: ['adj', 'n', 'art'], conj: ['prep', 'adv', 'pron'], int: ['adv', 'n', 'pron'] };
 const CORE = ['n', 'v', 'adj', 'adv'];
 const MINOR = ['pron', 'prep', 'conj', 'num', 'art', 'int'];
+// can、must 讲解里有时只写 “v.”：它们是情态动词，不出“是什么词性”的题
+const MODALS = new Set(['can', 'could', 'may', 'might', 'must', 'shall', 'should', 'will', 'would']);
+// 课本和词典里既算形容词又算代词的词（a few / few of them、my 是形容词性物主代词）：这两个都不当干扰项
+const DET = new Set(['few', 'much', 'many', 'more', 'most', 'less', 'least', 'little', 'enough', 'several', 'such', 'all', 'both', 'each',
+  'either', 'neither', 'any', 'some', 'another', 'other', 'same', 'plenty', 'every', 'this', 'that', 'these', 'those', 'what', 'which',
+  'whose', 'my', 'your', 'his', 'her', 'its', 'our', 'their']);
+// 放进 It is ___、my ___ 都不成立的形容词（It is same、It is few 是常见错误）：不用那句“说得通 / 说不通”
+const NO_FRAME = new Set([...DET, 'main', 'whole', 'own', 'only', 'very', 'elder', 'former', 'latter', 'upper', 'inner', 'outer', 'mere',
+  'everyday', 'teenage', 'olympic', 'able', 'unable', 'aware', 'sir', 'madam']);
+// “It is ___” 说得通的动词：过去分词和原形一样（It is put on the desk）
+const SAME_PP = new Set(['put', 'cut', 'hit', 'let', 'set', 'read', 'shut', 'spread', 'cost', 'hurt', 'quit', 'run', 'beat', 'bet', 'burst',
+  'cast', 'broadcast', 'forecast', 'found']);
+// 课标详表只写了 n.、其实也常作动词的词（I can email you.）；只写了 v.、其实也作名词的（my go 轮到我、my serve 我发球）
+const ALSO_VERB = new Set(['email', 'text', 'bike', 'bath', 'video', 'parent', 'round']);
+const ALSO_NOUN = new Set(['go', 'serve', 'draw', 'take']);
+// the offline notes' keys (word-notes.js posKeys) -> the kinds here
+const NOTE_KIND = { interj: 'int', modal: 'aux' };
 
 const arr = x => (Array.isArray(x) ? x : []);
 const str = x => (x == null ? '' : String(x));
@@ -107,9 +139,11 @@ export function normPos(x) {
   return '';
 }
 // 'n./v.' / ['n.', 'v.'] / 'adj. & adv.' -> ['n', 'v']
+// one string that says modal and v. together ('modal v.', 'aux. v.') is the modal only
 function splitPos(x) {
   if (Array.isArray(x)) return x.flatMap(splitPos);
-  return str(x).split(/[\s/&,，、;；]+|\.(?=[a-z])/i).map(normPos).filter(Boolean);
+  const ks = str(x).split(/[\s/&,，、;；]+|\.(?=[a-z])/i).map(normPos).filter(Boolean);
+  return ks.includes('aux') ? ks.filter(k => k !== 'v') : ks;
 }
 
 // ---------------------------------------------------------------- the guide (curriculum/pos-guide.json)
@@ -151,15 +185,19 @@ export const posLabel = kind => (ZH[kind] ? `${ZH[kind]} ${ABBR[kind]}` : '');
 // ---------------------------------------------------------------- one word's part of speech
 
 const headOf = (e, hw) => str(hw || (e && (e.headword || e.w || e.word || e.slug))).trim();
-export function posInfo(e, { curriculum = null, headword = '' } = {}) {
+// main: the kind that is sure (it is asked); all: every kind known for the word (none of them is a wrong option);
+// known: the kinds this word itself has (its entry, its own 课标 line, the offline note), for the word card's “也可以作”;
+// note: the offline note's kinds; firm: the word's own 课标 line gives it one kind only, so the other kinds can be ruled out
+export function posInfo(e, { curriculum = null, headword = '', dict = null } = {}) {
   const hw = headOf(e, headword);
-  const out = { main: '', all: [], from: '', phrase: false };
+  const out = { main: '', all: [], known: [], note: [], from: '', phrase: false, firm: false };
   if (!hw) return out;
   if (/\s/.test(hw) || (e && e.phrase)) { out.phrase = true; return out; }
-  const add = (list, from, setMain = true) => {
+  const add = (list, from, setMain = true, own = true) => {
     for (const k of list) {
       if (k === 'phrase') continue;
       if (!out.all.includes(k)) out.all.push(k);
+      if (own && !out.known.includes(k)) out.known.push(k);
       if (setMain && !out.main && k !== 'aux') { out.main = k; out.from = from; }
     }
   };
@@ -169,25 +207,64 @@ export function posInfo(e, { curriculum = null, headword = '' } = {}) {
     const senses = arr(e.senses).filter(s => s && s.pos);
     if (senses.length) { add(splitPos(senses[0].pos), 'sense'); add(senses.slice(1).flatMap(s => splitPos(s.pos)), 'sense', false); }
   }
+  // the 课标 line decides only when it is this word's own line (or lists this spelling): writing has no line of its own
+  // and must not take write's v.; a line found through the base form only rules out wrong options
+  const det = call(curriculum && curriculum.detail, hw);
+  const own = !det || !det.w || low(det.w) === low(hw) || arr(det.forms).some(f => low(f) === low(hw));
   const kb = splitPos(call(curriculum && curriculum.posOf, hw) || []);
   const kbMain = [...new Set(kb.filter(k => k !== 'aux'))];
-  add(kb, 'kebiao', kbMain.length === 1 && !kb.includes('aux'));
+  add(kb, 'kebiao', own && kbMain.length === 1 && !kb.includes('aux'), own);
+  // firm: the word's own line lists one kind. A longer line may be cut short (the offline dictionary trims long entries:
+  // cut, light, sound and return lost their v.), so only a one-kind line is trusted to rule a kind out
+  if (own && det && kbMain.length === 1 && kb.length === 1) out.firm = true;
   if (!out.main && e) {
     const m = str(e.brief_cn || e.cn).match(/^\s*([a-z]+)\.\s/i);
     if (m) add(splitPos(m[1]), 'cn');
   }
-  if (!out.main && out.all.length === 1 && out.all[0] !== 'aux') { out.main = out.all[0]; out.from = out.from || 'kebiao'; }
+  if (!out.main && out.known.length === 1 && out.known[0] !== 'aux') { out.main = out.known[0]; out.from = out.from || 'kebiao'; }
+  // a modal written as “v.” is still a modal
+  if (MODALS.has(low(hw)) && out.main === 'v') { out.main = ''; out.from = ''; add(['aux'], ''); }
+  // the offline note (this very word, not a form of another one) and the adjective-and-pronoun words: never a wrong option
+  let note = null;
+  try { note = noteFor(hw); } catch (err) { note = null; }
+  if (note && !note.via) {
+    out.note = [...new Set(arr(note.pos).map(k => NOTE_KIND[k] || k).filter(k => k === 'aux' || KINDS.includes(k)))];
+    add(out.note, 'note', false);
+  }
+  if (DET.has(low(hw))) add(['adj', 'pron'], '', false, false);
+  // the offline dictionary's line (ctx.dict, when the question is drawn): a 课外 word with one sense (comment 评论 n.) can
+  // still be a verb, and 评论 reads like one too, so its other kinds are no wrong option either
+  if (dict) add(dictKinds(dict, hw), '', false, false);
   return out;
+}
+// 'n. 冒险, 冒险经历；v. 冒险' -> ['n', 'v']
+function dictKinds(dict, hw) {
+  const d = call(dict && dict.get, hw);
+  if (!d || !d.cn) return [];
+  return str(d.cn).split(/[；;]/).flatMap(seg => { const m = seg.match(/^\s*((?:[a-z]+\.\s*)+)/i); return m ? splitPos(m[1].trim().split(/\s+/)) : []; });
 }
 export const wordPos = (e, opts) => posInfo(e, opts).main;
 
+// the kind of the meaning the card shows, when no sense or single 课标 kind says it: “灰色的” is an adjective, “光明地” an adverb;
+// else the offline note's first kind; else nothing (the 课标 list's order is not the textbook's: ready would come out n.)
+function guessKind(e, info, hw) {
+  const can = [...new Set([...info.known, ...info.note])].filter(k => KINDS.includes(k));
+  const zh = shortZh(e || {});
+  if (/地$/.test(zh) && can.includes('adv')) return 'adv';
+  if (/的$/.test(zh) && can.includes('adj') && !can.includes('pron')) return 'adj';
+  const n = info.note.find(k => KINDS.includes(k));
+  if (n) return n;
+  if (MODALS.has(low(hw)) && info.all.includes('aux')) return 'aux';
+  return '';
+}
+
 export function posLine(e, { curriculum = null, guide: g = null, headword = '' } = {}) {
   const info = posInfo(e, { curriculum, headword });
-  const main = info.main || info.all.find(k => k !== 'aux') || info.all[0] || '';
+  const hw = headOf(e, headword);
+  const main = info.main || guessKind(e, info, hw);
   if (!main) return null;
   const k = kindInfo(main, g);
-  const also = info.all.filter(x => x !== main && x !== 'aux');
-  const hw = headOf(e, headword);
+  const also = info.known.filter(x => x !== main && x !== 'aux' && KINDS.includes(x));
   return { main, sure: !!info.main, abbr: k.abbr, zh: k.zh, label: posLabel(main), what: k.what, image: k.image || '',
     tip: suffixTip(hw, main, g), also, alsoText: also.length ? `也可以作${also.map(x => ZH[x]).join('、')}。` : '' };
 }
@@ -200,10 +277,28 @@ export function suffixTip(word, kind, g = null) {
   for (const s of gg.suffixes) if (w.endsWith(s.end) && w.length >= s.end.length + 3 && s.pos === kind) return `${w} 是 -${s.end} 结尾，${s.say}。`;
   return '';
 }
+// a capital stays (It is British, I); a word like main or same that the frame does not fit gets none
 export function frameLine(kind, word, g = null) {
   const k = kindInfo(kind, g);
   const w = str(word).trim();
-  return k && k.frame && /^[A-Za-z]+$/.test(w) ? k.frame.replace(/\{w\}/g, w === 'I' ? w : w.toLowerCase()) : '';
+  if (!k || !k.frame || !/^[A-Za-z]+$/.test(w) || NO_FRAME.has(w.toLowerCase()) || MODALS.has(w.toLowerCase())) return '';
+  return k.frame.replace(/\{w\}/g, /^[A-Z]/.test(w) ? w : w.toLowerCase());
+}
+// “my cat 说得通” for the right kind: not for a name (my Christmas, my London are not what “my” is for)
+const rightFrame = (kind, w, g) => (kind === 'n' && /^[A-Z]/.test(str(w)) ? '' : frameLine(kind, w, g));
+// “I can cat 说不通” for a wrong pick, only when it is surely wrong English. It is coffee / It is mine / It is away and
+// I can email are fine English, so the It is ___ test only rules out a verb, and the noun / verb tests need the word's
+// own 课标 line (firm), where every kind it has is listed
+const SAYS_NO = { adj: ['v'], n: ['pron', 'prep', 'conj', 'art', 'int'], v: ['pron', 'prep', 'conj', 'art', 'int', 'num'] };
+const SAYS_NO_FIRM = { n: ['v', 'adj'], v: ['n', 'adj', 'adv'] };
+function wrongFrame(q, choice, g) {
+  const w = low(q.w);
+  if (q.kind !== 'word' || arr(q.all).includes(choice)) return '';
+  let ok = arr(SAYS_NO[choice]).includes(q.pos) || (!!q.firm && arr(SAYS_NO_FIRM[choice]).includes(q.pos));
+  if (choice === 'adj' && SAME_PP.has(w)) ok = false;
+  if (choice === 'v' && ALSO_VERB.has(w)) ok = false;
+  if (choice === 'n' && ALSO_NOUN.has(w)) ok = false;
+  return ok ? frameLine(choice, q.w, g) : '';
 }
 
 // ---------------------------------------------------------------- the items
@@ -223,15 +318,41 @@ function markOf(en, w, at = 0) {
   }
   return null;
 }
-const shortZh = e => Array.from(str(meaningOf(e)).replace(/^\s*(?:[a-z]+\.\s*)+/i, '').split(/[；;\n]/)[0].trim()).slice(0, 16).join('');
+const firstZh = t => Array.from(str(t).replace(/^\s*(?:[a-z]+\.\s*)+/i, '').split(/[；;\n]/)[0].trim()).slice(0, 16).join('');
+const shortZh = e => firstZh(meaningOf(e));
+// the meaning's Chinese, piece by piece (（把……）打包 -> 打包, 准备好的 -> 准备好): two Chinese lines say the same meaning when
+// a piece is the same
+const zhParts = t => str(t).replace(/（[^）]*）|\([^)]*\)|\[[^\]]*\]/g, '').replace(/^\s*(?:[a-z]+\.\s*)+/i, '').split(/[，,；;、/\n]/)
+  .map(x => x.replace(/[的地得了着]/g, '').replace(/[^一-鿿]/g, '')).filter(Boolean);
+const sameMeaning = (a, b) => { const y = new Set(zhParts(b)); return zhParts(a).some(x => y.has(x)); };
+const firstSense = e => arr(e && e.senses).find(s => s && s.pos) || null;
+// the Chinese a word question shows, from the same sense as its part of speech: when the entry's brief_cn (水) is not
+// what its first sense (v. 浇水) says, the sense's own Chinese
+function zhOf(e, info) {
+  const s0 = firstSense(e);
+  if (info.from === 'sense' && s0 && s0.cn && !sameMeaning(meaningOf(e), s0.cn)) return firstZh(s0.cn);
+  return shortZh(e);
+}
+// the part of speech of the meaning a card shows (meaningOf: brief_cn first), for the line on the spelling tiles;
+// '' when the shown meaning is not one of the senses and so its part of speech is not known
+export function shownPos(e, { curriculum = null } = {}) {
+  const info = posInfo(e, { curriculum });
+  if (info.from !== 'sense' || !info.main) return info.main;
+  const shown = meaningOf(e), s0 = firstSense(e);
+  if (!shown || !s0.cn || sameMeaning(shown, s0.cn)) return info.main;
+  const hit = arr(e.senses).find(s => s && s.pos && s.cn && sameMeaning(shown, s.cn));
+  const k = hit ? splitPos(hit.pos).find(x => KINDS.includes(x)) : '';
+  return k || '';
+}
 
 export function wordItem(e, { curriculum = null } = {}) {
   if (!e || !e.slug) return null;
   const w = headOf(e);
   if (!/^[A-Za-z]+$/.test(w)) return null;
-  const pos = wordPos(e, { curriculum });
+  const info = posInfo(e, { curriculum });
+  const pos = info.main;
   if (!ASKABLE.has(pos)) return null;
-  const zh = shortZh(e);
+  const zh = zhOf(e, info);
   if (!zh) return null;
   const item = 'pos:w:' + e.slug;
   return { id: item, item, mode: MODE, kind: 'word', slug: e.slug, w, pos, zh, ...(e.unit ? { unit: e.unit } : {}) };
@@ -320,7 +441,7 @@ export function optionsFor(right, { exclude = [], rng = Math.random } = {}) {
   return out;
 }
 
-export function makePosQuestion(item, { entryOf = null, curriculum = null, guide: g0 = null, rng = Math.random } = {}) {
+export function makePosQuestion(item, { entryOf = null, curriculum = null, guide: g0 = null, rng = Math.random, dict = null } = {}) {
   if (!item) return null;
   const g = g0 || G;
   if (item.kind === 'sentence') {
@@ -332,15 +453,16 @@ export function makePosQuestion(item, { entryOf = null, curriculum = null, guide
   }
   if (item.kind === 'word') {
     const e = (item.slug && typeof entryOf === 'function' ? call(entryOf, item.slug) : null) || item.entry || null;
-    const info = e ? posInfo(e, { curriculum }) : { main: item.pos, all: [item.pos] };
-    const pos = info.main || item.pos;
+    // with the entry there, only what it says now counts (a plan made earlier may carry a part of speech since corrected)
+    const info = e ? posInfo(e, { curriculum, dict }) : { main: item.pos, all: [item.pos], firm: false };
+    const pos = info.main;
     if (!ASKABLE.has(pos)) return null;
     const w = (e && headOf(e)) || item.w;
-    const zh = (e && shortZh(e)) || item.zh || '';
+    const zh = (e && zhOf(e, info)) || item.zh || '';
     const options = optionsFor(pos, { exclude: info.all, rng });
-    const frame = frameLine(pos, w, g);
+    const frame = rightFrame(pos, w, g);
     const k = kindInfo(pos, g);
-    return { id: item.item, item: item.item, kind: 'word', slug: item.slug, w, pos, options, answer: options.indexOf(pos),
+    return { id: item.item, item: item.item, kind: 'word', slug: item.slug, w, pos, all: info.all.slice(), firm: !!info.firm, options, answer: options.indexOf(pos),
       prompt: { en: w, mark: null, zh, say: w }, ask: `${w} 是什么词性？`, why: frame ? `${frame}，说得通。` : `${k.zh}是${k.what}`,
       ...(item.unit || (e && e.unit) ? { unit: item.unit || e.unit } : {}) };
   }
@@ -351,7 +473,7 @@ export function hintFor(q, choice, g = null) {
   const k = kindInfo(q.pos, g);
   const c = kindInfo(choice, g);
   if (!k || !c) return '';
-  const frame = q.kind === 'word' ? frameLine(choice, q.w, g) : '';
+  const frame = wrongFrame(q, choice, g);
   const head = frame ? `不是${c.zh}：${frame} 说不通。` : `不是${c.zh}。`;
   const check = k.check || '';
   if (!check) return head + '再想想。';
@@ -499,7 +621,7 @@ export function renderPos(container, ctx = {}, { items = [], sid = '', step = 'w
     const it = queue[i++];
     if (!it) { finish(); return; }
     if (it.kind === 'write') { drawWrite(it); return; }
-    const q = makePosQuestion(it, { entryOf, curriculum: ctx.curriculum, guide: g, rng });
+    const q = makePosQuestion(it, { entryOf, curriculum: ctx.curriculum, guide: g, rng, dict: ctx.dict || null });
     if (!q) { draw(); return; }
     const box = h('article', { className: 'pos-q' });
     el.replaceChildren(box);
@@ -547,7 +669,7 @@ export function renderPos(container, ctx = {}, { items = [], sid = '', step = 'w
 export function makePosSpell(e, { curriculum = null, rng } = {}) {
   const q = S.makeSpell(e, { curriculum, ...(rng ? { rng } : {}) });
   if (!q) return null;
-  const pos = wordPos(e, { curriculum });
+  const pos = shownPos(e, { curriculum });
   return pos ? { ...q, pos, posLabel: posLabel(pos) } : q;
 }
 
@@ -559,7 +681,7 @@ export const posSpellMode = {
   label: '看中文和词性写出来',
   render(e, ctx = {}) {
     const app = ctx.app || {};
-    const kind = wordPos(e, { curriculum: app.curriculum });
+    const kind = shownPos(e, { curriculum: app.curriculum });
     const onAnswer = ctx.onAnswer ? ev => ctx.onAnswer(kind && ev && typeof ev === 'object' ? { ...ev, pos: kind } : ev) : ctx.onAnswer;
     const v = S.spellMode.render(e, { ...ctx, onAnswer });
     if (!v || !v.el || v.modeId !== S.MODE_ID || !kind || kind === 'aux') return v;

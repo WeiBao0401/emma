@@ -25,6 +25,7 @@
 //   chunksFor(word) -> { kind: 'syllable' | 'letter', parts: [string] }
 //   decoysFor(word, { kind, parts }, { rng, n }) -> [string]   干扰块，和真块都不一样
 //   makeSpell(entry, { rng, curriculum, unit }) -> SpellQuestion | null   纯函数
+//     10-26：SpellQuestion 多 alts（spellingAlts：课标认的另一种写法 gray / meter / center，拼出来也算对）
 //     SpellQuestion = { id: 'w:<slug>', slug, headword, unit, kind, parts, need: parts.length,
 //                       tiles: [{ id: 't0', text, real: bool }]（已打乱，不会正好是答案的顺序）,
 //                       prompt: { text: 中文意思, lang: 'zh-CN', say: 要读的英文 }, right: { headword, meaning, parts } }
@@ -232,6 +233,24 @@ export function canSpell(entry, curriculum) {
   try { return !!(curriculum && typeof curriculum.isRequired === 'function' && curriculum.isRequired(w)); } catch (e) { return false; }
 }
 
+// the other spelling of the same word that the 课标 lists as one (gray / grey, meter / metre, center / centre, color / colour,
+// organize / organise): built from the tiles or typed, it is right too, and the headword's spelling is shown with it (10-26)
+const VARIANTS = [[/our/g, 'or'], [/or(?=[^aeiou]|$)/g, 'our'], [/re$/, 'er'], [/er$/, 're'], [/is(?=e|ed|es|ing|ation)/g, 'iz'],
+  [/iz(?=e|ed|es|ing|ation)/g, 'is'], [/yse$/, 'yze'], [/yze$/, 'yse'], [/^grey$/, 'gray'], [/^gray$/, 'grey'], [/mme$/, 'm'], [/gue$/, 'g']];
+export function spellingAlts(word, curriculum) {
+  const w = low(word).trim();
+  if (!w || !curriculum || typeof curriculum.baseOf !== 'function') return [];
+  const base = x => { try { return curriculum.baseOf(x) || ''; } catch (e) { return ''; } };
+  const b = base(w);
+  if (!b) return [];
+  const out = [];
+  for (const [re, to] of VARIANTS) {
+    const v = w.replace(re, to);
+    if (v !== w && !out.includes(v) && base(v) === b) out.push(v);
+  }
+  return out;
+}
+
 export function chunksFor(word) {
   const w = String(word ?? '').trim();
   const syl = w.length >= SYL_MIN ? syllablesOf(w) : [w];
@@ -308,6 +327,7 @@ export function makeSpell(entry, { rng = Math.random, curriculum, unit } = {}) {
     tiles,
     prompt: { text: meaning, lang: 'zh-CN', say: headword },
     right: { headword, meaning, parts },
+    alts: spellingAlts(headword, curriculum),
   };
 }
 
@@ -439,7 +459,7 @@ export function createSpellAttempt(q, { now = () => Date.now(), retry = false } 
       if (result || !placed.length) return null;
       tries++;
       const got = typed();
-      const correct = low(got) === low(q.headword);
+      const correct = low(got) === low(q.headword) || (Array.isArray(q.alts) && q.alts.includes(low(got)));
       if (correct) return finish(true, false, event(true));
       if (tries >= MAX_TRIES) {
         hintLevel = Math.max(hintLevel, 2);
@@ -529,9 +549,13 @@ export function renderSpell(container, q, { onAnswer, onDone, onMiss, say, retry
     el.classList.add('is-right');
     draw('right');
     feedback.textContent = r.grade === 3 ? '拼对了。' : '对了。';
+    // another spelling of the word (gray for grey): right, and the word's own spelling is there to see a little longer
+    const got = low(attempt.typed);
+    const other = got && got !== low(q.headword);
+    if (other) feedback.textContent += `${q.headword} 和 ${got} 是同一个词的两种写法，都对。`;
     revealBtn.hidden = true;
     speak(q.headword);
-    timer = setTimeout(next, autoNextMs);
+    timer = setTimeout(next, other ? Math.max(autoNextMs, 2500) : autoNextMs);
   }
 
   function showAnswer() {
