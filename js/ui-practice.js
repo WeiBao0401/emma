@@ -19,6 +19,17 @@
 //     hide()：拿掉那一层（换页时 app.js 调，和 textread 一样）；inSession()：正在做一小轮；holding() 永远 false（没有要保存的输入）。
 //   ctx 用到：kv、words（favorites、get、review）、curriculum、say、events（log、sessionId、query）、go、toast、busy、fetchJSON、
 //     dict、voice（stop）；题型照它们原来的要求。
+//
+// 0.9.4 按单元练（Wei 10-27：要背下来、会写）：中心页那排入口里多一个“按单元练”（.pr-entry-unit，排在“练我不熟的词”后面；
+//   不在 practice.js KINDS 里，所以 .pr-entry 还是原来 7 个）。start('unit') 先出选单元页：每个单元一行，课本 kv 里的名字和
+//   “会写 N / M 个”，现在学的那个标“在学”；start('unit', { unit }) 直接开这个单元。一轮 10 个词（practice.js unitPick / unitQueue）：
+//   字母块用 pos.js posSpellMode（题面“n. 名词：写出这个名词”），首字母填空用 modes/cloze.js clozeMode（上面同样加一行词性），
+//   看中文选英文用 modes/choice.js choiceMode（direction 'zh2en'），词性题用 pos.js renderPos（wordItem）。
+//   写错了（不是一下就对）给一屏巧记（word-notes.js memoryOf + ui-entry.js memoryBlock，点“记住了”往下走）；选错了巧记挂在题下面。
+//   主线做完，写错、选错的再考一遍（写的用字母块，选的照样选）。FSRS 照“练我不熟的词”：错了评 1，本来就到期又一下就对评 3 / 2，
+//   别的不评；词性题不评。作答照各题型原来的格式记（step 'practice'），session_start 多 unit。
+//   收尾一句（写了几个、写对几个、哪几个还要再练），旁边“分享给妈妈”：import('./share.js') 的 shareButton(ctx, { scope: 'today' })，
+//   文件没有或出错就不显示。题型模块都按需加载，少一个也不报错。
 import { h, icon } from './ui-dom.js';
 import * as P from './practice.js';
 import * as G from './grammar.js';
@@ -31,6 +42,8 @@ const quiet = p => { if (p && typeof p.catch === 'function') p.catch(() => {}); 
 const MODE_FILES = { mc4: ['./modes/choice.js', 'choiceMode'], listen: ['./modes/listen.js', 'listenMode'], tiles: ['./modes/spell.js', 'spellMode'], cloze: ['./modes/cloze.js', 'clozeMode'] };
 const EVENT_MODE = { mc4: 'mc4', listen: 'listen', spell: 'tiles', tiles: 'tiles', cloze: 'cloze', card: 'card', keys: 'keys' };
 const ENTRY_ICON = { read: 'book', words: 'cards', mistakes: 'pen', grammar: 'note', dictation: 'pen', revise: 'check', chat: 'chat' };
+const WRITE_MODES = new Set(['tiles', 'cloze', 'keys']);
+const arr = v => (Array.isArray(v) ? v : []);
 
 // modules written in parallel (daily-read.js) or loaded on demand: a missing file never stops the page
 const optional = new Map();
@@ -85,11 +98,17 @@ export function createPracticeHub(ctx = {}, { root = null } = {}) {
     return '';
   }
   function entries(now) {
-    return h('div', { className: 'pr-entries' }, P.KINDS.map(kind => {
+    const list = P.KINDS.map(kind => {
       const note = entryNote(kind, now);
       return h('button', { type: 'button', className: 'pr-entry', on: { click: () => start(kind) } },
         icon(ENTRY_ICON[kind] || 'chev'), h('span', { className: 'pr-entry-name', text: P.ENTRY_ZH[kind] }), note ? h('span', { className: 'pr-entry-note', text: note }) : null);
-    }));
+    });
+    // 0.9.4 按单元练, right after 练我不熟的词
+    const unit = h('button', { type: 'button', className: 'pr-entry-unit', on: { click: () => start(P.UNIT_KIND) } },
+      icon('pen'), h('span', { className: 'pr-unit-name', text: P.ENTRY_ZH.unit }), h('span', { className: 'pr-unit-note', text: '选一个单元，写 10 个词' }));
+    const at = P.KINDS.indexOf('words');
+    list.splice(at >= 0 ? at + 1 : list.length, 0, unit);
+    return h('div', { className: 'pr-entries' }, list);
   }
   function nudgeLine(now) {
     const m = P.todayMinutes(kv, now);
@@ -172,7 +191,7 @@ export function createPracticeHub(ctx = {}, { root = null } = {}) {
     const sid = sidNow();
     round = { kind, sid, t0: Date.now(), params, finished: false };
     setBusy(true);
-    log({ type: 'session_start', kind: 'practice', practice: kind, sid, hour: new Date().getHours(), step: P.STEP });
+    log({ type: 'session_start', kind: 'practice', practice: kind, sid, hour: new Date().getHours(), step: P.STEP, ...(params.unit ? { unit: String(params.unit) } : {}) });
     return round;
   }
   async function finishRound(res, { early = false, ref = '', slugs = null, feedback = null } = {}) {
@@ -194,15 +213,33 @@ export function createPracticeHub(ctx = {}, { root = null } = {}) {
     const nudge = P.shouldNudge(kv, now);
     if (nudge) await P.markNudged(kv, now);
     const minutes = P.todayMinutes(kv, now);
-    const again = h('button', { type: 'button', className: nudge ? 'text-btn accent' : 'btn pr-big', on: { click: () => start(r.kind, r.kind === 'grammar' ? { cardId: r.params.cardId } : {}) } }, '再来一轮');
+    const againParams = r.kind === 'grammar' ? { cardId: r.params.cardId } : r.kind === P.UNIT_KIND ? { unit: r.params.unit } : {};
+    const again = h('button', { type: 'button', className: nudge ? 'text-btn accent' : 'btn pr-big', on: { click: () => start(r.kind, againParams) } }, '再来一轮');
     const enough = h('button', { type: 'button', className: nudge ? 'btn pr-big' : 'text-btn accent', on: { click: () => { close(); safe(() => ctx.toast && ctx.toast('明天见。')); } } }, '今天够了');
     const other = h('button', { type: 'button', className: 'text-btn accent', on: { click: () => switchView(r.kind) } }, '换一个');
-    stage.replaceChildren(h('div', { className: 'pr-done' },
+    // 0.9.4 按单元练: “分享给妈妈” next to the closing line (share.js, loaded on demand; missing or failing: not shown)
+    const shareBox = r.kind === P.UNIT_KIND ? h('div', { className: 'pr-share', hidden: true }) : null;
+    const doneEl = h('div', { className: 'pr-done' },
       h('p', { className: 'lede', text: fb.head }),
       fb.detail ? h('p', { className: 'pr-detail', text: fb.detail }) : null,
+      shareBox,
       nudge ? h('p', { className: 'pr-nudge', text: `今天练了 ${minutes} 分钟了，很棒。今天够了，明天见。` }) : null,
-      h('div', { className: 'pr-actions' }, nudge ? [enough, again, other] : [again, other, enough])));
+      h('div', { className: 'pr-actions' }, nudge ? [enough, again, other] : [again, other, enough]));
+    stage.replaceChildren(doneEl);
     headLabel.textContent = '这一轮做完了';
+    if (shareBox) addShare(shareBox);
+  }
+  async function addShare(box) {
+    try {
+      const m = await optionalModule('./share.js');
+      const fn = fnOf(m, 'shareButton');
+      if (!fn) return;
+      let node = await Promise.resolve(fn(ctx, { scope: 'today' }));
+      if (node && !(node instanceof Node) && node.el instanceof Node) node = node.el;
+      if (!node || !(node instanceof Node) || !box) return;
+      box.replaceChildren(node);
+      box.hidden = false;
+    } catch (e) { /* no share button: the round is still done */ }
   }
   function switchView(kind) {
     stopCtl();
@@ -224,6 +261,7 @@ export function createPracticeHub(ctx = {}, { root = null } = {}) {
     if (kind === 'mistakes') return startMistakes();
     if (kind === 'grammar') return params.cardId ? startGrammar(params.cardId, params.why) : pickCard();
     if (kind === 'read') return startRead(params.option);
+    if (kind === P.UNIT_KIND) return params.unit ? startUnit(String(params.unit)) : pickUnit();
     return null;
   }
 
@@ -449,6 +487,271 @@ export function createPracticeHub(ctx = {}, { root = null } = {}) {
       return;
     }
     ctl = UR.renderEpisode(st, ctx, { episodeId: opt.id, again: !!opt.again, sid: r.sid, step: P.STEP, doneLabel: '好了', onDone: doneRead });
+  }
+
+  // ---------------------------------------------------------------- 0.9.4 按单元练
+  // answers and dictation marks of the last 180 days: 会写了 (metDays) needs them, like the word book
+  let unitEv = null, unitEvAt = 0;
+  async function unitEvents() {
+    if (unitEv && Date.now() - unitEvAt < 30000) return unitEv;
+    const since = P.dayOf(new Date(Date.now() - 180 * 864e5));
+    let list = [];
+    try { const q = await (ctx.events && typeof ctx.events.query === 'function' ? ctx.events.query({ since, type: ['answer', 'dictation'] }) : []); list = Array.isArray(q) ? q : []; } catch (e) { list = []; }
+    unitEv = list; unitEvAt = Date.now();
+    return list;
+  }
+  const favs = () => safe(() => ctx.words.favorites(), []) || [];
+  const curUnit = () => safe(() => (kv.peek('progress', {}) || {}).unit, '') || '';
+  const wait = () => h('p', { className: 'small pr-wait', text: '稍等……' });
+  // the question modes, the 词性 module and the 巧记 pieces; each one may be missing
+  let unitMods = null;
+  async function loadUnitMods() {
+    if (unitMods) return unitMods;
+    const [choice, spell, cloze, pos, entry, notes] = await Promise.all(['./modes/choice.js', './modes/spell.js', './modes/cloze.js', './pos.js', './ui-entry.js', './word-notes.js'].map(optionalModule));
+    unitMods = { choice, spell, cloze, pos, entry, notes };
+    return unitMods;
+  }
+  const settle = (p, ms) => Promise.race([Promise.resolve(p).catch(() => null), new Promise(r => setTimeout(r, ms))]);
+
+  async function pickUnit() {
+    const st = open(P.ENTRY_ZH.unit);
+    st.replaceChildren(wait());
+    const evs = await unitEvents();
+    if (st !== stage) return;
+    const list = P.unitList(ctx.curriculum, favs(), { written: P.writtenNow(kv, evs), current: curUnit() });
+    if (!list.length) {
+      st.replaceChildren(h('div', { className: 'pr-done' }, h('p', { className: 'lede', text: '还没有课本单元的词。' }),
+        h('p', { className: 'pr-detail', text: '家长在家长区导入课本以后，这里就能按单元练。' }),
+        h('div', { className: 'pr-actions' }, h('button', { type: 'button', className: 'btn pr-big', on: { click: () => switchView(P.UNIT_KIND) } }, '换一个'))));
+      return;
+    }
+    st.replaceChildren(h('div', { className: 'pr-pick' },
+      h('p', { className: 'lede pr-unit-ask', text: '练哪个单元？' }),
+      h('p', { className: 'pr-why', text: '一轮 10 个必会词，多半是看中文写英文。' }),
+      h('ul', { className: 'pr-cards pr-units' }, list.map(u => h('li', null,
+        h('button', { type: 'button', className: 'pr-cardrow pr-unitrow', on: { click: () => startUnit(u.id) } },
+          h('span', { className: 'pr-cardrow-t', lang: 'en', text: u.title }),
+          u.current ? h('span', { className: 'pr-unit-now', text: '在学' }) : null,
+          h('span', { className: 'pr-cardrow-s pr-unit-count', text: u.note }),
+          icon('chev')))))));
+  }
+
+  async function startUnit(unit) {
+    const st = open(P.ENTRY_ZH.unit);
+    const title = safe(() => ctx.curriculum.unitTitle(unit), '') || unit;
+    headLabel.textContent = `按单元练 · ${title}`;
+    st.replaceChildren(wait());
+    const [evs, mods] = await Promise.all([unitEvents(), loadUnitMods()]);
+    // the part-of-speech guide and the offline 巧记 (app.js loaded them at start; this only waits if it has not)
+    await settle(Promise.all([mods.pos && typeof mods.pos.loadPos === 'function' ? mods.pos.loadPos(ctx) : null,
+      mods.entry && typeof mods.entry.ensureNotes === 'function' ? mods.entry.ensureNotes(ctx) : null]), 1500);
+    if (st !== stage) return;
+    const now = new Date();
+    const list = P.unitEntries(ctx.curriculum, unit, favs());
+    const done = P.readDay(kv, now).rounds.filter(r => r.kind === P.UNIT_KIND && r.ref === unit).flatMap(r => r.slugs || []);
+    const slugs = P.unitPick(list, { written: P.writtenNow(kv, evs), events: evs, now, exclude: done });
+    const chosen = slugs.map(s => list.find(e => e.slug === s)).filter(Boolean);
+    const tiles = (mods.pos && mods.pos.posSpellMode) || (mods.spell && mods.spell.spellMode) || null;
+    const choice = mods.choice && mods.choice.choiceMode;
+    if (!chosen.length || !choice) {
+      st.replaceChildren(h('div', { className: 'pr-done' }, h('p', { className: 'lede', text: chosen.length ? '题目这会儿打不开。' : '这个单元还没有能练的词。' }),
+        h('p', { className: 'pr-detail', text: '换一个单元，或者换一个练吧。' }),
+        h('div', { className: 'pr-actions' },
+          h('button', { type: 'button', className: 'btn pr-big', on: { click: () => pickUnit() } }, '换一个单元'),
+          h('button', { type: 'button', className: 'text-btn accent', on: { click: () => switchView(P.UNIT_KIND) } }, '换一个'))));
+      return;
+    }
+    const cur = ctx.curriculum;
+    let sources = [];
+    if (mods.cloze && typeof mods.cloze.defaultSources === 'function') sources = safe(() => mods.cloze.defaultSources(ctx), []) || [];
+    const canSpell = e => !!(tiles && mods.spell && safe(() => mods.spell.canSpell(e, cur), false));
+    const canPos = e => !!(mods.pos && typeof mods.pos.renderPos === 'function' && safe(() => mods.pos.wordItem(e, { curriculum: cur }), null));
+    // 首字母填空 only for a word with one part of speech: the sentence then uses it the way the cue says
+    const canCloze = e => {
+      if (!mods.cloze || !mods.cloze.clozeMode || !mods.pos || !sources.length) return false;
+      const info = safe(() => mods.pos.posInfo(e, { curriculum: cur }), null);
+      if (!info || !info.main || arr(info.all).length !== 1) return false;
+      if (safe(() => mods.pos.shownPos(e, { curriculum: cur }), '') !== info.main) return false;
+      return !!safe(() => mods.cloze.canCloze(e, sources, { curriculum: cur }), false);
+    };
+    const queue = P.unitQueue(chosen, { canSpell, canPos, canCloze });
+    const r = begin(P.UNIT_KIND, { unit });
+    const word = s => safe(() => ctx.words.get(s).headword, s) || s;
+    ctl = unitRound(st, { unit, queue, pool: chosen, mods, tiles, choice, sources }, r.sid, res => {
+      unitEvAt = 0;   // the next picker counts this round's answers
+      finishRound({ n: res.n, right: res.right }, { ref: unit, slugs: chosen.map(e => e.slug),
+        feedback: P.feedbackLine(P.UNIT_KIND, { title, written: res.written.map(word), wrote: res.wrote.map(word), again: res.again.map(word), posAgain: res.posAgain.map(word), fixed: res.fixed }) });
+    });
+  }
+
+  function unitRound(st, { unit, queue: q0, pool: first = [], mods, tiles, choice, sources = [] }, sid, onEnd) {
+    const queue = q0.map(x => ({ ...x }));
+    const total = queue.length;
+    const results = new Map();   // slug -> { kind: 'write' | 'choice', first, mode, hint }   the first time only
+    const posRes = new Map();    // slug -> clean
+    const retest = [];
+    const fixed = new Set();
+    const memoSeen = new Set();
+    let again = false, cur = null, view = null, stopped = false, n = 0;
+    const cue = curKind => {
+      const zh = mods.pos && mods.pos.ZH ? mods.pos.ZH[curKind] : '', ab = mods.pos && mods.pos.ABBR ? mods.pos.ABBR[curKind] : '';
+      return zh && ab && curKind !== 'aux' ? h('p', { className: 'spell-ask small pos-cue' }, h('i', { className: 'pos', lang: 'en', text: ab }), ` ${zh}：写出这个${zh}`) : null;
+    };
+    const pool = (() => { const seen = new Set(), out = []; for (const e of [...first, ...favs()]) if (e && e.brief_cn && !seen.has(e.slug)) { seen.add(e.slug); out.push(e); } return out; })();
+    const unitOf = e => (e && e.unit) || safe(() => ctx.curriculum.unitOf(e.headword), '') || unit || undefined;
+    const box = h('div', { className: 'pr-card' });
+    const foot = h('div', { className: 'pr-card-foot' });
+    st.replaceChildren(box, foot);
+    const paint = (node, footer = []) => {
+      box.replaceChildren(...(again ? [h('p', { className: 'small pr-again', text: '最后把刚才错的再做一遍。' })] : []), node);
+      foot.replaceChildren(...footer);
+    };
+    function next() {
+      if (stopped) return;
+      cur = queue.shift() || null;
+      if (!cur && !again && retest.length) {
+        again = true;
+        queue.push(...retest.splice(0));
+        safe(() => { headLabel.textContent = '再做一遍刚才错的'; });
+        cur = queue.shift();
+      }
+      if (!cur) { end(); return; }
+      const e = safe(() => ctx.words.get(cur.slug), null);
+      if (!e) { next(); return; }
+      cur.t = Date.now(); cur.answered = false; cur.clean = true;
+      if (cur.want === 'pos') { drawPos(e, cur); return; }
+      const kind = cur.want === 'cloze' && mods.pos ? safe(() => mods.pos.shownPos(e, { curriculum: ctx.curriculum }), '') : '';
+      const base = { app: ctx, pool, say, position: { n: n + 1, total: Math.max(total, n + queue.length + 1), isNew: false }, rate: g => rated(g),
+        onAnswer: ev => answered(e, kind && ev && typeof ev === 'object' ? { ...ev, pos: kind } : ev) };
+      if (cur.want === 'zh2en') base.direction = 'zh2en';
+      const clozeMode = mods.cloze && mods.cloze.clozeMode;
+      const tries = cur.want === 'cloze' ? [clozeMode, tiles, choice] : cur.want === 'tiles' ? [tiles, choice] : [choice];
+      view = null;
+      for (const mode of tries) {
+        if (!mode) continue;
+        view = safe(() => mode.render(e, base), null);
+        if (view && view.el) break;
+      }
+      if (!view || !view.el) { n++; next(); return; }
+      cur.mode = EVENT_MODE[view.eventMode && view.modeId !== 'mc4' ? view.eventMode : view.modeId] || 'mc4';
+      cur.kind = WRITE_MODES.has(cur.mode) ? 'write' : 'choice';
+      // the 首字母填空 card gets the same part-of-speech line as the tiles (n. 名词：写出这个名词)
+      if (view.modeId === 'cloze' && kind) { const c = cue(kind); if (c) safe(() => view.el.replaceChildren(c, ...[...view.el.childNodes].filter(x => x !== c))); }
+      paint(view.el, [].concat(view.footer || []).filter(Boolean));
+    }
+    function note(c, clean, hint) {
+      if (!clean) c.clean = false;
+      if (again) { if (clean) fixed.add(c.slug); return; }
+      if (!results.has(c.slug)) results.set(c.slug, { kind: c.kind, first: clean, mode: c.mode, hint });
+    }
+    function answered(e, ev) {
+      log({ type: 'answer', step: P.STEP, sid, unit: unitOf(e), ...ev });
+      if (!cur || !ev || ev.slug !== cur.slug || cur.answered) return;
+      cur.answered = true;
+      note(cur, !!ev.correct && ev.first_try !== false && !(ev.hint_level > 0), !!(ev.hint_level > 0));
+      // a wrong choice shows the right word already: its 巧记 goes right under it
+      if (!ev.correct && cur.kind === 'choice') memoInline(e);
+    }
+    function rated(g) {
+      if (!cur || stopped) return;
+      const c = cur;
+      const e = safe(() => ctx.words.get(c.slug), null);
+      if (!c.answered) {
+        // a card with no choices to tap (not enough distractors): her own 认得 / 没认出来 is the answer
+        c.answered = true;
+        log({ type: 'answer', step: P.STEP, sid, item: 'w:' + c.slug, slug: c.slug, unit: unitOf(e), mode: 'card', choice: String(g), correct: g >= 2, first_try: true, ms: Date.now() - c.t, hint_level: 0, misconception: null });
+        note(c, g >= 3, false);
+      }
+      n++;
+      if (g <= 1) note(c, false, false);
+      if (!c.clean && !again) {
+        const r = results.get(c.slug);
+        if (r) r.first = false;
+        retest.push({ slug: c.slug, want: c.kind === 'write' ? 'tiles' : 'zh2en' });
+        // written wrong: one screen of 巧记 before the next word
+        if (c.kind === 'write' && e && showMemo(e, () => { if (cur === c) { cur = null; next(); } })) return;
+      }
+      cur = null;
+      next();
+    }
+    function drawPos(e, c) {
+      const it = safe(() => mods.pos.wordItem(e, { curriculum: ctx.curriculum }), null);
+      if (!it) { n++; cur = null; next(); return; }
+      c.kind = 'pos';
+      const holder = h('div', { className: 'pr-pos' });
+      paint(holder);
+      const v = safe(() => mods.pos.renderPos(holder, ctx, { items: [it], sid, step: P.STEP, onDone: res => {
+        if (stopped || cur !== c) return;
+        const r0 = arr(res && res.results)[0];
+        if (r0 && !again) posRes.set(e.slug, !!r0.clean);
+        n++;
+        cur = null;
+        next();
+      } }), null);
+      if (cur === c) view = v;
+      if (!v && cur === c) { n++; cur = null; next(); }
+    }
+    function memoOf(e) {
+      if (!e || !e.headword || !mods.notes || !mods.entry) return null;
+      const m = safe(() => mods.notes.memoryOf(e, mods.entry.noteOf(ctx, e.headword)), null);
+      return m && (arr(m.mem).length || m.trap || m.use) ? m : null;
+    }
+    function memoInline(e) {
+      if (!e || memoSeen.has(e.slug) || !view || !view.el) return;
+      const m = memoOf(e);
+      const box2 = m ? safe(() => mods.entry.memoryBlock(ctx, m, { word: e.headword }), null) : null;
+      if (!box2) return;
+      memoSeen.add(e.slug);
+      safe(() => { box2.classList.add('pr-memo-inline'); view.el.append(box2); });
+    }
+    function showMemo(e, then) {
+      if (memoSeen.has(e.slug)) return false;
+      const m = memoOf(e);
+      const block = m ? safe(() => mods.entry.memoryBlock(ctx, m, { word: e.headword }), null) : null;
+      if (!block) return false;
+      memoSeen.add(e.slug);
+      let gone = false;
+      const go = () => { if (gone || stopped) return; gone = true; then(); };
+      const pl = safe(() => mods.pos.posLine(e, { curriculum: ctx.curriculum }), null);
+      const cn = safe(() => mods.choice.meaningOf(e), '') || m.cn || e.brief_cn || '';
+      const hw = safe(() => mods.entry.headwordNode({ headword: e.headword }, { tag: 'p', syl: false }), null) || h('p', { className: 'pr-memo-word', lang: 'en', text: e.headword });
+      const sb = safe(() => mods.entry.sayBtn(ctx, e.headword, '听一遍'), null);
+      paint(h('article', { className: 'pr-memo' },
+        h('p', { className: 'small pr-memo-why', text: '没关系，记一记。这一轮最后再写一遍。' }),
+        h('div', { className: 'pr-memo-head' }, hw, sb),
+        h('p', { className: 'pr-memo-cn' },
+          pl && pl.abbr ? h('i', { className: 'pos', lang: 'en', text: pl.abbr }) : null,
+          pl && pl.zh ? h('span', { className: 'pr-memo-pos', text: pl.zh }) : null,
+          cn ? h('span', { text: cn }) : null),
+        block,
+        h('div', { className: 'pr-actions' }, h('button', { type: 'button', className: 'btn pr-big pr-memo-go', text: '记住了', on: { click: go } }))));
+      view = { onKey: ev => { if (ev.metaKey || ev.ctrlKey || ev.altKey) return; if (ev.key === 'Enter' || ev.key === ' ') { if (ev.preventDefault) ev.preventDefault(); go(); } } };
+      return true;
+    }
+    async function end() {
+      if (stopped) return;
+      stopped = true;
+      // into the review, the rule of 练我不熟的词: wrong -> 1 (back in the next warm-up); due anyway and right -> 3 (2 with a
+      // hint); not due and right -> left alone. 词性题 are not rated.
+      const eod = new Date(); eod.setHours(23, 59, 59, 999);
+      for (const [slug, r] of results) {
+        const e = safe(() => ctx.words.get(slug), null);
+        if (!e || !e.favorited) continue;
+        const due = !!(e.fsrs && e.fsrs.due && new Date(e.fsrs.due) <= eod);
+        const g = !r.first ? 1 : due ? (r.hint ? 2 : 3) : 0;
+        if (g) { try { await ctx.words.review(slug, g, r.mode || 'mc4'); } catch (err) { /* the round still counts */ } }
+      }
+      const written = [], wrote = [], wrong = [];
+      for (const [slug, r] of results) {
+        if (r.kind === 'write') { written.push(slug); if (r.first) wrote.push(slug); }
+        if (!r.first) wrong.push(slug);
+      }
+      const posAgain = [...posRes].filter(([, ok]) => !ok).map(([s]) => s);
+      const right = [...results.values()].filter(r => r.first).length + [...posRes.values()].filter(Boolean).length;
+      onEnd({ written, wrote, again: wrong, posAgain, fixed: fixed.size, n: results.size + posRes.size, right });
+    }
+    next();
+    return { onKey: ev => { if (view && typeof view.onKey === 'function' && !stopped) view.onKey(ev); }, stop: () => { stopped = true; } };
   }
 
   return {

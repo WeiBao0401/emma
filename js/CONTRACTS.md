@@ -568,3 +568,9 @@ await run();
 - **首页三张卡**（`ui-home.js`、`css/home.css`、`ui-practice.js`、`css/practice.css`、`tests/home-cards.test.mjs`，首页 agent）：招呼下面三张随时能点：① 今天的课 ② 今天的阅读 ③ 接着练。`ctx.practice.mount(el, { compact, card, onClose })`：`card: true` 只画推荐一句和一个按钮，`compact` 在卡片里表示不是首推（描边按钮），`onClose` 在盖的那一层关上以后调一次。首页还用 `ctx.dailyRead.open({ more | fallback })` 和 `ctx.dailyRead.el`（`fallback` 现在被忽略，首页平时直接用接着练读番外第 N 集；首页靠 MutationObserver 盯 `dailyRead.el` 的 hidden 重画）。ui-home 新 import `daily-read.js`（`dayState`、`homeLine`、`pickFallback`）、`reader.js`（`content`）、`practice.js`（`fadingWords`），新导出 `cellLine`、`lessonState`、`cardStart`、`pieceWords`、`readModel`、`primaryCard`、`whenHidden`
 - **测试**：`tests/b7-wiring.test.mjs`（热身至少一半写出来、词性题、memo、fillMemory、接线）、`tests/audio-session.test.mjs`（0.8.1 的录音音频模式：有没有 `navigator.audioSession` 都不报错、先切再要麦克风、占用时等 250 毫秒重试一次、被拒不重试）。b3、b4、b5、sprint 的几条排课测试按“至少一半写出来”改了期望；`ui-lesson.test` 的模块表多 `pos`
 - 还没接：`ui-daily-read.js` 的 `open({ fallback: true })` 直接进兜底、`open` 的 `onClose` 回调（首页现在用 MutationObserver）；`modes/choice.js` 的“再看一次”还是例句或旧的 `mnemonic`（巧记会透出意思，所以没换）
+
+
+## 16. 0.10.0 接线记录（2026-10-27）
+- ui-lesson：课本新词（还是新卡、有单元）在这节课第一张卡之前先出巧记一屏（“记住了，考我”），第一节课也这样，最多 MEMO_NEW_MAX 个，没有巧记的不出；先讲过的词答对不再出，答错照旧；她自己的新词还是答对以后给、第一节课不给，合用同一个上限。新导出 teachFirst、memoAfter。plan.js 的时长按这个规则估
+- 按单元练：ctx.practice.start('unit', { unit? }) / show({ start: 'unit', unit })；一轮 10 个词，至少六成写、2 道看中文选英文、2 道词性题，错的最后再考；kv practice:<日期> 的 rounds 多 kind 'unit'（ref 单元 id）；session_start 多 unit 字段。practice.js 新导出 UNIT_KIND、ROUND_UNIT、UNIT_CLOZE_MAX、UNIT_WRITE_SHARE、isRequiredEntry、unitEntries、writtenNow、unitList、unitPick、unitQueue。首页接着练小入口“按单元练”
+- share.js（新）：summarize、hasActivity、teacherLine、shareText、todaySummary、doneToday、drawCard、cardFile、shareToday、shareButton；css/share.css（类名 share-，首页外面一层 .home-share）。上课收尾、按单元练收尾按需 import('./share.js') 放“分享给妈妈”，首页 doneToday 为真才显示；失败都只是不显示

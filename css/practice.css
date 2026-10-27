@@ -56,3 +56,30 @@
 .pr-cardrow-s{flex:none;font-size:13px;color:var(--faint)}
 .pr-cardrow-s.hot{color:var(--accent);font-weight:600}
 .pr-cardrow .icon{flex:none;width:18px;height:18px;color:var(--faint)}
+
+/* 0.9.4 按单元练：入口和别的一样大；选单元一行一个，右边“会写 N / M 个” */
+.pr-entry-unit{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-height:76px;padding:12px 14px;text-align:left;
+  border:1px solid var(--rule);border-radius:var(--radius-btn);background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.pr-entry-unit:active{background:var(--tag-bg)}
+.pr-entry-unit .icon{width:20px;height:20px;color:var(--accent)}
+.pr-unit-name{font-size:16px;line-height:1.3}
+.pr-unit-note{font-size:12px;line-height:1.3;color:var(--faint)}
+.pr-unit-ask{margin:4px 0 6px}
+.pr-units{margin-top:4px}
+.pr-unitrow{min-height:64px}
+.pr-unit-now{flex:none;padding:2px 8px;border-radius:999px;background:var(--tag-bg);font-size:13px;color:var(--accent)}
+.pr-unit-count{font-size:15px;color:var(--muted)}
+
+/* 一轮里：再做一遍的提示、写错后的一屏巧记、选错挂在题下面的巧记、分享 */
+.pr-again{margin:0 0 12px;color:var(--accent)}
+.pr-memo{padding:4px 0 8px}
+.pr-memo-why{margin:0;color:var(--muted)}
+.pr-memo-head{display:flex;align-items:center;gap:6px;margin-top:10px}
+.pr-memo-word{margin:0;font:600 34px/1.2 var(--serif);color:var(--ink)}
+.pr-memo-cn{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin:8px 0 0;font:500 20px/1.5 var(--sans);color:var(--ink)}
+.pr-memo-pos{margin-right:4px}
+.pr-memo > section{margin-top:22px}
+.pr-memo .pr-actions{margin-top:28px}
+.pr-memo-inline{margin-top:22px}
+.pr-share{margin-top:14px}
+.pr-share[hidden]{display:none}

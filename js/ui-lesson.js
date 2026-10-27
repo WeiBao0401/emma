@@ -27,6 +27,10 @@
 //          字母块卡用 pos.js posSpellMode（题面多一行“n. 名词”，事件多 pos）。新词第一次出现、答错的词给一屏巧记
 //          （word-notes.js noteFor 的离线小本，没有就用词条上模型给的 mem、旧的 mnemonic；四选一、听音选词答错时直接挂在题下面），
 //          点“记住了”再往下走；一节课里一个词只出一次。收尾多“认对了 N 个词的词性”。
+//   0.9.4（Wei 10-27：先讲再考）：课本新词（还是新卡、有单元）在这节课第一张卡之前先出巧记一屏（词、读音、词性、中文、巧记、容易错），
+//          点“记住了，考我”才出题；第一节课也这样，一节课最多 MEMO_NEW_MAX 个，没有巧记的词直接出题（teachFirst）。
+//          先讲过的词答对以后不再出巧记屏，答错照旧挂巧记（memoAfter）；她自己的新词（没有单元）还是答对以后给，和以前一样。
+//          收尾“回到今天”旁边是“分享给妈妈”（动态 import('./share.js') 的 shareButton(ctx, { scope: 'today' })，没有或出错就不显示）。
 //   收尾   老师夸一句（lines 'praise'，填今天写对的一个具体的词，带 spelled；没写对的就填认出的），
 //          “今天写对了 N 个”加最多 3 个词（DESIGN 2.2），再见用 'close'，期中季用 'exam'（没有就退回 'close'）。
 //          轻松版开头老师先说一句 'easy' 场景的话。考前一天加一句“今天早点睡。”
@@ -65,6 +69,8 @@
 //   shuffleOptions(q, rng?) -> q             选项换个顺序（预写的题常把答案放第一个）
 //   examInfo(progress, now) -> { season, eve, days }   期中季（考前 14 天内）、考前一天
 //   closeScene({ season }) -> 'exam' | 'close'
+//   teachFirst({ isNew, textbook, hasMemo, taught, count, max }) -> bool   这张卡之前先讲巧记吗（0.9.4）
+//   memoAfter(g, { isNew, textbook, hasMemo, seen, first, count, max }) -> bool   答完以后出巧记吗（0.9.4）
 //
 // 记的事件（CONTRACTS.md 第 6 节）：session_start { kind, hour }（kind 多一个 'sprint'）、
 // predict { item, slug?, mode, p_base, p_teacher }、answer（题型给的字段加 sid、step、unit）、
@@ -174,6 +180,19 @@ export function predictCorrect(entry, now = new Date(), { mode = 'mc4' } = {}) {
   const card = entry && entry.fsrs;
   const r = !card || card.state === State.New || !card.last_review ? 0.5 : retrievability(card, now);
   return round2(guess + (1 - guess) * Math.max(0, Math.min(1, r)));
+}
+
+// 0.9.4 先讲再考 (Wei 10-27): a textbook word still new meets its 巧记 screen before its first card in the lesson,
+// the first lesson too, at most max a lesson; a word without 巧记 goes straight to its card
+export function teachFirst({ isNew = false, textbook = false, hasMemo = false, taught = false, count = 0, max = MEMO_NEW_MAX } = {}) {
+  return !!(isNew && textbook && hasMemo && !taught && count < max);
+}
+// after her answer (g = the rating, 1 = wrong): a wrong one gets its 巧记 (once a lesson); a right one only for her own
+// new word (no unit: a textbook word was taught before its card), not on the first lesson, within the same max
+export function memoAfter(g, { isNew = false, textbook = false, hasMemo = false, seen = false, first = false, count = 0, max = MEMO_NEW_MAX } = {}) {
+  if (seen || !hasMemo) return false;
+  if (g === 1) return true;
+  return !!(isNew && !textbook && !first && count < max);
 }
 
 // results: Map slug -> { first: bool (first answer right), p }
@@ -519,7 +538,8 @@ export function createLessonView(ctx) {
   let pQueue = [];           // 0.9.0: the warm-up's 词性题 (cell.pos), after 变形配对
   let posRight = 0;          // 词性题 right first time
   let memoSeen = new Set();  // 0.9.0: words whose 巧记 she has seen in this lesson (once a word)
-  let memoNew = 0;           // how many of them were new words answered right (plan.js MEMO_NEW_MAX)
+  let memoNew = 0;           // new words given a 巧记 screen: taught before the card, or her own answered right (plan.js MEMO_NEW_MAX)
+  let taught = new Set();    // 0.9.4: textbook words whose 巧记 came before their first card (a wrong answer still gets it again)
   let exam = { season: false, eve: false, days: null };
   let t0 = 0;
   let step = null;          // 'warmup' | 'read' | 'write' | 'wrap' while this lesson runs
@@ -718,6 +738,7 @@ export function createLessonView(ctx) {
     posRight = 0;
     memoSeen = new Set();
     memoNew = 0;
+    taught = new Set();
     ensureNotes(ctx);
     pendingFb = null;
     wq = null;
@@ -898,11 +919,16 @@ export function createLessonView(ctx) {
     const s = session;
     const e = ctx.words.get(slug);
     const now = new Date();
+    const isNew = !e.fsrs || e.fsrs.state === State.New;
+    const textbook = isNew && !!unitOf(e);
+    // 0.9.4 先讲再考: a textbook word still new meets its 巧记 first (once a lesson, at most MEMO_NEW_MAX), then its card
+    const tm = textbook && !taught.has(slug) && memoNew < MEMO_NEW_MAX ? memoOf(e) : null;
+    if (teachFirst({ isNew, textbook, hasMemo: !!tm, taught: taught.has(slug), count: memoNew })) { teach(slug); return; }
     const pf = e.fsrs && e.fsrs.state !== State.New ? round2(retrievability(e.fsrs, now)) : null;
     // a word she got wrong earlier in this lesson comes back as four-choice (DESIGN 5.1 rule 4)
     const want = results.has(slug) ? 'mc4' : (modeBySlug.get(slug) || 'mc4');
-    const position = { n: s.done + 1, total: s.total, isNew: !e.fsrs || e.fsrs.state === State.New };
-    cur = { kind: 'word', slug, item: 'w:' + slug, mode: want, p: 0.5, pf, t: Date.now(), answered: false, isNew: position.isNew };
+    const position = { n: s.done + 1, total: s.total, isNew };
+    cur = { kind: 'word', slug, item: 'w:' + slug, mode: want, p: 0.5, pf, t: Date.now(), answered: false, isNew: position.isNew, textbook };
     const base = { app: ctx, pool, say, position, rate: g => rate(g), onAnswer: ev => onAnswer(e, ev), distractor: distractorOf(cellOf('warmup'), slug) };
     const r = renderWord(e, want, base);
     if (!r) { skipped.add(slug); drawWarm(); return; }
@@ -952,35 +978,49 @@ export function createLessonView(ctx) {
     } catch (err) { /* the card works without it */ }
   }
   // one screen: the word, its part of speech and meaning, the 巧记 block, “记住了”
-  // a wrong one always; a new word answered right not on the first lesson (it ends on right answers, quickly), at most
-  // MEMO_NEW_MAX a lesson
+  // a wrong one always; her own new word answered right not on the first lesson (it ends on right answers, quickly), at
+  // most MEMO_NEW_MAX a lesson. A textbook word was taught before its card (0.9.4), so a right answer goes straight on.
   function memoWanted(c, g) {
     if (!c || !c.slug || memoSeen.has(c.slug)) return false;
-    if (g !== 1 && !(c.isNew && !(plan && plan.first) && memoNew < MEMO_NEW_MAX)) return false;
+    if (!memoAfter(g, { isNew: !!c.isNew, textbook: !!c.textbook, hasMemo: true, first: !!(plan && plan.first), count: memoNew })) return false;
     return !!memoOf(ctx.words.get(c.slug));
   }
-  function showMemo(c, g, then) {
+  // 0.9.4 先讲再考: the 巧记 screen before the word's first card; “记住了，考我” draws the card
+  function teach(slug) {
+    const s = session;
+    showMemo({ slug }, 0, () => {
+      if (step !== 'warmup' || session !== s) return;
+      if (s && s.current() === slug) drawWord(slug); else drawWarm();
+    }, { teach: true });
+  }
+  function showMemo(c, g, then, { teach: pre = false } = {}) {
     const e = ctx.words.get(c.slug);
     const m = memoOf(e);
+    // taught before its card: marked even without 巧记, so its card never waits for it twice
+    if (pre) taught.add(c.slug);
     if (!m) { then(); return; }
-    memoSeen.add(c.slug);
-    if (g !== 1) memoNew++;
+    // a word taught first can still get its 巧记 once after a wrong answer (memoSeen is for that one)
+    if (!pre) memoSeen.add(c.slug);
+    if (pre || g !== 1) memoNew++;
     let gone = false;
     const go = () => { if (gone) return; gone = true; then(); };
     let pl = null;
     try { const fn = fnOf(mods.pos, 'posLine'); pl = fn ? fn(e, { curriculum: ctx.curriculum }) : null; } catch (err) { pl = null; }
     const cn = Choice.meaningOf(e) || m.cn || '';
-    const box = h('article', { className: 'lesson-module lesson-memo' },
-      h('p', { className: 'small lesson-memo-why', text: g === 1 ? '没关系，记一记，下次就对了。' : '新词，先记一记。' }),
+    const box = h('article', { className: 'lesson-module lesson-memo' + (pre ? ' lesson-memo-teach' : '') },
+      h('p', { className: 'small lesson-memo-why', text: pre ? '新词，先认识一下。' : g === 1 ? '没关系，记一记，下次就对了。' : '新词，先记一记。' }),
       h('div', { className: 'lesson-memo-head' }, headwordNode({ headword: e.headword }, { tag: 'p', syl: false }), sayBtn(ctx, e.headword, '听一遍')),
       h('p', { className: 'lesson-memo-cn' },
         pl && pl.abbr ? h('i', { className: 'pos', lang: 'en', text: pl.abbr }) : null,
         pl && pl.zh ? h('span', { className: 'pos-zh', text: pl.zh }) : null,
         cn ? h('span', { className: 'lesson-memo-mean', text: cn }) : null),
       memoryBlock(ctx, m, { word: e.headword }),
-      h('div', { className: 'btn-row lesson-memo-go' }, h('button', { type: 'button', className: 'btn', text: '记住了', on: { click: go } })));
-    view = { onKey: ev => { if (ev.metaKey || ev.ctrlKey || ev.altKey) return; if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } } };
+      h('div', { className: 'btn-row lesson-memo-go' }, h('button', { type: 'button', className: 'btn', text: pre ? '记住了，考我' : '记住了', on: { click: go } })));
+    const v = { onKey: ev => { if (ev.metaKey || ev.ctrlKey || ev.altKey) return; if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); go(); } } };
+    view = v;
     paint(step === 'write' ? writeTitle() : LABELS.warmup, step || 'warmup', box);
+    // the first time she meets the word she hears it once (the four-choice card does the same; a blocked one waits for 听一遍)
+    if (pre) setTimeout(() => { if (view === v && !gone) { try { say(e.headword, null); } catch (err) { /* she can tap 听一遍 */ } } }, 0);
   }
 
   async function rate(g) {
@@ -1853,8 +1893,24 @@ export function createLessonView(ctx) {
         lineBlock(close, 'lesson-line lesson-bye'),
         talkT ? learnBlock(ctx, talkT, { step: 'wrap', cls: 'lesson-learn' }) : null,
         sleep ? h('p', { className: 'lesson-sleep', text: sleep }) : null,
-        h('div', { className: 'btn-row' }, h('button', { type: 'button', className: 'btn', text: '回到今天', on: { click: () => ctx.go('home') } })),
+        shareRow(h('button', { type: 'button', className: 'btn', text: '回到今天', on: { click: () => ctx.go('home') } })),
         practiceSlot()));
+  }
+
+  // 0.9.4 分享给妈妈 next to 回到今天: share.js (loaded only here) makes the button; no module, or it throws, no button
+  function shareRow(back) {
+    const row = h('div', { className: 'btn-row lesson-wrap-go' }, back);
+    const my = token;
+    let p = null;
+    try { p = import('./share.js'); } catch (err) { return row; }
+    Promise.resolve(p).then(M => {
+      const make = fnOf(M, 'shareButton');
+      if (!make || my !== token || step !== 'wrap') return null;
+      return make(ctx, { scope: 'today' });
+    }).then(el => {
+      if (el && el.nodeType === 1 && my === token && step === 'wrap' && row.isConnected) row.append(el);
+    }).catch(err => console.warn('lesson: share:', (err && err.message) || err));
+    return row;
   }
 
   // 0.8.0 接着练 (ui-practice.js) under the wrap: the teacher's next pick and the entries she can tap any time

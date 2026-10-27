@@ -100,3 +100,8 @@
 .lesson-memo .mem-box{margin-top:22px}
 .lesson-memo .lesson-memo-go{margin-top:28px}
 .mc4 .lesson-memo-inline,.lesson-memo-inline.mem-box{margin-top:22px}
+
+/* 0.9.4 先讲再考 (ui-lesson teach / showMemo { teach }): a textbook word still new meets this same screen before its first
+   card, with its own line and “记住了，考我”. 分享给妈妈 (share.js) sits next to 回到今天 at the wrap. */
+.lesson-memo-teach .lesson-memo-why{color:var(--accent)}
+.lesson-wrap-go{row-gap:14px}

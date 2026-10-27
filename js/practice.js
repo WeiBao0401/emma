@@ -14,6 +14,14 @@
 //   read      再读一篇：每日阅读（daily-read.js，另一个 agent 在写，有就先用它）→ 期中阅读小篇（她这里读得最早的）→ 读过的番外再读
 //             （最久没读的）→ 下一集番外（今天的课还没上时不抢课里那一集）。
 //   dictation / revise / chat   听写、复习考试、问老师：直接跳到那一页（ctx.go），不算一小轮。
+//   unit      按单元练（0.9.4，Wei 10-27：要背下来、会写）：她先选一个单元（Starter 和导入的课本单元，名字用 kv textbook 的），
+//             每个单元旁边写“会写 N / M 个”（M 是这个单元单词本里有的必会词，N 是其中“会写了”的：encounters.js writtenOf，
+//             复查退回的不算）。一轮 ROUND_UNIT = 10 个这个单元的必会词（unitPick：还没学的、写不出的、快忘的在前，
+//             会写又记得牢的在后，今天按单元练过的往后放；不够 10 个就全上）。题型（unitQueue）：至少六成看中文写英文
+//             （字母块 tiles，题面带词性，pos.js posSpellMode；能找到句子、词性只有一个的词，最多 UNIT_CLOZE_MAX 个换成
+//             首字母填空 cloze），其余一半看中文选英文（zh2en，modes/choice.js），一半词性题（pos，pos.js wordItem，
+//             定不下词性的词不出）。10 个词就是 6 写、2 选、2 词性。写错了先看巧记，这一轮最后把写错的再考一遍。
+//             FSRS 照“练我不熟的词”的规矩评（词性题不评）。不进 recommendNext，也不在 KINDS 里（入口单独画）。
 //
 // 推荐（recommendNext）按她现在最需要的排：
 //   1 离考试 3 天以内，或“我要复习考试”今天还有一份没做 → revise
@@ -49,11 +57,22 @@
 //   recommendNext(ctx, now, { exclude, events, content, stories, passages, bank, daily }) -> Rec
 //     Rec = { kind, title, why, cta, minutes, params }；params 给 ui-practice 的 start(kind, params)（grammar 带 cardId，read 带 option）
 //   feedbackLine(kind, result) -> { head, detail }   一轮做完给她的一句具体反馈（见各 kind）
+//   0.9.4 按单元练：UNIT_KIND = 'unit'、ROUND_UNIT = 10、UNIT_CLOZE_MAX = 2、UNIT_WRITE_SHARE = 0.6
+//     isRequiredEntry(entry, curriculum) -> bool
+//     unitEntries(curriculum, unit, entries) -> [entry]   这个单元单词本里有的必会词，课本顺序
+//     writtenNow(kv, events) -> { slug: 日子 }           “会写了”的词（tally + metDays，复查退回的去掉）
+//     unitList(curriculum, entries, { written, current }) -> [{ id, title, order, total, written, note: '会写 N / M 个', current }]
+//         只列有词能练的单元，课本顺序；current 是 kv progress.unit
+//     unitPick(list, { written, events, now, exclude, max }) -> [slug]   这一轮练哪几个
+//     unitQueue(list, { canSpell, canPos, canCloze, clozeMax }) -> [{ slug, want: 'tiles' | 'cloze' | 'zh2en' | 'pos' }]
+//     feedbackLine('unit', { title, written: [词], wrote: [词], again: [词], posAgain: [词], fixed: n })
 import { retrievability, State } from './fsrs.js';
 import * as G from './grammar.js';
 import * as M from './mistakes.js';
 import * as RV from './review.js';
 import { FADE_R } from './wordbook.js';
+import { applyBack, readRecheck, writtenOf } from './encounters.js';
+import { slugify } from './words.js';
 
 export const KV_PREFIX = 'practice:';
 export const kvKey = day => KV_PREFIX + day;
@@ -65,7 +84,11 @@ export const ROUND_GRAMMAR = 4;
 export const MAX_ROUNDS = 60;
 export const KEEP_DAYS = 30;
 export const KINDS = ['read', 'words', 'mistakes', 'grammar', 'dictation', 'revise', 'chat'];
-export const ENTRY_ZH = { read: '再读一篇', words: '练我不熟的词', mistakes: '错题再练', grammar: '语法闯关', dictation: '听写', revise: '复习考试', chat: '问老师' };
+export const ENTRY_ZH = { read: '再读一篇', words: '练我不熟的词', mistakes: '错题再练', grammar: '语法闯关', dictation: '听写', revise: '复习考试', chat: '问老师', unit: '按单元练' };
+export const UNIT_KIND = 'unit';
+export const ROUND_UNIT = 10;
+export const UNIT_CLOZE_MAX = 2;
+export const UNIT_WRITE_SHARE = 0.6;
 export const ROUND_KINDS = ['read', 'words', 'mistakes', 'grammar'];
 export const LINK_KINDS = { dictation: 'dictation', revise: 'revise', chat: 'chat' };
 
@@ -350,6 +373,131 @@ export function readOptions(kv, now = new Date(), { stories = null, passages = [
   return out;
 }
 
+// ---------------------------------------------------------------- 按单元练 (0.9.4)
+
+const low = v => String(v == null ? '' : v).trim().toLowerCase();
+
+// a word she has to be able to write: the entry says so (textbook import: tier), else the 课标 list
+export function isRequiredEntry(e, curriculum = null) {
+  if (!e) return false;
+  if (e.required === true) return true;
+  if (e.required === false) return false;
+  return !!safe(() => curriculum && typeof curriculum.isRequired === 'function' && curriculum.isRequired(e.headword), false);
+}
+
+// the required words of one unit that are in her word book (a round can only use those), in textbook order
+export function unitEntries(curriculum, unit, entries = []) {
+  const byHead = new Map(), bySlug = new Map();
+  for (const e of arr(entries)) {
+    if (!e || !e.slug || !e.favorited) continue;
+    bySlug.set(e.slug, e);
+    const k = low(e.headword);
+    if (k && !byHead.has(k)) byHead.set(k, e);
+  }
+  const out = [], seen = new Set();
+  for (const x of arr(safe(() => curriculum.unitWords(unit), []))) {
+    const k = low(x && x.w);
+    if (!k) continue;
+    const e = byHead.get(k) || bySlug.get(slugify(k));
+    if (!e || seen.has(e.slug) || !isRequiredEntry(e, curriculum)) continue;
+    seen.add(e.slug);
+    out.push(e);
+  }
+  return out;
+}
+
+// 会写了: the same rule as the word book (weekly.tally.written plus metDays), minus the ones a recheck sent back
+export function writtenNow(kv, events = []) {
+  return safe(() => applyBack(writtenOf({ kv, events: arr(events) }), readRecheck(kv)), {}) || {};
+}
+
+export function unitList(curriculum, entries = [], { written = {}, current = '' } = {}) {
+  const out = [];
+  for (const u of arr(safe(() => curriculum.units(), []))) {
+    if (!u || u.id == null) continue;
+    const list = unitEntries(curriculum, u.id, entries);
+    if (!list.length) continue;
+    const n = list.filter(e => obj(written)[e.slug]).length;
+    out.push({ id: String(u.id), title: String(u.title || u.id), order: num(u.order), total: list.length, written: n,
+      note: `会写 ${n} / ${list.length} 个`, current: !!current && String(u.id) === String(current) });
+  }
+  return out;
+}
+
+// which words this round: not learned yet, can't write yet, about to slip first; written and well remembered last.
+// Words done in a unit round today go to the back, so 再来一轮 gives the others while there are any.
+export function unitPick(list = [], { written = {}, events = [], now = new Date(), exclude = [], max = ROUND_UNIT } = {}) {
+  const t = toDate(now);
+  const since = addDays(dayOf(t), -14);
+  const wrong = new Map();
+  for (const ev of arr(events)) {
+    if (!ev || ev.type !== 'answer' || ev.correct !== false || !ev.slug) continue;
+    if (String(ev.at || '').slice(0, 10) < since) continue;
+    wrong.set(ev.slug, (wrong.get(ev.slug) || 0) + 1);
+  }
+  const skip = new Set(arr(exclude));
+  const scored = arr(list).filter(e => e && e.slug).map((e, i) => {
+    const c = fsrsOf(e);
+    const seen = seenCard(c);
+    const r = seen ? safe(() => retrievability(c, t), 1) : 1;
+    let score = 0;
+    if (!seen) score += 3;                                   // 还没学的
+    if (!obj(written)[e.slug]) score += 3;                   // 写不出的
+    if (seen && r < FADE_R) score += 2 + (FADE_R - r) * 10;  // 快忘的
+    if (c && num(c.lapses) > 0) score += 1;
+    score += Math.min(3, wrong.get(e.slug) || 0);
+    return { slug: e.slug, score, i, again: skip.has(e.slug) };
+  });
+  scored.sort((a, b) => (a.again - b.again) || b.score - a.score || a.i - b.i);
+  return scored.slice(0, Math.max(0, max)).map(x => x.slug);
+}
+
+// the question for each word. n words: ceil(60%) written (tiles, a few as 首字母填空), the rest half 看中文选英文, half
+// 词性题. A word that cannot be spelled (a phrase, two letters) is never a written one; a word whose part of speech is not
+// settled never gets a 词性题. Mixed so the round does not start or end on the same kind twice.
+export function unitQueue(list = [], { canSpell = () => false, canPos = () => false, canCloze = () => false, clozeMax = UNIT_CLOZE_MAX } = {}) {
+  const words = arr(list).filter(e => e && e.slug);
+  const n = words.length;
+  if (!n) return [];
+  const ok = (f, e) => !!safe(() => f(e), false);
+  const wantWrite = Math.ceil(n * UNIT_WRITE_SHARE);
+  const wantPos = Math.ceil((n - wantWrite) / 2);
+  const write = words.filter(e => ok(canSpell, e)).slice(0, wantWrite);
+  const inWrite = new Set(write.map(e => e.slug));
+  const pos = words.filter(e => !inWrite.has(e.slug) && ok(canPos, e)).slice(0, wantPos);
+  const taken = () => new Set([...write, ...pos].map(e => e.slug));
+  // not enough 词性题 among the rest: give one written word a 词性题 and write another word instead
+  while (pos.length < wantPos) {
+    const t = taken();
+    const spare = words.find(e => !t.has(e.slug) && ok(canSpell, e));
+    const swap = [...write].reverse().find(e => ok(canPos, e));
+    if (!spare || !swap) break;
+    write.splice(write.indexOf(swap), 1, spare);
+    pos.push(swap);
+  }
+  const t = taken();
+  const rest = words.filter(e => !t.has(e.slug));
+  const wantChoice = n - wantWrite - wantPos;
+  const choice = [];
+  for (const e of rest) {
+    // fewer 词性题 than planned: the spare words are written when they can be, so writing stays the main thing
+    if (choice.length >= wantChoice && ok(canSpell, e)) write.push(e);
+    else choice.push(e);
+  }
+  const order = new Map(words.map((e, i) => [e.slug, i]));
+  write.sort((a, b) => order.get(a.slug) - order.get(b.slug));
+  let cloze = 0;
+  const wq = write.map((e, i) => {
+    const want = i % 3 === 1 && cloze < clozeMax && ok(canCloze, e) ? 'cloze' : 'tiles';
+    if (want === 'cloze') cloze++;
+    return { slug: e.slug, want };
+  });
+  const spread = (items, offset, rank) => items.map((x, i) => ({ ...x, at: (i + offset) / items.length, rank }));
+  return [...spread(choice.map(e => ({ slug: e.slug, want: 'zh2en' })), 0, 0), ...spread(wq, 0.5, 1), ...spread(pos.map(e => ({ slug: e.slug, want: 'pos' })), 0.5, 2)]
+    .sort((a, b) => a.at - b.at || a.rank - b.rank)
+    .map(({ slug, want }) => ({ slug, want }));
+}
+
 // ---------------------------------------------------------------- recommend
 
 export function examGap(progress, now = new Date()) {
@@ -415,6 +563,7 @@ export function recommendNext(ctx = {}, now = new Date(), { exclude = [], events
 // ---------------------------------------------------------------- feedback
 
 const joinWords = ws => arr(ws).filter(Boolean).slice(0, 4).join('、');
+const joinAll = ws => arr(ws).filter(Boolean).slice(0, ROUND_UNIT).join('、');
 
 // result per kind:
 //   words     { right: [词], again: [词] }
@@ -446,6 +595,19 @@ export function feedbackLine(kind, r = {}) {
     const head = right === n ? `${n} 道错题全做对了。` : `${n} 道错题，做对 ${right} 道。`;
     const detail = r.conquered ? `攻克了 ${r.conquered} 道。` : right < n ? '错的那道明天再考一道新题。' : r.left === 1 ? '再做对 1 次就攻克。' : '到日子再考，做对两次就攻克。';
     return { head, detail };
+  }
+  if (kind === UNIT_KIND) {
+    // written: the words she had to write; wrote: the ones right the first time; again: wrong (written or chosen) ->
+    // FSRS 1, back in the next warm-up; posAgain: a 词性题 not right the first time
+    const written = arr(r.written), wrote = arr(r.wrote), again = arr(r.again), posAgain = arr(r.posAgain);
+    const title = r.title ? `${r.title}：` : '';
+    const parts = [];
+    if (again.length) parts.push(`${joinAll(again)}还要再练，明天热身里先出${again.length > 1 ? '它们' : '它'}。`);
+    if (posAgain.length) parts.push(`${joinAll(posAgain)}是什么词性，再记一记。`);
+    if (!written.length) return { head: again.length || posAgain.length ? `${title}这一轮练完了。` : `${title}这一轮都一下就对。`, detail: parts.join('') };
+    const head = wrote.length === written.length ? `${title}写了 ${written.length} 个，都写对了。` : `${title}写了 ${written.length} 个，写对 ${wrote.length} 个。`;
+    if (!parts.length) parts.push('这个单元的词越写越熟了。');
+    return { head, detail: parts.join('') };
   }
   if (kind === 'read') {
     if (!r.done) return { head: '这一篇先读到这儿。', detail: '' };

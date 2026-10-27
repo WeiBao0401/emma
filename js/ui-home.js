@@ -24,6 +24,7 @@
 //   老师会先推的那张卡（primaryCard：课没上完是 ①，上完了今天的阅读写好没读是 ②，否则 ③）按钮实心、顶上一道主题色线，别的描边。
 //   iPad 竖屏 ① 占一整行、② ③ 并排；横屏（宽 1000 以上）整页放宽到约 1100，三张一排，“学一点”挪到招呼右边。
 //   底部一行：问老师、查词、课文陪读、这周 N 天。听写挪进了 ③，“我要复习考试”“有 N 道错题今天再考”两行变成 ③ 的小入口。
+// 0.9.4：三张卡下面一个不抢眼的“分享给妈妈”（share.js 按需 import，doneToday 为真才显示；share.js 没有或出错就不显示）。
 // 负责：今天标签 UI agent（ui-home.js、ui-lesson.js、ui-dictation.js、css/home.css、css/lesson.css、css/dictation.css）。
 //
 // 导出
@@ -589,6 +590,7 @@ export function createHomeTab(ctx) {
     try { due = (mistakesSummary(ctx.kv, now) || {}).due || 0; } catch (e) { due = 0; }
     try { rp = reviewActive(ctx.kv, now); } catch (e) { rp = null; }
     if (P) items.push(btn('练不熟的词', () => P.start('words'), fading));
+    if (P) items.push(btn('按单元练', () => P.start('unit')));
     // mistakes due today go to the 错题 tab's own review (it counts for the 1, 3, 7 days); otherwise a free round here
     items.push(btn('错题', () => (due > 0 || !P ? ctx.go('mistakes', { review: true }) : P.start('mistakes')), due));
     if (P) items.push(btn('语法', () => P.start('grammar')));
@@ -664,10 +666,31 @@ export function createHomeTab(ctx) {
     }
     if (on !== weeklyOn) { weeklyOn = on; if (ctx.currentRoute() === 'home') render(); }
   }
+  // 0.9.4 分享给妈妈 (share.js, loaded on demand like weekly.js): a quiet link under the three cards, only once she
+  // has done something today; the file missing or failing only hides the link
+  let shareMod = null;
+  let shareOn = false;
+  let shareAt = 0;
+  async function checkShare(now, force) {
+    if (!force && Date.now() - shareAt < 30000) return;
+    shareAt = Date.now();
+    let on = false;
+    try {
+      const S = shareMod || await optionalModule('./share.js');
+      if (S && typeof S.doneToday === 'function' && typeof S.shareButton === 'function') { shareMod = S; on = !!(await S.doneToday(ctx, now)); }
+    } catch (e) { console.warn('home: share:', (e && e.message) || e); }
+    if (on !== shareOn) { shareOn = on; if (ctx.currentRoute() === 'home') render(); }
+  }
+  function shareRow() {
+    if (!shareOn || !shareMod) return null;
+    try { return h('div', { className: 'home-share' }, shareMod.shareButton(ctx, { scope: 'today' })); }
+    catch (e) { console.warn('home: share:', (e && e.message) || e); return null; }
+  }
   function refresh(force) {
     const now = new Date();
     checkGain(now, force);
     checkWeekly(now);
+    checkShare(now, force);
     if (force) loadSlips(now);
   }
 
@@ -703,7 +726,7 @@ export function createHomeTab(ctx) {
     phase.textContent = season ? (season.label || phaseText({ unit: prog.unit }, now, titleOf)) : phaseText(prog, now, titleOf);
     let notice = null;
     try { notice = dictationNotice(ctx.kv, now); } catch (e) { console.warn('home: dictation notice:', (e && e.message) || e); }
-    body.replaceChildren(...[noticeRow(notice), weeklyRow(), greeting(), cards(now, plan), links(now, days, plan)].filter(Boolean));
+    body.replaceChildren(...[noticeRow(notice), weeklyRow(), greeting(), cards(now, plan), shareRow(), links(now, days, plan)].filter(Boolean));
   }
 
   return {

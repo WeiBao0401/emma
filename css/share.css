@@ -1,0 +1,7 @@
+/* 分享给妈妈（share.js shareButton）：一个安静的文字按钮，带一个分享小图标。颜色都用 index.html :root 的变量 */
+.text-btn.share-btn{min-height:var(--btn-h);padding:0 14px;margin:0;gap:8px;font-size:16px;font-weight:500;border-radius:var(--radius-btn)}
+.text-btn.share-btn .icon{width:20px;height:20px}
+.text-btn.share-btn:active{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.text-btn.share-btn[aria-busy="true"]{opacity:.6}
+.text-btn.share-btn.share-empty{color:var(--muted);font-weight:400}
+.text-btn.share-btn.share-empty .icon{opacity:.6}

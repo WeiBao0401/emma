@@ -202,7 +202,8 @@ export const PICKED_WORDS = { standard: 2, light: 1 };
 export const DICT_WARM_MAX = 6;
 export const RECHECK_MAX = 3;
 export const CONTRAST_WARM = 1;
-// 0.9.0 (Wei 10-26: 会写、知道词性、巧记): a new word gets a 巧记 screen after its card in the lesson (ui-lesson showMemo)
+// 0.9.0 (Wei 10-26: 会写、知道词性、巧记): a 巧记 screen per new word (ui-lesson showMemo). 0.10.0: before its first card for
+// textbook words still new (first lesson too); after a right answer only for her own new words, not in the first lesson
 export const MEMO_SECONDS = 10;
 export const MEMO_NEW_MAX = 6;          // at most this many new words get their 巧记 screen in one lesson (wrong ones always do)
 export const NEW_KEEP = 3;              // when time is short, textbook words still new wait for tomorrow, but this many stay
@@ -573,7 +574,7 @@ export function planToday(state = {}, now = new Date()) {
       + probe.length * secOf('probe') + screen.length * secOf('screen') + verb.length * secOf('verb')
       + forms.length * secOf('forms') + contrast.length * secOf('contrast') + mistakes.length * secOf('grammar') * 2
       + grammar.filter(g => g && g.intro).length * secOf('alt_intro')
-      + posN * secOf('pos') + (first ? 0 : Math.min(MEMO_NEW_MAX, cards.filter(w => w.isNew).length) * MEMO_SECONDS);
+      + posN * secOf('pos') + Math.min(MEMO_NEW_MAX, cards.filter(w => w.isNew && (w.unit || !first)).length) * MEMO_SECONDS;
     const total = () => minOf(warmSec()) + (read.status === 'ready' ? read.minutes : 0) + (write.status === 'ready' ? write.minutes : 0) + WRAP_MINUTES;
     // a story day: recognition cards from the end of the list (lowest band, put off to tomorrow) go first, before the
     // 连词成句 sentence and before the spelling, so the key words are still written and one sentence is still ordered;
