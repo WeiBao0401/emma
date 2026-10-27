@@ -28,7 +28,7 @@
 //                  answer: 正确选项的下标, right: { headword, meaning }, hint: Hint | null }
 //   makeChoice(entry, pool, { direction?, rng, extra, unit, easy? }) -> Question | null
 //     makeQuestion 加默认值：direction 按 directionFor(entry)，easy 按 isRetry(entry)
-//   directionFor(entry, now) -> 'en2zh' | 'zh2en'   新词、刚答错的看英文选中文；熟一点的、开了“写得出”线的轮到看中文选英文
+//   directionFor(entry, now) -> 'en2zh' | 'zh2en'   新词、刚答错的看英文选中文；见过一次以后多半看中文选英文（0.9.3，三次里两次）
 //   isRetry(entry, now) -> bool              今天最后一次评分是 1（这节课里答错过，隔几张又出来了）
 //   hintFor(entry, direction) -> Hint | null “再看一次”给的东西：en2zh 是例句（没有例句用巧记），zh2en 是首字母和字母数
 //     Hint = { kind: 'example' | 'mnemonic' | 'letter', text, lang, say, mark? }
@@ -339,8 +339,9 @@ export function isRetry(e, now = new Date()) {
 export function directionFor(e, now = new Date()) {
   if (!e || isRetry(e, now)) return 'en2zh';
   const reps = (e.fsrs && e.fsrs.reps) || 0;
-  if (e.write) return reps % 2 ? 'zh2en' : 'en2zh';
-  return reps >= 3 && reps % 3 === 0 ? 'zh2en' : 'en2zh';
+  // 0.9.3 (Wei 10-27: 认得意思不够，要背下来): after the first meeting, mostly 看中文选英文
+  if (e.write) return reps % 3 === 0 ? 'en2zh' : 'zh2en';
+  return reps >= 1 && reps % 3 !== 0 ? 'zh2en' : 'en2zh';
 }
 
 export function makeChoice(entry, pool = [], opts = {}) {

@@ -39,7 +39,7 @@
 // 依赖：ai.js（AIError）、voice-stream.js（createDoubaoStream）。ctx 用到：settings()、mockForced()、budget（blockReason / record）、
 //   kv（peek）、parentName()、toast(msg, ms)。
 
-import { micGetter, forPlayback } from './audio-session.js';
+import { micGetter, releaseMic } from './audio-session.js';
 import { AIError } from './ai.js';
 import { createDoubaoStream, STREAM_URL, STREAM_RESOURCE } from './voice-stream.js';
 
@@ -331,9 +331,8 @@ export function createVoiceInput(ctx = {}, deps = {}) {
   function release(r) {
     if (!r) return;
     clearTimeout(r.timer);
-    setTimeout(forPlayback, 0);
     try { if (r.recorder && r.recorder.state !== 'inactive') r.recorder.stop(); } catch (e) { /* stopped */ }
-    try { for (const t of (r.stream && r.stream.getTracks ? r.stream.getTracks() : [])) t.stop(); } catch (e) { /* gone */ }
+    releaseMic(r.stream);   // kept a while for the next hold (audio-session.js)
   }
   function budgetBlock(route) {
     if (!route || route.provider !== 'bailian' || !ctx.budget || !ctx.budget.blockReason) return null;
@@ -475,7 +474,7 @@ export function createVoiceInput(ctx = {}, deps = {}) {
       if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) throw micDenied();
       throw kidErr('nodevice', ctx, e);
     }
-    if (rec !== r) { try { for (const t of stream.getTracks()) t.stop(); } catch (e) { /* gone */ } return; }   // cancelled meanwhile
+    if (rec !== r) { releaseMic(stream); return; }   // cancelled meanwhile
     r.stream = stream;
     const mime = pickMime(m => (Recorder.isTypeSupported ? Recorder.isTypeSupported(m) : false));
     try { r.recorder = mime ? new Recorder(stream, { mimeType: mime }) : new Recorder(stream); } catch (e) { r.recorder = new Recorder(stream); }

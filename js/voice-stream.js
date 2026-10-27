@@ -1,4 +1,4 @@
-import { micGetter } from './audio-session.js';
+import { micGetter, releaseMic } from './audio-session.js';
 // 豆包流式语音识别 2.0（火山引擎 v3 sauc）的浏览器适配器：按住说话，边说边出字。
 // 不依赖别的文件。voice-input.js 在 asrProvider='doubao'（或自动选到豆包）时调用，失败时它把 wav() 交给百炼整段识别。
 // 负责：语音输入（和 voice-input.js 同一个人）。worklet 用同源的 pcm-tap-worklet.js（voice-input 传 workletUrl），内容和 WORKLET_SOURCE 一样。
@@ -19,7 +19,7 @@ import { micGetter } from './audio-session.js';
 //   createDoubaoStream({ appId, accessToken, apiKey, resourceId, getMedia, WebSocketImpl, onPartial, onFinal, onError, ...选项 })
 //     -> { start({ onPartial?, onFinal?, onError? }?), stop() -> Promise<最终文字>, cancel(), state(), pcm(), wav(), info() }
 //     start() 要在点按（pointerdown）里同步调用：里面先建 AudioContext 再等麦克风。录到的音频边录边发，连上之前先排队。
-//     stop() 发最后一包，等最终结果；3 秒（finalTimeoutMs）没等到就用最后一次中间结果，一句都没有就报 timeout。
+//     stop() 发最后一包，等最终结果；1.5 秒（finalTimeoutMs）没等到就用最后一次中间结果，一句都没有就报 timeout。
 //     出错时 err.code 是英文键（和 voice-input.js 的 VOICE_COPY 一致），err.reason 是中文原因码（REASONS），
 //     err.fallback = true 表示上层可以退回百炼整段识别：pcm() / wav() 里有这次按住录到的全部音频（16 kHz），不用重录。
 //   纯函数（测试用）：credentials、streamUrl、buildRequest、encodeFrame、parseFrame、decodePayload、fullRequestFrame、
@@ -60,7 +60,7 @@ export const DEFAULTS = {
   url: STREAM_URL,
   resourceId: STREAM_RESOURCE,
   chunkMs: 200,            // 官方：双向流式 200 ms 一包性能最好
-  finalTimeoutMs: 3000,    // 松手后等最终结果的上限
+  finalTimeoutMs: 1500,    // 松手后等最终结果的上限（0.9.3 从 3 秒改成 1.5 秒：松手就发，别让她干等）
   connectTimeoutMs: 6000,
   maxMs: 60000,            // 最长录多久，到了自动发最后一包
   secondPass: true,        // enable_nonstream：边说边出字 + 每句判停后用非流式模型重认一遍，最终结果更准
@@ -414,7 +414,7 @@ async function micSource(stream, ac, { workletUrl = '' } = {}) {
       push = () => {};
       for (const n of [src, node, sink]) { try { n.disconnect(); } catch (e) { /* 已断开 */ } }
       if (port) { try { port.onmessage = null; } catch (e) { /* 无所谓 */ } }
-      stopTracks(stream);
+      releaseMic(stream);   // 留一会儿给下一次按住，免得 iPad 每次都问麦克风（audio-session.js）
       try { const p = ac.close && ac.close(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* 已关 */ }
     },
   };
@@ -589,7 +589,7 @@ export function createDoubaoStream(opts = {}) {
       if (cur === s) cur = null;
       throw err;
     }
-    if (s.dead) { if (media && typeof media.stop === 'function' && typeof media.start === 'function') media.stop(); else stopTracks(media); return; }
+    if (s.dead) { if (media && typeof media.stop === 'function' && typeof media.start === 'function') media.stop(); else releaseMic(media); return; }
     let source;
     try {
       if (media && typeof media.start === 'function') {

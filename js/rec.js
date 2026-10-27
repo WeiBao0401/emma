@@ -1,4 +1,4 @@
-import { micGetter, forPlayback } from './audio-session.js';
+import { micGetter, releaseMic } from './audio-session.js';
 // 本机录音（roadmap-gaps 4“读出来”、DESIGN 5.7）：她按住读一句，松开就能回放自己的声音，再和老师的范读对比。
 // 录音只存在这台 iPad 上（IndexedDB 单独的库 emma-rec），不上传，留 KEEP_DAYS 天、最多 MAX_CLIPS 段，多了先删最旧的。
 // 只有她点了“老师听听”（可选），这一段才交给语音识别（ctx.voiceInput.transcribe，见 wip/b6/gaps-c-needs.md），只标出漏读的词，不打分。
@@ -187,8 +187,7 @@ export function createRecorder(deps = {}) {
   }
   function release() {
     cancel();
-    try { for (const t of (stream && stream.getTracks ? stream.getTracks() : [])) t.stop(); } catch (e) { /* gone */ }
-    forPlayback();
+    releaseMic(stream);   // kept a while for the next sentence (audio-session.js)
     stream = null;
   }
   return { supported, open, start, stop, cancel, release, state: () => state };

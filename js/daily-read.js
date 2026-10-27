@@ -24,7 +24,7 @@
 //   makeVocab({ standard, unknown, add, remove }) -> Vocab = { known: Set, forms: Map, isKnownBase(w), baseOf(w) }
 //   classify(tok, vocab, names) -> { kind: 'name' | 'known' | 'unknown', base?, word? }；countTarget(text, w, vocab)
 //   buildMaterial(input) -> Material（纯函数，见下）；gatherMaterial(ctx, { now, date, n }) -> Promise<Material>（从 ctx 读好再调 buildMaterial）
-//   systemPrompt()、userPrompt(mat)、fixPrompt(mat, passage, report)、blindPrompt(passage)
+//   systemPrompt(spec?)、userPrompt(mat)、fixPrompt(mat, passage, report)、blindPrompt(passage)
 //   normalizePassage(raw, mat, { id }) -> Passage（stories.json 一集的形状，id 'daily-<日期>-<n>'）
 //   cleanQuestions(passage) -> { passage, dropped: [qid] }   结构不对的题去掉（答案不在选项里、依据句不存在……）
 //   checkPassage(passage, { vocab, targets, spec }) -> Report = { ok, words, sentences, avg, longest, coverage, unknown: [{ w, count, ids }],
@@ -88,17 +88,18 @@ export const GEN_TIMEOUT_MS = 150000;
 export const CHECK_TIMEOUT_MS = 60000;
 export const STANDARD_FILE = 'curriculum/standard-words.json';
 
-// 阅读等级（kid.level 的 read，-1..2）：0 约 120 词，每高一级 +30 词，句子也更长一点
+// 阅读等级（kid.level 的 read，-1..2）：0 约 120 词。0.9.3（Wei 10-27：选了“挑战”读起来还是比学校简单）：
+// 难一点和挑战明显加长，放宽“认识的词”的比例、多给几个表外词（glossary 里讲），挑战接近学校阅读理解的长度；-1 和 0 不变
 export const LEVELS = {
-  '-1': { words: 90, avg: 6, longest: 11 },
-  0: { words: 120, avg: 7, longest: 12 },
-  1: { words: 150, avg: 8, longest: 14 },
-  2: { words: 180, avg: 9, longest: 16 },
+  '-1': { words: 90, avg: 6, longest: 11, coverage: 0.95, extra: 2 },
+  0: { words: 120, avg: 7, longest: 12, coverage: 0.95, extra: 2 },
+  1: { words: 200, avg: 10, longest: 17, coverage: 0.93, extra: 4 },
+  2: { words: 250, avg: 11, longest: 20, coverage: 0.9, extra: 6 },
 };
 export function levelSpec(level = 0) {
   const lv = Math.max(-1, Math.min(2, Math.round(Number(level) || 0)));
   const L = LEVELS[lv];
-  return { level: lv, words: L.words, min: L.words - 20, max: L.words + 25, avg: L.avg, longest: L.longest };
+  return { level: lv, words: L.words, min: L.words - 20, max: L.words + 25, avg: L.avg, longest: L.longest, coverage: L.coverage, extra: L.extra };
 }
 
 // 课标不列、她天天在用的：语气词和功能词（reader.js FUNCTION_ZH 里的都算认识）
@@ -334,12 +335,20 @@ export async function gatherMaterial(ctx, { now = new Date(), date = null, n = 1
 
 // ---------------------------------------------------------------- 2. 写一篇（提示词）
 const TAG_LIST = 'there_be, poss_s, pronoun, be_adj, be_verb, can, third_s, plural, do_q, wh_q, imperative, freq_adv, be_ing, past, will';
-export function systemPrompt() {
+export function systemPrompt(sp = levelSpec(0)) {
+  const lv = sp && sp.level > 0 ? sp.level : 0;
+  const extra = (sp && sp.extra) || 2;
+  const pitch = lv >= 2
+    ? `这篇按学校阅读理解的难度写（她自己选了“挑战”）：比她现在的水平明显难一些，要有一点读的挑战。可以用 and、but、so、because、when、if 连起来的长一点的句子，
+有人物、有事情的经过、有一个转折或者小道理；题目里至少一道要想一想才能答（为什么、接下来会怎样、作者想说什么），不能全是原句里找答案。`
+    : lv === 1
+      ? `这篇要比她现在的水平难一些（她选了“难一点”）：大部分词她认识，多几个目标词和少量表外词；句子可以长一点，用 and、but、because 连起来，题目里有一道要想一想。`
+      : `这篇要比她现在的水平只难一点点：几乎每个词她都认识，只多今天要学的几个目标词；她在读里学会这几个词和一个句型。`;
   return `你是北京一位很会教的初一英语老师，在给自己的一个学生写今天的一篇小阅读。她用外研版七年级，基础弱，阅读看不懂。
-这篇要比她现在的水平只难一点点：几乎每个词她都认识，只多今天要学的几个目标词；她在读里学会这几个词和一个句型。
+${pitch}
 写作规矩：
 - 正文只用“她认识的词”里的词，加上目标词。变化形式可以用：-s、-es、-ed、-ing、's；不规则变化（went、saw、children）只有表里写出来的才能用。
-  名字用简单的英文名（Lily、Tom、Kitty 这种），算不上生词。实在要用表外的词，最多 2 个，写进 glossary。
+  名字用简单的英文名（Lily、Tom、Kitty 这种），算不上生词。实在要用表外的词，最多 ${extra} 个，写进 glossary。
 - 每个目标词在正文里至少出现 2 次，放在能看出意思的句子里，第一次出现的那句前后要能猜出它的意思。
 - 目标句型要在正文里自然地用上至少 2 句。
 - 一般现在时为主，可以有对话（speaker 写说话人的名字，叙述句 speaker 写 null）。句子短，一句只说一件事。
@@ -566,7 +575,8 @@ export function checkPassage(passage, { vocab, targets = [], spec = levelSpec(0)
   const n = p.sentences.length;
   const avg = n ? Math.round((words / n) * 10) / 10 : 0;
   if (n < 6) problems.push(`只有 ${n} 句`);
-  if (coverage < COVERAGE) problems.push(`认识的词 ${(coverage * 100).toFixed(1)}%，要 ${COVERAGE * 100}% 以上`);
+  const need = (spec && spec.coverage) || COVERAGE;
+  if (coverage < need) problems.push(`认识的词 ${(coverage * 100).toFixed(1)}%，要 ${Math.round(need * 100)}% 以上`);
   for (const t of missing) problems.push(`目标词 ${t} 只出现 ${targetHits[t]} 次`);
   if (avg > spec.avg) problems.push(`平均句长 ${avg} 个词，要 ${spec.avg} 以内`);
   if (long.length) problems.push(`第 ${long.join('、')} 句太长`);
@@ -649,7 +659,7 @@ export async function generate(ctx, { date = null, n = 1, now = new Date(), fetc
   const s = settingsOf(ctx);
   const route = textRoute(s);
   const budget = (ctx && ctx.budget) || null;
-  const first = await callJSON({ route, system: systemPrompt(), user: userPrompt(mat), kind: GEN_KIND, budget, fetchImpl, signal, sleep, timeoutMs: GEN_TIMEOUT_MS });
+  const first = await callJSON({ route, system: systemPrompt(mat.spec), user: userPrompt(mat), kind: GEN_KIND, budget, fetchImpl, signal, sleep, timeoutMs: GEN_TIMEOUT_MS });
   let passage = cleanQuestions(normalizePassage(first.obj, mat, { id }));
   const dropped = passage.dropped.slice();
   passage = passage.passage;
